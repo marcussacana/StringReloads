@@ -1,4 +1,6 @@
 # StringsReloads v1.0
+[![Build Status](https://ci.appveyor.com/api/projects/status/github/marcussacana/StringReloads?branch=master&retina=true)](https://ci.appveyor.com/project/marcussacana/StringReloads)
+
 
 This is a tool created to inject strings using low level code
 
@@ -49,7 +51,7 @@ In the code bellow the catched EIP is to the "pop EAX" and the Srl.Process in th
 
 ### Build Dependencies:
 *	[vsSoluctionBuildEvents](https://github.com/3F/vsSolutionBuildEvent)
-*	[DllExport](https://github.com/3F/DllExport) (Automatically Downloaded)
+*	[DllExport](https://github.com/3F/DllExport) (Included)
 ---
 ### Usefull Tools
 * [Multiline Assembly](http://rammichael.com/multimate-assembler) (Allow put a block of code in a specified position)
