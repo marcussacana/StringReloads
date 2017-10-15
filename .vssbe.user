@@ -1,0 +1,104 @@
+﻿{
+  "Global": {
+    "$type": "net.r_eg.vsSBE.Configuration.User.Global, vsSolutionBuildEvent",
+    "DebugMode": true,
+    "SuppressDualCommand": false,
+    "LogIgnoreLevels": {
+      "TRACE": true
+    }
+  },
+  "Cache": {},
+  "Common": [
+    {
+      "$type": "net.r_eg.vsSBE.Configuration.User.Data+_KeyCommon, vsSolutionBuildEvent",
+      "Route": {
+        "$type": "net.r_eg.vsSBE.Configuration.User.Route, vsSolutionBuildEvent",
+        "Event": "Pre",
+        "Mode": "File"
+      },
+      "Common": {
+        "$type": "net.r_eg.vsSBE.Configuration.User.Common, vsSolutionBuildEvent",
+        "WordWrap": true,
+        "Zoomed": 100
+      }
+    },
+    {
+      "$type": "net.r_eg.vsSBE.Configuration.User.Data+_KeyCommon, vsSolutionBuildEvent",
+      "Route": {
+        "$type": "net.r_eg.vsSBE.Configuration.User.Route, vsSolutionBuildEvent",
+        "Event": "Post",
+        "Mode": "File"
+      },
+      "Common": {
+        "$type": "net.r_eg.vsSBE.Configuration.User.Common, vsSolutionBuildEvent",
+        "WordWrap": true,
+        "Zoomed": 100
+      }
+    },
+    {
+      "$type": "net.r_eg.vsSBE.Configuration.User.Data+_KeyCommon, vsSolutionBuildEvent",
+      "Route": {
+        "$type": "net.r_eg.vsSBE.Configuration.User.Route, vsSolutionBuildEvent",
+        "Event": "Post",
+        "Mode": "CSharp"
+      },
+      "Common": {
+        "$type": "net.r_eg.vsSBE.Configuration.User.Common, vsSolutionBuildEvent",
+        "WordWrap": true,
+        "Zoomed": 100
+      }
+    },
+    {
+      "$type": "net.r_eg.vsSBE.Configuration.User.Data+_KeyCommon, vsSolutionBuildEvent",
+      "Route": {
+        "$type": "net.r_eg.vsSBE.Configuration.User.Route, vsSolutionBuildEvent",
+        "Event": "Post",
+        "Mode": "Script"
+      },
+      "Common": {
+        "$type": "net.r_eg.vsSBE.Configuration.User.Common, vsSolutionBuildEvent",
+        "WordWrap": true,
+        "Zoomed": 100
+      }
+    },
+    {
+      "$type": "net.r_eg.vsSBE.Configuration.User.Data+_KeyCommon, vsSolutionBuildEvent",
+      "Route": {
+        "$type": "net.r_eg.vsSBE.Configuration.User.Route, vsSolutionBuildEvent",
+        "Event": "Post",
+        "Mode": "Operation"
+      },
+      "Common": {
+        "$type": "net.r_eg.vsSBE.Configuration.User.Common, vsSolutionBuildEvent",
+        "WordWrap": true,
+        "Zoomed": 100
+      }
+    },
+    {
+      "$type": "net.r_eg.vsSBE.Configuration.User.Data+_KeyCommon, vsSolutionBuildEvent",
+      "Route": {
+        "$type": "net.r_eg.vsSBE.Configuration.User.Route, vsSolutionBuildEvent",
+        "Event": "Post",
+        "Mode": "Interpreter"
+      },
+      "Common": {
+        "$type": "net.r_eg.vsSBE.Configuration.User.Common, vsSolutionBuildEvent",
+        "WordWrap": true,
+        "Zoomed": 100
+      }
+    },
+    {
+      "$type": "net.r_eg.vsSBE.Configuration.User.Data+_KeyCommon, vsSolutionBuildEvent",
+      "Route": {
+        "$type": "net.r_eg.vsSBE.Configuration.User.Route, vsSolutionBuildEvent",
+        "Event": "Post",
+        "Mode": "Targets"
+      },
+      "Common": {
+        "$type": "net.r_eg.vsSBE.Configuration.User.Common, vsSolutionBuildEvent",
+        "WordWrap": true,
+        "Zoomed": 100
+      }
+    }
+  ]
+}
