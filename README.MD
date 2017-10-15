@@ -29,7 +29,7 @@ Our strategy to inject the string is create a new section using tools like the S
 
 ---
 
-We have various method to catch the Srl.Process Pointer, this one is to games who have a dynamic main module alocation, is possible use the sample bellow if you have injected the export in the game executable, you can use Stud_PE or CFF Explorer to do this, You need too create a new executable section in to append our new code. 
+We have various method to catch the Srl.Process Pointer, this one is to games who have a dynamic main module alocation, is possible use the sample bellow if you have injected the export in the game executable, you can use Stud_PE or CFF Explorer to do this, You need too create a new executable section to append our new code. 
 
 In the case of this Sample the Srl.Process address in the import table is allways relative to the our new executable section.
 
