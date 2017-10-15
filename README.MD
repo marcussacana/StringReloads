@@ -18,9 +18,9 @@ Our strategy to inject the string is create a new section using tools like the S
 	push ECX
 	push EBX
 	push EAX		;The EAX is the string pointer or a unicode character
-	call GetProc	;Here the Srl.Process Pointer is catched
+	call GetProc		;Here the Srl.Process Pointer is catched
 	call EAX
-	add ESP, 0x4	;Discard the last "Push EAX" (Is Cdecl)
+	add ESP, 0x4		;Discard the last "Push EAX" (Is Cdecl)
 	pop EBX			;Restore EDX, ECX, EBX Registers from the "Backup"
 	pop ECX
 	pop EDX
@@ -42,8 +42,8 @@ In the code bellow the catched EIP is to the "pop EAX" and the Srl.Process in th
 	call Nxt		;Call the label Nxt
 @Nxt:				;Declare the Nxt label
 	pop EAX 		;Catch the EIP :)
-	sub EAX, 0x204C	;Subtract the Difference from the EIP and Import Address
-	mov EAX, [EAX]	;Read the import table
+	sub EAX, 0x204C		;Subtract the Difference from the EIP and Import Address
+	mov EAX, [EAX]		;Read the import table
 	ret
 ```
 
