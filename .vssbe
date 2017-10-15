@@ -74,8 +74,8 @@
       "Name": "Finish",
       "Caption": "Signs Executables",
       "SupportMSBuild": true,
-      "SupportSBEScripts": true,
-      "IgnoreIfBuildFailed": false,
+      "SupportSBEScripts": false,
+      "IgnoreIfBuildFailed": true,
       "BuildType": "Build",
       "Confirmation": false,
       "ToConfiguration": [
@@ -189,6 +189,43 @@
   "Transmitter": [],
   "CommandEvent": [],
   "Logging": [],
-  "SlnOpened": [],
+  "SlnOpened": [
+    {
+      "Enabled": true,
+      "Name": "Act",
+      "Caption": "",
+      "SupportMSBuild": true,
+      "SupportSBEScripts": true,
+      "IgnoreIfBuildFailed": false,
+      "BuildType": "Common",
+      "Confirmation": false,
+      "ToConfiguration": [],
+      "ExecutionOrder": {
+        "$type": "net.r_eg.vsSBE.Events.ExecutionOrder[], vsSolutionBuildEvent",
+        "$values": [
+          {
+            "Project": "SRL",
+            "Order": "Before"
+          }
+        ]
+      },
+      "Process": {
+        "$type": "net.r_eg.vsSBE.Events.EventProcess, vsSolutionBuildEvent",
+        "Waiting": true,
+        "Hidden": true,
+        "TimeLimit": 30
+      },
+      "Mode": {
+        "$type": "net.r_eg.vsSBE.Events.ModeOperation, vsSolutionBuildEvent",
+        "Type": "Operation",
+        "Command": [
+          "$(+PostBuildEvent = 'Finish')",
+          ""
+        ],
+        "Caption": ">> User custom <<",
+        "AbortOnFirstError": true
+      }
+    }
+  ],
   "SlnClosed": []
 }
