@@ -53,6 +53,7 @@ In the code bellow the catched EIP is to the "pop EAX" and the Srl.Process in th
 *	[vsSoluctionBuildEvents](https://github.com/3F/vsSolutionBuildEvent)
 *	[DllExport](https://github.com/3F/DllExport) (Included)
 ---
-### Usefull Tools
+### Useful
 * [Multiline Assembly](http://rammichael.com/multimate-assembler) (Allow put a block of code in a specified position)
 	*  (Use <0x02B9E44A> for example to set the position to write your code)
+* Auto-Builds: [AppVeyor](https://ci.appveyor.com/project/marcussacana/StringReloads/build/artifacts)
