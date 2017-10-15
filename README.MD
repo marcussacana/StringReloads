@@ -9,7 +9,7 @@ This is a tool created to inject strings using low level code
 
 
 ---
-Our strategy to inject the string is create a new section using tools like the Stud_PE or CFF Explorer to have space in the executable to append the new code, a commom method is replace a original command and jump to your code, generally a jump have 5 bytes of length, sometimes you need replace more than one command and don't forgive to place original commands like CMP and TEST after the execution of your code, of course, if have one.
+Our strategy to inject the string is create a new section using tools like the Stud_PE or CFF Explorer to have space in the executable to append the new code, a commom method is replace a original command and jump to your code, generally a jump have 5 bytes of length, sometimes you need replace more than one command and don't forget to place original commands like CMP and TEST after the execution of your code, of course, if have one.
 
 ### Sample Call Algorithm:
 ```Assembly
