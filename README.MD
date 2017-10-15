@@ -11,7 +11,7 @@ This is a tool created to inject strings using low level code
 ---
 Our strategy to inject the string is create a new section using tools like the Stud_PE or CFF Explorer to have space in the executable to append the new code, a commom method is replace a original command and jump to your code, generally a jump have 5 bytes of length, sometimes you need replace more than one command and don't forgive to place original commands like CMP and TEST after the execution of your code, of course, if have one.
 
-### Sample Call Algorithm
+### Sample Call Algorithm:
 ```Assembly
 @StrInject:			;Declare StrInject Label
 	push EDX		;Backup EDX, ECX, EBX Registers
@@ -36,7 +36,7 @@ In the case of this Sample the Srl.Process address in the import table is allway
 In the code bellow the catched EIP is to the "pop EAX" and the Srl.Process in the import table is for example 0x02B9C400 and the "pop EAX" is at 0x02B9E44C, so...
 0x02B9E44C - 0x02B9C400 = 0x204C, now if we subtract this value of the EIP we can get the position of the Srl.Process pointer.
 
-### Sample Catch Srl.Process
+### Sample Catch Srl.Process:
 ```Assembly
 @GetProc:
 	call Nxt		;Call the label Nxt
@@ -53,7 +53,7 @@ In the code bellow the catched EIP is to the "pop EAX" and the Srl.Process in th
 *	[vsSoluctionBuildEvents](https://github.com/3F/vsSolutionBuildEvent)
 *	[DllExport](https://github.com/3F/DllExport) (Included)
 ---
-### Useful
+### Useful:
 * [Multiline Assembly](http://rammichael.com/multimate-assembler) (Allow put a block of code in a specified position)
 	*  (Use <0x02B9E44A> for example to set the position to write your code)
 * Auto-Builds: [AppVeyor](https://ci.appveyor.com/project/marcussacana/StringReloads/build/artifacts)
