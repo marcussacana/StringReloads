@@ -360,7 +360,8 @@ namespace SRL {
                     return Encoding.BigEndianUnicode;
 
                 default:
-                    if (int.TryParse(Name, out int ID)) {
+                    int ID = 0;
+                    if (int.TryParse(Name, out ID)) {
                         return Encoding.GetEncoding(ID);
                     }
                     return Encoding.GetEncoding(Name);
