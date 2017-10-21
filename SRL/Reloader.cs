@@ -60,13 +60,16 @@ namespace SRL {
             if (Debugging)
                 MissMatch(Input);
 
-            if (TLIB != null && IsDialog(Input)) {
-                string TL = TLIB.Call("TLIB.Google", "Translate", Input, SourceLang, TargetLang);
-                AppendLst(Input, TL, MTLCache);
-                TL = ReplaceChars(TL);
-                Log("\"{0}\" Automatically Transalted.", true, Input);
-                AddEntry(SimplfyMatch(Input), TL);
-                return TL;
+            if (TLIB != null) {
+                Str = TrimString(Input);
+                if (IsDialog(Str)) {
+                    string TL = TLIB.Call("TLIB.Google", "Translate", Str, SourceLang, TargetLang);
+                    AppendLst(Str, TL, MTLCache);
+                    TL = ReplaceChars(TL);
+                    Log("\"{0}\" Automatically Transalted.", true, Str);
+                    AddEntry(SimplfyMatch(Str), TL);
+                    return TL;
+                }
             }
 
             if (SpecialLineBreaker)

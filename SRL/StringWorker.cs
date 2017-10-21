@@ -287,7 +287,7 @@ namespace SRL {
                     default:
                         goto ExitWhile;
                     case 0:
-                        Status = !ContainsOR(Minified, "@,§,$,_,<,>,/");
+                        Status = !ContainsOR(Minified, "@,§,$,_,<,>,/,[,],#");
                         break;
                     case 1:
                         Status = NumberLimiter(String, String.Length / 4);
