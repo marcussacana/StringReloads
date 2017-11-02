@@ -89,30 +89,47 @@ namespace SRL {
         private static void LoadConfig() {
             Log("Loading Settings...", true);
 
-            if (Ini.GetConfigStatus(CfgName, "InEncoding", IniPath) == Ini.Status.Ok) {
+            if (Ini.GetConfigStatus(CfgName, "InEncoding;ReadEncoding;Encoding", IniPath) == Ini.Status.Ok) {
                 Log("Loading Read Encoding Config...", true);
-                ReadEncoding = ParseEncodingName(Ini.GetConfig(CfgName, "InEncoding", IniPath, true));
+                ReadEncoding = ParseEncodingName(Ini.GetConfig(CfgName, "InEncoding;ReadEncoding;Encoding", IniPath, true));
             }
 
-            if (Ini.GetConfigStatus(CfgName, "OutEncoding", IniPath) == Ini.Status.Ok) {
+            if (Ini.GetConfigStatus(CfgName, "OutEncoding;WriteEncoding;Encoding", IniPath) == Ini.Status.Ok) {
                 Log("Loading Write Encoding Config...", true);
-                WriteEncoding = ParseEncodingName(Ini.GetConfig(CfgName, "OutEncoding", IniPath, true));
+                WriteEncoding = ParseEncodingName(Ini.GetConfig(CfgName, "OutEncoding;WriteEncoding;Encoding", IniPath, true));
+
+                
                 if (Debugging)
                     Console.OutputEncoding = WriteEncoding;
             }
 
-            if (Ini.GetConfig(CfgName, "Wide", IniPath, false).ToLower() == "true") {
+            if (Ini.GetConfig(CfgName, "Wide;Unicode;Multiwide", IniPath, false).ToLower() == "true") {
                 Log("Wide Character Mode Enabled...", true);
                 Unicode = true;
             }
 
-            if (Ini.GetConfig(CfgName, "TrimRangeMissmatch", IniPath, false).ToLower() == "true") {
+            if (Ini.GetConfig(CfgName, "TrimRangeMissmatch;TrimRange", IniPath, false).ToLower() == "true") {
                 Log("Trim missmatch Ranges Enabled...", true);
                 TrimRangeMissmatch = true;
             }
+            if (Ini.GetConfig("WordWrap", "Enable;Enabled", IniPath, false).ToLower() == "true") {
+                Log("Wordwrap Enabled.", true);
+                EnableWordWrap = true;
+                string Width = Ini.GetConfig("WordWrap", "MaxWidth;Width;Length", IniPath, true);
+                string Size = Ini.GetConfig("WordWrap", "Size;FontSize", IniPath, false);
+                string FontName = Ini.GetConfig("WordWrap", "Face;FaceName;Font;FontName;FamilyName", IniPath, false);
+                bool Bold = Ini.GetConfig("WordWrap", "Bold", IniPath, false) == "true";
+                Monospaced = Ini.GetConfig("WordWrap", "Monospaced;FixedSize;FixedLength", IniPath, false).ToLower() == "true";
+                
+                if (!Monospaced) {
+                    float FSize = float.Parse(Size);
+                    Font = new System.Drawing.Font(FontName, FSize, Bold ? System.Drawing.FontStyle.Bold : System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+                }
+                MaxWidth = uint.Parse(Width);
+            }
 
 
-            if (Ini.GetConfigStatus(CfgName, "AcceptableRanges", IniPath) == Ini.Status.Ok) {
+            if (Ini.GetConfigStatus(CfgName, "AcceptableRanges;AcceptableRange;ValidRange;ValidRanges", IniPath) == Ini.Status.Ok) {
                 LoadRanges();
             }
 
@@ -122,7 +139,7 @@ namespace SRL {
                 SpecialLineBreaker = true;
             }
 
-            string ExtraSimplify = Ini.GetConfig(CfgName, "MatchIgnore", IniPath, false);
+            string ExtraSimplify = Ini.GetConfig(CfgName, "MatchIgnore;IgnoreMatchs", IniPath, false);
             if (!string.IsNullOrWhiteSpace(ExtraSimplify)) {
                 foreach (string str in ExtraSimplify.Split(','))
                     if (str.Trim().StartsWith("0x")) {
@@ -138,7 +155,7 @@ namespace SRL {
                         AppendArray(ref MatchDel, str.Replace(BreakLineFlag, "\n").Replace(ReturnLineFlag, "\r"), true);
             }
 
-            string ExtraTrim = Ini.GetConfig(CfgName, "TrimChars", IniPath, false);
+            string ExtraTrim = Ini.GetConfig(CfgName, "TrimChars;TrimStrings", IniPath, false);
             if (!string.IsNullOrWhiteSpace(ExtraTrim)) {
                 foreach (string str in ExtraTrim.Split(',')) {
                     if (str.Trim().StartsWith("0x")) {
@@ -162,7 +179,7 @@ namespace SRL {
         /// </summary>
         private static void LoadRanges() {
             Ranges = new System.Collections.Generic.List<Range>();
-            string RangeList = Ini.GetConfig(CfgName, "AcceptableRanges", IniPath, true);
+            string RangeList = Ini.GetConfig(CfgName, "AcceptableRanges;AcceptableRange;ValidRange;ValidRanges", IniPath, true);
             for (int i = 0; i < RangeList.Length - 1;) {
                 char c = RangeList[i];
                 char c2 = RangeList[i + 1];

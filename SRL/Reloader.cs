@@ -34,9 +34,11 @@ namespace SRL {
             if (!DialogFound && !IsDialog(Input)) {
                 return Input;
             }
+
             string Str = SimplfyMatch(Input);
             if (string.IsNullOrWhiteSpace(Str))
                 return Input;
+
             if (LogString) {
                 Log("Simplified: {0}", false, Str);
             }
@@ -47,14 +49,14 @@ namespace SRL {
 
             if (ContainsKey(Str)) {
                 DialogFound = true;
-                return GetEntry(Str);
+                return EnableWordWrap ? WordWrap(GetEntry(Str)) : GetEntry(Str);
             }
 
             Str = GetString(InputPtr, false);
             Str = SimplfyMatch(Str);
             if (ContainsKey(Str)) {
                 DialogFound = true;
-                return GetEntry(Str);
+                return EnableWordWrap ? WordWrap(GetEntry(Str)) : GetEntry(Str);
             }
 
             if (Debugging)
@@ -65,6 +67,8 @@ namespace SRL {
                 if (IsDialog(Str)) {
                     string TL = TLIB.Call("TLIB.Google", "Translate", Str, SourceLang, TargetLang);
                     AppendLst(Str, TL, MTLCache);
+                    if (EnableWordWrap)
+                        TL = WordWrap(TL);
                     TL = ReplaceChars(TL);
                     Log("\"{0}\" Automatically Transalted.", true, Str);
                     AddEntry(SimplfyMatch(Str), TL);
@@ -85,7 +89,12 @@ namespace SRL {
 
                 if (!CloseEventAdded) {
                     CloseEventAdded = true;
+
+                    
+                    //System.Windows.Forms.Application.ThreadException += ProcessOver;
+                    //AppDomain.CurrentDomain.UnhandledException += ProcessOver;
                     AppDomain.CurrentDomain.ProcessExit += ProcessOver;
+
                     new Thread(ShowLoading).Start();
                 }
 

@@ -58,6 +58,7 @@ namespace SRL {
         static bool LogFile = false;
         static bool TrimRangeMissmatch = false;
         static bool SpecialLineBreaker = false;
+        static bool EnableWordWrap = false;
 
         static int ReplyPtr = 0;
 
@@ -65,7 +66,11 @@ namespace SRL {
         static string SourceLang = string.Empty;
         static string TargetLang = string.Empty;
         static string LastInput = string.Empty;
-        static string GameLineBreaker = string.Empty;
+        static string GameLineBreaker = "\n";
+
+        static System.Drawing.Font Font;
+        static bool Monospaced;
+        static uint MaxWidth;
 
         static DotNetVM TLIB = null;
         static DotNetVM Modifier = null;
