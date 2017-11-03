@@ -65,7 +65,7 @@ namespace SRL {
             if (TLIB != null) {
                 Str = TrimString(Input);
                 if (IsDialog(Str)) {
-                    string TL = TLIB.Call("TLIB.Google", "Translate", Str, SourceLang, TargetLang);
+                    string TL = TLIB.Call("TLIB.Google", "Translate", MergeLines(Str), SourceLang, TargetLang);
                     AppendLst(Str, TL, MTLCache);
                     if (EnableWordWrap)
                         TL = WordWrap(TL);

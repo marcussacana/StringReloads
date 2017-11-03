@@ -12,15 +12,24 @@ namespace SRL {
         /// <param name="Input">The string to wordwrap</param>
         /// <returns>The Result String</returns>        
         internal static string WordWrap(string Input) {
-            string Text = Input.Replace(GameLineBreaker, @" ");
-            while (Text.Contains(@"  "))
-                Text = Text.Replace(@"  ", @" ");
-
             if (Monospaced) {
-                return MonospacedWordWrap(Text);
+                return MonospacedWordWrap(MergeLines(Input));
             } else {
-                return MultispacedWordWrap(Text);
+                return MultispacedWordWrap(MergeLines(Input));
             }
+        }
+
+        /// <summary>
+        /// Remove Break Lines
+        /// </summary>
+        /// <param name="String">The string to remove the breakline</param>
+        /// <returns>The Result</returns>
+        internal static string MergeLines(string String) {
+            string Rst = String.Replace(" " + GameLineBreaker + " ", "  ");
+            Rst = String.Replace(GameLineBreaker + " ", " ");
+            Rst = String.Replace(" " + GameLineBreaker, " ");
+            Rst = String.Replace(GameLineBreaker, " ");
+            return Rst;
         }
 
         #region WordWrap

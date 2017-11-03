@@ -5,12 +5,12 @@ namespace SRL {
     public partial class StringReloader {
         
         [DllExport]
-        public static IntPtr Process(IntPtr Reload) {
+        public static IntPtr Process(IntPtr Target) {
             again:;
             int Tries = 0;
             try {
                 DateTime Begin = DateTime.Now;
-                int Ptr = ParsePtr(Reload);
+                int Ptr = ParsePtr(Target);
 
                 if (StrRld == null) {
                     try {
@@ -26,21 +26,21 @@ namespace SRL {
                     return IntPtr.Zero;
 
                 if (Ptr <= char.MaxValue) {
-                    return ProcessChar(Reload);
+                    return ProcessChar(Target);
                 }
 
-                string Input = GetString(Reload);
+                string Input = GetString(Target);
                 
                 if (string.IsNullOrWhiteSpace(Input))
-                    return Reload;
+                    return Target;
 
-                string Reloaded = StrMap(Input, Reload);
+                string Reloaded = StrMap(Input, Target);
 
                 LastInput = Input;
                 
                 //Prevent inject a string already injected
                 if (Input == Reloaded)
-                    return Reload;
+                    return Target;
                 else
                     CacheReply(Reloaded);
 
@@ -49,6 +49,7 @@ namespace SRL {
                 IntPtr Output = GenString(Reloaded);
                 
                 AddPtr(Output);
+                AddPtr(Target);
 
                 if (DelayTest)
                     Log("Delay - {0}ms", false, (DateTime.Now - Begin).TotalMilliseconds);
@@ -61,7 +62,7 @@ namespace SRL {
                     goto again;
                 Initialized = true;
             }
-            return Reload;
+            return Target;
         }
 
         [DllExport(CallingConvention = CallingConvention.StdCall)]

@@ -103,7 +103,7 @@ namespace SRL {
                     Console.OutputEncoding = WriteEncoding;
             }
 
-            if (Ini.GetConfig(CfgName, "Wide;Unicode;Multiwide", IniPath, false).ToLower() == "true") {
+            if (Ini.GetConfig(CfgName, "Wide;Unicode", IniPath, false).ToLower() == "true") {
                 Log("Wide Character Mode Enabled...", true);
                 Unicode = true;
             }
