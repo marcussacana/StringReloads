@@ -10,6 +10,7 @@ namespace SRL {
 
         const string BreakLineFlag = "::BREAKLINE::";
         const string ReturnLineFlag = "::RETURNLINE::";
+        const string AntiWordWrapFlag = "::NOWORDWRAP::";
         const string CfgName = "StringReloader";
         const string ServiceMask = "StringReloaderPipeID-{0}";
 
@@ -160,5 +161,7 @@ namespace SRL {
             "»", "」", "』", "】", ")", ">", "‘", "’", "〃", "″",
             "～", "~", "―", "-", "%K", "%LC", "♪", "%P"
         };
+
+        static string DenyChars = "@,§,$,_,<,>,/,[,],#";
     }
 }

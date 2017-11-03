@@ -22,11 +22,13 @@ namespace SRL {
                 BinaryReader Reader = new BinaryReader(Server);
                 BinaryWriter Writer = new BinaryWriter(Server);
 
+                bool OK = true;
                 while (Server.IsConnected) {
                     PipeCommands Command = (PipeCommands)Reader.ReadByte();
                     Log("Command Recived: {0}", true, Command.ToString());
                     switch (Command) {
                         case PipeCommands.AddReload:
+                            OK = true;
                             string Original = Reader.ReadString();
                             string Reloader = Reader.ReadString();
                             if (!StrRld.ContainsKey(Original))
@@ -34,6 +36,7 @@ namespace SRL {
                             Log("Command Finished, In: {0}, Out: {1}", true, 2, 0);
                             break;
                         case PipeCommands.FindReload:
+                            OK = true;
                             if (StrRld.ContainsKey(Reader.ReadString()))
                                 Writer.Write((byte)PipeCommands.True);
                             else
@@ -42,6 +45,7 @@ namespace SRL {
                             Log("Command Finished, In: {0}, Out: {1}", true, 1, 1);
                             break;
                         case PipeCommands.GetReload:
+                            OK = true;
                             string RLD = Reader.ReadString();
                             try {
                                 Writer.Write(StrRld[RLD]);
@@ -53,10 +57,12 @@ namespace SRL {
                             Log("Command Finished, In: {0}, Out: {1}", true, 1, 1);
                             break;
                         case PipeCommands.AddMissed:
+                            OK = true;
                             Missed.Add(Reader.ReadString());
                             Log("Command Finished, In: {0}, Out: {1}", true, 1, 1);
                             break;
                         case PipeCommands.FindMissed:
+                            OK = true;
                             if (Missed.Contains(Reader.ReadString()))
                                 Writer.Write((byte)PipeCommands.True);
                             else
@@ -65,10 +71,12 @@ namespace SRL {
                             Log("Command Finished, In: {0}, Out: {1}", true, 1, 1);
                             break;
                         case PipeCommands.AddPtr:
+                            OK = true;
                             Ptrs.Add(Reader.ReadInt64());
                             Log("Command Finished, In: {0}, Out: {1}", true, 1, 0);
                             break;
                         case PipeCommands.GetPtrs:
+                            OK = true;
                             uint Replys = 1;
                             Writer.Write(Ptrs.Count);
                             foreach (long Ptr in Ptrs) {
@@ -79,6 +87,7 @@ namespace SRL {
                             Log("Command Finished, In: {0}, Out: {1}", true, 1, Replys);
                             break;
                         case PipeCommands.EndPipe:
+                            OK = true;
                             Log("Exit Command Recived...", true);
                             if (Debugging) {
                                 File.WriteAllText("DEBUG", "CloseRecived");
@@ -86,7 +95,9 @@ namespace SRL {
                             Environment.Exit(0);
                             break;
                         default:
-                            MessageBox.Show("Recived Invalid Command to the pipe service...", "SRL Engine", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            if (!OK)
+                                MessageBox.Show("Recived Invalid Command to the pipe service...", "SRL Engine", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            OK = false;
                             break;
                     }
                 }

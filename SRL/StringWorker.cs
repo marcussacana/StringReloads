@@ -11,12 +11,31 @@ namespace SRL {
         /// </summary>
         /// <param name="Input">The string to wordwrap</param>
         /// <returns>The Result String</returns>        
-        internal static string WordWrap(string Input) {            
+        internal static string WordWrap(string Input) {
+            if (Input.StartsWith(AntiWordWrapFlag))
+                return Input.Substring(AntiWordWrapFlag.Length, Input.Length - AntiWordWrapFlag.Length);
+
+            //::MaxWidth[?]::
+            uint BakWidth = MaxWidth;
+            if (Input.StartsWith("::MaxWidth[")) {
+                string Width = Input.Split('[')[1].Split(']')[0];
+                int TagLen = 14 + Width.Length;
+                if (Input.Substring(TagLen - 3, 3) == "]::") {
+                    Input = Input.Substring(TagLen, Input.Length - TagLen);
+                    try {
+                        MaxWidth = uint.Parse(Width);
+                    } catch { }
+                }
+            }
+
             if (Monospaced) {
-                return MonospacedWordWrap(MergeLines(Input));
+                string Rst = MonospacedWordWrap(MergeLines(Input));
+                MaxWidth = BakWidth;
+                return Rst;
             } else {
                 string Rst = ReplaceChars(MergeLines(Input), true);
                 Rst = MultispacedWordWrap(Rst);
+                MaxWidth = BakWidth;
                 return ReplaceChars(Rst);
             }
         }
@@ -140,7 +159,8 @@ namespace SRL {
                 int len = WriteEncoding.GetByteCount(String + "\x0");
                 buffer = new byte[len];
                 WriteEncoding.GetBytes(String, 0, String.Length, buffer, 0);
-#if LEAKING
+
+#if LEAKING //Less Memory Leak, but works only with some games
                 IntPtr Pointer = LastGenerated;
                 if (LastGenerated == IntPtr.Zero) {
                     Pointer = Marshal.AllocHGlobal(buffer.Length);
@@ -388,7 +408,7 @@ namespace SRL {
                     default:
                         goto ExitWhile;
                     case 0:
-                        Status = !ContainsOR(Minified, "@,§,$,_,<,>,/,[,],#");
+                        Status = !ContainsOR(Minified, DenyChars);
                         break;
                     case 1:
                         Status = NumberLimiter(String, String.Length / 4);
@@ -397,7 +417,7 @@ namespace SRL {
                         Status = Minified.Length >= 3 || EndsWithOr(String, ".,!,?") || String.StartsWith(".");
                         break;
                     case 3:
-                        Status = String.Contains(((char)32).ToString()) || EndsWithOr(String, ".\",!\",?\",.,!,?") || String.StartsWith(".");
+                        Status = String.Contains(((char)32).ToString()) || String.StartsWith(".");
                         if (!Status) {
                             if (Ranges != null) {
                                 Status = true;

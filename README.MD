@@ -4,7 +4,9 @@
 
 This is a tool created to inject strings using low level code
 
-* Accept strings and characters as input
+* Help translate a game without discovery about he packget/encryption
+* Help use Non-ASCII Characters
+* Help with a customizable Auto-WordWrap
 * Can use with just a small assembly knowledge
 
 
@@ -35,6 +37,8 @@ In the case of this Sample the Srl.Process address in the import table is allway
 
 In the code bellow the catched EIP is to the "pop EAX" and the Srl.Process in the import table is for example 0x02B9C400 and the "pop EAX" is at 0x02B9E44C, so...
 0x02B9E44C - 0x02B9C400 = 0x204C, now if we subtract this value of the EIP we can get the position of the Srl.Process pointer.
+
+If you wanna use the SRL to put Non-ASCII Characters you need call the Srl.Process and give the char of a GetGlyph function to he.
 
 ### Sample Catch Srl.Process:
 ```Assembly

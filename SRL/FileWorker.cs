@@ -108,10 +108,17 @@ namespace SRL {
                 Unicode = true;
             }
 
+            if (Ini.GetConfig(CfgName, "DenyChars;NoChars", IniPath) != string.Empty) {
+                Log("Custom Denied Chars List Loaded...", true);
+                DenyChars = Ini.GetConfig(CfgName, "DenyChars;NoChars", IniPath);
+            }
+
             if (Ini.GetConfig(CfgName, "TrimRangeMissmatch;TrimRange", IniPath, false).ToLower() == "true") {
                 Log("Trim missmatch Ranges Enabled...", true);
                 TrimRangeMissmatch = true;
             }
+
+
             if (Ini.GetConfig("WordWrap", "Enable;Enabled", IniPath, false).ToLower() == "true") {
                 Log("Wordwrap Enabled.", true);
                 EnableWordWrap = true;
@@ -157,6 +164,7 @@ namespace SRL {
 
             string ExtraTrim = Ini.GetConfig(CfgName, "TrimChars;TrimStrings", IniPath, false);
             if (!string.IsNullOrWhiteSpace(ExtraTrim)) {
+                TrimChars = new string[0];
                 foreach (string str in ExtraTrim.Split(',')) {
                     if (str.Trim().StartsWith("0x")) {
                         string Hex = str.Trim();
@@ -171,6 +179,8 @@ namespace SRL {
                         AppendArray(ref TrimChars, str.Replace(BreakLineFlag, "\n").Replace(ReturnLineFlag, "\r"), true);
                 }
             }
+
+            Log("Settings Loaded.", true);
         }
 
 
