@@ -11,11 +11,13 @@ namespace SRL {
         /// </summary>
         /// <param name="Input">The string to wordwrap</param>
         /// <returns>The Result String</returns>        
-        internal static string WordWrap(string Input) {
+        internal static string WordWrap(string Input) {            
             if (Monospaced) {
                 return MonospacedWordWrap(MergeLines(Input));
             } else {
-                return MultispacedWordWrap(MergeLines(Input));
+                string Rst = ReplaceChars(MergeLines(Input), true);
+                Rst = MultispacedWordWrap(Rst);
+                return ReplaceChars(Rst);
             }
         }
 
@@ -267,12 +269,8 @@ namespace SRL {
         /// </summary>
         /// <param name="Str">The string to Minify</param>
         /// <returns>The Minified String</returns>
-        internal static string SimplfyMatch(string Str) {
-            if (SpecialLineBreaker) {
-                Str = Str.Replace(GameLineBreaker, "\n");
-            }
-
-            string Output = TrimString(Str);
+        internal static string SimplfyMatch(string Str) {           
+            string Output = TrimString(MergeLines(Str));
             for (int i = 0; i < MatchDel.Length; i++)
                 Output = Output.Replace(MatchDel[i], "");
             return Output;
@@ -283,10 +281,10 @@ namespace SRL {
         /// </summary>
         /// <param name="Input">The String to Replace</param>
         /// <returns>The Result String</returns>
-        internal static string ReplaceChars(string Input) {
+        internal static string ReplaceChars(string Input, bool Restore = false) {
             string Output = Input;
             for (int i = 0; i < Replaces.Length; i += 2)
-                Output = Output.Replace(Replaces[i], Replaces[i + 1]);
+                Output = Output.Replace(Restore ? Replaces[i + 1] : Replaces[i], Restore ? Replaces[i] : Replaces[i + 1]);
             return Output;
         }
 

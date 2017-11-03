@@ -65,13 +65,21 @@ namespace SRL {
             if (TLIB != null) {
                 Str = TrimString(Input);
                 if (IsDialog(Str)) {
-                    string TL = TLIB.Call("TLIB.Google", "Translate", MergeLines(Str), SourceLang, TargetLang);
+                    string TL = string.Empty;
+                    if (EnableWordWrap)
+                        TL = TLIB.Call("TLIB.Google", "Translate", MergeLines(Str), SourceLang, TargetLang);
+                    else
+                        TL = TLIB.Call("TLIB.Google", "Translate", Str, SourceLang, TargetLang);
+
                     AppendLst(Str, TL, MTLCache);
+
                     if (EnableWordWrap)
                         TL = WordWrap(TL);
                     TL = ReplaceChars(TL);
+
                     Log("\"{0}\" Automatically Transalted.", true, Str);
                     AddEntry(SimplfyMatch(Str), TL);
+
                     return TL;
                 }
             }
