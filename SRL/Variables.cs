@@ -60,6 +60,7 @@ namespace SRL {
         static bool TrimRangeMissmatch = false;
         static bool SpecialLineBreaker = false;
         static bool EnableWordWrap = false;
+        static bool Multithread = false;
 
         static int ReplyPtr = 0;
 

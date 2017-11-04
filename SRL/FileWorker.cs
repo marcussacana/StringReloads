@@ -108,6 +108,11 @@ namespace SRL {
                 Unicode = true;
             }
 
+            if (Ini.GetConfig(CfgName, "Multithread;DisablePipe", IniPath, false).ToLower() == "true") {
+                Log("Multithread Support Enabled", true);
+                Multithread = true;
+            }
+
             if (Ini.GetConfig(CfgName, "DenyChars;NoChars", IniPath) != string.Empty) {
                 Log("Custom Denied Chars List Loaded...", true);
                 DenyChars = Ini.GetConfig(CfgName, "DenyChars;NoChars", IniPath);
