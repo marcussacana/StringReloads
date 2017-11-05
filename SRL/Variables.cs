@@ -74,6 +74,8 @@ namespace SRL {
         static string LastInput = string.Empty;
         static string GameLineBreaker = "\n";
 
+        static string MTLRst = null;
+
         static System.Drawing.Font Font;
         static bool Monospaced;
         static uint MaxWidth;
@@ -112,11 +114,11 @@ namespace SRL {
 
         
         private static IntPtr hConsole = IntPtr.Zero;
-
+        private static bool _hdlFail = false;
         private static IntPtr _hdl = IntPtr.Zero;
         static IntPtr GameHandler {
             get {
-                if (_hdl != IntPtr.Zero)
+                if (_hdl != IntPtr.Zero || _hdlFail)
                     return _hdl;
                 Thread Task = new Thread(() => {
                     string title = WindowTitle;
@@ -129,6 +131,11 @@ namespace SRL {
                         continue;
                     Task?.Abort();
                 } catch { }
+
+                //Optimization
+                if (_hdl == IntPtr.Zero)
+                    _hdlFail = true;
+
                 return _hdl;
             }
         }

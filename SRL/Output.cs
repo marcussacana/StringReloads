@@ -8,7 +8,7 @@ using System.Windows.Forms;
 namespace SRL {
     partial class StringReloader {
         internal static void ShowLoading() {            
-            if (LoadShowed)
+            if (LoadShowed || GameHandler == IntPtr.Zero)
                 return;
             LoadShowed = true;
             const string WaitMsg = "SRL - String Reloader\nSoft-Translation Engine by Marcussacana\nInitializing, Please Wait...";
@@ -26,6 +26,9 @@ namespace SRL {
         }
 
         private static void PrintMessage(string Text, int Seconds) {
+            if (GameHandler == IntPtr.Zero)
+                return;
+
             Font F = new Font("Consolas", 20.5f, FontStyle.Bold);
             Brush B = Brushes.BlueViolet;
             PointF Pos = new PointF(0, 0);

@@ -12,31 +12,34 @@ namespace SRL {
                 return Text;
             else if (!Online && !Debugging)
                 PrintMessage("Trying Reconnect...", 3);
-
-            string Result = null;
+            
             Thread Request = new Thread((a) => {
                 try {
-                    Result = TLIB.Call("TLIB.Google", "Translate", a, SourceLang, TargetLang);
+                    MTLRst = TLIB.Call("TLIB.Google", "Translate", a, SourceLang, TargetLang);
                 } catch { }
             });
 
             Request.Start(Text);
-            try {
-                LastTry = DateTime.Now;
-                while ((Request.IsAlive || Request.IsBackground) && (DateTime.Now - LastTry).TotalSeconds <= 5)
-                    Thread.Sleep(10);
 
+            
+            LastTry = DateTime.Now;
+            while ((MTLRst == null) && (DateTime.Now - LastTry).TotalSeconds <= 5)
+                Thread.Sleep(1);
+           
+            try {
                 Request.Abort();
             } catch { }
 
-            Online = Result != null;
+            Online = MTLRst != null;
 
-            if (!Online && !Debugging) {
-                Error("Failed to connect, Online Functions Temporarily Disabled.");
-                PrintMessage("Failed to connect, Online Functions Temporarily Disabled.", 5);
+            if (!Online) {
+                if (Debugging)
+                    Error("Failed to connect, Online Functions Temporarily Disabled.");
+                else
+                    PrintMessage("Failed to connect, Online Functions Temporarily Disabled.", 5);
             }
 
-            return Online ? Result : Text;
+            return Online ? MTLRst : Text;
         }
 
 
@@ -309,6 +312,10 @@ namespace SRL {
         /// <param name="Str">The Reply String</param>
         internal static void CacheReply(string Str) {
             string Reply = SimplfyMatch(Str);
+
+            if (Replys.Contains(Reply))
+                return;
+
             if (ReplyPtr > 100)
                 ReplyPtr = 0;
             Replys.Insert(ReplyPtr++, Reply);
