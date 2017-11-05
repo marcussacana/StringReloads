@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 
 namespace SRL {
@@ -30,7 +31,7 @@ namespace SRL {
                 return IntPtr.ToInt32();
         }       
        
-        internal static string StrMap(string Input, IntPtr InputPtr) {
+        internal static string StrMap(string Input, IntPtr InputPtr, bool Native) {
             if (!DialogFound && !IsDialog(Input)) {
                 return Input;
             }
@@ -49,14 +50,23 @@ namespace SRL {
 
             if (ContainsKey(Str)) {
                 DialogFound = true;
-                return EnableWordWrap ? WordWrap(GetEntry(Str)) : GetEntry(Str);
+                string Rst = EnableWordWrap ? WordWrap(GetEntry(Str)) : GetEntry(Str);
+                if (Native)
+                    return ReplaceChars(Rst, true);
+                return Rst;
             }
 
-            Str = GetString(InputPtr, false);
-            Str = SimplfyMatch(Str);
-            if (ContainsKey(Str)) {
-                DialogFound = true;
-                return EnableWordWrap ? WordWrap(GetEntry(Str)) : GetEntry(Str);
+            if (InputPtr != IntPtr.Zero) {
+                Str = GetString(InputPtr, false);
+                Str = SimplfyMatch(Str);
+                if (ContainsKey(Str)) {
+                    DialogFound = true;
+
+                    string Rst = EnableWordWrap ? WordWrap(GetEntry(Str)) : GetEntry(Str);
+                    if (Native)
+                        return ReplaceChars(Rst, true);
+                    return Rst;
+                }
             }
 
             if (Debugging)
@@ -84,7 +94,9 @@ namespace SRL {
 
                     if (EnableWordWrap)
                         TL = WordWrap(TL);
-                    TL = ReplaceChars(TL);
+
+                    if (!Native)
+                        TL = ReplaceChars(TL);
 
                     Log("\"{0}\" Automatically Transalted.", true, Str);
                     AddEntry(SimplfyMatch(Str), TL);
@@ -106,12 +118,7 @@ namespace SRL {
 
                 if (!CloseEventAdded) {
                     CloseEventAdded = true;
-
-                    
-                    //System.Windows.Forms.Application.ThreadException += ProcessOver;
-                    //AppDomain.CurrentDomain.UnhandledException += ProcessOver;
                     AppDomain.CurrentDomain.ProcessExit += ProcessOver;
-
                     new Thread(ShowLoading).Start();
                 }
 
@@ -120,7 +127,6 @@ namespace SRL {
                     Log("Strings Reloads - v1.0");
                     Log("Soft-Translation Engine - By Marcussacana");
                     Log("Debug Mode Enabled...");
-
                 }
 
                 if (File.Exists("Modifier.cs")) {
@@ -166,16 +172,15 @@ namespace SRL {
 
                 if (Debugging && File.Exists(TLMapSrc)) {
                     Log("Loading Dumped Data...");
-                    uint cnt = 0;
-                    using (TextReader Reader = File.OpenText(TLMapSrc)) {
-                        while (Reader.Peek() >= 0) {
-                            AddMissed(SimplfyMatch(Reader.ReadLine()));
-                            Reader.ReadLine();
-                            cnt++;
-                        }
-                        Reader.Close();
-                    }
-                    Log("Dumped Data Loaded, {0} Entries Loaded.", false, cnt);
+
+                    var Strs = new List<string>();
+                    var Ign = new List<string>();
+                    ReadDump(TLMapSrc, ref Strs, ref Ign, true);
+
+                    foreach (string str in Strs)
+                        AddMissed(SimplfyMatch(str));
+
+                    Log("Dumped Data Loaded, {0} Entries Loaded.", false, Strs.Count);
                 }
 
                 if (TLIB != null && File.Exists(MTLCache)) {
@@ -185,13 +190,108 @@ namespace SRL {
                     ReadDump(MTLCache, ref Ori, ref TL);
 
                     for (int i = 0; i < Ori.Count; i++) {
-                        AddEntry(SimplfyMatch(Ori[i]), ReplaceChars(TL[i]));
+                        string Match = SimplfyMatch(Ori[i]);
+                        if (!ContainsKey(Match))
+                            AddEntry(Match, ReplaceChars(TL[i]));
                     }
                 }
 
             } catch (Exception ex) {
                 Error("Failed to Initialize...");
                 throw ex;
+            }
+        }
+
+        private static void WindowHook() {
+            while (!Initialized)
+                Thread.Sleep(100);            
+
+            while (GameHandler == IntPtr.Zero)
+                Thread.Sleep(1000);            
+
+            while (true) {
+                Thread.Sleep(100);
+
+                var CB = new CallBack(ProcessWindow);
+                EnumWindows(CB, 0);
+
+                IntPtr Handler = GetMenu(GameHandler);
+                ProcessMenu(Handler);
+            }
+        }
+
+        private static bool ProcessWindow(IntPtr Handler, int Paramters) {
+            int Len = GetWindowTextLength(Handler);
+            StringBuilder sb = new StringBuilder(Len + 1);
+            GetWindowText(Handler, sb, sb.Capacity);
+
+            string Ori = sb.ToString();
+
+            if (Replys.Contains(SimplfyMatch(Ori)))
+                return true;
+
+            string Reload = StrMap(Ori, IntPtr.Zero, true);
+            CacheReply(Reload);
+
+            GetWindowThreadProcessId(Handler, out uint PID);
+
+            if (PID == GamePID) {
+                var CB = new CallBack(ProcessWindow);
+                EnumChildWindows(Handler, CB, IntPtr.Zero);
+            }
+
+            if (Ori == Reload || PID != GamePID) {
+                return true;
+            }            
+
+            HandleRef href = new HandleRef(null, Handler);
+            SendMessage(href, WM_SETTEXT, IntPtr.Zero, Reload);
+
+            if (InvalidateWindow)
+                ForcePaint(Handler);
+
+            return true;
+        }
+        private static void ProcessMenu(IntPtr Handler) {
+            int MenuCount = GetMenuItemCount(Handler);
+            if (MenuCount == -1)
+                return;
+            var MenuInfo = new MENUITEMINFO();
+            for (int i = 0; i < MenuCount; i++) {
+                MenuInfo = new MENUITEMINFO() {
+                    cbSize = MENUITEMINFO.SizeOf,
+                    fMask = MIIM_STRING | MIIM_SUBMENU,
+                    fType = MFT_STRING,
+                    dwTypeData = new string(new char[1024]),
+                    cch = 1025
+                };
+
+                bool Sucess = GetMenuItemInfo(Handler, i, true, ref MenuInfo);
+
+                string Ori = MenuInfo.dwTypeData;
+
+                if (Replys.Contains(SimplfyMatch(Ori)))
+                    continue;
+
+                string Reload = StrMap(Ori, IntPtr.Zero, true);
+                CacheReply(Reload);
+
+                if (MenuInfo.hSubMenu != IntPtr.Zero)
+                    ProcessMenu(MenuInfo.hSubMenu);
+
+                if (!Sucess)
+                    continue;
+
+                if (Ori == Reload) {
+                    continue;
+                }
+
+                MenuInfo.dwTypeData = Reload;
+
+                Sucess = SetMenuItemInfo(Handler, i, true, ref MenuInfo);
+
+                if (InvalidateWindow)
+                    ForcePaint(Handler);
             }
         }
 
@@ -207,8 +307,8 @@ namespace SRL {
             } catch { }
             EndPipe();
 
-            if (Ini.GetConfig(CfgName, "AntiCrash", IniPath, false).ToLower() == "true") {
-                Log("Forcing OK Process end Signal...", true);
+            if (AntiCrash) {
+                Log("Closing Process...", true);
                 Environment.Exit(0);
             }
         }

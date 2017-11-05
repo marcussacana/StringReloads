@@ -77,6 +77,7 @@
     <Compile Include="StringWorker.cs" />
     <Compile Include="StructStream.cs" />
     <Compile Include="Types.cs" />
+    <Compile Include="Unmanaged.cs" />
     <Compile Include="Variables.cs" />
   </ItemGroup>
   <ItemGroup>

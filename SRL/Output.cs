@@ -244,28 +244,8 @@ namespace SRL {
         }
 
         public static void ForcePaint(IntPtr Handle) {
-            RedrawWindow(Handle, IntPtr.Zero, IntPtr.Zero, (uint)(Flags.RDW_ERASE | Flags.RDW_INVALIDATE));
+            RedrawWindow(Handle, IntPtr.Zero, IntPtr.Zero, (RDW_ERASE | RDW_INVALIDATE));
         }
-
-        public enum Flags : uint {
-            RDW_INVALIDATE = 0x0001,
-            RDW_ERASE = 0x0004,
-        }
-
-        [DllImport("User32.dll")]
-        public static extern bool RedrawWindow(IntPtr hWnd, IntPtr rec, IntPtr recptr, uint Flags);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool AllocConsole();
-
-        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        public static extern bool SetWindowText(IntPtr hwnd, String lpString);
-
-        [DllImport("kernel32.dll")]
-        static extern IntPtr GetConsoleWindow();
-
-        [DllImport("user32.dll")]
-        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        
     }
 }

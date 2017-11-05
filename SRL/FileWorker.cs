@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 
 namespace SRL {
     partial class StringReloader {
@@ -12,15 +13,16 @@ namespace SRL {
         /// <param name="Path">Path to the LST file</param>
         /// <param name="In">Original Lines</param>
         /// <param name="Out">Target Lines</param>
-        static void ReadDump(string Path, ref List<string> In, ref List<string> Out) {
+        static void ReadDump(string Path, ref List<string> In, ref List<string> Out, bool IgnoreOutput = true) {
             using (TextReader Reader = File.OpenText(Path)) {
                 while (Reader.Peek() != -1) {
                     try {
                         string L1 = Reader.ReadLine().Replace(BreakLineFlag, "\n").Replace(ReturnLineFlag, "\r");
                         string L2 = Reader.ReadLine().Replace(BreakLineFlag, "\n").Replace(ReturnLineFlag, "\r");
-                        if (L2 != L1 && !string.IsNullOrWhiteSpace(L2) && !In.Contains(L1)) {
+                        if ((L2 != L1 && !string.IsNullOrWhiteSpace(L2) && !In.Contains(L1)) || IgnoreOutput) {
                             In.Add(L1);
-                            Out.Add(L2);
+                            if (IgnoreOutput)
+                                Out.Add(L2);
                         }
                     } catch {
 
@@ -38,8 +40,13 @@ namespace SRL {
         internal static void AppendLst(string L1, string L2, string LstPath) {
             try {
                 using (TextWriter Writer = File.AppendText(LstPath)) {
-                    Writer.WriteLine(L1.Replace("\n", "::BREAKLINE::").Replace("\r", "::RETURNLINE::"));
-                    Writer.WriteLine(L2.Replace("\n", "::BREAKLINE::").Replace("\r", "::RETURNLINE::"));
+                    try {
+                        Writer.WriteLine(L1.Replace("\n", "::BREAKLINE::").Replace("\r", "::RETURNLINE::"));
+                        Writer.WriteLine(L2.Replace("\n", "::BREAKLINE::").Replace("\r", "::RETURNLINE::"));
+
+                    } catch (Exception ex) {
+                        Error("Failed to append the string list, Reason:\n{0}", ex.Message);
+                    }
                     Writer.Close();
                 }
             } catch (Exception ex) {
@@ -55,32 +62,30 @@ namespace SRL {
             try {
                 if (!IsDialog(String) && DumpStrOnly)
                     return;
-                using (TextWriter Writer = File.AppendText(TLMapSrc + StrLstSufix)) {
-                    string Txt = SimplfyMatch(String);
-                    if (ContainsMissed(Txt) || Replys.Contains(Txt) || Txt.Length <= 2)
-                        return;
-                    if ((Replys.Count > 0 && Replys[ReplyPtr - 1].EndsWith(Txt)) || LastInput.EndsWith(String))
-                        return;
 
-                    if (Ranges != null) {
-                        uint Miss = 0;
-                        foreach (char c in Txt) {
-                            if (!InRange(c))
-                                Miss++;
-                        }
-                        if (Miss >= Txt.Length - 3)
-                            return;
+                string Txt = SimplfyMatch(String);
+
+                if (ContainsMissed(Txt) || Replys.Contains(Txt) || Txt.Length <= 2)
+                    return;
+
+                if ((Replys.Count > 0 && Replys[ReplyPtr - 1].EndsWith(Txt)) || LastInput.EndsWith(String))
+                    return;
+
+                if (Ranges != null) {
+                    uint Miss = 0;
+                    foreach (char c in Txt) {
+                        if (!InRange(c))
+                            Miss++;
                     }
-
-                    AddMissed(Txt);
-                    Txt = TrimString(String);
-                    Writer.WriteLine(Txt.Replace("\n", "::BREAKLINE::").Replace("\r", "::RETURNLINE::"));
-                    Writer.WriteLine(Txt.Replace("\n", "::BREAKLINE::").Replace("\r", "::RETURNLINE::"));
-                    Writer.Close();
+                    if (Miss >= Txt.Length - 3)
+                        return;
                 }
-            } catch (Exception ex) {
-                Error("Failed to dump the string, Reason:\n{0}", ex.Message);
-            }
+
+                AddMissed(Txt);
+                Txt = TrimString(String);
+                AppendLst(Txt, Txt, TLMapSrc + StrLstSufix);
+
+            } catch { }
         }
 
         /// <summary>
@@ -97,7 +102,6 @@ namespace SRL {
             if (Ini.GetConfigStatus(CfgName, "OutEncoding;WriteEncoding;Encoding", IniPath) == Ini.Status.Ok) {
                 Log("Loading Write Encoding Config...", true);
                 WriteEncoding = ParseEncodingName(Ini.GetConfig(CfgName, "OutEncoding;WriteEncoding;Encoding", IniPath, true));
-
                 
                 if (Debugging)
                     Console.OutputEncoding = WriteEncoding;
@@ -123,6 +127,23 @@ namespace SRL {
                 TrimRangeMissmatch = true;
             }
 
+            if (Ini.GetConfig(CfgName, "WindowHook;WindowReloader", IniPath, false).ToLower() == "true") {
+                Log("Enabling Window Reloader...");
+                new Thread(() => WindowHook()).Start();
+
+                if (Ini.GetConfig(CfgName, "Invalidate;RedrawWindow", IniPath, false).ToLower() == "true") {
+                    Log("Invalidate Window Mode Enabled.");
+                    InvalidateWindow = true;
+                }
+            }
+
+
+            if (Ini.GetConfig(CfgName, "AntiCrash;CrashHandler", IniPath, false).ToLower() == "true") {
+                Log("Enabling Crash Handler...", true);
+                System.Windows.Forms.Application.ThreadException += ProcessOver;
+                AppDomain.CurrentDomain.UnhandledException += ProcessOver;
+                AntiCrash = true;
+            }
 
             if (Ini.GetConfig("WordWrap", "Enable;Enabled", IniPath, false).ToLower() == "true") {
                 Log("Wordwrap Enabled.", true);
@@ -132,7 +153,7 @@ namespace SRL {
                 string FontName = Ini.GetConfig("WordWrap", "Face;FaceName;Font;FontName;FamilyName", IniPath, false);
                 bool Bold = Ini.GetConfig("WordWrap", "Bold", IniPath, false) == "true";
                 Monospaced = Ini.GetConfig("WordWrap", "Monospaced;FixedSize;FixedLength", IniPath, false).ToLower() == "true";
-                
+
                 if (!Monospaced) {
                     float FSize = float.Parse(Size);
                     Font = new System.Drawing.Font(FontName, FSize, Bold ? System.Drawing.FontStyle.Bold : System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
@@ -242,28 +263,17 @@ namespace SRL {
                 File.Delete(CharMapSrc);
             }
             SRLData Data = new SRLData();
-            using (TextWriter Output = File.CreateText(TLMapSrc)) {
-                StructReader Reader = new StructReader(TLMap);
-                Reader.ReadStruct(ref Data);
-                Reader.Close();
-                for (uint i = 0; i < Data.Original.LongLength; i++) {
-                    string Str = Data.Original[i];
-                    if (string.IsNullOrWhiteSpace(Str))
-                        continue;
+            StructReader Reader = new StructReader(TLMap);
+            Reader.ReadStruct(ref Data);
+            Reader.Close();
 
-                    try {
-                        string L1 = Str.Replace("\n", BreakLineFlag).Replace("\r", ReturnLineFlag);
-                        string L2 = Data.Replace[i].Replace("\n", BreakLineFlag).Replace("\r", ReturnLineFlag);
-                        if (TLMode) {
-                            Output.WriteLine(L1);
-                            Output.WriteLine(L1);
-                        } else {
-                            Output.WriteLine(L1);
-                            Output.WriteLine(L2);
-                        }
-                    } catch { }
-                }
-                Output.Close();
+
+            for (uint i = 0; i < Data.Original.LongLength; i++) {
+                string Str = Data.Original[i];
+                if (string.IsNullOrWhiteSpace(Str))
+                    continue;
+
+                AppendLst(Str, TLMode ? Str : Data.Replace[i], TLMapSrc);
             }
 
             if (Data.OriLetters.LongLength + Data.UnkReps.LongLength != 0) {
@@ -281,16 +291,13 @@ namespace SRL {
 
             if (Data.OriLetters.LongLength != 0) {
                 Log("Dumping Replaces...");
-                using (TextWriter Output = File.CreateText(ReplLst)) {
-                    for (uint i = 0; i < Data.OriLetters.LongLength; i++) {
-                        try {
-                            string L1 = Data.RepOri[i];
-                            string L2 = Data.RepTrg[i];
-                            Output.WriteLine(L1);
-                            Output.WriteLine(L2);
-                        } catch { }
-                    }
-                    Output.Close();
+
+                for (uint i = 0; i < Data.OriLetters.LongLength; i++) {
+                    try {
+                        string L1 = Data.RepOri[i];
+                        string L2 = Data.RepTrg[i];
+                        AppendLst(L1, L2, ReplLst);
+                    } catch { }
                 }
             }
 

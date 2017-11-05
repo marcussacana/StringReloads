@@ -188,13 +188,11 @@ namespace SRL {
 
             if (File.Exists(TLMapSrc))
                 File.Delete(TLMapSrc);
-            using (TextWriter Writer = File.CreateText(TLMapSrc)) {
-                for (uint i = 0; i < Cache.Original.Length; i++) {
-                    Writer.WriteLine(Cache.Original[i].Replace("\n", BreakLineFlag).Replace("\r", ReturnLineFlag));
-                    Writer.WriteLine(Cache.Replace[i].Replace("\n", BreakLineFlag).Replace("\r", ReturnLineFlag));
-                }
-                Writer.Close();
+
+            for (uint i = 0; i < Cache.Original.Length; i++) {
+                AppendLst(Cache.Original[i], Cache.Replace[i], TLMapSrc);
             }
+
             File.Delete(TLMap);
             Log("Restarting...");
             Init();

@@ -281,8 +281,9 @@ namespace SRL {
             if (Replys.Contains(Reply))
                 return;
 
-            if (ReplyPtr > 100)
+            if (ReplyPtr > 200)
                 ReplyPtr = 0;
+
             Replys.Insert(ReplyPtr++, Reply);
 
             if (Debugging)

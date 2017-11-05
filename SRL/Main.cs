@@ -34,7 +34,7 @@ namespace SRL {
                 if (string.IsNullOrWhiteSpace(Input))
                     return Target;
 
-                string Reloaded = StrMap(Input, Target);
+                string Reloaded = StrMap(Input, Target, false);
 
                 LastInput = Input;
                 

@@ -14,10 +14,7 @@ namespace SRL {
         const string ReturnLineFlag = "::RETURNLINE::";
         const string AntiWordWrapFlag = "::NOWORDWRAP::";
         const string CfgName = "StringReloader";
-        const string ServiceMask = "StringReloaderPipeID-{0}";
-
-        const int SW_HIDE = 0;
-        const int SW_SHOW = 5;
+        const string ServiceMask = "StringReloaderPipeID-{0}";        
 
         enum PipeCommands : byte {
             FindMissed = 0,
@@ -37,6 +34,7 @@ namespace SRL {
             internal uint Max;
         }
 
+        static int GamePID = System.Diagnostics.Process.GetCurrentProcess().Id;
 
         static Dictionary<string, string> StrRld = null;
         static Dictionary<ushort, char> CharRld;
@@ -63,6 +61,8 @@ namespace SRL {
         static bool SpecialLineBreaker = false;
         static bool EnableWordWrap = false;
         static bool Multithread = false;
+        static bool AntiCrash = false;
+        static bool InvalidateWindow = false;
 
         static int ReplyPtr = 0;
 
@@ -116,16 +116,18 @@ namespace SRL {
             get {
                 if (_hdl != IntPtr.Zero || _hdlFail)
                     return _hdl;
-                Thread Task = new Thread(() => {
-                    string title = WindowTitle;
+
+                Thread Work = new Thread(() => {
                     _hdl = System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
+                    string title = WindowTitle;
                 });
-                Task.Start();
+                Work.Start();
+
                 try {
                     DateTime Begin = DateTime.Now;
-                    while ((Task.IsAlive || Task.IsBackground) && (DateTime.Now - Begin).TotalSeconds <= 2)
+                    while ((Work.IsAlive || Work.IsBackground) && (DateTime.Now - Begin).TotalSeconds <= 2)
                         continue;
-                    Task?.Abort();
+                    Work?.Abort();
                 } catch { }
 
                 //Optimization

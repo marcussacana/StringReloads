@@ -62,7 +62,9 @@ namespace SRL {
                         break;
                     case PipeCommands.AddMissed:
                         OK = true;
-                        Missed.Add(Reader.ReadString());
+                        try {
+                            Missed.Add(Reader.ReadString());
+                        } catch { }
                         Log("Command Finished, In: {0}, Out: {1}", true, 1, 1);
                         break;
                     case PipeCommands.FindMissed:
@@ -76,7 +78,9 @@ namespace SRL {
                         break;
                     case PipeCommands.AddPtr:
                         OK = true;
-                        Ptrs.Add(Reader.ReadInt64());
+                        try {
+                            Ptrs.Add(Reader.ReadInt64());
+                        } catch { }
                         Log("Command Finished, In: {0}, Out: {1}", true, 1, 0);
                         break;
                     case PipeCommands.GetPtrs:
@@ -119,7 +123,8 @@ namespace SRL {
         private static void AddPtr(IntPtr Ptr) {
             long Pointer = Ptr.ToInt64();
             if (Multithread) {
-                Ptrs.Add(Pointer);
+                if (!Ptrs.Contains(Pointer))
+                    Ptrs.Add(Pointer);
                 return;
             }
 
@@ -153,7 +158,8 @@ namespace SRL {
 
         private static void AddMissed(string Line) {
             if (Multithread) {
-                Missed.Add(Line);
+                if (!Missed.Contains(Line))
+                    Missed.Add(Line);
                 return;
             }
 
