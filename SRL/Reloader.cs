@@ -65,9 +65,19 @@ namespace SRL {
             if (TLIB != null) {
                 Str = TrimString(Input);
                 if (IsDialog(Str)) {
-                    string TL = MTL(EnableWordWrap ? MergeLines(Str) : Str);
+                    string Ori = MergeLines(Str);
 
-                    if (TL == (EnableWordWrap ? MergeLines(Str) : Str))
+                    string TL = null;
+                    if (Online) {
+                        try {
+                            TL = TLIB.Call("TLIB.Google", "Translate", Ori, SourceLang, TargetLang);
+                        } catch {
+                            Log("Connection Failed, Disabling MTL for 30m", true);
+                            Online = false;
+                        }
+                    }
+
+                    if (!Online)
                         return Input;
 
                     AppendLst(Str, TL, MTLCache);

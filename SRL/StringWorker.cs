@@ -3,45 +3,10 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace SRL {
     partial class StringReloader {
-
-        static string MTL(string Text) {
-            if (!Online && (DateTime.Now - LastTry).TotalMinutes <= 1)
-                return Text;
-            else if (!Online && !Debugging)
-                PrintMessage("Trying Reconnect...", 3);
-            
-            Thread Request = new Thread((a) => {
-                try {
-                    MTLRst = TLIB.Call("TLIB.Google", "Translate", a, SourceLang, TargetLang);
-                } catch { }
-            });
-
-            Request.Start(Text);
-
-            
-            LastTry = DateTime.Now;
-            while ((MTLRst == null) && (DateTime.Now - LastTry).TotalSeconds <= 5)
-                Thread.Sleep(1);
-           
-            try {
-                Request.Abort();
-            } catch { }
-
-            Online = MTLRst != null;
-
-            if (!Online) {
-                if (Debugging)
-                    Error("Failed to connect, Online Functions Temporarily Disabled.");
-                else
-                    PrintMessage("Failed to connect, Online Functions Temporarily Disabled.", 5);
-            }
-
-            return Online ? MTLRst : Text;
-        }
-
 
         /// <summary>
         /// Wordwrap a string

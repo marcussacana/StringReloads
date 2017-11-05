@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading;
 
@@ -62,9 +63,6 @@ namespace SRL {
         static bool SpecialLineBreaker = false;
         static bool EnableWordWrap = false;
         static bool Multithread = false;
-        static bool Online = true;
-
-        static DateTime LastTry = DateTime.Now;
 
         static int ReplyPtr = 0;
 
@@ -73,9 +71,7 @@ namespace SRL {
         static string TargetLang = string.Empty;
         static string LastInput = string.Empty;
         static string GameLineBreaker = "\n";
-
-        static string MTLRst = null;
-
+        
         static System.Drawing.Font Font;
         static bool Monospaced;
         static uint MaxWidth;
@@ -159,6 +155,29 @@ namespace SRL {
                     _LogWriter = File.AppendText(AppDomain.CurrentDomain.BaseDirectory + "SRL.log");
                 }
                 return _LogWriter;
+            }
+        }
+
+        private static int _netstas = -1;
+        private static DateTime LastTry = DateTime.Now;
+        private static bool Online {
+            get {
+                if (_netstas == 1)
+                    return true;
+                if (_netstas == -1 || (DateTime.Now - LastTry).TotalMinutes > 10) {
+                    Ping myPing = new Ping();
+                    string host = "google.com";
+                    byte[] buffer = new byte[32];
+                    int timeout = 1000;
+                    PingOptions pingOptions = new PingOptions();
+                    PingReply reply = myPing.Send(host, timeout, buffer, pingOptions);
+                    _netstas = (reply.Status == IPStatus.Success ? 1 : 0);
+                }
+                LastTry = DateTime.Now;
+                return _netstas == 1;
+            }
+            set {
+                _netstas = value ? 1 : 0;
             }
         }
 
