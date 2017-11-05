@@ -233,7 +233,8 @@ namespace SRL {
             string Reload = StrMap(Ori, IntPtr.Zero, true);
             CacheReply(Reload);
 
-            GetWindowThreadProcessId(Handler, out uint PID);
+            uint PID;
+            GetWindowThreadProcessId(Handler, out PID);
 
             if (PID == GamePID) {
                 var CB = new CallBack(ProcessWindow);
