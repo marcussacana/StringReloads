@@ -18,7 +18,7 @@ namespace SRL {
             }
         
             if (!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')) && Debugging)
-                Log("Char Missed... l={0}|n=0x{1:X4}", true, (char)c, c);
+                Warning("Char Missed... l={0}|n=0x{1:X4}", (char)c, c);
 
             return CharInt;
         }
@@ -65,11 +65,10 @@ namespace SRL {
             if (TLIB != null) {
                 Str = TrimString(Input);
                 if (IsDialog(Str)) {
-                    string TL = string.Empty;
-                    if (EnableWordWrap)
-                        TL = TLIB.Call("TLIB.Google", "Translate", MergeLines(Str), SourceLang, TargetLang);
-                    else
-                        TL = TLIB.Call("TLIB.Google", "Translate", Str, SourceLang, TargetLang);
+                    string TL = MTL(EnableWordWrap ? MergeLines(Str) : Str);
+
+                    if (TL == (EnableWordWrap ? MergeLines(Str) : Str))
+                        return Input;
 
                     AppendLst(Str, TL, MTLCache);
 
@@ -121,7 +120,7 @@ namespace SRL {
                         Modifier = VM;
                         Log("Modifier Compiled");
                     } catch (Exception ex) {
-                        Log("Failed to compile the Modifier\n===========\n{0}\n===========\n{1}", false, ex.Message, ex.Source);
+                        Error("Failed to compile the Modifier\n===========\n{0}\n===========\n{1}", ex.Message, ex.Source);
                     }
                 }
 
@@ -146,8 +145,8 @@ namespace SRL {
                         Log("Compiling String Reloads, Please Wait...");
                         CompileStrMap();
                     } else {
-                        Log("Can't Compile Strings because the Strings.lst has not found.");
-                        Thread.Sleep(3000);
+                        Error("Can't Compile Strings because the Strings.lst has not found.");
+                        Thread.Sleep(5000);
                         Environment.Exit(2);
                     }
                 }
@@ -181,7 +180,7 @@ namespace SRL {
                 }
 
             } catch (Exception ex) {
-                Log("Failed to Initialize...");
+                Error("Failed to Initialize...");
                 throw ex;
             }
         }

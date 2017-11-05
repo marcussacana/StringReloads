@@ -56,7 +56,7 @@ namespace SRL {
 
                 return Output;
             } catch (Exception ex) {
-                Log("Ops, a Bug...\n{0}\n======================\n{1}\n============================\n{2}", false, ex.Message, ex.StackTrace, ex.Data);
+                Error("Ops, a Bug...\n{0}\n======================\n{1}\n============================\n{2}", ex.Message, ex.StackTrace, ex.Data);
 
                 if (Tries++ < 3)
                     goto again;

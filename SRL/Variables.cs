@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Text;
+using System.Threading;
 
 namespace SRL {
     partial class StringReloader {
@@ -61,6 +62,9 @@ namespace SRL {
         static bool SpecialLineBreaker = false;
         static bool EnableWordWrap = false;
         static bool Multithread = false;
+        static bool Online = true;
+
+        static DateTime LastTry = DateTime.Now;
 
         static int ReplyPtr = 0;
 
@@ -114,9 +118,17 @@ namespace SRL {
             get {
                 if (_hdl != IntPtr.Zero)
                     return _hdl;
-                string title = WindowTitle;
-                Process Curr = System.Diagnostics.Process.GetCurrentProcess();
-                _hdl = Curr.MainWindowHandle;
+                Thread Task = new Thread(() => {
+                    string title = WindowTitle;
+                    _hdl = System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
+                });
+                Task.Start();
+                try {
+                    DateTime Begin = DateTime.Now;
+                    while ((Task.IsAlive || Task.IsBackground) && (DateTime.Now - Begin).TotalSeconds <= 2)
+                        continue;
+                    Task?.Abort();
+                } catch { }
                 return _hdl;
             }
         }
@@ -126,8 +138,7 @@ namespace SRL {
         private static string WindowTitle {
             get {
                 if (_tlt == string.Empty) {
-                    Process Curr = System.Diagnostics.Process.GetCurrentProcess();
-                    _tlt = Curr.MainWindowTitle;
+                    _tlt = System.Diagnostics.Process.GetCurrentProcess().MainWindowTitle;
                 }
                 return _tlt;
             }

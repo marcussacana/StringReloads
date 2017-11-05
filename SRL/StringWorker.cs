@@ -2,9 +2,43 @@
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 
 namespace SRL {
     partial class StringReloader {
+
+        static string MTL(string Text) {
+            if (!Online && (DateTime.Now - LastTry).TotalMinutes <= 1)
+                return Text;
+            else if (!Online && !Debugging)
+                PrintMessage("Trying Reconnect...", 3);
+
+            string Result = null;
+            Thread Request = new Thread((a) => {
+                try {
+                    Result = TLIB.Call("TLIB.Google", "Translate", a, SourceLang, TargetLang);
+                } catch { }
+            });
+
+            Request.Start(Text);
+            try {
+                LastTry = DateTime.Now;
+                while ((Request.IsAlive || Request.IsBackground) && (DateTime.Now - LastTry).TotalSeconds <= 5)
+                    Thread.Sleep(10);
+
+                Request.Abort();
+            } catch { }
+
+            Online = Result != null;
+
+            if (!Online && !Debugging) {
+                Error("Failed to connect, Online Functions Temporarily Disabled.");
+                PrintMessage("Failed to connect, Online Functions Temporarily Disabled.", 5);
+            }
+
+            return Online ? Result : Text;
+        }
+
 
         /// <summary>
         /// Wordwrap a string

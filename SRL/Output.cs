@@ -63,22 +63,22 @@ namespace SRL {
             CmdLineChecked = true;
             string[] Commands = Environment.GetCommandLineArgs();
 
+            if (Ini.GetConfig(CfgName, "Debug", IniPath, false).ToLower() == "true")
+                AppendArray(ref Commands, "-debug");
             if (Ini.GetConfig(CfgName, "Delay", IniPath, false).ToLower() == "true")
                 AppendArray(ref Commands, "-delay");
-            if (Ini.GetConfig(CfgName, "Dump", IniPath, false).ToLower() == "true")
-                AppendArray(ref Commands, "-dump");
-            if (Ini.GetConfig(CfgName, "DumpRetail", IniPath, false).ToLower() == "true")
-                AppendArray(ref Commands, "-dumpretail");
             if (Ini.GetConfig(CfgName, "Log", IniPath, false).ToLower() == "true")
                 AppendArray(ref Commands, "-log");
             if (Ini.GetConfig(CfgName, "Unsafe", IniPath, false).ToLower() == "true")
                 AppendArray(ref Commands, "-unsafe");
-            if (Ini.GetConfig(CfgName, "Debug", IniPath, false).ToLower() == "true")
-                AppendArray(ref Commands, "-debug");
             if (Ini.GetConfig(CfgName, "LogFile", IniPath, false).ToLower() == "true")
                 AppendArray(ref Commands, "-logfile");
             if (Ini.GetConfig(CfgName, "DetectText", IniPath, false).ToLower() == "true")
                 AppendArray(ref Commands, "-detectstr");
+            if (Ini.GetConfig(CfgName, "Dump", IniPath, false).ToLower() == "true")
+                AppendArray(ref Commands, "-dump");
+            if (Ini.GetConfig(CfgName, "DumpRetail", IniPath, false).ToLower() == "true")
+                AppendArray(ref Commands, "-dumpretail");
 
             if (Commands?.Length == 0)
                 return;
@@ -199,6 +199,19 @@ namespace SRL {
             if (checkSumInFile != checksum)
                 return false;
             return true;
+        }
+
+        internal static void Error(string Message, params object[] Format) {
+            ConsoleColor Color = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Red;
+            Log(Message, false, Format);
+            Console.ForegroundColor = Color;
+        }
+        internal static void Warning(string Message, params object[] Format) {
+            ConsoleColor Color = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Log(Message, true, Format);
+            Console.ForegroundColor = Color;
         }
 
         internal static void Log(string Message, bool Optional = false, params object[] Format) {

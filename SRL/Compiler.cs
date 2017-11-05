@@ -21,22 +21,8 @@ namespace SRL {
             var UErr = new List<ushort>();
             var ROri = new List<string>();
             var RNew = new List<string>();
-            Log("Generating String Reload Database...");
 
-            //Splited String Dump
-            uint Cnt = 0;
-            while (File.Exists(string.Format(TLMapSrcMsk, ++Cnt))) {
-                string TMS = string.Format(TLMapSrcMsk, Cnt);
-                ReadDump(TMS, ref In, ref Out);
-                Log("{0} Found, Importing...", false, Path.GetFileName(TMS));
-            }
-
-            if (File.Exists(TLMapSrc)) {
-                ReadDump(TLMapSrc, ref In, ref Out);
-                Log("{0} Found, Importing...", false, Path.GetFileName(TLMapSrc));
-            }
-
-            Log("Database Generated.");
+            
             if (File.Exists(CharMapSrc)) {
                 Log("Compiling Char Reloads...");
                 using (TextReader Reader = File.OpenText(CharMapSrc)) {
@@ -59,6 +45,24 @@ namespace SRL {
                 }
             }
 
+            Log("Generating String Reload Database...");
+            //Splited String Dump
+            uint Cnt = 0;
+            while (File.Exists(string.Format(TLMapSrcMsk, ++Cnt))) {
+                string TMS = string.Format(TLMapSrcMsk, Cnt);
+                ReadDump(TMS, ref In, ref Out);
+                Log("{0} Found, Importing...", false, Path.GetFileName(TMS));
+            }
+
+            if (File.Exists(TLMapSrc)) {
+                ReadDump(TLMapSrc, ref In, ref Out);
+                Log("{0} Found, Importing...", false, Path.GetFileName(TLMapSrc));
+            }
+
+            SearchViolations(Out.ToArray(), CFak.ToArray());
+
+            Log("Database Generated.");
+            
             if (File.Exists(ReplLst)) {
                 Log("Compiling Replace List...");
                 ReadDump(ReplLst, ref ROri, ref RNew);
@@ -87,7 +91,25 @@ namespace SRL {
             Log("Builded Successfully.");
         }
 
-        
+        private static void SearchViolations(string[] Reloads, char[] Ilegals) {
+            Log("Serching Chars Violations...");
+            string[] Violations =
+            (from x in Reloads where
+
+                   (from y in Ilegals where
+                    x.Contains(y.ToString())
+                   select y).LongCount() != 0
+
+             select x).ToArray();
+
+            if (Violations.LongLength != 0) {
+                Warning("{0} Strings contains a char violation.", Violations.LongLength);
+                foreach (string Violation in Violations) {
+                    Warning("\"{0}\" contains a char violation.", Violation);
+                }
+            }
+        }
+
         /// <summary>
         /// Load the String.srl Data
         /// </summary>
@@ -101,7 +123,7 @@ namespace SRL {
                     return;
                 }
                 if (Reader.PeekInt() != 0x4C5253) {
-                    Log("Failed to Initialize - Corrupted Data");
+                    Error("Failed to Initialize - Corrupted Data");
                     Thread.Sleep(3000);
                     Environment.Exit(2);
                 }
@@ -148,7 +170,7 @@ namespace SRL {
                 }
                 Log("Loading Complete.", true);
             } catch (Exception ex) {
-                Log("Failed to Execute: {0}\n=========\n{1}", false, ex.Message, ex.StackTrace);
+                Error("Failed to Execute: {0}\n=========\n{1}", false, ex.Message, ex.StackTrace);
                 Thread.Sleep(3000);
                 Environment.Exit(2);
             }

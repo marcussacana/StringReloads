@@ -43,7 +43,7 @@ namespace SRL {
                     Writer.Close();
                 }
             } catch (Exception ex) {
-                Log("Failed to append the string list, Reason:\n{0}", true, ex.Message);
+                Error("Failed to append the string list, Reason:\n{0}", ex.Message);
             }
         }
 
@@ -79,7 +79,7 @@ namespace SRL {
                     Writer.Close();
                 }
             } catch (Exception ex) {
-                Log("Failed to dump the string, Reason:\n{0}", true, ex.Message);
+                Error("Failed to dump the string, Reason:\n{0}", ex.Message);
             }
         }
 
@@ -250,32 +250,50 @@ namespace SRL {
                     string Str = Data.Original[i];
                     if (string.IsNullOrWhiteSpace(Str))
                         continue;
-                    if (TLMode) {
-                        Output.WriteLine(Str.Replace("\n", BreakLineFlag).Replace("\r", ReturnLineFlag));
-                        Output.WriteLine(Str.Replace("\n", BreakLineFlag).Replace("\r", ReturnLineFlag));
-                    } else {
-                        Output.WriteLine(Str.Replace("\n", BreakLineFlag).Replace("\r", ReturnLineFlag));
-                        Output.WriteLine(Data.Replace[i].Replace("\n", BreakLineFlag).Replace("\r", ReturnLineFlag));
+
+                    try {
+                        string L1 = Str.Replace("\n", BreakLineFlag).Replace("\r", ReturnLineFlag);
+                        string L2 = Data.Replace[i].Replace("\n", BreakLineFlag).Replace("\r", ReturnLineFlag);
+                        if (TLMode) {
+                            Output.WriteLine(L1);
+                            Output.WriteLine(L1);
+                        } else {
+                            Output.WriteLine(L1);
+                            Output.WriteLine(L2);
+                        }
+                    } catch { }
+                }
+                Output.Close();
+            }
+
+            if (Data.OriLetters.LongLength + Data.UnkReps.LongLength != 0) {
+                Log("Dumping Char Reloads...", true);
+                using (TextWriter Output = File.CreateText(CharMapSrc)) {
+                    for (uint i = 0; i < Data.OriLetters.LongLength; i++) {
+                        Output.WriteLine("{0}={1}", Data.OriLetters[i], Data.MemoryLetters[i]);
                     }
+                    for (uint i = 0; i < Data.UnkReps.LongLength; i++) {
+                        Output.WriteLine("{0}=0x{1:X4}", Data.UnkReps[i], Data.UnkChars[i]);
+                    }
+                    Output.Close();
                 }
-                Output.Close();
             }
-            using (TextWriter Output = File.CreateText(CharMapSrc)) {
-                for (uint i = 0; i < Data.OriLetters.LongLength; i++) {
-                    Output.WriteLine("{0}={1}", Data.OriLetters[i], Data.MemoryLetters[i]);
+
+            if (Data.OriLetters.LongLength != 0) {
+                Log("Dumping Replaces...");
+                using (TextWriter Output = File.CreateText(ReplLst)) {
+                    for (uint i = 0; i < Data.OriLetters.LongLength; i++) {
+                        try {
+                            string L1 = Data.RepOri[i];
+                            string L2 = Data.RepTrg[i];
+                            Output.WriteLine(L1);
+                            Output.WriteLine(L2);
+                        } catch { }
+                    }
+                    Output.Close();
                 }
-                for (uint i = 0; i < Data.UnkReps.LongLength; i++) {
-                    Output.WriteLine("{0}=0x{1:X4}", Data.UnkReps[i], Data.UnkChars[i]);
-                }
-                Output.Close();
             }
-            using (TextWriter Output = File.CreateText(ReplLst)) {
-                for (uint i = 0; i < Data.OriLetters.LongLength; i++) {
-                    Output.WriteLine(Data.RepOri[i]);
-                    Output.WriteLine(Data.RepTrg[i]);
-                }
-                Output.Close();
-            }
+
             Log("Data Dumped...", true);
         }
     }
