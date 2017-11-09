@@ -128,11 +128,11 @@ namespace SRL {
             }
 
             if (Ini.GetConfig(CfgName, "WindowHook;WindowReloader", IniPath, false).ToLower() == "true") {
-                Log("Enabling Window Reloader...");
+                Log("Enabling Window Reloader...", true);
                 new Thread(() => WindowHook()).Start();
 
                 if (Ini.GetConfig(CfgName, "Invalidate;RedrawWindow", IniPath, false).ToLower() == "true") {
-                    Log("Invalidate Window Mode Enabled.");
+                    Log("Invalidate Window Mode Enabled.", true);
                     InvalidateWindow = true;
                 }
             }

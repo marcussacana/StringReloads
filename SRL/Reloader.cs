@@ -230,20 +230,21 @@ namespace SRL {
             if (Replys.Contains(SimplfyMatch(Ori)))
                 return true;
 
+            uint HandlePID;
+            GetWindowThreadProcessId(Handler, out HandlePID);
+
+            if (HandlePID == GamePID) {
+                var CB = new CallBack(ProcessWindow);
+                EnumChildWindows(Handler, CB, IntPtr.Zero);
+            } else
+                return true;
+
             string Reload = StrMap(Ori, IntPtr.Zero, true);
             CacheReply(Reload);
 
-            uint PID;
-            GetWindowThreadProcessId(Handler, out PID);
-
-            if (PID == GamePID) {
-                var CB = new CallBack(ProcessWindow);
-                EnumChildWindows(Handler, CB, IntPtr.Zero);
-            }
-
-            if (Ori == Reload || PID != GamePID) {
+            if (Ori == Reload)
                 return true;
-            }            
+            
 
             HandleRef href = new HandleRef(null, Handler);
             SendMessage(href, WM_SETTEXT, IntPtr.Zero, Reload);
