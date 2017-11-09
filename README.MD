@@ -62,3 +62,4 @@ If you wanna use the SRL to put Non-ASCII Characters you need call the Srl.Proce
 * [Multiline Assembly](http://rammichael.com/multimate-assembler) (Allow put a block of code in a specified position)
 	*  (Use <0x02B9E44A> for example to set the position to write your code)
 * Auto-Builds: [AppVeyor](https://ci.appveyor.com/project/marcussacana/StringReloads/build/artifacts)
+* Lastest Build: [Download](https://ci.appveyor.com/api/projects/marcussacana/StringReloads/artifacts/SRL/bin/SRLEngine.zip)
