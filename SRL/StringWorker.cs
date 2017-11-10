@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -425,18 +426,6 @@ namespace SRL {
                         break;
                     case 3:
                         Status = String.Contains(((char)32).ToString()) || String.StartsWith(".");
-                        if (!Status) {
-                            if (Ranges != null) {
-                                Status = true;
-                                uint Miss = 0;
-                                foreach (char c in Minified) {
-                                    if (!InRange(c))
-                                        Miss++;
-                                }
-                                if (Miss >= Minified.Length - 3)
-                                    Status = true;
-                            }
-                        }
                         break;
                     case 4:
                         if (String.Length > 3) {
@@ -448,6 +437,21 @@ namespace SRL {
                     case 5:
                         Status = ContainsOR(String.ToLower(), "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,x,w,y,z");
                         break;
+                    case 6:
+                        if (Ranges != null) {                            
+                            uint Miss = 0;
+                            foreach (char c in Minified) {
+                                if (!InRange(c))
+                                    Miss++;
+                            }
+                            if (Miss > Minified.Length/2)
+                                Status = false;
+                        }
+                        break;
+                    case 7:
+                        int cCount = CountChars(Minified);
+                        Status = !(Minified.Length < 6 && cCount < 6);
+                        break;
                 }
                 Process++;
             }
@@ -458,6 +462,16 @@ namespace SRL {
                 return IsDialog(String, true);
             }
             return Status;
+        }
+
+        static int CountChars(string Str) {
+            List<char> Chars = new List<char>();
+            foreach (var chr in Str) {
+                if (Chars.Contains(chr))
+                    continue;
+                Chars.Add(chr);
+            }
+            return Chars.Count;
         }
 
         /// <summary>

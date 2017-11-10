@@ -98,7 +98,7 @@ namespace SRL {
                     if (!Native)
                         TL = ReplaceChars(TL);
 
-                    Log("\"{0}\" Automatically Transalted.", true, Str);
+                    Log("\"{0}\" Automatically Translated.", true, Str);
                     AddEntry(SimplfyMatch(Str), TL);
 
                     return TL;

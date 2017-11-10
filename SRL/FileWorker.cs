@@ -190,6 +190,7 @@ namespace SRL {
 
             string ExtraTrim = Ini.GetConfig(CfgName, "TrimChars;TrimStrings", IniPath, false);
             if (!string.IsNullOrWhiteSpace(ExtraTrim)) {
+                Log("Using Custom Trim List...", true);
                 TrimChars = new string[0];
                 foreach (string str in ExtraTrim.Split(',')) {
                     if (str.Trim().StartsWith("0x")) {
