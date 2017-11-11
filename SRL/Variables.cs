@@ -13,6 +13,8 @@ namespace SRL {
         const string BreakLineFlag = "::BREAKLINE::";
         const string ReturnLineFlag = "::RETURNLINE::";
         const string AntiWordWrapFlag = "::NOWORDWRAP::";
+        const string AntiMaskParser = "::NOMASK::";
+
         const string CfgName = "StringReloader";
         const string ServiceMask = "StringReloaderPipeID-{0}";        
 
@@ -26,7 +28,10 @@ namespace SRL {
             False = 6,
             AddPtr = 7,
             GetPtrs = 8,
-            EndPipe = 9
+            EndPipe = 9,
+            AddMask = 10,
+            ChkMask = 11,
+            RldMask = 12
         }
 
         struct Range {
@@ -37,6 +42,7 @@ namespace SRL {
         static int GamePID = System.Diagnostics.Process.GetCurrentProcess().Id;
 
         static Dictionary<string, string> StrRld = null;
+        static Dictionary<string, string> MskRld = null;
         static Dictionary<ushort, char> CharRld;
         static Dictionary<ushort, char> UnkRld;
         static List<string> Missed = new List<string>();

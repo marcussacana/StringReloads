@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.IO.Pipes;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -18,6 +19,7 @@ namespace SRL {
 
         private static void Service(string ServiceName) {
             StrRld = new System.Collections.Generic.Dictionary<string, string>();
+            MskRld = new System.Collections.Generic.Dictionary<string, string>();
             Missed = new System.Collections.Generic.List<string>();
 
             NamedPipeServerStream Server = new NamedPipeServerStream(ServiceName, PipeDirection.InOut, 2, PipeTransmissionMode.Byte);
@@ -101,6 +103,32 @@ namespace SRL {
                             File.WriteAllText("DEBUG", "CloseRecived");
                         }
                         Environment.Exit(0);
+                        break;
+                    case PipeCommands.AddMask:
+                        OK = true;
+                        string Input = Reader.ReadString();
+                        string Reload = Reader.ReadString();
+                        if (!MskRld.ContainsKey(Input))
+                            MskRld.Add(Input, Reload);
+                        Log("Command Finished, In {0}, Out: {1}", true, 2, 0);
+                        break;
+                    case PipeCommands.ChkMask:
+                        string String = Reader.ReadString();
+                        
+                        string[] Result = (from x in MskRld.Keys where MaskMatch(x, String) select x).ToArray();
+
+                        Writer.Write((byte)((Result.Length > 0) ? PipeCommands.True : PipeCommands.False));
+                        Writer.Flush();
+                        Log("Command Finished, In: {0}, Out: {1}", true, 1, 1);
+                        break;
+                    case PipeCommands.RldMask:
+                        string Ori = Reader.ReadString();
+                        string Mask = (from x in MskRld.Keys where MaskMatch(x, Ori) select x).FirstOrDefault();
+                        string Rld = MskRld[Mask];
+
+                        Writer.Write(MaskReplace(Mask, Ori, Rld));
+                        Writer.Flush();
+                        Log("Command Finished, In: {0}, Out: {1}", true, 2, 1);
                         break;
                     default:
                         if (!OK)
@@ -189,6 +217,47 @@ namespace SRL {
             return PipeReader.ReadByte() == (byte)PipeCommands.True;
         }
 
+        private static void AddMask(string ReadMask, string WriteMask) {
+            if (Multithread) {
+                MskRld.Add(ReadMask, WriteMask);
+                return;
+            }
+
+            PipeWriter.Write((byte)PipeCommands.AddMask);
+            PipeWriter.Write(ReadMask);
+            PipeWriter.Write(WriteMask);
+            PipeWriter.Flush();
+        }
+
+        private static bool ValidateMask(string String) {
+            if (Multithread) {
+                string[] Result = (from x in MskRld.Keys where MaskMatch(x, String) select x).ToArray();
+                if (Result.Length > 0)
+                    return true;
+                return false;
+            }
+
+            PipeWriter.Write((byte)PipeCommands.ChkMask);
+            PipeWriter.Write(String);
+            PipeWriter.Flush();
+
+            return PipeReader.ReadByte() == (byte)PipeCommands.True;
+        }
+
+
+        private static string ProcesMask(string Original) {
+            if (Multithread) {
+                string Mask = (from x in MskRld.Keys where MaskMatch(x, Original) select x).FirstOrDefault();
+                return MaskReplace(Mask, Original, MskRld[Mask]);
+            }
+
+            PipeWriter.Write((byte)PipeCommands.RldMask);
+            PipeWriter.Write(Original);
+            PipeWriter.Flush();
+
+            return PipeReader.ReadString();
+        }
+
         private static void AddEntry(string Key, string Value) {
             if (Multithread) {
                 StrRld.Add(Key, Value);
@@ -219,6 +288,7 @@ namespace SRL {
             if (Multithread) {
                 Log("Pipe Service Disabled.", true);
                 StrRld = new System.Collections.Generic.Dictionary<string, string>();
+                MskRld = new System.Collections.Generic.Dictionary<string, string>();
                 Missed = new System.Collections.Generic.List<string>();
                 return;
             }

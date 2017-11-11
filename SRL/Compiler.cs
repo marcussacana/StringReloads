@@ -158,8 +158,17 @@ namespace SRL {
                 for (uint i = 0; i < Data.Original.LongLength; i++) {
                     Application.DoEvents();
                     string str = SimplfyMatch(Data.Original[i]);
-                    if (!ContainsKey(str))
+                    if (!ContainsKey(str)) {
+                        if (IsMask(Data.Original[i])) {
+                            if (Data.Replace[i].StartsWith(AntiMaskParser)) {
+                                Data.Replace[i] = Data.Replace[i].Substring(AntiMaskParser.Length, Data.Replace[i].Length - AntiMaskParser.Length);
+                            } else {
+                                AddMask(Data.Original[i], ReplaceChars(Data.Replace[i]));
+                                continue;
+                            }
+                        }
                         AddEntry(str, ReplaceChars(Data.Replace[i]));
+                    }
                 }
 
                 Log("String Reloads Initialized.", true);

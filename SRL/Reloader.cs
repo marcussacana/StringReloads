@@ -69,6 +69,14 @@ namespace SRL {
                 }
             }
 
+            if (ValidateMask(Input)) {
+                DialogFound = true;
+                string Result = ProcesMask(Input);
+                if (Native)
+                    return ReplaceChars(Result, true);
+                return Result;
+            }
+
             if (Debugging)
                 MissMatch(Input);
 

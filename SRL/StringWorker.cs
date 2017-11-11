@@ -3,11 +3,154 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace SRL {
     partial class StringReloader {
+
+        /// <summary>
+        /// Check if the string is a Mask
+        /// </summary>
+        /// <param name="String">The String to Verify</param>
+        /// <returns>If is a mask, return true.</returns>
+        internal static bool IsMask(string String) {
+            return SplitMask(String).Length > 1;
+        }
+
+        /// <summary>
+        /// Check if the Mask match with a string
+        /// </summary>
+        /// <param name="Mask">The Mask to check</param>
+        /// <param name="String">The String to try match with the mask</param>
+        /// <returns>If String is usable with this mask, return true</returns>
+        internal static bool MaskMatch(string Mask, string String) {
+            string[] Source = SplitMask(Mask);
+            for (int i = 0, x = 0; i < Source.LongLength; i++) {
+                string M = Source[i];
+                if (M == string.Empty)
+                    continue;
+                while (!String.Substring(x, String.Length - x).StartsWith(M)) {
+                    if (++x >= String.Length)
+                        return false;
+                }
+
+                if (i + 1 >= Source.LongLength && String.Substring(x, String.Length - x) != M)
+                    return false;
+
+                x += M.Length;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Replace the content of the source string to the target mask using the Mask as base
+        /// </summary>
+        /// <param name="Mask">The Mask to use as base</param>
+        /// <param name="String">The Original String</param>
+        /// <param name="Target">The Target String Mask</param>
+        /// <returns>The Modified Target String</returns>
+        internal static string MaskReplace(string Mask, string String, string Target) {
+            List<object> Format = new List<object>();
+            string[] Source = SplitMask(Mask);
+            for (int i = 0, x = 0; i < Source.LongLength; i++) {
+                string M = Source[i];
+                if (string.IsNullOrEmpty(M)) {
+                    if (i + 1 >= Source.LongLength) {
+                        Format.Add(String.Substring(x, String.Length - x));
+                    }
+                    continue;
+                }
+
+                int Skiped = x;
+                while (!String.Substring(x, String.Length - x).StartsWith(M)) {
+                    if (++x >= String.Length) {
+                        Error("Invalid Mask Replace Request\nM: {0}\nS: {1}", Mask, String);
+                        return String;
+                    }
+                }
+                if (i + 1 >= Source.LongLength && String.Substring(x, String.Length - x) != M) {
+                    Error("Invalid Mask Replace Request\nM: {0}\nS: {1}", Mask, String);
+                    return String;
+                }
+                if (x > Skiped) {
+                    string Content = String.Substring(Skiped, x - Skiped);
+
+                    int Passed = 0;
+                    if (int.TryParse(Content, out Passed))
+                        Format.Add(Passed);
+                    else
+                        Format.Add(Content);
+                }
+                x += M.Length;
+            }
+
+            int[] Sort = MaskSort(Mask);
+            object[] F = Format.ToArray();
+            Array.Sort(Sort, F);
+
+            return string.Format(Target, F);
+        }
+
+        /// <summary>
+        /// Split the Mask in Parts to Process
+        /// </summary>
+        /// <param name="String">The Mask</param>
+        /// <returns>The Splited Mask</returns>
+        internal static string[] SplitMask(string String) {
+            List<string> Strings = new List<string>();
+            string Content = string.Empty;
+            for (int i = 0; i < String.Length; i++) {
+                char c = String[i];
+                if (c == '{' && !Content.EndsWith("\\")) {
+                    int o = i;
+                    while (i < String.Length && String[i] != '}')
+                        i++;
+                    if (i >= String.Length || String[i] != '}') {
+                        Error("Bad String Format: \"{0}\"\nAt: {0}", String, o);
+                    }
+
+                    Strings.Add(Content);
+                    Content = string.Empty;
+                    continue;
+                }
+                if (Content.EndsWith("\\") && c == '{') {
+                    Content = Content.Substring(0, Content.Length - 1);
+                }
+                Content += c;
+            }
+            Strings.Add(Content);
+            return Strings.ToArray();
+        }
+
+        /// <summary>
+        /// Get order of Mask Entries
+        /// </summary>
+        /// <param name="String">The Mask</param>
+        /// <returns>The Index Array</returns>
+        internal static int[] MaskSort(string String) {
+            List<int> IDS = new List<int>();
+            string Content = string.Empty;
+            for (int i = 0; i < String.Length; i++) {
+                char c = String[i];
+                if (c == '{' && !Content.EndsWith("\\")) {
+                    int o = i;
+                    while (i < String.Length && String[i] != '}')
+                        i++;
+                    if (i >= String.Length || String[i] != '}') {
+                        Error("Bad String Format: \"{0}\"\nAt: {0}", String, o);
+                    }
+                    o++;
+                    string Str = String.Substring(o, i - o).Split(':')[0];
+                    int ID = 0;
+                    if (int.TryParse(Str, out ID))
+                        IDS.Add(ID);
+                    else
+                        Error("Bad Mask Format, Invalid ID: {0}", Str);
+                    continue;
+                }
+            }
+
+            return IDS.ToArray();
+        }
 
         /// <summary>
         /// Wordwrap a string
