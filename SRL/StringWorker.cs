@@ -434,6 +434,47 @@ namespace SRL {
                 Log("\"{0}\" Added to the cache at {1}", false, Reply, ReplyPtr - 1);
         }
 
+        /// <summary>
+        /// Check if a String is in the cache
+        /// </summary>
+        /// <param name="Str">The Reply String</param>
+        internal static bool InCache(string Str) {
+            string Reply = SimplfyMatch(Str);
+
+            if (Replys.Contains(Reply))
+                return true;
+
+            int Last = ReplyPtr - 1;
+            if (Last < 0)
+                Last = CacheLength;
+
+            if (Replys.Count > Last && (Replys[Last].EndsWith(Reply) || Replys[Last].StartsWith(Reply)) && Replys[Last].Length >= 3)
+                return true;
+
+            return false;
+        }
+
+
+
+        /// <summary>
+        /// Cache a Pointer and your response
+        /// </summary>
+        /// <param name="Input">Original Pointer</param>
+        /// <param name="Output">Response Pointer</param>
+        internal static void CachePtr(IntPtr Input, IntPtr Output) {
+            if (PtrCacheIn.Contains(Input))
+                return;
+
+            if (CacheArrPtr > CacheLength)
+                CacheArrPtr = 0;
+
+            PtrCacheIn.Insert(CacheArrPtr, Input);
+            PtrCacheOut.Insert(CacheArrPtr++, Output);
+
+            if (Debugging)
+                Log("\"{0:D16}\" Added to the cache at {1}", false, Output, CacheArrPtr - 1);
+        }
+
 
         /// <summary>
         /// Minify a String at the max.

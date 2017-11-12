@@ -44,7 +44,7 @@ namespace SRL {
                 Log("Simplified: {0}", false, Str);
             }
 
-            if (Replys.Contains(Str) && DialogFound) {
+            if (InCache(Str) && DialogFound) {
                 return Input;
             }
 
@@ -98,7 +98,8 @@ namespace SRL {
                     if (!Online)
                         return Input;
 
-                    AppendLst(Str, TL, MTLCache);
+                    if (Str != TL)
+                        AppendLst(Str, TL, MTLCache);
 
                     if (EnableWordWrap)
                         TL = WordWrap(TL);
@@ -142,7 +143,7 @@ namespace SRL {
                     try {
                         DotNetVM VM = new DotNetVM(File.ReadAllText("Modifier.cs", System.Text.Encoding.UTF8));
                         Modifier = VM;
-                        Log("Modifier Compiled");
+                        Log("Modifier Compiled", true);
                     } catch (Exception ex) {
                         Error("Failed to compile the Modifier\n===========\n{0}\n===========\n{1}", ex.Message, ex.Source);
                     }

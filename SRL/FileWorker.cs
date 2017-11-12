@@ -65,10 +65,10 @@ namespace SRL {
 
                 string Txt = SimplfyMatch(String);
 
-                if (ContainsMissed(Txt) || Replys.Contains(Txt) || Txt.Length <= 2)
+                if (ContainsMissed(Txt) || InCache(Txt) || Txt.Length <= 2)
                     return;
 
-                if ((Replys.Count > 0 && Replys[ReplyPtr - 1].EndsWith(Txt)) || LastInput.EndsWith(String))
+                if (LastInput.EndsWith(String))
                     return;
 
                 if (Ranges != null) {
@@ -125,6 +125,11 @@ namespace SRL {
             if (Ini.GetConfig(CfgName, "TrimRangeMissmatch;TrimRange", IniPath, false).ToLower() == "true") {
                 Log("Trim missmatch Ranges Enabled...", true);
                 TrimRangeMissmatch = true;
+            }
+
+            if (Ini.GetConfig(CfgName, "CachePointers;CachePointer;ReusePointer;ReusePointers", IniPath, false).ToLower() == "true") {
+                Warning("Pointer Cache Enabled...", true);
+                CachePointers = true;
             }
 
             if (Ini.GetConfig(CfgName, "WindowHook;WindowReloader", IniPath, false).ToLower() == "true") {

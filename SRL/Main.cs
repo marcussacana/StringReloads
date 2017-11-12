@@ -29,6 +29,11 @@ namespace SRL {
                     return ProcessChar(Target);
                 }
 
+                if (CachePointers) {
+                    if (PtrCacheIn.Contains(Target))
+                        return PtrCacheOut[PtrCacheIn.IndexOf(Target)];
+                }
+
                 string Input = GetString(Target);
                 
                 if (string.IsNullOrWhiteSpace(Input))
@@ -44,12 +49,16 @@ namespace SRL {
                 else
                     CacheReply(Reloaded);
 
+
                 TrimWorker(ref Reloaded, Input);
 
                 IntPtr Output = GenString(Reloaded);
                 
                 AddPtr(Output);
                 AddPtr(Target);
+
+                if (CachePointers)
+                    CachePtr(Target, Output);
 
                 if (DelayTest)
                     Log("Delay - {0}ms", false, (DateTime.Now - Begin).TotalMilliseconds);

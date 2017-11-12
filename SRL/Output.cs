@@ -220,7 +220,7 @@ namespace SRL {
         internal static void Log(string Message, bool Optional = false, params object[] Format) {
             try {
                 if (LogFile) {
-                    LogWriter.WriteLine("{0}: {1}", DateTime.Now.ToShortTimeString(), string.Format(Message, Format));
+                    LogWriter.WriteLine("{0}: {1}", DateTime.Now.ToShortTimeString(), string.Format(Message, Format).Replace("\r\n", "\n").Replace("\n", "\r\n"));
                     LogWriter.Flush();
                 }
                 if (!ConsoleShowed && (!Optional || Debugging)) {

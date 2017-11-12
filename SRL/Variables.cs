@@ -16,7 +16,9 @@ namespace SRL {
         const string AntiMaskParser = "::NOMASK::";
 
         const string CfgName = "StringReloader";
-        const string ServiceMask = "StringReloaderPipeID-{0}";        
+        const string ServiceMask = "StringReloaderPipeID-{0}";
+
+        const int CacheLength = 200;
 
         enum PipeCommands : byte {
             FindMissed = 0,
@@ -41,10 +43,13 @@ namespace SRL {
 
         static int GamePID = System.Diagnostics.Process.GetCurrentProcess().Id;
 
-        static Dictionary<string, string> StrRld = null;
-        static Dictionary<string, string> MskRld = null;
         static Dictionary<ushort, char> CharRld;
         static Dictionary<ushort, char> UnkRld;
+        static Dictionary<string, string> StrRld = null;
+        static Dictionary<string, string> MskRld = null;
+
+        static List<IntPtr> PtrCacheIn = new List<IntPtr>();
+        static List<IntPtr> PtrCacheOut = new List<IntPtr>();
         static List<string> Missed = new List<string>();
         static List<string> Replys = new List<string>();
         static List<long> Ptrs = new List<long>();
@@ -69,8 +74,10 @@ namespace SRL {
         static bool Multithread = false;
         static bool AntiCrash = false;
         static bool InvalidateWindow = false;
+        static bool CachePointers = false;
 
         static int ReplyPtr = 0;
+        static int CacheArrPtr = 0;
 
         static string StrLstSufix = string.Empty;
         static string SourceLang = string.Empty;
