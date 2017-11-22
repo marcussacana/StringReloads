@@ -75,6 +75,7 @@ namespace SRL {
         static bool AntiCrash = false;
         static bool InvalidateWindow = false;
         static bool CachePointers = false;
+        static bool FreeOnExit = false;
 
         static int ReplyPtr = 0;
         static int CacheArrPtr = 0;
@@ -84,6 +85,7 @@ namespace SRL {
         static string TargetLang = string.Empty;
         static string LastInput = string.Empty;
         static string GameLineBreaker = "\n";
+        static string LastOutput = string.Empty;
         
         static System.Drawing.Font Font;
         static bool Monospaced;

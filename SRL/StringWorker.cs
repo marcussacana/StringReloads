@@ -529,8 +529,17 @@ namespace SRL {
             }
 
             if (TrimRangeMissmatch && Ranges != null) {
-                while (!string.IsNullOrEmpty(rst) && !InRange(rst[0])) {
-                    rst = rst.TrimStart(rst[0]);
+                int Len = rst.Length - 1;
+                while (Len != rst.Length) {
+                    Len = rst.Length;
+                    while (!string.IsNullOrEmpty(rst) && !InRange(rst[0])) {
+                        rst = rst.TrimStart(rst[0]);
+                    }
+                    if (!string.IsNullOrEmpty(rst) && rst.Length > 1 && !InRange(rst[1])) {
+                        rst = rst.TrimStart(rst[0]);
+                        continue;
+                    }
+                    break;
                 }
             }
 
@@ -556,8 +565,17 @@ namespace SRL {
             }
             
             if (TrimRangeMissmatch && Ranges != null) {
-                while (!string.IsNullOrEmpty(rst) && !InRange(rst[rst.Length-1])) {
-                    rst = rst.TrimEnd(rst[rst.Length - 1]);
+                int Len = rst.Length - 1;
+                while (Len != rst.Length) {
+                    Len = rst.Length;
+                    while (!string.IsNullOrEmpty(rst) && !InRange(rst[rst.Length - 1])) {
+                        rst = rst.TrimEnd(rst[rst.Length - 1]);
+                    }
+                    if (!string.IsNullOrEmpty(rst) && rst.Length > 1 && !InRange(rst[rst.Length - 2])) {
+                        rst = rst.TrimStart(rst[rst.Length - 1]);
+                        continue;
+                    }
+                    break;
                 }
             }
 
@@ -740,4 +758,3 @@ namespace SRL {
         }
     }
 }
-

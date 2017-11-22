@@ -1,5 +1,4 @@
-﻿using AdvancedBinary;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -41,7 +40,7 @@ namespace SRL {
                 return Input;
 
             if (LogString) {
-                Log("Simplified: {0}", false, Str);
+                Log("Input: {0}", false, Input);
             }
 
             if (InCache(Str) && DialogFound) {
@@ -307,24 +306,24 @@ namespace SRL {
         }
 
         private static void ProcessOver(object sender, EventArgs e) {
-            Log("Exiting Process...", true);
-            try {
-                IntPtr[] Ptrs = GetPtrs();
-                foreach (IntPtr Ptr in Ptrs) {
-                    try {
-                        Marshal.FreeHGlobal(Ptr);
-                    } catch { }
-                }
-            } catch { }
+            if (FreeOnExit)
+                try {
+                    Log("Exiting Process...", true);
+                    IntPtr[] Ptrs = GetPtrs();
+                    foreach (IntPtr Ptr in Ptrs) {
+                        try {
+                            Marshal.FreeHGlobal(Ptr);
+                        } catch { }
+                    }
+                } catch { }
+
+
             EndPipe();
 
             if (AntiCrash) {
-                Log("Closing Process...", true);
-                Environment.Exit(0);
+                System.Diagnostics.Process.GetCurrentProcess().Kill();
             }
         }
                 
     }
 }
-
-

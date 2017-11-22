@@ -52,6 +52,10 @@ namespace SRL {
 
                 TrimWorker(ref Reloaded, Input);
 
+                if (LogString) {
+                    Log("Output: {0}", true, Reloaded);
+                }
+
                 IntPtr Output = GenString(Reloaded);
                 
                 AddPtr(Output);

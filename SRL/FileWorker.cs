@@ -132,6 +132,11 @@ namespace SRL {
                 CachePointers = true;
             }
 
+            if (Ini.GetConfig(CfgName, "FreeOnExit;FreePointers;FreeMemory", IniPath, false).ToLower() == "true") {
+                Warning("Memory Leak Prevention Enabled...", true);
+                FreeOnExit = true;
+            }
+
             if (Ini.GetConfig(CfgName, "WindowHook;WindowReloader", IniPath, false).ToLower() == "true") {
                 Log("Enabling Window Reloader...", true);
                 new Thread(() => WindowHook()).Start();

@@ -219,6 +219,12 @@ namespace SRL {
 
         internal static void Log(string Message, bool Optional = false, params object[] Format) {
             try {
+                bool Stack = Message == LastOutput;
+                LastOutput = Message;
+                if (Stack) {
+                    return;
+                }
+
                 if (LogFile) {
                     LogWriter.WriteLine("{0}: {1}", DateTime.Now.ToShortTimeString(), string.Format(Message, Format).Replace("\r\n", "\n").Replace("\n", "\r\n"));
                     LogWriter.Flush();

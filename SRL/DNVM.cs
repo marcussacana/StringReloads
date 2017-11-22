@@ -1,15 +1,20 @@
 ﻿using Microsoft.CSharp;
+using Microsoft.VisualBasic;
 using System;
 using System.CodeDom.Compiler;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
 class DotNetVM {
-    internal DotNetVM(string Content) {
+    public enum Language {
+        CSharp, VisualBasic
+    }
+    internal DotNetVM(string Content, Language Lang = Language.CSharp) {
         if (System.IO.File.Exists(Content)) {
             DllInitialize(Content);
             return;
         }
+
         System.IO.StringReader Sr = new System.IO.StringReader(Content);
         string[] Lines = new string[0];
         while (Sr.Peek() != -1) {
@@ -18,7 +23,7 @@ class DotNetVM {
             tmp[Lines.Length] = Sr.ReadLine();
             Lines = tmp;
         }
-        Engine = InitializeEngine(Lines);
+        Engine = InitializeEngine(Lines, Lang);
     }
 
     private void DllInitialize(string Dll) {
@@ -57,19 +62,33 @@ class DotNetVM {
     }
 
     const string ImportFlag = "#import ";
-    private Assembly InitializeEngine(string[] lines) {
-        CodeDomProvider cpd = new CSharpCodeProvider();
+    private Assembly InitializeEngine(string[] lines, Language Lang) {
+        CodeDomProvider cpd = (Lang == Language.CSharp ? new CSharpCodeProvider() : (CodeDomProvider)new VBCodeProvider());
+
         var cp = new CompilerParameters();
         string sourceCode = string.Empty;
+        int Imports = 0;
         foreach (string line in lines) {
             if (line.ToLower().StartsWith(ImportFlag)) {
                 cp.ReferencedAssemblies.Add(line.Substring(ImportFlag.Length, line.Length - ImportFlag.Length).Trim());
+                Imports++;
                 continue;
             }
-            sourceCode += line.Replace("\t", "") + '\n';
+            sourceCode += line + "\r\n";
         }
         cp.GenerateExecutable = false;
         CompilerResults cr = cpd.CompileAssemblyFromSource(cp, sourceCode);
+
+        if (cr.Errors.HasErrors) {
+            string Log = "Interpreter Error(s) List:";
+            foreach (CompilerError Error in cr.Errors) {
+                string MSG = string.Format("[{0}]: {1}", Error.Line - Imports, Error.ErrorText);
+                Log += "\n" + MSG;
+            }
+
+            throw new Exception(Log);
+        }
+
         return cr.CompiledAssembly;
     }
 
