@@ -76,6 +76,7 @@ namespace SRL {
         static bool InvalidateWindow = false;
         static bool CachePointers = false;
         static bool FreeOnExit = false;
+        static bool DialogCheck = true;
 
         static int ReplyPtr = 0;
         static int CacheArrPtr = 0;

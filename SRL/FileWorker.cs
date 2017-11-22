@@ -136,6 +136,10 @@ namespace SRL {
                 Warning("Memory Leak Prevention Enabled...", true);
                 FreeOnExit = true;
             }
+            if (Ini.GetConfig(CfgName, "NoDiagCheck;DisableDiagCheck;DisableDialogCheck", IniPath, false).ToLower() == "true") {
+                Warning("Dialog Check Disabled...", true);
+                DialogCheck = false;
+            }
 
             if (Ini.GetConfig(CfgName, "WindowHook;WindowReloader", IniPath, false).ToLower() == "true") {
                 Log("Enabling Window Reloader...", true);

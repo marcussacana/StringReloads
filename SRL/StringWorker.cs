@@ -604,6 +604,9 @@ namespace SRL {
         /// <param name="Trim">Internal Paramter, don't change it.</param>
         /// <returns>If looks a dialog, return true, else return false.</returns>
         static bool IsDialog(string Str, bool Trim = false) {
+            if (!DialogCheck)
+                return true;
+
             string String = TrimString(Str);
 
             if (SpecialLineBreaker)
