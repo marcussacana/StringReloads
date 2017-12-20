@@ -16,7 +16,7 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <DllExportNamespace>SRL</DllExportNamespace>
-    <DllExportDDNSCecil>false</DllExportDDNSCecil>
+    <DllExportDDNSCecil>true</DllExportDDNSCecil>
     <DllExportSkipOnAnyCpu>false</DllExportSkipOnAnyCpu>
     <DllExportOrdinalsBase>1</DllExportOrdinalsBase>
     <DllExportGenExpLib>false</DllExportGenExpLib>

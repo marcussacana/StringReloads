@@ -46,12 +46,12 @@ namespace SRL {
             }
 
             Log("Generating String Reload Database...");
+
             //Splited String Dump
-            uint Cnt = 0;
-            while (File.Exists(string.Format(TLMapSrcMsk, ++Cnt))) {
-                string TMS = string.Format(TLMapSrcMsk, Cnt);
-                ReadDump(TMS, ref In, ref Out);
-                Log("{0} Found, Importing...", false, Path.GetFileName(TMS));
+            string[] TLMaps = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, Path.GetFileName(string.Format(TLMapSrcMsk, "*")));
+            foreach (string TLMap in TLMaps) { 
+                ReadDump(TLMap, ref In, ref Out);
+                Log("{0} Found, Importing...", false, Path.GetFileName(TLMap));
             }
 
             if (File.Exists(TLMapSrc)) {

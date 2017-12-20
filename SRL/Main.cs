@@ -9,7 +9,7 @@ namespace SRL {
             again:;
             int Tries = 0;
             try {
-                DateTime Begin = DateTime.Now;
+                DateTime Begin = DelayTest ? DateTime.Now : DateTime.FromFileTimeUtc(1512840324); //wtf this is causing a exception
                 int Ptr = ParsePtr(Target);
 
                 if (StrRld == null) {
@@ -85,5 +85,6 @@ namespace SRL {
             ServiceCall(Paramter);
             return IntPtr.Zero;
         }
+        
     }
 }

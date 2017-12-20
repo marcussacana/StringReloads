@@ -685,14 +685,15 @@ namespace SRL {
         /// <param name="Name">Name/Id of the encoding</param>
         /// <returns>Result Encoding, Thrown if fails.</returns>
         static Encoding ParseEncodingName(string Name) {
-            switch (Name.ToLower().Trim()) {
+            switch (Name.ToLower().Trim().Replace("-", "")) {
                 case "default":
                     return Encoding.Default;
 
-                case "shift-jis":
+                case "japanese":
+                case "shiftjis":
                 case "sjis":
-                    return Encoding.GetEncoding(932);
-
+                    return Encoding.GetEncoding(932);                
+                
                 case "utf8":
                     return Encoding.UTF8;
 

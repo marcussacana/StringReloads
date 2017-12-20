@@ -219,14 +219,26 @@ namespace SRL {
 
         internal static void Log(string Message, bool Optional = false, params object[] Format) {
             try {
+                Message = string.Format(Message, Format);
+
                 bool Stack = Message == LastOutput;
                 LastOutput = Message;
                 if (Stack) {
+                    if (LogFile) {
+                        Console.CursorLeft = CursorX;
+                        Console.CursorTop = CursorY;
+                        Console.WriteLine("{0}: {1} [x{2}]", DateTime.Now.ToShortTimeString(), Message, LogStack++);
+                    }
                     return;
                 }
 
+                //Inside the LogFile to optimize loops without debug
                 if (LogFile) {
-                    LogWriter.WriteLine("{0}: {1}", DateTime.Now.ToShortTimeString(), string.Format(Message, Format).Replace("\r\n", "\n").Replace("\n", "\r\n"));
+                    CursorX = Console.CursorLeft;
+                    CursorY = Console.CursorTop;
+                    LogStack = 0;
+
+                    LogWriter.WriteLine("{0}: {1}", DateTime.Now.ToShortTimeString(), Message.Replace("\r\n", "\n").Replace("\n", "\r\n"));
                     LogWriter.Flush();
                 }
                 if (!ConsoleShowed && (!Optional || Debugging)) {
@@ -242,8 +254,7 @@ namespace SRL {
                     return;
                 }
                 ShowWindow(hConsole, SW_SHOW);
-                string Msg = string.Format(Message, Format);
-                Console.WriteLine("{0}: {1}", DateTime.Now.ToShortTimeString(), Msg);
+                Console.WriteLine("{0}: {1}", DateTime.Now.ToShortTimeString(), Message);
             } catch {
 
             }
