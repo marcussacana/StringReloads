@@ -155,14 +155,23 @@ namespace SRL {
                 Log("Chars Reloads Initialized, Total entries: {0} + {1}", true, UnkRld.Count, CharRld.Count);
                 Log("Processing String Reloads...", true);
                 StrRld = new Dictionary<string, string>();
+                List<string> Temp = new List<string>();
                 for (uint i = 0; i < Data.Original.LongLength; i++) {
                     Application.DoEvents();
                     string str = SimplfyMatch(Data.Original[i]);
                     if (!ContainsKey(str)) {
                         if (IsMask(Data.Original[i])) {
+                            if (LiteralMaskMatch)
+                                AddEntry(str, ReplaceChars(Data.Replace[i]));
+
                             if (Data.Replace[i].StartsWith(AntiMaskParser)) {
                                 Data.Replace[i] = Data.Replace[i].Substring(AntiMaskParser.Length, Data.Replace[i].Length - AntiMaskParser.Length);
                             } else {
+                                if (!Temp.Contains(Data.Original[i]))
+                                    Temp.Add(Data.Original[i]);
+                                else
+                                    continue;
+
                                 AddMask(Data.Original[i], ReplaceChars(Data.Replace[i]));
                                 continue;
                             }
@@ -180,7 +189,7 @@ namespace SRL {
                 Log("Loading Complete.", true);
             } catch (Exception ex) {
                 Error("Failed to Execute: {0}\n=========\n{1}", false, ex.Message, ex.StackTrace);
-                Thread.Sleep(3000);
+                Thread.Sleep(5000);
                 Environment.Exit(2);
             }
         }

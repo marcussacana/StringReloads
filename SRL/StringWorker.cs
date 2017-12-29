@@ -179,6 +179,18 @@ namespace SRL {
                 MaxWidth = BakWidth;
                 return Rst;
             } else {
+#if DEBUG
+                if (Debugging) {
+                    if (LastDPI != DPI) {
+                        if (LastDPI == 0)
+                            Log("Wordwrap DPI: {0}", true, DPI);
+                        else
+                            Warning("Wordwrap DPI: {0}", false, DPI);
+
+                        LastDPI = DPI;
+                    }
+                }
+#endif
                 string Rst = ReplaceChars(MergeLines(Input), true);
                 Rst = MultispacedWordWrap(Rst);
                 MaxWidth = BakWidth;
@@ -199,7 +211,7 @@ namespace SRL {
             return Rst;
         }
 
-        #region WordWrap
+#region WordWrap
         private static string MultispacedWordWrap(string String) {
             StringBuilder sb = new StringBuilder();
             if (MaxWidth == 0)
@@ -274,7 +286,7 @@ namespace SRL {
                 i--;
             return i + 1;
         }
-        #endregion
+#endregion
 
         /// <summary>
         /// Detect the correct string reader method, and load it
@@ -430,8 +442,10 @@ namespace SRL {
 
             Replys.Insert(ReplyPtr++, Reply);
 
+#if DEBUG
             if (Debugging)
                 Log("\"{0}\" Added to the cache at {1}", false, Reply, ReplyPtr - 1);
+#endif
         }
 
         /// <summary>
@@ -471,8 +485,10 @@ namespace SRL {
             PtrCacheIn.Insert(CacheArrPtr, Input);
             PtrCacheOut.Insert(CacheArrPtr++, Output);
 
+#if DEBUG
             if (Debugging)
                 Log("\"{0:D16}\" Added to the cache at {1}", false, Output, CacheArrPtr - 1);
+#endif
         }
 
 
@@ -485,6 +501,7 @@ namespace SRL {
             string Output = TrimString(MergeLines(Str));
             for (int i = 0; i < MatchDel.Length; i++)
                 Output = Output.Replace(MatchDel[i], "");
+
             return Output;
         }
 
@@ -510,6 +527,11 @@ namespace SRL {
             string Result = Input;
             Result = TrimStart(Result);
             Result = TrimEnd(Result);
+#if DEBUG
+            if (Debugging) {
+                Log("Trim: {0} to {1}", true, Input, Result);
+            }
+#endif
             return Result;
         }
 

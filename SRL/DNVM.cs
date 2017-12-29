@@ -50,14 +50,20 @@ class DotNetVM {
         Type fooType = assembly.GetType(Class);
         if (Instance == null)
             Instance = assembly.CreateInstance(Class);
+
         MethodInfo[] Methods = fooType.GetMethods().Where(x => x.Name == Function).Select(x => x).ToArray();
+
         foreach (MethodInfo Method in Methods) {
             if (Method.GetParameters().Length == Args.Length) {
                 try {
                     return Method?.Invoke(Instance, BindingFlags.InvokeMethod, null, Args, CultureInfo.CurrentCulture);
-                } catch { }
+                } catch (Exception ex) {
+                    if (Method == Methods.Last())
+                        throw ex;
+                }
             }
         }
+
         throw new Exception("Failed to find the method...");
     }
 

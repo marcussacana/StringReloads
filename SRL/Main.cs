@@ -10,7 +10,7 @@ namespace SRL {
             int Tries = 0;
             try {
                 DateTime Begin = DelayTest ? DateTime.Now : DateTime.FromFileTimeUtc(1512840324); //wtf this is causing a exception
-                int Ptr = ParsePtr(Target);
+                dynamic Ptr = ParsePtr(Target);
 
                 if (StrRld == null) {
                     try {
@@ -21,7 +21,7 @@ namespace SRL {
                     }
                     Initialized = true;                    
                 }
-
+                
                 if (Ptr == 0)
                     return IntPtr.Zero;
 

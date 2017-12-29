@@ -23,9 +23,9 @@ namespace SRL {
             return CharInt;
         }
 
-        internal static int ParsePtr(IntPtr IntPtr) {
+        internal static dynamic ParsePtr(IntPtr IntPtr) {
             if (Environment.Is64BitProcess)
-                return (int)(IntPtr.ToInt64() & int.MaxValue);
+                return IntPtr.ToInt64();
             else
                 return IntPtr.ToInt32();
         }       
@@ -35,9 +35,10 @@ namespace SRL {
                 return Input;
             }
 
-            string Str = SimplfyMatch(Input);
-            if (string.IsNullOrWhiteSpace(Str))
+            if (string.IsNullOrWhiteSpace(Input))
                 return Input;
+
+            string Str = SimplfyMatch(Input);
 
             if (LogString) {
                 Log("Input: {0}", false, Input);
@@ -134,7 +135,11 @@ namespace SRL {
                 if (Debugging) {
                     Log("Strings Reloads - v1.0");
                     Log("Soft-Translation Engine - By Marcussacana");
+#if DEBUG
                     Log("Debug Mode Enabled...");
+#else
+                    Log("Dump Mode Enabled...");
+#endif
                 }
 
                 if (File.Exists("Modifier.cs")) {
@@ -149,7 +154,12 @@ namespace SRL {
                 }
 
                 if (!PECSVal(File.ReadAllBytes(SrlDll))) {
-                    return;
+#if DEBUG
+                    Warning("SRL Engine - Unauthenticated Debug Build");
+#else
+                    Error("SRL Engine - Unauthenticated Public Build");
+                    return;                    
+#endif
                 }
 
                 if (File.Exists(TLDP) && TLIB == null) {

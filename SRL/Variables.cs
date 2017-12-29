@@ -77,12 +77,15 @@ namespace SRL {
         static bool CachePointers = false;
         static bool FreeOnExit = false;
         static bool DialogCheck = true;
+        static bool LiteralMaskMatch = false;
 
         static int ReplyPtr = 0;
         static int CacheArrPtr = 0;
 
         static int LogStack = 0;
         static int CursorX, CursorY;
+
+        static float LastDPI;
 
         static string StrLstSufix = string.Empty;
         static string SourceLang = string.Empty;
@@ -157,6 +160,12 @@ namespace SRL {
             }
         }
 
+        private static float DPI { get {
+                var g = System.Drawing.Graphics.FromHwnd(GameHandler);
+                return g.DpiX;
+            }
+        }
+
 
         private static string _tlt = string.Empty;
         private static string WindowTitle {
@@ -201,7 +210,7 @@ namespace SRL {
                 _netstas = value ? 1 : 0;
             }
         }
-
+        
         private static bool GameStarted() {
             try {
                 return !string.IsNullOrWhiteSpace(System.Diagnostics.Process.GetCurrentProcess().MainWindowTitle);

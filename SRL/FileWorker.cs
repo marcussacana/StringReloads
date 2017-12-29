@@ -65,13 +65,13 @@ namespace SRL {
 
                 string Txt = SimplfyMatch(String);
 
-                if (ContainsMissed(Txt) || InCache(Txt) || Txt.Length <= 2)
+                if (ContainsMissed(Txt) || InCache(Txt))
                     return;
 
                 if (LastInput.EndsWith(String))
                     return;
 
-                if (Ranges != null) {
+                if (Ranges != null && DialogCheck) {
                     uint Miss = 0;
                     foreach (char c in Txt) {
                         if (!InRange(c))
@@ -136,9 +136,15 @@ namespace SRL {
                 Warning("Memory Leak Prevention Enabled...", true);
                 FreeOnExit = true;
             }
+
             if (Ini.GetConfig(CfgName, "NoDiagCheck;DisableDiagCheck;DisableDialogCheck", IniPath, false).ToLower() == "true") {
                 Warning("Dialog Check Disabled...", true);
                 DialogCheck = false;
+            }
+
+            if (Ini.GetConfig(CfgName, "LiteralMask;MaskLiteralMatch;MaskMatch", IniPath, false).ToLower() == "true") {
+                Log("Literal Mask Matching Enabled...", true);
+                LiteralMaskMatch = true;
             }
 
             if (Ini.GetConfig(CfgName, "WindowHook;WindowReloader", IniPath, false).ToLower() == "true") {
@@ -150,7 +156,6 @@ namespace SRL {
                     InvalidateWindow = true;
                 }
             }
-
 
             if (Ini.GetConfig(CfgName, "AntiCrash;CrashHandler", IniPath, false).ToLower() == "true") {
                 Log("Enabling Crash Handler...", true);
@@ -188,6 +193,8 @@ namespace SRL {
 
             string ExtraSimplify = Ini.GetConfig(CfgName, "MatchIgnore;IgnoreMatchs", IniPath, false);
             if (!string.IsNullOrWhiteSpace(ExtraSimplify)) {
+                Log("Using Custom Ignore List...", true);
+                MatchDel = new string[0];
                 foreach (string str in ExtraSimplify.Split(','))
                     if (str.Trim().StartsWith("0x")) {
                         string Hex = str.Trim();
@@ -229,7 +236,7 @@ namespace SRL {
         /// Load/Compile all Acceptable Character Ranges by the user config.
         /// </summary>
         private static void LoadRanges() {
-            Ranges = new System.Collections.Generic.List<Range>();
+            Ranges = new List<Range>();
             string RangeList = Ini.GetConfig(CfgName, "AcceptableRanges;AcceptableRange;ValidRange;ValidRanges", IniPath, true);
             for (int i = 0; i < RangeList.Length - 1;) {
                 char c = RangeList[i];
