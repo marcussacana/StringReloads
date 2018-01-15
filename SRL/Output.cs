@@ -173,6 +173,7 @@ namespace SRL {
                 }
         }
 
+        //Portable Executable Checksum Value
         internal static bool PECSVal(byte[] Data) {
             int PEStart = BitConverter.ToInt32(Data, 0x3c);
             int PECoffStart = PEStart + 4;

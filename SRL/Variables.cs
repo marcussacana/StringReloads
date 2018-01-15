@@ -78,6 +78,8 @@ namespace SRL {
         static bool FreeOnExit = false;
         static bool DialogCheck = true;
         static bool LiteralMaskMatch = false;
+        static bool DecodeCharactersFromInput = false;
+        static bool WindowHookRunning = false;
 
         static int ReplyPtr = 0;
         static int CacheArrPtr = 0;
@@ -218,6 +220,8 @@ namespace SRL {
                 return false;
             }
         }
+
+        static Thread SettingsWatcher = null;
 
         static string[] MatchDel = new string[] {
             "\r", "\\r", "\n", "\\n", " ", "_r", "―", "-", "*", "♥", "①", "♪"

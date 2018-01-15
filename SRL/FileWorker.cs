@@ -92,7 +92,19 @@ namespace SRL {
         /// Load All Configs from the INI file.
         /// </summary>
         private static void LoadConfig() {
-            Log("Loading Settings...", true);
+            SpecialLineBreaker = false;
+            EnableWordWrap = false;
+            AntiCrash = false;
+            DecodeCharactersFromInput = false;
+            InvalidateWindow = false;
+            LiteralMaskMatch = false;
+            DialogCheck = true;
+            FreeOnExit = false;
+            CachePointers = false;
+            TrimRangeMissmatch = false;
+            Unicode = false;
+
+            Log(Initialized ? "Reloading Settings..." : "Loading Settings...", true);
 
             if (Ini.GetConfigStatus(CfgName, "InEncoding;ReadEncoding;Encoding", IniPath) == Ini.Status.Ok) {
                 Log("Loading Read Encoding Config...", true);
@@ -111,10 +123,16 @@ namespace SRL {
                 Log("Wide Character Mode Enabled...", true);
                 Unicode = true;
             }
-
+            
             if (Ini.GetConfig(CfgName, "Multithread;DisablePipe", IniPath, false).ToLower() == "true") {
-                Log("Multithread Support Enabled", true);
-                Multithread = true;
+                if (Initialized && !Multithread) {
+                    Warning("The Multithread Settings Changed - Restart Required");
+                } else {
+                    Log("Multithread Support Enabled", true);
+                    Multithread = true;
+                }
+            } else if (Initialized && Multithread) {
+                Warning("The Multithread Settings Changed - Restart Required");
             }
 
             if (Ini.GetConfig(CfgName, "DenyChars;NoChars", IniPath) != string.Empty) {
@@ -157,11 +175,42 @@ namespace SRL {
                 }
             }
 
+            if (Ini.GetConfigStatus(CfgName, "AcceptableRanges;AcceptableRange;ValidRange;ValidRanges", IniPath) == Ini.Status.Ok) {
+                LoadRanges();
+            }
+
+            if (Ini.GetConfig(CfgName, "DecodeInputRemap;DecodeCharacterRemapFromInput;DecodeRemapChars", IniPath).ToLower() == "true") {
+                DecodeCharactersFromInput = true;
+            }
+
+            if (Ini.GetConfig(CfgName, "LiveSettings;KeepSettingsUpdate;ReloadSettings", IniPath).ToLower() == "true") {
+                if (SettingsWatcher == null) {
+                    Log("Enabling Live Settings....");
+                    SettingsWatcher = new Thread(() => {
+                        DateTime Before = new FileInfo(IniPath).LastWriteTime;
+                        while (true) {
+                            DateTime Now = new FileInfo(IniPath).LastWriteTime;
+                            if (Before != Now) {
+                                Before = Now;
+                                LoadConfig();
+                            }
+                            Thread.Sleep(500);
+                        }
+                    });
+                    SettingsWatcher.Start();
+                }
+            } else if (SettingsWatcher != null) {
+                SettingsWatcher.Abort();
+                SettingsWatcher = null;
+            }
+
             if (Ini.GetConfig(CfgName, "AntiCrash;CrashHandler", IniPath, false).ToLower() == "true") {
-                Log("Enabling Crash Handler...", true);
-                System.Windows.Forms.Application.ThreadException += ProcessOver;
-                AppDomain.CurrentDomain.UnhandledException += ProcessOver;
-                AntiCrash = true;
+                if (!Initialized) {
+                    Log("Enabling Crash Handler...", true);
+                    System.Windows.Forms.Application.ThreadException += ProcessOver;
+                    AppDomain.CurrentDomain.UnhandledException += ProcessOver;
+                    AntiCrash = true;
+                }
             }
 
             if (Ini.GetConfig("WordWrap", "Enable;Enabled", IniPath, false).ToLower() == "true") {
@@ -179,12 +228,6 @@ namespace SRL {
                 }
                 MaxWidth = uint.Parse(Width);
             }
-
-
-            if (Ini.GetConfigStatus(CfgName, "AcceptableRanges;AcceptableRange;ValidRange;ValidRanges", IniPath) == Ini.Status.Ok) {
-                LoadRanges();
-            }
-
 
             if (!string.IsNullOrEmpty(Ini.GetConfig(CfgName, "BreakLine", IniPath, false))) {
                 GameLineBreaker = Ini.GetConfig(CfgName, "BreakLine", IniPath, false);

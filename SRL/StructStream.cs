@@ -9,7 +9,7 @@ using System.Reflection;
 /// </summary>
 namespace AdvancedBinary {
 
-    enum StringStyle {
+    public enum StringStyle {
         /// <summary>
         /// C-Style String (null terminated)
         /// </summary>
@@ -31,7 +31,7 @@ namespace AdvancedBinary {
     /// <param name="Stream">Stream Instance</param>
     /// <param name="FromReader">Determine if the method is invoked from the StructReader or StructWriter</param>
     /// <param name="StructInstance">Struct instance reference</param>
-    /// <return>Struct Instance</return>
+    /// <return>New Struct Instance</return>
     public delegate dynamic FieldInvoke(Stream Stream, bool FromReader, dynamic StructInstance);
 
     /// <summary>
@@ -82,7 +82,7 @@ namespace AdvancedBinary {
     /// Struct Field Type (required only to sub structs)
     /// </summary>
     public class StructField : Attribute { }
-    internal class Const {
+    public class Const {
         //Types
         public const string INT8 = "System.SByte";
         public const string UINT8 = "System.Byte";
@@ -231,9 +231,10 @@ namespace AdvancedBinary {
                     return true;
             return false;
         }
-        public static void ReadStruct<T>(byte[] Array, ref T Struct, bool IsBigEnddian = false, Encoding Encoding = null) {
+        public static void ReadStruct<T>(byte[] Array, ref T Struct, bool IsBigEnddian = false, Encoding Encoding = null, long BaseOffset = 0) {
             MemoryStream Stream = new MemoryStream(Array);
             StructReader Reader = new StructReader(Stream, IsBigEnddian, Encoding);
+            Reader.Seek(BaseOffset, SeekOrigin.Begin);
             Reader.ReadStruct(ref Struct);
             Reader.Close();
             Stream?.Close();
@@ -261,18 +262,18 @@ namespace AdvancedBinary {
         }
     }
 
-    class StructWriter : BinaryWriter {
+    public class StructWriter : BinaryWriter {
 
         internal bool BigEndian = false;
         internal Encoding Encoding;
 
-        public StructWriter(Stream Input, bool BigEndian = false, Encoding Encoding = null) : base(Input) {
+        public StructWriter(Stream Output, bool BigEndian = false, Encoding Encoding = null) : base(Output) {
             if (Encoding == null)
                 Encoding = Encoding.UTF8;
             this.BigEndian = BigEndian;
             this.Encoding = Encoding;
         }
-        public StructWriter(string Input, bool BigEndian = false, Encoding Encoding = null) : base(new StreamWriter(Input).BaseStream) {
+        public StructWriter(string OutputFile, bool BigEndian = false, Encoding Encoding = null) : base(new StreamWriter(OutputFile).BaseStream) {
             if (Encoding == null)
                 Encoding = Encoding.UTF8;
             this.BigEndian = BigEndian;
@@ -290,7 +291,7 @@ namespace AdvancedBinary {
             FieldInfo[] fields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             foreach (FieldInfo field in fields) {
                 if (HasAttribute(field, Const.IGNORE))
-                    break;
+                    continue;
                 dynamic Value = field.GetValue(Instance);
                 string Type = field.FieldType.ToString();
                 if (!Type.EndsWith("[]")) {

@@ -31,9 +31,11 @@ namespace SRL {
         }       
        
         internal static string StrMap(string Input, IntPtr InputPtr, bool Native) {
-            if (!DialogFound && !IsDialog(Input)) {
-                return Input;
-            }
+            if (DecodeCharactersFromInput)
+                Input = ReplaceChars(Input, true);            
+
+            if (!DialogFound && !IsDialog(Input))
+                return Input;          
 
             if (string.IsNullOrWhiteSpace(Input))
                 return Input;
@@ -58,6 +60,10 @@ namespace SRL {
 
             if (InputPtr != IntPtr.Zero) {
                 Str = GetString(InputPtr, false);
+
+                if (DecodeCharactersFromInput)
+                    Str = ReplaceChars(Str, true);
+
                 Str = SimplfyMatch(Str);
                 if (ContainsKey(Str)) {
                     DialogFound = true;
@@ -153,6 +159,7 @@ namespace SRL {
                     }
                 }
 
+                //I Implement This to prevent 
                 if (!PECSVal(File.ReadAllBytes(SrlDll))) {
 #if DEBUG
                     Warning("SRL Engine - Unauthenticated Debug Build");
@@ -221,6 +228,10 @@ namespace SRL {
         }
 
         private static void WindowHook() {
+            if (WindowHookRunning)
+                return;
+
+            WindowHookRunning = true;
             while (!Initialized)
                 Thread.Sleep(100);            
 
@@ -235,7 +246,7 @@ namespace SRL {
 
                 IntPtr Handler = GetMenu(GameHandler);
                 ProcessMenu(Handler);
-            }
+            }            
         }
 
         private static bool ProcessWindow(IntPtr Handler, int Paramters) {

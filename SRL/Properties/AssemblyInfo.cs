@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("VNX+")]
 [assembly: AssemblyProduct("SRL - By Marcussacana")]
-[assembly: AssemblyCopyright("Copyright © VNX+ 2017")]
+[assembly: AssemblyCopyright("Copyright © VNX+ 2017-2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
