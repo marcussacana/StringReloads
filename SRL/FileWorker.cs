@@ -185,7 +185,7 @@ namespace SRL {
 
             if (Ini.GetConfig(CfgName, "LiveSettings;KeepSettingsUpdate;ReloadSettings", IniPath).ToLower() == "true") {
                 if (SettingsWatcher == null) {
-                    Log("Enabling Live Settings....");
+                    Log("Enabling Live Settings....", true);
                     SettingsWatcher = new Thread(() => {
                         DateTime Before = new FileInfo(IniPath).LastWriteTime;
                         while (true) {
