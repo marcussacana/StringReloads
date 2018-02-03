@@ -140,6 +140,14 @@ namespace SRL {
                         CharRld.Add(cPrx, cOri);
                         AppendArray(ref Replaces, cOri.ToString());
                         AppendArray(ref Replaces, cPrx.ToString());
+
+                        Range Range = new Range() {
+                            Min = cPrx,
+                            Max = cPrx
+                        };
+
+                        if (!Ranges.Contains(Range))
+                            Ranges.Add(Range);
                     }
                 }
 

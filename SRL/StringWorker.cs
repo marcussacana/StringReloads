@@ -415,6 +415,10 @@ namespace SRL {
         /// <param name="String">String to Restore</param>
         /// <param name="Original">Original Template</param>
         internal static void TrimWorker(ref string String, string Original) {
+            if (LogString) {
+                Log("Trim Request:\nOri: {0}\nStr: {1}", true, Original, String);
+            }
+
             String = TrimString(String);
 
             string Test = TrimStart(Original);
@@ -425,6 +429,10 @@ namespace SRL {
 
             Diff = Original.Length - Test.Length;
             String += Original.Substring(Original.Length - Diff, Diff);
+
+            if (LogString) {
+                Log("Trim Result: {0}", true, String);
+            }
         }
 
         /// <summary>

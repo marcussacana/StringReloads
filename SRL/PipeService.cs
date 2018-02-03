@@ -99,9 +99,6 @@ namespace SRL {
                     case PipeCommands.EndPipe:
                         OK = true;
                         Log("Exit Command Recived...", true);
-                        if (Debugging) {
-                            File.WriteAllText("DEBUG", "CloseRecived");
-                        }
                         Environment.Exit(0);
                         break;
                     case PipeCommands.AddMask:
