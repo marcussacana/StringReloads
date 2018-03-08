@@ -27,7 +27,53 @@ namespace SRL {
         }
 
 #pragma warning disable 649
-        struct SRLData {
+        struct SRLData2 {
+            [FString(Length = 4)]
+            public string Signature;
+
+            [PArray(PrefixType = Const.UINT16), StructField]
+            public SRLDatabase[] Databases;
+
+            [PArray(PrefixType = Const.UINT32)]
+            public char[] OriLetters;
+
+            [PArray(PrefixType = Const.UINT32)]
+            public char[] MemoryLetters;
+
+            [PArray(PrefixType = Const.UINT32)]
+            public ushort[] UnkChars;
+
+            [PArray(PrefixType = Const.UINT32)]
+            public char[] UnkReps;
+
+            [PArray(PrefixType = Const.UINT32), CString]
+            public string[] RepOri;
+
+            [PArray(PrefixType = Const.UINT32), CString]
+            public string[] RepTrg;
+        }
+
+        struct SRLDatabase {
+            [PArray(PrefixType = Const.UINT32), CString]
+            public string[] Original;
+
+            [PArray(PrefixType = Const.UINT32), CString]
+            public string[] Replace;
+        }
+
+        //Decrapted But Supported Formats
+        struct TLBC {
+            [FString(Length = 4)]
+            public string Signature;
+
+            [PArray(PrefixType = Const.UINT32), CString]
+            public string[] Original;
+
+            [PArray(PrefixType = Const.UINT32), CString]
+            public string[] Replace;
+
+        }
+        struct SRLData1 {
             [FString(Length = 4)]
             public string Signature;
 
@@ -54,17 +100,6 @@ namespace SRL {
 
             [PArray(PrefixType = Const.UINT32), CString]
             public string[] RepTrg;
-        }
-        struct TLBC {
-            [FString(Length = 4)]
-            public string Signature;
-
-            [PArray(PrefixType = Const.UINT32), CString]
-            public string[] Original;
-
-            [PArray(PrefixType = Const.UINT32), CString]
-            public string[] Replace;
-
         }
 #pragma warning restore 649
     }

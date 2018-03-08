@@ -173,13 +173,13 @@ namespace SRL {
                 }
         }
 
-        //Portable Executable Checksum Value
+        //Portable Executable Checksum Validator
         internal static bool PECSVal(byte[] Data) {
             int PEStart = BitConverter.ToInt32(Data, 0x3c);
             int PECoffStart = PEStart + 4;
             int PEOptionalStart = PECoffStart + 20;
             int PECheckSum = PEOptionalStart + 64;
-            uint checkSumInFile = BitConverter.ToUInt32(Data, PECheckSum);
+            uint checkSumInHeader = BitConverter.ToUInt32(Data, PECheckSum);
             long checksum = 0;
             var top = Math.Pow(2, 32);
 
@@ -199,22 +199,28 @@ namespace SRL {
             checksum = checksum & 0xffff;
 
             checksum += (uint)Data.LongLength;
-            if (checkSumInFile != checksum)
+            if (checkSumInHeader != checksum)
                 return false;
             return true;
         }
 
         internal static void Error(string Message, params object[] Format) {
+            bool BakLogFile = LogFile;
+            LogFile = true;
             ConsoleColor Color = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Red;
             Log(Message, false, Format);
             Console.ForegroundColor = Color;
+            LogFile = BakLogFile;
         }
         internal static void Warning(string Message, params object[] Format) {
+            bool BakLogFile = LogFile;
+            LogFile = true & Debugging;
             ConsoleColor Color = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Yellow;
             Log(Message, true, Format);
             Console.ForegroundColor = Color;
+            LogFile = BakLogFile;
         }
 
         internal static void Log(string Message, bool Optional = false, params object[] Format) {

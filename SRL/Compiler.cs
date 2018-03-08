@@ -13,8 +13,7 @@ namespace SRL {
         /// Build the String.srl
         /// </summary>
         internal static void CompileStrMap() {
-            var In = new List<string>();
-            var Out = new List<string>();
+            var DBAr = new List<SRLDatabase>();
             var COri = new List<char>();
             var CFak = new List<char>();
             var UOri = new List<char>();
@@ -49,17 +48,33 @@ namespace SRL {
 
             //Splited String Dump
             string[] TLMaps = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, Path.GetFileName(string.Format(TLMapSrcMsk, "*")));
-            foreach (string TLMap in TLMaps) { 
+            foreach (string TLMap in TLMaps) {
+                var In = new List<string>();
+                var Out = new List<string>();
+
                 ReadDump(TLMap, ref In, ref Out);
+
+                DBAr.Add(new SRLDatabase() {
+                    Original = In.ToArray(),
+                    Replace = Out.ToArray()
+                });
+
                 Log("{0} Found, Importing...", false, Path.GetFileName(TLMap));
             }
 
             if (File.Exists(TLMapSrc)) {
+                var In = new List<string>();
+                var Out = new List<string>();
+
                 ReadDump(TLMapSrc, ref In, ref Out);
+                DBAr.Add(new SRLDatabase() {
+                    Original = In.ToArray(),
+                    Replace = Out.ToArray()
+                });
                 Log("{0} Found, Importing...", false, Path.GetFileName(TLMapSrc));
             }
 
-            SearchViolations(Out.ToArray(), CFak.ToArray());
+            SearchViolations(DBAr.ToArray(), CFak.ToArray());
 
             Log("Database Generated.");
             
@@ -69,10 +84,9 @@ namespace SRL {
             }
 
             Log("Building String Reloads...");
-            SRLData Data = new SRLData() {
-                Signature = "SRL",
-                Original = In.ToArray(),
-                Replace = Out.ToArray(),
+            SRLData2 Data = new SRLData2() {
+                Signature = "SRL2",
+                Databases = DBAr.ToArray(),
                 OriLetters = COri.ToArray(),
                 MemoryLetters = CFak.ToArray(),
                 UnkChars = UErr.ToArray(),
@@ -84,26 +98,26 @@ namespace SRL {
             if (File.Exists(TLMap))
                 File.Delete(TLMap);
 
-            StructWriter Writer = new StructWriter(TLMap);
-            Writer.WriteStruct(ref Data);
-            Writer.Close();
-
+            using (StructWriter Writer = new StructWriter(TLMap)){
+                Writer.WriteStruct(ref Data);
+                Writer.Close();
+            }
             Log("Builded Successfully.");
         }
 
-        private static void SearchViolations(string[] Reloads, char[] Ilegals) {
+        private static void SearchViolations(SRLDatabase[] DBS, char[] Ilegals) {
             Log("Serching Chars Violations...");
-            string[] Violations =
-            (from x in Reloads where
+            List<string> Violations = new List<string>();
 
-                   (from y in Ilegals where
-                    x.Contains(y.ToString())
-                   select y).LongCount() != 0
+            foreach (SRLDatabase Database in DBS) {
+                foreach (string String in Database.Replace)
+                    foreach (char Ilegal in Ilegals)
+                        if (String.Contains(Ilegal))
+                            Violations.Add(String);
+            }
 
-             select x).ToArray();
-
-            if (Violations.LongLength != 0) {
-                Warning("{0} Strings contains a char violation.", Violations.LongLength);
+            if (Violations.LongCount() != 0) {
+                Warning("{0} Strings contains a char violation.", Violations.LongCount());
                 foreach (string Violation in Violations) {
                     Warning("\"{0}\" contains a char violation.", Violation);
                 }
@@ -115,21 +129,27 @@ namespace SRL {
         /// </summary>
         static void LoadData() {
             Log("Initializing String Reloads...", true);
+            StartPipe();
+            var Data = new SRLData2();
+
             try {
-                StartPipe();
-                StructReader Reader = new StructReader(TLMap);
-                if (Reader.PeekInt() == 0x43424C54) {
-                    TLBCParser(Reader);
-                    return;
+                using (StructReader Reader = new StructReader(TLMap)) {
+                    if (Reader.PeekInt() == 0x43424C54) {
+                        TLBCParser(Reader);
+                        return;
+                    }
+                    if (Reader.PeekInt() == 0x4C5253) {
+                        SRL1Parser(Reader);
+                        return;
+                    }
+                    if (Reader.PeekInt() != 0x324C5253) {
+                        Error("Failed to Initialize - Corrupted Data");
+                        Thread.Sleep(3000);
+                        Environment.Exit(2);
+                    }
+                    Reader.ReadStruct(ref Data);
+                    Reader.Close();
                 }
-                if (Reader.PeekInt() != 0x4C5253) {
-                    Error("Failed to Initialize - Corrupted Data");
-                    Thread.Sleep(3000);
-                    Environment.Exit(2);
-                }
-                var Data = new SRLData();
-                Reader.ReadStruct(ref Data);
-                Reader.Close();
 
                 Log("Processing Char Reloads... 1/2", true);
                 CharRld = new Dictionary<ushort, char>();
@@ -162,32 +182,38 @@ namespace SRL {
 
                 Log("Chars Reloads Initialized, Total entries: {0} + {1}", true, UnkRld.Count, CharRld.Count);
                 Log("Processing String Reloads...", true);
-                StrRld = new Dictionary<string, string>();
                 List<string> Temp = new List<string>();
-                for (uint i = 0; i < Data.Original.LongLength; i++) {
-                    Application.DoEvents();
-                    string str = SimplfyMatch(Data.Original[i]);
-                    if (!ContainsKey(str)) {
-                        if (IsMask(Data.Original[i])) {
-                            if (LiteralMaskMatch)
-                                AddEntry(str, ReplaceChars(Data.Replace[i]));
+                foreach (SRLDatabase Database in Data.Databases) {
+                    StrRld = new Dictionary<string, string>();
+                    for (uint i = 0; i < Database.Original.LongLength; i++) {
+                        Application.DoEvents();
+                        string str = SimplfyMatch(Database.Original[i]);
+                        if (!ContainsKey(str, true)) {
+                            if (IsMask(Database.Original[i])) {
+                                if (LiteralMaskMatch)
+                                    AddEntry(str, ReplaceChars(Database.Replace[i]));
 
-                            if (Data.Replace[i].StartsWith(AntiMaskParser)) {
-                                Data.Replace[i] = Data.Replace[i].Substring(AntiMaskParser.Length, Data.Replace[i].Length - AntiMaskParser.Length);
-                            } else {
-                                if (!Temp.Contains(Data.Original[i]))
-                                    Temp.Add(Data.Original[i]);
-                                else
+                                if (Database.Replace[i].StartsWith(AntiMaskParser)) {
+                                    Database.Replace[i] = Database.Replace[i].Substring(AntiMaskParser.Length, Database.Replace[i].Length - AntiMaskParser.Length);
+                                } else {
+
+                                    //Prevent Duplicates
+                                    if (!Temp.Contains(Database.Original[i]))
+                                        Temp.Add(Database.Original[i]);
+                                    else
+                                        continue;
+
+                                    AddMask(Database.Original[i], ReplaceChars(Database.Replace[i]));
                                     continue;
-
-                                AddMask(Data.Original[i], ReplaceChars(Data.Replace[i]));
-                                continue;
-                            }
+                                }
+                            } else
+                                AddEntry(str, ReplaceChars(Database.Replace[i]));
                         }
-                        AddEntry(str, ReplaceChars(Data.Replace[i]));
                     }
-                }
 
+                    if (MultipleDatabases)
+                        FinishDatabase();
+                }
                 Log("String Reloads Initialized.", true);
                 Log("Initializing Replaces...", true);
                 for (uint i = 0; i < Data.RepOri.LongLength; i++) {
@@ -218,6 +244,53 @@ namespace SRL {
             for (uint i = 0; i < Cache.Original.Length; i++) {
                 AppendLst(Cache.Original[i], Cache.Replace[i], TLMapSrc);
             }
+
+            File.Delete(TLMap);
+            Log("Restarting...");
+            Init();
+        }
+
+        /// <summary>
+        /// Convert SRL1 Database to the SRL2 Format
+        /// </summary>
+        /// <param name="Reader">Input Stream</param>
+        private static void SRL1Parser(StructReader Reader) {
+            Log("SRL1 Database Detected... Rebuilding...");
+            var DB = new SRLData1();
+            Reader.ReadStruct(ref DB);
+            Reader.Close();
+
+            if (File.Exists(TLMapSrc))
+                File.Delete(TLMapSrc);
+
+            for (uint i = 0; i < DB.Original.Length; i++) {
+                AppendLst(DB.Original[i], DB.Replace[i], TLMapSrc);
+            }
+            if (DB.OriLetters.LongLength + DB.UnkReps.LongLength != 0) {
+                Log("Dumping Char Reloads...", true);
+                using (TextWriter Output = File.CreateText(CharMapSrc)) {
+                    for (uint i = 0; i < DB.OriLetters.LongLength; i++) {
+                        Output.WriteLine("{0}={1}", DB.OriLetters[i], DB.MemoryLetters[i]);
+                    }
+                    for (uint i = 0; i < DB.UnkReps.LongLength; i++) {
+                        Output.WriteLine("{0}=0x{1:X4}", DB.UnkReps[i], DB.UnkChars[i]);
+                    }
+                    Output.Close();
+                }
+            }
+
+            if (DB.OriLetters.LongLength != 0) {
+                Log("Dumping Replaces...", true);
+
+                for (uint i = 0; i < DB.OriLetters.LongLength; i++) {
+                    try {
+                        string L1 = DB.RepOri[i];
+                        string L2 = DB.RepTrg[i];
+                        AppendLst(L1, L2, ReplLst);
+                    } catch { }
+                }
+            }
+
 
             File.Delete(TLMap);
             Log("Restarting...");

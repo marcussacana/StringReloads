@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Net.NetworkInformation;
@@ -33,7 +32,8 @@ namespace SRL {
             EndPipe = 9,
             AddMask = 10,
             ChkMask = 11,
-            RldMask = 12
+            RldMask = 12,
+            AdvDB = 13,
         }
 
         struct Range {
@@ -45,8 +45,8 @@ namespace SRL {
 
         static Dictionary<ushort, char> CharRld;
         static Dictionary<ushort, char> UnkRld;
-        static Dictionary<string, string> StrRld = null;
         static Dictionary<string, string> MskRld = null;
+
 
         static List<IntPtr> PtrCacheIn = new List<IntPtr>();
         static List<IntPtr> PtrCacheOut = new List<IntPtr>();
@@ -54,6 +54,7 @@ namespace SRL {
         static List<string> Replys = new List<string>();
         static List<long> Ptrs = new List<long>();
         static List<Range> Ranges = null;
+
 
         static NamedPipeClientStream PipeClient = null;
 
@@ -80,13 +81,15 @@ namespace SRL {
         static bool LiteralMaskMatch = false;
         static bool DecodeCharactersFromInput = false;
         static bool WindowHookRunning = false;
+        static bool MultipleDatabases = false;
+        static bool Managed = false;
 
         static int ReplyPtr = 0;
         static int CacheArrPtr = 0;
 
         static int LogStack = 0;
         static int CursorX, CursorY;
-
+        
         static float LastDPI;
 
         static string StrLstSufix = string.Empty;
@@ -119,6 +122,37 @@ namespace SRL {
 
         static BinaryReader PipeReader = null;
         static BinaryWriter PipeWriter = null;
+
+
+        static int LastDBID = 0;
+        static int DBID = 0;
+        static List<Dictionary<string, string>> Databases = null;
+        static Dictionary<string, string> StrRld {
+            get {
+                if (Databases == null)
+                    Databases = new List<Dictionary<string, string>>() { null };
+
+                if (DBID >= Databases.Count)
+                    Databases.Add(new Dictionary<string, string>());
+
+                if (DBID >= Databases.Count)
+                    throw new Exception("Invalid Database ID");
+
+                return Databases[DBID];
+            }
+            set {
+                if (Databases == null)
+                    Databases = new List<Dictionary<string, string>>() { null };
+
+                if (DBID >= Databases.Count)
+                    Databases.Add(new Dictionary<string, string>());
+
+                if (DBID >= Databases.Count)
+                    throw new Exception("Invalid Database ID");
+
+                Databases[DBID] = value;
+            }
+        }
 
         static bool _FrcDbg = false;
         static bool Debugging {

@@ -43,18 +43,32 @@ namespace SRL {
                         break;
                     case PipeCommands.FindReload:
                         OK = true;
-                        if (StrRld.ContainsKey(Reader.ReadString()))
+                        bool Enforce = Reader.ReadByte() == (byte)PipeCommands.True;
+                        string Key = Reader.ReadString();
+                        if (StrRld.ContainsKey(Key))
                             Writer.Write((byte)PipeCommands.True);
-                        else
-                            Writer.Write((byte)PipeCommands.False);
+                        else {
+                            if (!Enforce && (from x in Databases where x.ContainsKey(Key) select x).Count() > 0)
+                                Writer.Write((byte)PipeCommands.True);
+                            else
+                                Writer.Write((byte)PipeCommands.False);
+                        }
                         Writer.Flush();
-                        Log("Command Finished, In: {0}, Out: {1}", true, 1, 1);
+                        Log("Command Finished, In: {0}, Out: {1}", true, 2, 1);
                         break;
                     case PipeCommands.GetReload:
                         OK = true;
                         string RLD = Reader.ReadString();
                         try {
-                            Writer.Write(StrRld[RLD]);
+                            string Rst = null;
+                            if (StrRld.ContainsKey(RLD))
+                                Rst = StrRld[RLD];
+                            else
+                                for (DBID = 0; DBID < Databases.Count; DBID++) {
+                                    if (StrRld.ContainsKey(RLD))
+                                        Rst = StrRld[RLD];
+                                }
+                            Writer.Write(Rst);
                         } catch (Exception ex) {
                             Writer.Write(RLD);
                             Log("Exception Handled\n=================\n{0}\n{1}", true, ex.Message, ex.StackTrace);
@@ -126,6 +140,11 @@ namespace SRL {
                         Writer.Write(MaskReplace(Mask, Ori, Rld));
                         Writer.Flush();
                         Log("Command Finished, In: {0}, Out: {1}", true, 2, 1);
+                        break;
+                    case PipeCommands.AdvDB:
+                        LastDBID++;
+                        DBID = LastDBID;
+                        Log("Command Finished, In: {0}, Out: {1}", true, 1, 0);
                         break;
                     default:
                         if (!OK)
@@ -203,12 +222,19 @@ namespace SRL {
             PipeWriter.Flush();
             return PipeReader.ReadByte() == (byte)PipeCommands.True;
         }
-        private static bool ContainsKey(string Line) {
+        private static bool ContainsKey(string Line, bool EnforceAtualDatabase = false) {
             if (Multithread) {
-                return StrRld.ContainsKey(Line);
+                if (StrRld.ContainsKey(Line))
+                    return true;
+
+                if (EnforceAtualDatabase)
+                    return false;
+
+                return (from x in Databases where x.ContainsKey(Line) select x).Count() > 0;
             }
 
             PipeWriter.Write((byte)PipeCommands.FindReload);
+            PipeWriter.Write((byte)(EnableWordWrap ? PipeCommands.True : PipeCommands.False));
             PipeWriter.Write(Line);
             PipeWriter.Flush();
             return PipeReader.ReadByte() == (byte)PipeCommands.True;
@@ -266,10 +292,26 @@ namespace SRL {
             PipeWriter.Write(Value);
             PipeWriter.Flush();
         }
+        
+        private static void FinishDatabase() {
+            if (Multithread) {
+                LastDBID++;
+                DBID = LastDBID;
+                return;
+            }
+
+            PipeWriter.Write((byte)PipeCommands.AdvDB);
+            PipeWriter.Flush();
+        }
 
         private static string GetEntry(string Key) {
             if (Multithread) {
-                return StrRld[Key];
+                if (StrRld.ContainsKey(Key))
+                    return StrRld[Key];
+                for (DBID = 0; DBID < Databases.Count; DBID++) {
+                    if (StrRld.ContainsKey(Key))
+                        return StrRld[Key];
+                }
             }
 
             PipeWriter.Write((byte)PipeCommands.GetReload);

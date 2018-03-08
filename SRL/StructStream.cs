@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using System.Reflection;
+using System.Collections;
 
 /// <summary>
 /// Advanced Binary Tools - By Marcussacana
@@ -321,8 +322,10 @@ namespace AdvancedBinary {
                     Length = Tools.Reverse(Length);
                 Write(Length);
 
+                System.Collections.IEnumerator Enum = Value.GetEnumerator();
                 for (long i = 0; i < Length; i++) {
-                    WriteField(Value[i], Type.Substring(0, Type.Length-2), field, ref Instance);
+                    Enum.MoveNext();
+                    WriteField(Enum.Current, Type.Substring(0, Type.Length-2), field, ref Instance);                    
                 }
             }
         }
@@ -378,7 +381,7 @@ namespace AdvancedBinary {
                     throw new Exception("String Attribute Not Specified.");
                 default:
                     if (HasAttribute(field, Const.STRUCT)) {
-                        WriteStruct(field.FieldType, ref Value);
+                        WriteStruct(System.Type.GetType(Type), ref Value);
                     } else {
                         if (field.FieldType.BaseType.ToString() == Const.DELEGATE) {
                             FieldInvoke Invoker = ((FieldInvoke)Value);
@@ -545,11 +548,16 @@ namespace AdvancedBinary {
                         string PType = Tools.GetAttributePropertyValue(field, Const.PARRAY, "PrefixType");
                         dynamic Count = ReadField(PType, field, ref Instance);
 
-                        Value = CreateArrayInstance(FType, Count);
+                        
+                        object[] Content = new object[Count];
                         for (long x = 0; x < Count; x++) {
-                            Value[x] = ReadField(FType, field, ref Instance);
+                            Content[x] = ReadField(FType, field, ref Instance);
                         }
 
+
+                        Value = Array.CreateInstance(Type.GetType(FType), Count);
+                        Content.CopyTo(Value, 0);
+                       
                     } else
                         throw new Exception("Bad Struct Configuration");
                 }                
@@ -656,8 +664,9 @@ namespace AdvancedBinary {
                 default:
                     IsNumber = false;
                     if (Tools.HasAttribute(field, Const.STRUCT)) {
-                        Value = Activator.CreateInstance(field.FieldType);
-                        ReadStruct(field.FieldType, ref Value);
+                        Type FieldType = System.Type.GetType(Type);
+                        Value = Activator.CreateInstance(FieldType);
+                        ReadStruct(FieldType, ref Value);
                     } else {
                         if (field.FieldType.BaseType.ToString() == Const.DELEGATE) {
                             FieldInvoke Invoker = (FieldInvoke)field.GetValue(Instance);

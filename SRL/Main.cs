@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RGiesecke.DllExport;
+using System;
 using System.Runtime.InteropServices;
 
 namespace SRL {
@@ -85,6 +86,18 @@ namespace SRL {
             ServiceCall(Paramter);
             return IntPtr.Zero;
         }
-        
+
+        public static string ProcessManagerd(string Text) {
+            Managed = true;
+            IntPtr Ptr = Marshal.StringToHGlobalAuto(Text);
+            IntPtr New = Process(Ptr);
+            Text = Marshal.PtrToStringAuto(New);
+            Marshal.FreeHGlobal(Ptr);
+            return Text;
+        }
+        public static char ProcessManagerd(char Char) {
+            Managed = true;
+            return (char)(Process(new IntPtr(Char)).ToInt32() & 0xFFFF);
+        }
     }
 }

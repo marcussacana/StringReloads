@@ -103,6 +103,7 @@ namespace SRL {
             CachePointers = false;
             TrimRangeMissmatch = false;
             Unicode = false;
+            MultipleDatabases = false;
 
             Log(Initialized ? "Reloading Settings..." : "Loading Settings...", true);
 
@@ -163,6 +164,10 @@ namespace SRL {
             if (Ini.GetConfig(CfgName, "LiteralMask;MaskLiteralMatch;MaskMatch", IniPath, false).ToLower() == "true") {
                 Log("Literal Mask Matching Enabled...", true);
                 LiteralMaskMatch = true;
+            }
+            if (Ini.GetConfig(CfgName, "MultiDatabase;MultiDB;SplitDatabase;SplitDB", IniPath, false).ToLower() == "true") {
+                Log("Multidatabase's Matching Method Enabled...", true);
+                MultipleDatabases = true;
             }
 
             if (Ini.GetConfig(CfgName, "WindowHook;WindowReloader", IniPath, false).ToLower() == "true") {
@@ -272,6 +277,14 @@ namespace SRL {
             }
 
             Log("Settings Loaded.", true);
+
+            if (Managed) {
+                Log("Managed Mode Enabled, Enforcing Compatible Settings", true);
+                WriteEncoding = ReadEncoding = System.Text.Encoding.Unicode;
+                Multithread = true;
+                if (Debugging)
+                    LogFile = true;
+            }
         }
 
 
@@ -327,18 +340,31 @@ namespace SRL {
             if (File.Exists(CharMapSrc)) {
                 File.Delete(CharMapSrc);
             }
-            SRLData Data = new SRLData();
+            SRLData2 Data = new SRLData2();
             StructReader Reader = new StructReader(TLMap);
             Reader.ReadStruct(ref Data);
             Reader.Close();
 
+            if (Data.Databases.Length <= 1) {
+                for (uint i = 0; i < Data.Databases[0].Original.LongLength; i++) {
+                    string Str = Data.Databases[0].Original[i];
+                    if (string.IsNullOrWhiteSpace(Str))
+                        continue;
 
-            for (uint i = 0; i < Data.Original.LongLength; i++) {
-                string Str = Data.Original[i];
-                if (string.IsNullOrWhiteSpace(Str))
-                    continue;
+                    AppendLst(Str, TLMode ? Str : Data.Databases[0].Replace[i], TLMapSrc);
+                }
+            } else {
+                int ID = 1;
+                foreach (SRLDatabase DataBase in Data.Databases) {
+                    for (uint i = 0; i < DataBase.Original.LongLength; i++) {
+                        string Str = DataBase.Original[i];
+                        if (string.IsNullOrWhiteSpace(Str))
+                            continue;
 
-                AppendLst(Str, TLMode ? Str : Data.Replace[i], TLMapSrc);
+                        AppendLst(Str, TLMode ? Str : DataBase.Replace[i], string.Format(TLMapSrcMsk, ID));
+                    }
+                    ID++;
+                }
             }
 
             if (Data.OriLetters.LongLength + Data.UnkReps.LongLength != 0) {
@@ -355,7 +381,7 @@ namespace SRL {
             }
 
             if (Data.OriLetters.LongLength != 0) {
-                Log("Dumping Replaces...");
+                Log("Dumping Replaces...", true);
 
                 for (uint i = 0; i < Data.OriLetters.LongLength; i++) {
                     try {

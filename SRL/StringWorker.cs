@@ -536,7 +536,7 @@ namespace SRL {
             Result = TrimStart(Result);
             Result = TrimEnd(Result);
 #if DEBUG
-            if (Debugging) {
+            if (LogString) {
                 Log("Trim: {0} to {1}", true, Input, Result);
             }
 #endif
