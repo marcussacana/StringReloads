@@ -183,8 +183,8 @@ namespace SRL {
                 Log("Chars Reloads Initialized, Total entries: {0} + {1}", true, UnkRld.Count, CharRld.Count);
                 Log("Processing String Reloads...", true);
                 List<string> Temp = new List<string>();
+                StrRld = new Dictionary<string, string>();
                 foreach (SRLDatabase Database in Data.Databases) {
-                    StrRld = new Dictionary<string, string>();
                     for (uint i = 0; i < Database.Original.LongLength; i++) {
                         Application.DoEvents();
                         string str = SimplfyMatch(Database.Original[i]);

@@ -45,14 +45,16 @@ namespace SRL {
                         OK = true;
                         bool Enforce = Reader.ReadByte() == (byte)PipeCommands.True;
                         string Key = Reader.ReadString();
+
                         if (StrRld.ContainsKey(Key))
                             Writer.Write((byte)PipeCommands.True);
-                        else {
-                            if (!Enforce && (from x in Databases where x.ContainsKey(Key) select x).Count() > 0)
-                                Writer.Write((byte)PipeCommands.True);
-                            else
-                                Writer.Write((byte)PipeCommands.False);
-                        }
+                        else if (Enforce)
+                            Writer.Write((byte)PipeCommands.False);
+                        else if ((from x in Databases where x.ContainsKey(Key) select x).Count() > 0)
+                            Writer.Write((byte)PipeCommands.True);
+                        else
+                            Writer.Write((byte)PipeCommands.False);
+
                         Writer.Flush();
                         Log("Command Finished, In: {0}, Out: {1}", true, 2, 1);
                         break;
@@ -65,8 +67,10 @@ namespace SRL {
                                 Rst = StrRld[RLD];
                             else
                                 for (DBID = 0; DBID < Databases.Count; DBID++) {
-                                    if (StrRld.ContainsKey(RLD))
+                                    if (StrRld.ContainsKey(RLD)) {
                                         Rst = StrRld[RLD];
+                                        break;
+                                    }
                                 }
                             Writer.Write(Rst);
                         } catch (Exception ex) {
@@ -234,7 +238,7 @@ namespace SRL {
             }
 
             PipeWriter.Write((byte)PipeCommands.FindReload);
-            PipeWriter.Write((byte)(EnableWordWrap ? PipeCommands.True : PipeCommands.False));
+            PipeWriter.Write((byte)(EnforceAtualDatabase ? PipeCommands.True : PipeCommands.False));
             PipeWriter.Write(Line);
             PipeWriter.Flush();
             return PipeReader.ReadByte() == (byte)PipeCommands.True;
@@ -337,8 +341,12 @@ namespace SRL {
 
                 int ServiceID = GetPipeID();
                 string Service = string.Format(ServiceMask, ServiceID);
-                string Args = string.Format("{0},{1} {2}", Path.GetFileName(SrlDll), "Service", ServiceID);
 
+#if DEBUG
+                new System.Threading.Thread(() => ServiceCall(ServiceID.ToString())).Start();
+#else
+                string Args = string.Format("{0},{1} {2}", Path.GetFileName(SrlDll), "Service", ServiceID);
+            
                 var Proc = new System.Diagnostics.Process() {
                     StartInfo = new System.Diagnostics.ProcessStartInfo() {
                         UseShellExecute = false,
@@ -348,7 +356,7 @@ namespace SRL {
                     }
                 };
                 Proc.Start();
-
+#endif
                 while (PipeClient == null) {
                     try {
                         PipeClient = new NamedPipeClientStream(Service);

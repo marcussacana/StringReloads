@@ -281,7 +281,9 @@ namespace SRL {
             if (Managed) {
                 Log("Managed Mode Enabled, Enforcing Compatible Settings", true);
                 WriteEncoding = ReadEncoding = System.Text.Encoding.Unicode;
+#if TRACE
                 Multithread = true;
+#endif
                 if (Debugging)
                     LogFile = true;
             }

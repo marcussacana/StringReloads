@@ -141,11 +141,7 @@ namespace SRL {
                 if (Debugging) {
                     Log("Strings Reloads - v1.0");
                     Log("Soft-Translation Engine - By Marcussacana");
-#if DEBUG
                     Log("Debug Mode Enabled...");
-#else
-                    Log("Dump Mode Enabled...");
-#endif
                 }
 
                 if (File.Exists("Modifier.cs")) {
