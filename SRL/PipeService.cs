@@ -150,6 +150,11 @@ namespace SRL {
                         DBID = LastDBID;
                         Log("Command Finished, In: {0}, Out: {1}", true, 1, 0);
                         break;
+                    case PipeCommands.GetDBID:
+                        Writer.Write(DBID);
+                        Writer.Flush();
+                        Log("Command Finished, In: {0}, Out: {1}", true, 1, 1);
+                        break;
                     default:
                         if (!OK)
                             MessageBox.Show("Recived Invalid Command to the pipe service...", "SRL Engine", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -312,16 +317,44 @@ namespace SRL {
             if (Multithread) {
                 if (StrRld.ContainsKey(Key))
                     return StrRld[Key];
+
+                string Result = string.Empty;
                 for (DBID = 0; DBID < Databases.Count; DBID++) {
-                    if (StrRld.ContainsKey(Key))
-                        return StrRld[Key];
+                    if (StrRld.ContainsKey(Key)) {
+                        Result = StrRld[Key];
+                        break;
+                    }
                 }
+
+                if (Debugging)
+                    Log("Database Changed, New ID: {0}", true, DBID);
+
+                return Result;
+            }
+
+            int OID = 0;
+
+            if (Debugging) {
+                PipeWriter.Write((byte)PipeCommands.GetDBID);
+                PipeWriter.Flush();
+                OID = PipeReader.ReadInt32();
             }
 
             PipeWriter.Write((byte)PipeCommands.GetReload);
             PipeWriter.Write(Key);
             PipeWriter.Flush();
-            return PipeReader.ReadString();
+            string Return = PipeReader.ReadString();
+
+            if (Debugging) {
+                PipeWriter.Write((byte)PipeCommands.GetDBID);
+                PipeWriter.Flush();
+                int NID = PipeReader.ReadInt32();
+                if (OID != NID) {
+                    Log("Database Changed, New ID: {0}", true, NID);
+                }
+            }
+
+            return Return;
         }
         private static int GetPipeID() {
             return new Random().Next(0, int.MaxValue);

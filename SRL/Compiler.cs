@@ -59,7 +59,7 @@ namespace SRL {
                     Replace = Out.ToArray()
                 });
 
-                Log("{0} Found, Importing...", false, Path.GetFileName(TLMap));
+                Log("{0} Found, Importing, Database ID: {1}...", false, Path.GetFileName(TLMap), DBAr.Count-1);
             }
 
             if (File.Exists(TLMapSrc)) {
@@ -71,12 +71,13 @@ namespace SRL {
                     Original = In.ToArray(),
                     Replace = Out.ToArray()
                 });
-                Log("{0} Found, Importing...", false, Path.GetFileName(TLMapSrc));
+
+                Log("{0} Found, Importing, Database ID: {1}...", false, Path.GetFileName(TLMapSrc), DBAr.Count - 1);
             }
 
             SearchViolations(DBAr.ToArray(), CFak.ToArray());
 
-            Log("Database Generated.");
+            Log("{0} Databases Generated.", true, DBAr.Count);
             
             if (File.Exists(ReplLst)) {
                 Log("Compiling Replace List...");
@@ -196,7 +197,6 @@ namespace SRL {
                                 if (Database.Replace[i].StartsWith(AntiMaskParser)) {
                                     Database.Replace[i] = Database.Replace[i].Substring(AntiMaskParser.Length, Database.Replace[i].Length - AntiMaskParser.Length);
                                 } else {
-
                                     //Prevent Duplicates
                                     if (!Temp.Contains(Database.Original[i]))
                                         Temp.Add(Database.Original[i]);
@@ -214,7 +214,7 @@ namespace SRL {
                     if (MultipleDatabases)
                         FinishDatabase();
                 }
-                Log("String Reloads Initialized.", true);
+                Log("String Reloads Initialized, {0} Databases Created.", true, Databases.Count-1);
                 Log("Initializing Replaces...", true);
                 for (uint i = 0; i < Data.RepOri.LongLength; i++) {
                     AppendArray(ref Replaces, Data.RepOri[i]);

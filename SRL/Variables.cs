@@ -34,6 +34,7 @@ namespace SRL {
             ChkMask = 11,
             RldMask = 12,
             AdvDB = 13,
+            GetDBID = 14
         }
 
         struct Range {
