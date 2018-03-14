@@ -34,8 +34,14 @@ namespace Overlay {
         }
 
         public string DialogueText {
-            get => DialogueBox.Text;
-            set => Invoke(new MethodInvoker(() => { DialogueBox.Text = value; DialogueBox.Invalidate(); } ));
+            get { return DialogueBox.Text; }
+
+            set {
+                Invoke(new MethodInvoker(() => {
+                    DialogueBox.Text = value;
+                    DialogueBox.Invalidate();
+                }));
+            }
         }
         public void ShowText(string Text) {
             DialogueText = Text;
