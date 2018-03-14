@@ -126,6 +126,22 @@ namespace SRL {
             return Input;
         }
 
+        internal static void UpdateOverlay(string Text) {
+            if (Overlay != null && OverlayEnabled) {
+                if (!OverlayInitialized) {
+                    Overlay.Call("Overlay.Exports", "HookWindow", GameHandler);
+                    OverlayInitialized = true;
+                }
+
+                if (!PaddingSeted) {
+                    PaddingSeted = true;
+                    Overlay.Call("Overlay.Exports", "SetOverlayPadding", OPaddingTop, OPaddinBottom, OPaddinLeft, OPaddingRigth);
+                }
+
+                Overlay.Call("Overlay.Exports", "SetDialogue", ReplaceChars(Text, true).Replace(GameLineBreaker, "\n"));
+            }
+        }
+
         internal static void Init() {
             try {
                 if (Initialized)
@@ -163,6 +179,11 @@ namespace SRL {
                     Error("SRL Engine - Unauthenticated Public Build");
                     return;                    
 #endif
+                }
+
+                if (File.Exists(OEDP) && Overlay == null) {
+                    Overlay = new DotNetVM(OEDP);
+                    Log("Overlay Enabled.", true);
                 }
 
                 if (File.Exists(TLDP) && TLIB == null) {

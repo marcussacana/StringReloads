@@ -104,6 +104,8 @@ namespace SRL {
             TrimRangeMissmatch = false;
             Unicode = false;
             MultipleDatabases = false;
+            OverlayEnabled = false;
+            NoReload = true;
 
             Log(Initialized ? "Reloading Settings..." : "Loading Settings...", true);
 
@@ -186,6 +188,49 @@ namespace SRL {
 
             if (Ini.GetConfig(CfgName, "DecodeInputRemap;DecodeCharacterRemapFromInput;DecodeRemapChars", IniPath).ToLower() == "true") {
                 DecodeCharactersFromInput = true;
+            }
+
+            if (Ini.GetConfig(CfgName, "ReadOnly;NoInjection;DisableReloader;NoReload", IniPath).ToLower() == "true") {
+                NoReload = true;
+                Warning("String Injection Disabled by User.");
+            }
+
+            if (Ini.GetConfig("Overlay", "EnableOverlay;Enabled;Enable;ShowOverlay", IniPath).ToLower() == "true") {
+                OverlayEnabled = true;
+                if (!File.Exists(OEDP))
+                    Error("Can't Enabled the Overlay Because the Overlay.dll is missing.");
+                else
+                    Log("Overlay Allowed.", true);
+            }
+
+            if (Ini.GetConfigStatus("Overlay", "Padding", IniPath) == Ini.Status.Ok) {
+                PaddingSeted = false;
+                string Padding = Ini.GetConfig("Overlay", "Padding", IniPath, true);
+                foreach (string Paramter in Padding.Split('|')) {
+                    try {
+                        string Border = Paramter.Split(':')[0].Trim().ToLower();
+                        int Value = int.Parse(Paramter.Split(':')[1].Trim());
+                        switch (Border) {
+                            case "top":
+                                OPaddingTop = Value;
+                                break;
+                            case "bottom":
+                                OPaddinBottom = Value;
+                                break;
+                            case "rigth":
+                                OPaddingRigth = Value;
+                                break;
+                            case "left":
+                                OPaddinLeft = Value;
+                                break;
+                            default:
+                                Error("\"{0}\" Isn't a valid Padding Border", Border);
+                                break;
+                        }
+                    } catch {
+                        Error("\"{0}\" Isn't a valid Padding Paramter", Paramter);
+                    }
+                }
             }
 
             if (Ini.GetConfig(CfgName, "LiveSettings;KeepSettingsUpdate;ReloadSettings", IniPath).ToLower() == "true") {
@@ -280,6 +325,7 @@ namespace SRL {
 
             if (Managed) {
                 Log("Managed Mode Enabled, Enforcing Compatible Settings", true);
+                OverlayEnabled = false;
                 WriteEncoding = ReadEncoding = System.Text.Encoding.Unicode;
 #if TRACE
                 Multithread = true;

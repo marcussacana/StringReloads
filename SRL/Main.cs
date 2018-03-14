@@ -47,11 +47,14 @@ namespace SRL {
                 //Prevent inject a string already injected
                 if (Input == Reloaded)
                     return Target;
-                else
-                    CacheReply(Reloaded);
 
-
+                CacheReply(Reloaded);
                 TrimWorker(ref Reloaded, Input);
+
+                UpdateOverlay(Reloaded);
+
+                if (NoReload)
+                    return Target;
 
                 if (LogString) {
                     Log("Output: {0}", true, Reloaded);

@@ -84,6 +84,15 @@ namespace SRL {
         static bool WindowHookRunning = false;
         static bool MultipleDatabases = false;
         static bool Managed = false;
+        static bool NoReload = false;
+        
+        static bool OverlayEnabled = false;
+        static bool OverlayInitialized = false;
+        static bool PaddingSeted = false;
+        static int OPaddingTop;
+        static int OPaddinLeft;
+        static int OPaddinBottom;
+        static int OPaddingRigth;
 
         static int ReplyPtr = 0;
         static int CacheArrPtr = 0;
@@ -106,6 +115,7 @@ namespace SRL {
 
         static DotNetVM TLIB = null;
         static DotNetVM Modifier = null;
+        static DotNetVM Overlay = null;
 
         static string[] Replaces = new string[0];
         static string TLMap => AppDomain.CurrentDomain.BaseDirectory + "Strings.srl";
@@ -113,6 +123,7 @@ namespace SRL {
         static string TLMapSrcMsk => AppDomain.CurrentDomain.BaseDirectory + "Strings-{0}.lst";
         static string CharMapSrc => AppDomain.CurrentDomain.BaseDirectory + "Chars.lst";
         static string TLDP => AppDomain.CurrentDomain.BaseDirectory + "TLIB.dll";
+        static string OEDP => AppDomain.CurrentDomain.BaseDirectory + "Overlay.dll";
         static string IniPath => AppDomain.CurrentDomain.BaseDirectory + "Srl.ini";
         static string MTLCache => AppDomain.CurrentDomain.BaseDirectory + "MTL.lst";
         static string ReplLst => AppDomain.CurrentDomain.BaseDirectory + "Replaces.lst";
