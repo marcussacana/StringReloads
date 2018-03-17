@@ -101,6 +101,103 @@ namespace SRL {
             [PArray(PrefixType = Const.UINT32), CString]
             public string[] RepTrg;
         }
+
+        [FieldParmaters(Name = "StringReloader")]
+        struct SRLSettings {
+            [FieldParmaters(DefaultValue = null, Name = "InEncoding;ReadEncoding;Encoding")]
+            public string InEncoding;
+
+            [FieldParmaters(DefaultValue = null, Name = "OutEncoding;WriteEncoding;Encoding")]
+            public string OutEncoding;
+
+            [FieldParmaters(DefaultValue = false, Name = "Wide;Unicode;MultiByte")]
+            public bool Wide;
+
+            [FieldParmaters(DefaultValue = false, Name = "Multithread;DisablePipe")]
+            public bool Multithread;
+
+            [FieldParmaters(DefaultValue = null, Name = "DenyChars;NoChars")]
+            public string DenyChars;
+
+            [FieldParmaters(DefaultValue = false, Name = "TrimRangeMissmatch;TrimRange")]
+            public bool TrimRangeMissmatch;
+
+            [FieldParmaters(DefaultValue = false, Name = "CachePointers;CachePointer;ReusePointer;ReusePointers")]
+            public bool CachePointers;
+
+            [FieldParmaters(DefaultValue = false, Name = "FreeOnExit;FreePointers;FreeMemory")]
+            public bool FreeOnExit;
+
+            [FieldParmaters(DefaultValue = false, Name = "NoDialogCheck;NoDiagCheck;DisableDiagCheck;DisableDialogCheck")]
+            public bool NoDialogCheck;
+
+            [FieldParmaters(DefaultValue = false, Name = "LiteralMask;MaskLiteralMatch;MaskMatch")]
+            public bool LiteralMaskMatch;
+
+            [FieldParmaters(DefaultValue = false, Name = "MultiDatabase;MultiDB;SplitDatabase;SplitDB")]
+            public bool MultiDatabase;
+
+            [FieldParmaters(DefaultValue = false, Name = "WindowHook;WindowReloader")]
+            public bool WindowHook;
+
+            [FieldParmaters(DefaultValue = false, Name = "InvalidateWindow;Invalidate;RedrawWindow")]
+            public bool InvalidateWindow;
+
+            [FieldParmaters(DefaultValue = null, Name = "AcceptableRanges;AcceptableRange;ValidRange;ValidRanges")]
+            public string AcceptableRanges;
+
+            [FieldParmaters(DefaultValue = false, Name = "DecodeFromInput;DecodeInputRemap;DecodeCharacterRemapFromInput;DecodeRemapChars")]
+            public bool DecodeFromInput;
+
+            [FieldParmaters(DefaultValue = false, Name = "ReadOnly;NoInjection;DisableReloader;NoReload")]
+            public bool NoReload;
+
+            [FieldParmaters(DefaultValue = true, Name = "LiveSettings;KeepSettingsUpdate;ReloadSettings")]
+            public bool LiveSettings;
+
+            [FieldParmaters(DefaultValue = true, Name = "AntiCrash;CrashHandler")]
+            public bool AntiCrash;
+
+            [FieldParmaters(DefaultValue = null, Name = "BreakLine;GameBreakLine")]
+            public string GameLineBreaker;
+
+            [FieldParmaters(DefaultValue = null, Name = "MatchIgnore;IgnoreMatchs")]
+            public string MatchIgnore;
+
+            [FieldParmaters(DefaultValue = null, Name = "TrimChars;TrimStrings")]
+            public string TrimChars;
+        }
+
+        [FieldParmaters(Name = "WordWrap")]
+        public struct WordwrapSettings {
+            [FieldParmaters(DefaultValue = false, Name = "Enable;Enabled")]
+            public bool Enabled;
+
+            [FieldParmaters(DefaultValue = 0, Name = "MaxWidth;Width;Length")]
+            public uint Width;
+
+            [FieldParmaters(DefaultValue = 0, Name = "Size;FontSize")]
+            public float Size;
+
+            [FieldParmaters(DefaultValue = null, Name = "Face;FaceName;Font;FontName;FamilyName")]
+            public string FontName;
+
+            [FieldParmaters(DefaultValue = false, Name = "Bold")]
+            public bool Bold;
+
+            [FieldParmaters(DefaultValue = false, Name = "Monospaced;FixedSize;FixedLength")]
+            public bool Monospaced;
+
+        }
+
+        [FieldParmaters(Name = "Overlay")]
+        public struct OverlaySettings {
+            [FieldParmaters(DefaultValue = false, Name = "EnableOverlay;Enabled;Enable;ShowOverlay")]
+            public bool Enable;
+
+            [FieldParmaters(DefaultValue = null, Name = "Padding")]
+            public string Padding;
+        }
 #pragma warning restore 649
     }
 }

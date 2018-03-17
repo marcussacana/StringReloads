@@ -107,27 +107,35 @@ namespace SRL {
             OverlayEnabled = false;
             NoReload = false;
 
+            SRLSettings Settings;
+            OverlaySettings OverlaySettings;
+            WordwrapSettings WordwrapSettings;
+            AdvancedIni.FastOpen(out Settings, IniPath);
+            AdvancedIni.FastOpen(out OverlaySettings, IniPath);
+            AdvancedIni.FastOpen(out WordwrapSettings, IniPath);
+
+
             Log(Initialized ? "Reloading Settings..." : "Loading Settings...", true);
 
-            if (Ini.GetConfigStatus(CfgName, "InEncoding;ReadEncoding;Encoding", IniPath) == Ini.Status.Ok) {
+            if (Settings.InEncoding != null) {
                 Log("Loading Read Encoding Config...", true);
-                ReadEncoding = ParseEncodingName(Ini.GetConfig(CfgName, "InEncoding;ReadEncoding;Encoding", IniPath, true));
+                ReadEncoding = ParseEncodingName(Settings.InEncoding);
             }
 
-            if (Ini.GetConfigStatus(CfgName, "OutEncoding;WriteEncoding;Encoding", IniPath) == Ini.Status.Ok) {
+            if (Settings.OutEncoding != null) {
                 Log("Loading Write Encoding Config...", true);
-                WriteEncoding = ParseEncodingName(Ini.GetConfig(CfgName, "OutEncoding;WriteEncoding;Encoding", IniPath, true));
+                WriteEncoding = ParseEncodingName(Settings.OutEncoding);
                 
                 if (Debugging)
                     Console.OutputEncoding = WriteEncoding;
             }
 
-            if (Ini.GetConfig(CfgName, "Wide;Unicode", IniPath, false).ToLower() == "true") {
+            if (Settings.Wide) {
                 Log("Wide Character Mode Enabled...", true);
                 Unicode = true;
             }
             
-            if (Ini.GetConfig(CfgName, "Multithread;DisablePipe", IniPath, false).ToLower() == "true") {
+            if (Settings.Multithread) {
                 if (Initialized && !Multithread) {
                     Warning("The Multithread Settings Changed - Restart Required");
                 } else {
@@ -138,64 +146,64 @@ namespace SRL {
                 Warning("The Multithread Settings Changed - Restart Required");
             }
 
-            if (Ini.GetConfig(CfgName, "DenyChars;NoChars", IniPath) != string.Empty) {
+            if (!string.IsNullOrWhiteSpace(Settings.DenyChars)) {
                 Log("Custom Denied Chars List Loaded...", true);
-                DenyChars = Ini.GetConfig(CfgName, "DenyChars;NoChars", IniPath);
+                DenyChars = Settings.DenyChars;
             }
 
-            if (Ini.GetConfig(CfgName, "TrimRangeMissmatch;TrimRange", IniPath, false).ToLower() == "true") {
+            if (Settings.TrimRangeMissmatch) {
                 Log("Trim missmatch Ranges Enabled...", true);
                 TrimRangeMissmatch = true;
             }
 
-            if (Ini.GetConfig(CfgName, "CachePointers;CachePointer;ReusePointer;ReusePointers", IniPath, false).ToLower() == "true") {
+            if (Settings.CachePointers) {
                 Warning("Pointer Cache Enabled...", true);
                 CachePointers = true;
             }
 
-            if (Ini.GetConfig(CfgName, "FreeOnExit;FreePointers;FreeMemory", IniPath, false).ToLower() == "true") {
+            if (Settings.FreeOnExit) {
                 Warning("Memory Leak Prevention Enabled...", true);
                 FreeOnExit = true;
             }
 
-            if (Ini.GetConfig(CfgName, "NoDiagCheck;DisableDiagCheck;DisableDialogCheck", IniPath, false).ToLower() == "true") {
+            if (Settings.NoDialogCheck) {
                 Warning("Dialog Check Disabled...", true);
                 DialogCheck = false;
             }
 
-            if (Ini.GetConfig(CfgName, "LiteralMask;MaskLiteralMatch;MaskMatch", IniPath, false).ToLower() == "true") {
+            if (Settings.LiteralMaskMatch) {
                 Log("Literal Mask Matching Enabled...", true);
                 LiteralMaskMatch = true;
             }
-            if (Ini.GetConfig(CfgName, "MultiDatabase;MultiDB;SplitDatabase;SplitDB", IniPath, false).ToLower() == "true") {
+            if (Settings.MultiDatabase) {
                 Log("Multidatabase's Matching Method Enabled...", true);
                 MultipleDatabases = true;
             }
 
-            if (Ini.GetConfig(CfgName, "WindowHook;WindowReloader", IniPath, false).ToLower() == "true") {
+            if (Settings.WindowHook) {
                 Log("Enabling Window Reloader...", true);
                 new Thread(() => WindowHook()).Start();
 
-                if (Ini.GetConfig(CfgName, "Invalidate;RedrawWindow", IniPath, false).ToLower() == "true") {
+                if (Settings.InvalidateWindow) {
                     Log("Invalidate Window Mode Enabled.", true);
                     InvalidateWindow = true;
                 }
             }
 
-            if (Ini.GetConfigStatus(CfgName, "AcceptableRanges;AcceptableRange;ValidRange;ValidRanges", IniPath) == Ini.Status.Ok) {
+            if (!string.IsNullOrWhiteSpace(Settings.AcceptableRanges)) {
                 LoadRanges();
             }
 
-            if (Ini.GetConfig(CfgName, "DecodeInputRemap;DecodeCharacterRemapFromInput;DecodeRemapChars", IniPath, false).ToLower() == "true") {
+            if (Settings.DecodeFromInput) {
                 DecodeCharactersFromInput = true;
             }
 
-            if (Ini.GetConfig(CfgName, "ReadOnly;NoInjection;DisableReloader;NoReload", IniPath, false).ToLower() == "true") {
+            if (Settings.NoReload) {
                 NoReload = true;
                 Warning("String Injection Disabled by User.");
             }
 
-            if (Ini.GetConfig("Overlay", "EnableOverlay;Enabled;Enable;ShowOverlay", IniPath, false).ToLower() == "true") {
+            if (OverlaySettings.Enable) {
                 OverlayEnabled = true;
                 if (!File.Exists(OEDP))
                     Error("Can't Enabled the Overlay Because the Overlay.dll is missing.");
@@ -203,9 +211,9 @@ namespace SRL {
                     Log("Overlay Allowed.", true);
             }
 
-            if (Ini.GetConfigStatus("Overlay", "Padding", IniPath) == Ini.Status.Ok) {
+            if (!string.IsNullOrWhiteSpace(OverlaySettings.Padding)) {
                 PaddingSeted = false;
-                string Padding = Ini.GetConfig("Overlay", "Padding", IniPath, true);
+                string Padding = OverlaySettings.Padding;
                 foreach (string Paramter in Padding.Split('|')) {
                     try {
                         string Border = Paramter.Split(':')[0].Trim().ToLower();
@@ -233,7 +241,7 @@ namespace SRL {
                 }
             }
 
-            if (Ini.GetConfig(CfgName, "LiveSettings;KeepSettingsUpdate;ReloadSettings", IniPath).ToLower() == "true") {
+            if (Settings.LiveSettings) {
                 if (SettingsWatcher == null) {
                     Log("Enabling Live Settings....", true);
                     SettingsWatcher = new Thread(() => {
@@ -254,7 +262,7 @@ namespace SRL {
                 SettingsWatcher = null;
             }
 
-            if (Ini.GetConfig(CfgName, "AntiCrash;CrashHandler", IniPath, false).ToLower() == "true") {
+            if (Settings.AntiCrash) {
                 if (!Initialized) {
                     Log("Enabling Crash Handler...", true);
                     System.Windows.Forms.Application.ThreadException += ProcessOver;
@@ -263,32 +271,25 @@ namespace SRL {
                 }
             }
 
-            if (Ini.GetConfig("WordWrap", "Enable;Enabled", IniPath, false).ToLower() == "true") {
+            if (WordwrapSettings.Enabled) {
                 Log("Wordwrap Enabled.", true);
                 EnableWordWrap = true;
-                string Width = Ini.GetConfig("WordWrap", "MaxWidth;Width;Length", IniPath, true);
-                string Size = Ini.GetConfig("WordWrap", "Size;FontSize", IniPath, false);
-                string FontName = Ini.GetConfig("WordWrap", "Face;FaceName;Font;FontName;FamilyName", IniPath, false);
-                bool Bold = Ini.GetConfig("WordWrap", "Bold", IniPath, false) == "true";
-                Monospaced = Ini.GetConfig("WordWrap", "Monospaced;FixedSize;FixedLength", IniPath, false).ToLower() == "true";
+                MaxWidth = WordwrapSettings.Width;
+                Monospaced = WordwrapSettings.Monospaced;
 
-                if (!Monospaced) {
-                    float FSize = float.Parse(Size);
-                    Font = new System.Drawing.Font(FontName, FSize, Bold ? System.Drawing.FontStyle.Bold : System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-                }
-                MaxWidth = uint.Parse(Width);
+                if (!Monospaced)
+                    Font = new System.Drawing.Font(WordwrapSettings.FontName, WordwrapSettings.Size, WordwrapSettings.Bold ? System.Drawing.FontStyle.Bold : System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             }
 
-            if (!string.IsNullOrEmpty(Ini.GetConfig(CfgName, "BreakLine", IniPath, false))) {
-                GameLineBreaker = Ini.GetConfig(CfgName, "BreakLine", IniPath, false);
+            if (!string.IsNullOrEmpty(Settings.GameLineBreaker)) {
+                GameLineBreaker = Settings.GameLineBreaker;
                 SpecialLineBreaker = true;
             }
 
-            string ExtraSimplify = Ini.GetConfig(CfgName, "MatchIgnore;IgnoreMatchs", IniPath, false);
-            if (!string.IsNullOrWhiteSpace(ExtraSimplify)) {
+            if (!string.IsNullOrWhiteSpace(Settings.MatchIgnore)) {
                 Log("Using Custom Ignore List...", true);
                 MatchDel = new string[0];
-                foreach (string str in ExtraSimplify.Split(','))
+                foreach (string str in Settings.MatchIgnore.Split(','))
                     if (str.Trim().StartsWith("0x")) {
                         string Hex = str.Trim();
                         Hex = Hex.Substring(2, Hex.Length - 2);
@@ -302,11 +303,10 @@ namespace SRL {
                         AppendArray(ref MatchDel, str.Replace(BreakLineFlag, "\n").Replace(ReturnLineFlag, "\r"), true);
             }
 
-            string ExtraTrim = Ini.GetConfig(CfgName, "TrimChars;TrimStrings", IniPath, false);
-            if (!string.IsNullOrWhiteSpace(ExtraTrim)) {
+            if (!string.IsNullOrWhiteSpace(Settings.TrimChars)) {
                 Log("Using Custom Trim List...", true);
                 TrimChars = new string[0];
-                foreach (string str in ExtraTrim.Split(',')) {
+                foreach (string str in Settings.TrimChars.Split(',')) {
                     if (str.Trim().StartsWith("0x")) {
                         string Hex = str.Trim();
                         Hex = Hex.Substring(2, Hex.Length - 2);

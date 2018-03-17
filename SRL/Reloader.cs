@@ -187,8 +187,8 @@ namespace SRL {
                 }
 
                 if (File.Exists(TLDP) && TLIB == null) {
-                    if (Ini.GetConfigStatus("MTL", "SourceLang", IniPath) == Ini.Status.Ok) {
-                        if (Ini.GetConfigStatus("MTL", "TargetLang", IniPath) == Ini.Status.Ok) {
+                    if (Ini.GetConfigStatus("MTL", "SourceLang", IniPath) == Ini.ConfigStatus.Ok) {
+                        if (Ini.GetConfigStatus("MTL", "TargetLang", IniPath) == Ini.ConfigStatus.Ok) {
                             SourceLang = Ini.GetConfig("MTL", "SourceLang", IniPath, true);
                             TargetLang = Ini.GetConfig("MTL", "TargetLang", IniPath, true);
                             TLIB = new DotNetVM(TLDP);
