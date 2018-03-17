@@ -100,8 +100,6 @@ namespace SRL {
         static int LogStack = 0;
         static int CursorX, CursorY;
         
-        static float LastDPI;
-
         static string StrLstSufix = string.Empty;
         static string SourceLang = string.Empty;
         static string TargetLang = string.Empty;

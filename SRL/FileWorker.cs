@@ -105,7 +105,7 @@ namespace SRL {
             Unicode = false;
             MultipleDatabases = false;
             OverlayEnabled = false;
-            NoReload = true;
+            NoReload = false;
 
             Log(Initialized ? "Reloading Settings..." : "Loading Settings...", true);
 
@@ -186,16 +186,16 @@ namespace SRL {
                 LoadRanges();
             }
 
-            if (Ini.GetConfig(CfgName, "DecodeInputRemap;DecodeCharacterRemapFromInput;DecodeRemapChars", IniPath).ToLower() == "true") {
+            if (Ini.GetConfig(CfgName, "DecodeInputRemap;DecodeCharacterRemapFromInput;DecodeRemapChars", IniPath, false).ToLower() == "true") {
                 DecodeCharactersFromInput = true;
             }
 
-            if (Ini.GetConfig(CfgName, "ReadOnly;NoInjection;DisableReloader;NoReload", IniPath).ToLower() == "true") {
+            if (Ini.GetConfig(CfgName, "ReadOnly;NoInjection;DisableReloader;NoReload", IniPath, false).ToLower() == "true") {
                 NoReload = true;
                 Warning("String Injection Disabled by User.");
             }
 
-            if (Ini.GetConfig("Overlay", "EnableOverlay;Enabled;Enable;ShowOverlay", IniPath).ToLower() == "true") {
+            if (Ini.GetConfig("Overlay", "EnableOverlay;Enabled;Enable;ShowOverlay", IniPath, false).ToLower() == "true") {
                 OverlayEnabled = true;
                 if (!File.Exists(OEDP))
                     Error("Can't Enabled the Overlay Because the Overlay.dll is missing.");
