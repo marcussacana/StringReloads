@@ -43,15 +43,22 @@ namespace SRL {
                 string Reloaded = StrMap(Input, Target, false);
 
                 LastInput = Input;
-                
+
+                if (ShowNonReloads) {
+                    //TrimWorker(ref Reloaded, Input); //To Translation It's Better Turn This Off.
+                    UpdateOverlay(Reloaded);
+                }
+
                 //Prevent inject a string already injected
-                if (Input == Reloaded)
+                if (Input == Reloaded) {
                     return Target;
+                }
 
                 CacheReply(Reloaded);
                 TrimWorker(ref Reloaded, Input);
 
-                UpdateOverlay(Reloaded);
+                if (!ShowNonReloads)
+                    UpdateOverlay(Reloaded);
 
                 if (NoReload)
                     return Target;

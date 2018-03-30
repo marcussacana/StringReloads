@@ -205,6 +205,8 @@ namespace SRL {
 
             if (OverlaySettings.Enable) {
                 OverlayEnabled = true;
+                ShowNonReloads = OverlaySettings.ShowNonReloaded;
+
                 if (!File.Exists(OEDP))
                     Error("Can't Enabled the Overlay Because the Overlay.dll is missing.");
                 else
@@ -325,7 +327,7 @@ namespace SRL {
 
             if (Managed) {
                 Log("Managed Mode Enabled, Enforcing Compatible Settings", true);
-                OverlayEnabled = false;
+                //OverlayEnabled = false;
                 WriteEncoding = ReadEncoding = System.Text.Encoding.Unicode;
 #if TRACE
                 Multithread = true;

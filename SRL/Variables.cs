@@ -88,6 +88,7 @@ namespace SRL {
         
         static bool OverlayEnabled = false;
         static bool OverlayInitialized = false;
+        static bool ShowNonReloads = false;
         static bool PaddingSeted = false;
         static int OPaddingTop;
         static int OPaddinLeft;

@@ -195,6 +195,9 @@ namespace SRL {
             [FieldParmaters(DefaultValue = false, Name = "EnableOverlay;Enabled;Enable;ShowOverlay")]
             public bool Enable;
 
+            [FieldParmaters(DefaultValue = false, Name = "ShowNative;ShowNonReloaded")]
+            public bool ShowNonReloaded;
+
             [FieldParmaters(DefaultValue = null, Name = "Padding")]
             public string Padding;
         }

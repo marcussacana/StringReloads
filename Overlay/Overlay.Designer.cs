@@ -48,8 +48,11 @@ namespace Overlay
             this.DialogueBox = new System.Windows.Forms.Label();
             this.ButtonPanel = new System.Windows.Forms.Panel();
             this.bntSettings = new System.Windows.Forms.Button();
+            this.TranslatePanel = new System.Windows.Forms.Panel();
+            this.TranslateBox = new System.Windows.Forms.TextBox();
             this.LabelBackground.SuspendLayout();
             this.ButtonPanel.SuspendLayout();
+            this.TranslatePanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // LabelBackground
@@ -82,14 +85,14 @@ namespace Overlay
             this.ButtonPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.ButtonPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
             this.ButtonPanel.Controls.Add(this.bntSettings);
-            this.ButtonPanel.Location = new System.Drawing.Point(619, 18);
+            this.ButtonPanel.Location = new System.Drawing.Point(619, 8);
             this.ButtonPanel.Name = "ButtonPanel";
-            this.ButtonPanel.Size = new System.Drawing.Size(72, 30);
+            this.ButtonPanel.Size = new System.Drawing.Size(72, 36);
             this.ButtonPanel.TabIndex = 1;
             // 
             // bntSettings
             // 
-            this.bntSettings.Location = new System.Drawing.Point(4, 3);
+            this.bntSettings.Location = new System.Drawing.Point(4, 6);
             this.bntSettings.Name = "bntSettings";
             this.bntSettings.Size = new System.Drawing.Size(64, 23);
             this.bntSettings.TabIndex = 0;
@@ -97,12 +100,36 @@ namespace Overlay
             this.bntSettings.UseVisualStyleBackColor = true;
             this.bntSettings.Click += new System.EventHandler(this.bntSettings_Click);
             // 
+            // TranslatePanel
+            // 
+            this.TranslatePanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.TranslatePanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
+            this.TranslatePanel.Controls.Add(this.TranslateBox);
+            this.TranslatePanel.Location = new System.Drawing.Point(15, 8);
+            this.TranslatePanel.Name = "TranslatePanel";
+            this.TranslatePanel.Size = new System.Drawing.Size(598, 36);
+            this.TranslatePanel.TabIndex = 2;
+            // 
+            // TranslateBox
+            // 
+            this.TranslateBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.TranslateBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.TranslateBox.Location = new System.Drawing.Point(4, 5);
+            this.TranslateBox.Name = "TranslateBox";
+            this.TranslateBox.Size = new System.Drawing.Size(591, 26);
+            this.TranslateBox.TabIndex = 0;
+            this.TranslateBox.Text = "Waiting Text";
+            this.TranslateBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.KeyDownTB);
+            // 
             // Overlay
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Fuchsia;
             this.ClientSize = new System.Drawing.Size(706, 193);
+            this.Controls.Add(this.TranslatePanel);
             this.Controls.Add(this.ButtonPanel);
             this.Controls.Add(this.LabelBackground);
             this.DoubleBuffered = true;
@@ -115,6 +142,8 @@ namespace Overlay
             this.TransparencyKey = System.Drawing.Color.Fuchsia;
             this.LabelBackground.ResumeLayout(false);
             this.ButtonPanel.ResumeLayout(false);
+            this.TranslatePanel.ResumeLayout(false);
+            this.TranslatePanel.PerformLayout();
             this.ResumeLayout(false);
 
 		}
@@ -123,6 +152,8 @@ namespace Overlay
 		internal Label DialogueBox;
 		internal Panel ButtonPanel;
         private Button bntSettings;
+        internal Panel TranslatePanel;
+        private TextBox TranslateBox;
     }
 
 }

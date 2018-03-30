@@ -199,7 +199,8 @@ namespace SRL {
 
                 if (!File.Exists(TLMap) || Ini.GetConfig(CfgName, "Rebuild", IniPath, false).ToLower() == "true") {
                     Log("Unabled to load the {0}", false, TLMap);
-                    if (File.Exists(TLMapSrc) || File.Exists(string.Format(TLMapSrcMsk, 1))) {
+                    bool ContainsSplitedList = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, Path.GetFileName(string.Format(TLMapSrcMsk, "*"))).Length != 0;
+                    if (File.Exists(TLMapSrc) || ContainsSplitedList) {
                         Log("Compiling String Reloads, Please Wait...");
                         CompileStrMap();
                     } else {

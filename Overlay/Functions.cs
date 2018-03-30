@@ -29,12 +29,13 @@ namespace Overlay {
             GetWindowArea(WindowHandler, out Pos, out Siz);
 
             Overlay.DefaultInstance.Invoke(new MethodInvoker(() => {
-                Overlay.DefaultInstance.Size = new Size(Siz.Width - (WindowDiff.Left + WindowDiff.Right), Siz.Height - (WindowDiff.Top + WindowDiff.Bottom));
-                Overlay.DefaultInstance.Location = new Point(Pos.X + WindowDiff.Left, Pos.Y + WindowDiff.Top);
+                try {
+                    Overlay.DefaultInstance.Size = new Size(Siz.Width - (WindowDiff.Left + WindowDiff.Right), Siz.Height - (WindowDiff.Top + WindowDiff.Bottom));
+                    Overlay.DefaultInstance.Location = new Point(Pos.X + WindowDiff.Left, Pos.Y + WindowDiff.Top);
 
-                Overlay.DefaultInstance.Focus();
-                SetForegroundWindow(WindowHandler);
-
+                    Overlay.DefaultInstance.Focus();
+                    SetForegroundWindow(WindowHandler);
+                } catch { }
             }));
         }
 
