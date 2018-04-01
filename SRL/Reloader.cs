@@ -154,16 +154,18 @@ namespace SRL {
                 }
 
                 CheckArguments();
+                LoadConfig();
+
                 if (Debugging) {
                     Log("Strings Reloads - v1.0");
                     Log("Soft-Translation Engine - By Marcussacana");
                     Log("Debug Mode Enabled...");
                 }
 
-                if (File.Exists("Modifier.cs")) {
+                if (File.Exists(CustomDir + "Modifier.cs")) {
                     Log("Enabling String Modifier...", true);
                     try {
-                        DotNetVM VM = new DotNetVM(File.ReadAllText("Modifier.cs", System.Text.Encoding.UTF8));
+                        DotNetVM VM = new DotNetVM(File.ReadAllText(CustomDir + "Modifier.cs", Encoding.UTF8));
                         Modifier = VM;
                         Log("Modifier Compiled", true);
                     } catch (Exception ex) {
@@ -199,7 +201,7 @@ namespace SRL {
 
                 if (!File.Exists(TLMap) || Ini.GetConfig(CfgName, "Rebuild", IniPath, false).ToLower() == "true") {
                     Log("Unabled to load the {0}", false, TLMap);
-                    bool ContainsSplitedList = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, Path.GetFileName(string.Format(TLMapSrcMsk, "*"))).Length != 0;
+                    bool ContainsSplitedList = Directory.GetFiles(BaseDir, Path.GetFileName(string.Format(TLMapSrcMsk, "*"))).Length != 0;
                     if (File.Exists(TLMapSrc) || ContainsSplitedList) {
                         Log("Compiling String Reloads, Please Wait...");
                         CompileStrMap();
@@ -210,7 +212,6 @@ namespace SRL {
                     }
                 }
 
-                LoadConfig();
                 LoadData();
 
                 if (Debugging && File.Exists(TLMapSrc)) {

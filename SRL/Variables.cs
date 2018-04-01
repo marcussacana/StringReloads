@@ -109,6 +109,7 @@ namespace SRL {
         static string LastInput = string.Empty;
         static string GameLineBreaker = "\n";
         static string LastOutput = string.Empty;
+        static string CustomDir = string.Empty;
         
         static System.Drawing.Font Font;
         static bool Monospaced;
@@ -119,16 +120,18 @@ namespace SRL {
         static DotNetVM Overlay = null;
 
         static string[] Replaces = new string[0];
-        static string TLMap => AppDomain.CurrentDomain.BaseDirectory + "Strings.srl";
-        static string TLMapSrc => AppDomain.CurrentDomain.BaseDirectory + "Strings.lst";
-        static string TLMapSrcMsk => AppDomain.CurrentDomain.BaseDirectory + "Strings-{0}.lst";
-        static string CharMapSrc => AppDomain.CurrentDomain.BaseDirectory + "Chars.lst";
-        static string TLDP => AppDomain.CurrentDomain.BaseDirectory + "TLIB.dll";
-        static string OEDP => AppDomain.CurrentDomain.BaseDirectory + "Overlay.dll";
+        static string TLMap => BaseDir + "Strings.srl";
+        static string TLMapSrc => BaseDir + "Strings.lst";
+        static string TLMapSrcMsk => BaseDir + "Strings-{0}.lst";
+        static string CharMapSrc => BaseDir + "Chars.lst";
+        static string TLDP => BaseDir + "TLIB.dll";
+        static string OEDP => BaseDir + "Overlay.dll";
         static string IniPath => AppDomain.CurrentDomain.BaseDirectory + "Srl.ini";
-        static string MTLCache => AppDomain.CurrentDomain.BaseDirectory + "MTL.lst";
-        static string ReplLst => AppDomain.CurrentDomain.BaseDirectory + "Replaces.lst";
+        static string MTLCache => BaseDir + "MTL.lst";
+        static string ReplLst =>  BaseDir + "Replaces.lst";
         static string SrlDll => System.Reflection.Assembly.GetCallingAssembly().Location;
+
+        static string BaseDir => AppDomain.CurrentDomain.BaseDirectory + CustomDir;
 
         static Encoding ReadEncoding = Encoding.Default;
         static Encoding WriteEncoding = Encoding.Default;
@@ -172,7 +175,7 @@ namespace SRL {
             get {
                 if (_FrcDbg)
                     return true;
-                return File.Exists(AppDomain.CurrentDomain.BaseDirectory + "DEBUG");
+                return File.Exists(BaseDir + "DEBUG");
             }
             set {
                 _FrcDbg = value;
@@ -231,7 +234,7 @@ namespace SRL {
         private static TextWriter LogWriter {
             get {
                 if (_LogWriter == null) {
-                    _LogWriter = File.AppendText(AppDomain.CurrentDomain.BaseDirectory + "SRL.log");
+                    _LogWriter = File.AppendText(BaseDir + "SRL.log");
                 }
                 return _LogWriter;
             }

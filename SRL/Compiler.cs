@@ -47,7 +47,7 @@ namespace SRL {
             Log("Generating String Reload Database...");
 
             //Splited String Dump
-            string[] TLMaps = Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, Path.GetFileName(string.Format(TLMapSrcMsk, "*")));
+            string[] TLMaps = Directory.GetFiles(BaseDir, Path.GetFileName(string.Format(TLMapSrcMsk, "*")));
             foreach (string TLMap in TLMaps) {
                 var In = new List<string>();
                 var Out = new List<string>();

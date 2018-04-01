@@ -323,6 +323,17 @@ namespace SRL {
                 }
             }
 
+            if (!string.IsNullOrWhiteSpace(Settings.WorkDirectory)) {
+                CustomDir = Settings.WorkDirectory.TrimStart(' ', '\\', '/').Replace("/", "\\");
+                if (!CustomDir.EndsWith("\\"))
+                    CustomDir += '\\';
+
+                if (!Directory.Exists(BaseDir))
+                    Directory.CreateDirectory(BaseDir);
+
+                Log("Custom Directory Loaded", true);
+            }
+
             Log("Settings Loaded.", true);
 
             if (Managed) {

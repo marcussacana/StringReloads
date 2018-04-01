@@ -166,6 +166,9 @@ namespace SRL {
 
             [FieldParmaters(DefaultValue = null, Name = "TrimChars;TrimStrings")]
             public string TrimChars;
+
+            [FieldParmaters(DefaultValue = null, Name = "WorkingDir;WorkDir")]
+            public string WorkDirectory;
         }
 
         [FieldParmaters(Name = "WordWrap")]
