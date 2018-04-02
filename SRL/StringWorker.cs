@@ -337,7 +337,7 @@ namespace SRL {
 
             Marshal.Copy(buffer, 0, Pointer, buffer.Length);
 
-            if (LogString) {
+            if (LogAll) {
                 string New = GetString(Pointer);
                 Log("Old: {0}\nNew: {1}\nHex: {2}", false, String, New, ParseBytes(buffer));
             }
@@ -359,7 +359,7 @@ namespace SRL {
             byte[] buffer = new byte[len];
             Marshal.Copy(Pointer, buffer, 0, buffer.Length);
 
-            if (LogString) {
+            if (LogInput) {
                 Log("Input: {0}", true, ParseBytes(buffer));
             }
 
@@ -386,7 +386,7 @@ namespace SRL {
             byte[] buffer = new byte[len];
             Marshal.Copy(Pointer, buffer, 0, buffer.Length);
 
-            if (LogString) {
+            if (LogInput) {
                 Log("Input: {0}", true, ParseBytes(buffer));
             }
 
@@ -415,7 +415,7 @@ namespace SRL {
         /// <param name="String">String to Restore</param>
         /// <param name="Original">Original Template</param>
         internal static void TrimWorker(ref string String, string Original) {
-            if (LogString) {
+            if (LogAll) {
                 Log("Trim Request:\nOri: {0}\nStr: {1}", true, Original, String);
             }
 
@@ -430,7 +430,7 @@ namespace SRL {
             Diff = Original.Length - Test.Length;
             String += Original.Substring(Original.Length - Diff, Diff);
 
-            if (LogString) {
+            if (LogAll) {
                 Log("Trim Result: {0}", true, String);
             }
         }
@@ -558,14 +558,14 @@ namespace SRL {
                 }
             }
 
-            if (TrimRangeMissmatch && Ranges != null) {
+            if (TrimRangeMismatch && Ranges != null) {
                 int Len = rst.Length - 1;
                 while (Len != rst.Length) {
                     Len = rst.Length;
                     while (!string.IsNullOrEmpty(rst) && !InRange(rst[0])) {
                         rst = rst.TrimStart(rst[0]);
                     }
-                    if (!string.IsNullOrEmpty(rst) && rst.Length > 1 && !InRange(rst[1])) {
+                    if (!string.IsNullOrEmpty(rst) && rst.Length > 2 && !InRange(rst[1]) && !InRange(rst[2])) {
                         rst = rst.TrimStart(rst[0]);
                         continue;
                     }
@@ -594,14 +594,14 @@ namespace SRL {
                 }
             }
             
-            if (TrimRangeMissmatch && Ranges != null) {
+            if (TrimRangeMismatch && Ranges != null) {
                 int Len = rst.Length - 1;
                 while (Len != rst.Length) {
                     Len = rst.Length;
                     while (!string.IsNullOrEmpty(rst) && !InRange(rst[rst.Length - 1])) {
                         rst = rst.TrimEnd(rst[rst.Length - 1]);
                     }
-                    if (!string.IsNullOrEmpty(rst) && rst.Length > 1 && !InRange(rst[rst.Length - 2])) {
+                    if (!string.IsNullOrEmpty(rst) && rst.Length > 2 && !InRange(rst[rst.Length - 2]) && !InRange(rst[rst.Length - 3])) {
                         rst = rst.TrimStart(rst[rst.Length - 1]);
                         continue;
                     }

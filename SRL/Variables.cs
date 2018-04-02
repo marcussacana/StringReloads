@@ -64,13 +64,15 @@ namespace SRL {
         static bool ConsoleShowed = false;
         static bool DelayTest = false;
         static bool CmdLineChecked = false;
-        static bool LogString = false;
+        static bool LogAll = false;
+        static bool LogInput = false;
+        static bool LogOutput = false;
         static bool DumpStrOnly = false;
         static bool DialogFound = false;
         static bool CloseEventAdded = false;
         static bool Unicode = false;
         static bool LogFile = false;
-        static bool TrimRangeMissmatch = false;
+        static bool TrimRangeMismatch = false;
         static bool SpecialLineBreaker = false;
         static bool EnableWordWrap = false;
         static bool Multithread = false;

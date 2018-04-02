@@ -69,8 +69,12 @@ namespace SRL {
                 AppendArray(ref Commands, "-debug");
             if (Ini.GetConfig(CfgName, "Delay", IniPath, false).ToLower() == "true")
                 AppendArray(ref Commands, "-delay");
-            if (Ini.GetConfig(CfgName, "Log", IniPath, false).ToLower() == "true")
+            if (Ini.GetConfig(CfgName, "Log;LogAll", IniPath, false).ToLower() == "true")
                 AppendArray(ref Commands, "-log");
+            if (Ini.GetConfig(CfgName, "LogInput;LogIn", IniPath, false).ToLower() == "true")
+                AppendArray(ref Commands, "-loginput");
+            if (Ini.GetConfig(CfgName, "LogOutput;LogOut", IniPath, false).ToLower() == "true")
+                AppendArray(ref Commands, "-logoutput");
             if (Ini.GetConfig(CfgName, "Unsafe", IniPath, false).ToLower() == "true")
                 AppendArray(ref Commands, "-unsafe");
             if (Ini.GetConfig(CfgName, "LogFile", IniPath, false).ToLower() == "true")
@@ -143,7 +147,18 @@ namespace SRL {
                     case "debugencoding":
                     case "encodingtest":
                         Log("String Deubugger Enabled");
-                        LogString = true;
+                        LogAll = true;
+                        break;
+
+                    case "loginput":
+                    case "login":
+                        Log("Input Log Enabled");
+                        LogInput = true;
+                        break;
+                    case "logout":
+                    case "logoutput":
+                        Log("Output Log Enabled");
+                        LogOutput = true;
                         break;
                     case "dumptext":
                     case "dumpstr":

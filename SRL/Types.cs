@@ -119,8 +119,8 @@ namespace SRL {
             [FieldParmaters(DefaultValue = null, Name = "DenyChars;NoChars")]
             public string DenyChars;
 
-            [FieldParmaters(DefaultValue = false, Name = "TrimRangeMissmatch;TrimRange")]
-            public bool TrimRangeMissmatch;
+            [FieldParmaters(DefaultValue = false, Name = "TrimRangeMismatch;TrimRange")]
+            public bool TrimRangeMismatch;
 
             [FieldParmaters(DefaultValue = false, Name = "CachePointers;CachePointer;ReusePointer;ReusePointers")]
             public bool CachePointers;

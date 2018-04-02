@@ -42,7 +42,7 @@ namespace SRL {
 
             string Str = SimplfyMatch(Input);
 
-            if (LogString) {
+            if (LogAll || LogInput) {
                 Log("Input: {0}", false, Input);
             }
 
@@ -84,7 +84,7 @@ namespace SRL {
             }
 
             if (Debugging)
-                MissMatch(Input);
+                Mismatch(Input);
 
             if (TLIB != null) {
                 Str = TrimString(Input);

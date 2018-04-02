@@ -55,10 +55,10 @@ namespace SRL {
         }
 
         /// <summary>
-        /// Dump a missmatch if debugging
+        /// Dump a Mismatch if debugging
         /// </summary>
-        /// <param name="String">Missmatched String</param>
-        internal static void MissMatch(string String) {
+        /// <param name="String">Mismatched String</param>
+        internal static void Mismatch(string String) {
             try {
                 if (!IsDialog(String) && DumpStrOnly)
                     return;
@@ -101,7 +101,7 @@ namespace SRL {
             DialogCheck = true;
             FreeOnExit = false;
             CachePointers = false;
-            TrimRangeMissmatch = false;
+            TrimRangeMismatch = false;
             Unicode = false;
             MultipleDatabases = false;
             OverlayEnabled = false;
@@ -151,9 +151,9 @@ namespace SRL {
                 DenyChars = Settings.DenyChars;
             }
 
-            if (Settings.TrimRangeMissmatch) {
-                Log("Trim missmatch Ranges Enabled...", true);
-                TrimRangeMissmatch = true;
+            if (Settings.TrimRangeMismatch) {
+                Log("Trim Mismatch Ranges Enabled...", true);
+                TrimRangeMismatch = true;
             }
 
             if (Settings.CachePointers) {
@@ -369,7 +369,7 @@ namespace SRL {
                             Ranges.Add(Range);
                             Log("Range from {0} to {1} Added.", true, Range.Min, Range.Max);
                         } else {
-                            Log("Range from {0} to {1} Conflited.", true, Range.Min, Range.Max);
+                            Warning("Range from {0} to {1} Conflited.", true, Range.Min, Range.Max);
                         }
                     }
                     i += 3;
