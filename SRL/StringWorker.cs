@@ -73,19 +73,28 @@ namespace SRL {
                 }
                 if (x > Skiped) {
                     string Content = String.Substring(Skiped, x - Skiped);
-                    
+
+                    #region FuckYouAppVeyor
+                    int Passed1;
+                    uint Passed2;
+                    long Passed3;
+                    ulong Passed4;
+                    float Passed5;
+                    double Passed6;
+                    #endregion
+
                     //Brute-Force Data Type :P
-                    if (int.TryParse(Content, out var Passed1))
+                    if (int.TryParse(Content, out Passed1))
                         Format.Add(Passed1);
-                    else if (uint.TryParse(Content, out var Passed2))
+                    else if (uint.TryParse(Content, out Passed2))
                         Format.Add(Passed2);
-                    else if (long.TryParse(Content, out var Passed3))
+                    else if (long.TryParse(Content, out Passed3))
                         Format.Add(Passed3);
-                    else if (ulong.TryParse(Content, out var Passed4))
+                    else if (ulong.TryParse(Content, out Passed4))
                         Format.Add(Passed4);
-                    else if (float.TryParse(Content, out var Passed5))
+                    else if (float.TryParse(Content, out Passed5))
                         Format.Add(Passed5);
-                    else if (double.TryParse(Content, out var Passed6))
+                    else if (double.TryParse(Content, out Passed6))
                         Format.Add(Passed6);
                     else
                         Format.Add(Content);
