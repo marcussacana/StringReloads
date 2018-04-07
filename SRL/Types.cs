@@ -167,8 +167,14 @@ namespace SRL {
             [FieldParmaters(DefaultValue = null, Name = "TrimChars;TrimStrings")]
             public string TrimChars;
 
-            [FieldParmaters(DefaultValue = null, Name = "WorkingDir;WorkDir")]
+            [FieldParmaters(DefaultValue = null, Name = "WorkingDir;WorkDir;DataDir")]
             public string WorkDirectory;
+
+            [FieldParmaters(DefaultValue = true, Name = "NoTrim;DisableTrim;SkipTrim")]
+            public bool NoTrim;
+
+            [FieldParmaters(DefaultValue = false, Name = "ReloadMaskArgs;ReloadMaskParameters;")]
+            public bool ReloadMaskParameters;
         }
 
         [FieldParmaters(Name = "WordWrap")]

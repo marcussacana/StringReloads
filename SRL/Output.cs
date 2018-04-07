@@ -183,7 +183,7 @@ namespace SRL {
                     case "wtf":
                     case "help":
                     case "?":
-                        Log("Help:\nParamters:\tAction:\nDump\t\tDump all content of the Strings.srl to the game directory\nUnsafe\t\tDon't ignore strings while don't recive a text line.\nDumpText\tEnable Dialog Filter in the debugger dump (Latim only)\nDumpRetail\tDump the text to Retranslation\nRebuild\t\tForce rebuild the Strings.srl from the Strings.lst\nLogFile\tWrite debug output to a plain text file.\n\nDelay Test\tShow the delay from a string reload\nLog\t\tLog all string input/output bytes\nCredits\t\tShow credits message\nHelp\t\tShow this message");
+                        Log("Help:\nParameters:\tAction:\nDump\t\tDump all content of the Strings.srl to the game directory\nUnsafe\t\tDon't ignore strings while don't recive a text line.\nDumpText\tEnable Dialog Filter in the debugger dump (Latim only)\nDumpRetail\tDump the text to Retranslation\nRebuild\t\tForce rebuild the Strings.srl from the Strings.lst\nLogFile\tWrite debug output to a plain text file.\n\nDelay Test\tShow the delay from a string reload\nLog\t\tLog all string input/output bytes\nCredits\t\tShow credits message\nHelp\t\tShow this message");
                         break;
                 }
         }

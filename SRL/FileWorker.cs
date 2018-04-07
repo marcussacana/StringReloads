@@ -13,19 +13,22 @@ namespace SRL {
         /// <param name="Path">Path to the LST file</param>
         /// <param name="In">Original Lines</param>
         /// <param name="Out">Target Lines</param>
-        static void ReadDump(string Path, ref List<string> In, ref List<string> Out, bool IgnoreOutput = true) {
+        static void ReadDump(string Path, ref List<string> In, ref List<string> Out, bool IgnoreOutput = true, bool IgnoreMask = false) {
             using (TextReader Reader = File.OpenText(Path)) {
                 while (Reader.Peek() != -1) {
                     try {
                         string L1 = Reader.ReadLine().Replace(BreakLineFlag, "\n").Replace(ReturnLineFlag, "\r");
                         string L2 = Reader.ReadLine().Replace(BreakLineFlag, "\n").Replace(ReturnLineFlag, "\r");
-                        if ((L2 != L1 && !string.IsNullOrWhiteSpace(L2) && !In.Contains(L1)) || IgnoreOutput) {
-                            In.Add(L1);
-                            if (IgnoreOutput)
-                                Out.Add(L2);
-                        }
-                    } catch {
 
+                        if (L2 != L1 || (IgnoreMask && IsMask(L1))) {
+                            if (IgnoreOutput || (!string.IsNullOrWhiteSpace(L2) && !In.Contains(L1))) {
+                                In.Add(L1);
+                                if (IgnoreOutput)
+                                    Out.Add(L2);
+                            }
+                        }
+                    } catch (Exception ex){
+                        Warning("Read Dump Exception: {0}", ex.Message);
                     }
                 }
                 Reader.Close();
@@ -106,6 +109,8 @@ namespace SRL {
             MultipleDatabases = false;
             OverlayEnabled = false;
             NoReload = false;
+            NoTrim = true;
+            ReloadMaskParameters = false;
 
             SRLSettings Settings;
             OverlaySettings OverlaySettings;
@@ -139,7 +144,7 @@ namespace SRL {
                 if (Initialized && !Multithread) {
                     Warning("The Multithread Settings Changed - Restart Required");
                 } else {
-                    Log("Multithread Support Enabled", true);
+                    Log("Multithreaded Game Support Enabled", true);
                     Multithread = true;
                 }
             } else if (Initialized && Multithread) {
@@ -195,12 +200,29 @@ namespace SRL {
             }
 
             if (Settings.DecodeFromInput) {
+                Log("Enabling Character Reloader Decoding From Input...");
                 DecodeCharactersFromInput = true;
+            }
+
+            if (Settings.NoTrim) {
+                Log("Disabling Trim Service...", true);
+                NoTrim = true;
+            }
+
+            if (Settings.ReloadMaskParameters) {
+                Log("Enabling Mask Parameters Reloader...", true);
+                ReloadMaskParameters = true;
+
+                if (!Settings.Multithread) {
+                    Warning("You can't use the PIPE service with the Mask Parameter Reloader Feature, Enabling Multithreaded Game Support...");
+                    Settings.Multithread = true;
+                    Multithread = true;
+                }
             }
 
             if (Settings.NoReload) {
                 NoReload = true;
-                Warning("String Injection Disabled by User.");
+                Warning("String Injection Disabled by User...");
             }
 
             if (OverlaySettings.Enable) {
@@ -216,10 +238,10 @@ namespace SRL {
             if (!string.IsNullOrWhiteSpace(OverlaySettings.Padding)) {
                 PaddingSeted = false;
                 string Padding = OverlaySettings.Padding;
-                foreach (string Paramter in Padding.Split('|')) {
+                foreach (string Parameter in Padding.Split('|')) {
                     try {
-                        string Border = Paramter.Split(':')[0].Trim().ToLower();
-                        int Value = int.Parse(Paramter.Split(':')[1].Trim());
+                        string Border = Parameter.Split(':')[0].Trim().ToLower();
+                        int Value = int.Parse(Parameter.Split(':')[1].Trim());
                         switch (Border) {
                             case "top":
                                 OPaddingTop = Value;
@@ -238,7 +260,7 @@ namespace SRL {
                                 break;
                         }
                     } catch {
-                        Error("\"{0}\" Isn't a valid Padding Paramter", Paramter);
+                        Error("\"{0}\" Isn't a valid Padding Parameter", Parameter);
                     }
                 }
             }

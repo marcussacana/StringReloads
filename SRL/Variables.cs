@@ -87,6 +87,8 @@ namespace SRL {
         static bool MultipleDatabases = false;
         static bool Managed = false;
         static bool NoReload = false;
+        static bool NoTrim = false;
+        static bool ReloadMaskParameters = false;
         
         static bool OverlayEnabled = false;
         static bool OverlayInitialized = false;
@@ -103,8 +105,10 @@ namespace SRL {
         static int LogStack = 0;
         static int CursorX, CursorY;
 
+#if DEBUG
         static float LastDPI;
-        
+#endif
+
         static string StrLstSufix = string.Empty;
         static string SourceLang = string.Empty;
         static string TargetLang = string.Empty;

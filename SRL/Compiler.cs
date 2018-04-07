@@ -52,7 +52,7 @@ namespace SRL {
                 var In = new List<string>();
                 var Out = new List<string>();
 
-                ReadDump(TLMap, ref In, ref Out);
+                ReadDump(TLMap, ref In, ref Out, IgnoreMask: true);
 
                 DBAr.Add(new SRLDatabase() {
                     Original = In.ToArray(),
@@ -66,7 +66,7 @@ namespace SRL {
                 var In = new List<string>();
                 var Out = new List<string>();
 
-                ReadDump(TLMapSrc, ref In, ref Out);
+                ReadDump(TLMapSrc, ref In, ref Out, IgnoreMask: true);
                 DBAr.Add(new SRLDatabase() {
                     Original = In.ToArray(),
                     Replace = Out.ToArray()
@@ -185,14 +185,17 @@ namespace SRL {
                 Log("Processing String Reloads...", true);
                 List<string> Temp = new List<string>();
                 StrRld = new Dictionary<string, string>();
+                long ReloadEntries = 0, MaskEntries = 0;
                 foreach (SRLDatabase Database in Data.Databases) {
                     for (uint i = 0; i < Database.Original.LongLength; i++) {
                         Application.DoEvents();
                         string str = SimplfyMatch(Database.Original[i]);
                         if (!ContainsKey(str, true)) {
                             if (IsMask(Database.Original[i])) {
-                                if (LiteralMaskMatch)
+                                if (LiteralMaskMatch) {
                                     AddEntry(str, ReplaceChars(Database.Replace[i]));
+                                    ReloadEntries++;
+                                }
 
                                 if (Database.Replace[i].StartsWith(AntiMaskParser)) {
                                     Database.Replace[i] = Database.Replace[i].Substring(AntiMaskParser.Length, Database.Replace[i].Length - AntiMaskParser.Length);
@@ -204,17 +207,20 @@ namespace SRL {
                                         continue;
 
                                     AddMask(Database.Original[i], ReplaceChars(Database.Replace[i]));
+                                    MaskEntries++;
                                     continue;
                                 }
-                            } else
+                            } else {
                                 AddEntry(str, ReplaceChars(Database.Replace[i]));
+                                ReloadEntries++;
+                            }
                         }
                     }
 
                     if (MultipleDatabases)
                         FinishDatabase();
                 }
-                Log("String Reloads Initialized, {0} Databases Created.", true, Databases.Count-1);
+                Log("String Reloads Initialized, {0} Databases Created, {1} Reload Entries, {2} Mask Entries", true, Databases.Count-1, ReloadEntries, MaskEntries);
                 Log("Initializing Replaces...", true);
                 for (uint i = 0; i < Data.RepOri.LongLength; i++) {
                     AppendArray(ref Replaces, Data.RepOri[i]);

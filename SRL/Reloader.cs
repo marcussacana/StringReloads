@@ -25,9 +25,9 @@ namespace SRL {
 
         internal static dynamic ParsePtr(IntPtr IntPtr) {
             if (Environment.Is64BitProcess)
-                return IntPtr.ToInt64();
+                return unchecked((ulong)IntPtr.ToInt64());
             else
-                return IntPtr.ToInt32();
+                return unchecked((uint)IntPtr.ToInt32());
         }       
        
         internal static string StrMap(string Input, IntPtr InputPtr, bool Native) {
@@ -268,7 +268,7 @@ namespace SRL {
             }            
         }
 
-        private static bool ProcessWindow(IntPtr Handler, int Paramters) {
+        private static bool ProcessWindow(IntPtr Handler, int Parameters) {
             int Len = GetWindowTextLength(Handler);
             StringBuilder sb = new StringBuilder(Len + 1);
             GetWindowText(Handler, sb, sb.Capacity);

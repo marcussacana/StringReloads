@@ -1,4 +1,4 @@
-﻿using RGiesecke.DllExport;
+﻿//using RGiesecke.DllExport;
 using System;
 using System.Runtime.InteropServices;
 
@@ -10,7 +10,7 @@ namespace SRL {
             again:;
             int Tries = 0;
             try {
-                DateTime Begin = DelayTest ? DateTime.Now : DateTime.FromFileTimeUtc(1512840324); //wtf this is causing a exception
+                DateTime? Begin = DelayTest ? DateTime.Now : (DateTime?)null;
                 dynamic Ptr = ParsePtr(Target);
 
                 if (StrRld == null) {
@@ -26,6 +26,12 @@ namespace SRL {
                 if (Ptr == 0)
                     return IntPtr.Zero;
 
+#if DEBUG
+                if (LogAll) {
+                    Log("Target: {0} | Ptr: {1} | char.MaxValue {2} | Convert: {3}", true, Target.ToString(), Ptr, char.MaxValue, unchecked((uint)Ptr));
+                }
+
+#endif
                 if (Ptr <= char.MaxValue) {
                     return ProcessChar(Target);
                 }
@@ -76,7 +82,7 @@ namespace SRL {
                     CachePtr(Target, Output);
 
                 if (DelayTest)
-                    Log("Delay - {0}ms", false, (DateTime.Now - Begin).TotalMilliseconds);
+                    Log("Delay - {0}ms", false, (DateTime.Now - Begin)?.TotalMilliseconds);
 
                 return Output;
             } catch (Exception ex) {
@@ -92,8 +98,8 @@ namespace SRL {
         [DllExport(CallingConvention = CallingConvention.StdCall)]
         public static IntPtr Service(IntPtr hWnd, IntPtr hInst, IntPtr hCmdLine, int nCmdShow) {
             hConsole = hCmdLine;
-            string Paramter = GetStringA(hCmdLine);
-            ServiceCall(Paramter);
+            string Parameter = GetStringA(hCmdLine);
+            ServiceCall(Parameter);
             return IntPtr.Zero;
         }
 

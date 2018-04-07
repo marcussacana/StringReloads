@@ -73,10 +73,20 @@ namespace SRL {
                 }
                 if (x > Skiped) {
                     string Content = String.Substring(Skiped, x - Skiped);
-
-                    int Passed = 0;
-                    if (int.TryParse(Content, out Passed))
-                        Format.Add(Passed);
+                    
+                    //Brute-Force Data Type :P
+                    if (int.TryParse(Content, out var Passed1))
+                        Format.Add(Passed1);
+                    else if (uint.TryParse(Content, out var Passed2))
+                        Format.Add(Passed2);
+                    else if (long.TryParse(Content, out var Passed3))
+                        Format.Add(Passed3);
+                    else if (ulong.TryParse(Content, out var Passed4))
+                        Format.Add(Passed4);
+                    else if (float.TryParse(Content, out var Passed5))
+                        Format.Add(Passed5);
+                    else if (double.TryParse(Content, out var Passed6))
+                        Format.Add(Passed6);
                     else
                         Format.Add(Content);
                 }
@@ -86,6 +96,17 @@ namespace SRL {
             int[] Sort = MaskSort(Mask);
             object[] F = Format.ToArray();
             Array.Sort(Sort, F);
+
+            if (ReloadMaskParameters) {
+                for (long i = 0; i < F.LongLength; i++) {
+                    if (F[i] is string) {
+                        if (ContainsKey((string)F[i]))
+                            F[i] = GetEntry((string)F[i]);
+                        else
+                            Mismatch((string)F[i]);
+                    }
+                }
+            }
 
             return string.Format(Target, F);
         }
@@ -151,7 +172,7 @@ namespace SRL {
 
             return IDS.ToArray();
         }
-
+        
         /// <summary>
         /// Wordwrap a string
         /// </summary>
@@ -415,6 +436,9 @@ namespace SRL {
         /// <param name="String">String to Restore</param>
         /// <param name="Original">Original Template</param>
         internal static void TrimWorker(ref string String, string Original) {
+            if (NoTrim)
+                return;
+
             if (LogAll) {
                 Log("Trim Request:\nOri: {0}\nStr: {1}", true, Original, String);
             }
@@ -532,11 +556,14 @@ namespace SRL {
         /// <param name="Txt">The String to Trim</param>
         /// <returns>The Result</returns>
         internal static string TrimString(string Input) {
+            if (NoTrim)
+                return Input;
+
             string Result = Input;
             Result = TrimStart(Result);
             Result = TrimEnd(Result);
 #if DEBUG
-            if (LogString) {
+            if (LogAll) {
                 Log("Trim: {0} to {1}", true, Input, Result);
             }
 #endif
@@ -549,6 +576,9 @@ namespace SRL {
         /// <param name="Txt">The String to Trim</param>
         /// <returns>The Result</returns>
         internal static string TrimStart(string Txt) {
+            if (NoTrim)
+                return Txt;
+
             string rst = Txt;
             foreach (string str in TrimChars) {
                 if (string.IsNullOrEmpty(str))
@@ -585,6 +615,9 @@ namespace SRL {
         /// <param name="Txt">The String to Trim</param>
         /// <returns>The Result</returns>
         internal static string TrimEnd(string Txt) {
+            if (NoTrim)
+                return Txt;
+
             string rst = Txt;
             foreach (string str in TrimChars) {
                 if (string.IsNullOrEmpty(str))
@@ -631,7 +664,7 @@ namespace SRL {
         /// Check if the string looks a dialog line
         /// </summary>
         /// <param name="Str">The String</param>
-        /// <param name="Trim">Internal Paramter, don't change it.</param>
+        /// <param name="Trim">Internal Parameter, don't change it.</param>
         /// <returns>If looks a dialog, return true, else return false.</returns>
         static bool IsDialog(string Str, bool Trim = false) {
             if (!DialogCheck)
