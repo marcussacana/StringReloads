@@ -300,6 +300,7 @@ namespace SRL {
                 EnableWordWrap = true;
                 MaxWidth = WordwrapSettings.Width;
                 Monospaced = WordwrapSettings.Monospaced;
+                FakeBreakLine = WordwrapSettings.FakeBreakLine;
 
                 if (!Monospaced)
                     Font = new System.Drawing.Font(WordwrapSettings.FontName, WordwrapSettings.Size, WordwrapSettings.Bold ? System.Drawing.FontStyle.Bold : System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);

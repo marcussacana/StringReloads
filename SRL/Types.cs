@@ -197,6 +197,8 @@ namespace SRL {
             [FieldParmaters(DefaultValue = false, Name = "Monospaced;FixedSize;FixedLength")]
             public bool Monospaced;
 
+            [FieldParmaters(DefaultValue = false, Name = "FakeBreakLine;NoBreakLine")]
+            public bool FakeBreakLine;
         }
 
         [FieldParmaters(Name = "Overlay")]

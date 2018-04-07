@@ -264,9 +264,28 @@ namespace SRL {
             if (Line != string.Empty)
                 sb.AppendLine(Line);
 
-            string rst = sb.ToString().Replace("\r\n", "\n").Replace("\n", GameLineBreaker);
+            string rst = sb.ToString().Replace("\r\n", "\n");
+            
+            rst = rst.Replace("\n", GameLineBreaker);
+
             if (rst.EndsWith(GameLineBreaker))
                 rst = rst.Substring(0, rst.Length - GameLineBreaker.Length);
+
+            if (FakeBreakLine) {
+                string[] Splited = rst.Replace(GameLineBreaker, "\n").Split('\n');
+                string NewRst = string.Empty;
+                for (int i = 0; i < Splited.Length; i++) {
+                    string tmp = Splited[i];
+                    bool Last = i + 1 >= Splited.Length;
+                    if (!Last)
+                        while (GetTextWidth(Font, tmp) < MaxWidth)
+                            tmp += ' ';
+
+                    NewRst += tmp;
+                }
+                rst = NewRst;
+            }
+
             return rst;
         }
 
@@ -299,8 +318,25 @@ namespace SRL {
                 } else sb.Append(GameLineBreaker);
             }
             string rst = sb.ToString();
+
+
             if (rst.EndsWith(GameLineBreaker))
                 rst = rst.Substring(0, rst.Length - GameLineBreaker.Length);
+
+            if (FakeBreakLine) {
+                string[] Splited = rst.Replace(GameLineBreaker, "\n").Split('\n');
+                string NewRst = string.Empty;
+                for (int i = 0; i < Splited.Length; i++) {
+                    string tmp = Splited[i];
+                    bool Last = i + 1 >= Splited.Length;
+                    if (!Last)
+                        while (tmp.Length < MaxWidth)
+                            tmp += ' ';
+                    NewRst += tmp;
+                }
+                rst = NewRst;
+            }
+
             return rst;
         }
         private static int BreakLine(string text, int pos, int max) {

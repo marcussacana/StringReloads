@@ -119,6 +119,7 @@ namespace SRL {
         
         static System.Drawing.Font Font;
         static bool Monospaced;
+        static bool FakeBreakLine;
         static uint MaxWidth;
 
         static DotNetVM TLIB = null;
