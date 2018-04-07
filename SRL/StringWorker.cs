@@ -108,12 +108,9 @@ namespace SRL {
 
             if (ReloadMaskParameters) {
                 for (long i = 0; i < F.LongLength; i++) {
-                    if (F[i] is string) {
-                        if (ContainsKey((string)F[i]))
-                            F[i] = GetEntry((string)F[i]);
-                        else
-                            Mismatch((string)F[i]);
-                    }
+                    if (F[i] is string)
+                        F[i] = StrMap((string)F[i], IntPtr.Zero, true);
+                    
                 }
             }
 

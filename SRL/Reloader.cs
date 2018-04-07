@@ -30,6 +30,14 @@ namespace SRL {
                 return unchecked((uint)IntPtr.ToInt32());
         }       
        
+
+        /// <summary>
+        /// Reload a String
+        /// </summary>
+        /// <param name="Input">Original String</param>
+        /// <param name="InputPtr">Original String Pointer, Use IntPtr.Zero don't have one</param>
+        /// <param name="Native">When true, will return the string without char reloads.</param>
+        /// <returns></returns>
         internal static string StrMap(string Input, IntPtr InputPtr, bool Native) {
             if (DecodeCharactersFromInput)
                 Input = ReplaceChars(Input, true);            
