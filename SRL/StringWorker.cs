@@ -106,6 +106,20 @@ namespace SRL {
             object[] F = Format.ToArray();
             Array.Sort(Sort, F);
 
+
+            //::MAXWIDTH[?]::
+            uint BakWidth = MaxWidth;
+            if (Target.StartsWith("::MAXWIDTH[")) {
+                string Width = Target.Split('[')[1].Split(']')[0];
+                int TagLen = 14 + Width.Length;
+                if (Target.Substring(TagLen - 3, 3) == "]::") {
+                    Target = Target.Substring(TagLen, Target.Length - TagLen);
+                    try {
+                        MaxWidth = uint.Parse(Width);
+                    } catch { }
+                }
+            }
+
             if (ReloadMaskParameters) {
                 for (long i = 0; i < F.LongLength; i++) {
                     if (F[i] is string)
@@ -113,6 +127,8 @@ namespace SRL {
                     
                 }
             }
+
+            MaxWidth = BakWidth;
 
             return string.Format(Target, F);
         }
@@ -358,7 +374,7 @@ namespace SRL {
             return i + 1;
         }
 #endregion
-
+        
         /// <summary>
         /// Detect the correct string reader method, and load it
         /// </summary>
