@@ -188,9 +188,9 @@ namespace SRL {
             if (Input.StartsWith(AntiWordWrapFlag))
                 return Input.Substring(AntiWordWrapFlag.Length, Input.Length - AntiWordWrapFlag.Length);
 
-            //::MaxWidth[?]::
+            //::MAXWIDTH[?]::
             uint BakWidth = MaxWidth;
-            if (Input.StartsWith("::MaxWidth[")) {
+            if (Input.StartsWith("::MAXWIDTH[")) {
                 string Width = Input.Split('[')[1].Split(']')[0];
                 int TagLen = 14 + Width.Length;
                 if (Input.Substring(TagLen - 3, 3) == "]::") {
@@ -199,6 +199,11 @@ namespace SRL {
                         MaxWidth = uint.Parse(Width);
                     } catch { }
                 }
+            }
+
+            if (FakeBreakLine) {
+                while (Input.Contains(@"  "))
+                    Input = Input.Replace(@"  ", @" ");
             }
 
             if (Monospaced) {
@@ -231,6 +236,9 @@ namespace SRL {
         /// <param name="String">The string to remove the breakline</param>
         /// <returns>The Result</returns>
         internal static string MergeLines(string String) {
+            if (NoTrim)
+                return String;
+
             string Rst = String.Replace(" " + GameLineBreaker + " ", "  ");
             Rst = String.Replace(GameLineBreaker + " ", " ");
             Rst = String.Replace(" " + GameLineBreaker, " ");

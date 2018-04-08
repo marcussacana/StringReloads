@@ -312,7 +312,7 @@ namespace SRL {
                 SpecialLineBreaker = true;
             }
 
-            if (!string.IsNullOrWhiteSpace(Settings.MatchIgnore)) {
+            if (!string.IsNullOrEmpty(Settings.MatchIgnore)) {
                 Log("Using Custom Ignore List...", true);
                 MatchDel = new string[0];
                 foreach (string str in Settings.MatchIgnore.Split(','))
@@ -329,7 +329,7 @@ namespace SRL {
                         AppendArray(ref MatchDel, str.Replace(BreakLineFlag, "\n").Replace(ReturnLineFlag, "\r"), true);
             }
 
-            if (!string.IsNullOrWhiteSpace(Settings.TrimChars)) {
+            if (!string.IsNullOrEmpty(Settings.TrimChars)) {
                 Log("Using Custom Trim List...", true);
                 TrimChars = new string[0];
                 foreach (string str in Settings.TrimChars.Split(',')) {

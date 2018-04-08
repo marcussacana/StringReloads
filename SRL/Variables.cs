@@ -13,6 +13,7 @@ namespace SRL {
         const string ReturnLineFlag = "::RETURNLINE::";
         const string AntiWordWrapFlag = "::NOWORDWRAP::";
         const string AntiMaskParser = "::NOMASK::";
+        const string MaskWordWrap = "::FULLWORDWRAP::";
 
         const string CfgName = "StringReloader";
         const string ServiceMask = "StringReloaderPipeID-{0}";

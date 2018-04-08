@@ -86,10 +86,15 @@ namespace SRL {
             if (ValidateMask(Input)) {
                 DialogFound = true;
                 string Result = ProcesMask(Input);
+                if (Result.StartsWith(MaskWordWrap)) {
+                    Result = Result.Substring(MaskWordWrap.Length, Result.Length - MaskWordWrap.Length);
+                    Result = WordWrap(Result);
+                }
                 if (Native)
                     return ReplaceChars(Result, true);
                 return Result;
             }
+
 
             if (Debugging)
                 Mismatch(Input);
