@@ -109,7 +109,7 @@ namespace SRL {
             if (ReloadMaskParameters) {
                 for (long i = 0; i < F.LongLength; i++) {
                     if (F[i] is string)
-                        F[i] = StrMap((string)F[i], IntPtr.Zero, true);
+                        F[i] = StrMap((string)F[i], IntPtr.Zero, false);
                     
                 }
             }
