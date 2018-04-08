@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace SRL {
     partial class StringReloader {
@@ -28,6 +29,10 @@ namespace SRL {
                 string M = Source[i];
                 if (M == string.Empty)
                     continue;
+
+                if (i == 0 && !String.StartsWith(M))
+                    return false;
+
                 while (!String.Substring(x, String.Length - x).StartsWith(M)) {
                     if (++x >= String.Length)
                         return false;
@@ -58,6 +63,11 @@ namespace SRL {
                         Format.Add(String.Substring(x, String.Length - x));
                     }
                     continue;
+                }
+
+                if (i == 0 && !String.StartsWith(M)) {
+                    Error("Invalid Mask Replace Request\nM: {0}\nS: {1}", Mask, String);
+                    return String;
                 }
 
                 int Skiped = x;
@@ -104,6 +114,11 @@ namespace SRL {
 
             int[] Sort = MaskSort(Mask);
             object[] F = Format.ToArray();
+            if (Sort.Length != F.Length) {
+                //Not log as error because sometimes is just a bad input from the game.
+                Log("Invalid Mask Replace Request\nM: {0}\nS: {1}", true, Mask, String);
+                return String;
+            }
             Array.Sort(Sort, F);
 
 
@@ -262,7 +277,7 @@ namespace SRL {
             return Rst;
         }
 
-#region WordWrap
+        #region WordWrap
         private static string MultispacedWordWrap(string String) {
             StringBuilder sb = new StringBuilder();
             if (MaxWidth == 0)
@@ -346,7 +361,7 @@ namespace SRL {
 
             if (rst.EndsWith(GameLineBreaker))
                 rst = rst.Substring(0, rst.Length - GameLineBreaker.Length);
-
+            
             if (FakeBreakLine) {
                 string[] Splited = rst.Replace(GameLineBreaker, "\n").Split('\n');
                 string NewRst = string.Empty;
