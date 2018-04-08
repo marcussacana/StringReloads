@@ -274,6 +274,7 @@ namespace SRL {
                             DateTime Now = new FileInfo(IniPath).LastWriteTime;
                             if (Before != Now) {
                                 Before = Now;
+                                Thread.Sleep(500);
                                 LoadConfig();
                             }
                             Thread.Sleep(500);

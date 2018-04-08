@@ -246,8 +246,10 @@ namespace SRL {
                 LastOutput = Message;
                 if (Stack) {
                     if (LogFile) {
-                        Console.CursorLeft = CursorX;
-                        Console.CursorTop = CursorY;
+                        try {
+                            Console.CursorLeft = CursorX;
+                            Console.CursorTop = CursorY;
+                        } catch { LastOutput = null; }
                         Console.WriteLine("{0}: {1} [x{2}]", DateTime.Now.ToShortTimeString(), Message, LogStack++);
                     }
                     return;
@@ -255,8 +257,10 @@ namespace SRL {
 
                 //Inside the LogFile to optimize loops without debug
                 if (LogFile) {
-                    CursorX = Console.CursorLeft;
-                    CursorY = Console.CursorTop;
+                    try {
+                        CursorX = Console.CursorLeft;
+                        CursorY = Console.CursorTop;
+                    } catch { LastOutput = null; }
                     LogStack = 0;
 
                     LogWriter.WriteLine("{0}: {1}", DateTime.Now.ToShortTimeString(), Message.Replace("\r\n", "\n").Replace("\n", "\r\n"));

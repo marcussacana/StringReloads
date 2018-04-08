@@ -159,7 +159,7 @@ namespace SRL {
                     Databases.Add(new Dictionary<string, string>());
 
                 if (DBID >= Databases.Count)
-                    throw new Exception("Invalid Database ID");
+                    throw new Exception("GET - Invalid Database ID");
 
                 return Databases[DBID];
             }
@@ -171,7 +171,7 @@ namespace SRL {
                     Databases.Add(new Dictionary<string, string>());
 
                 if (DBID >= Databases.Count)
-                    throw new Exception("Invalid Database ID");
+                    throw new Exception("SET - Invalid Database ID");
 
                 Databases[DBID] = value;
             }

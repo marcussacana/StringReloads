@@ -146,6 +146,9 @@ namespace SRL {
                         Log("Command Finished, In: {0}, Out: {1}", true, 2, 1);
                         break;
                     case PipeCommands.AdvDB:
+                        if (DBID >= Databases.Count)
+                            return;
+
                         LastDBID++;
                         DBID = LastDBID;
                         Log("Command Finished, In: {0}, Out: {1}", true, 1, 0);
@@ -304,6 +307,9 @@ namespace SRL {
         
         private static void FinishDatabase() {
             if (Multithread) {
+                if (DBID >= Databases.Count)
+                    return;
+
                 LastDBID++;
                 DBID = LastDBID;
                 return;
