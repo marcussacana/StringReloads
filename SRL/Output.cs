@@ -10,18 +10,34 @@ namespace SRL {
             if (LoadShowed || GameHandler == IntPtr.Zero)
                 return;
             LoadShowed = true;
-            const string WaitMsg = "SRL - String Reloader\nSoft-Translation Engine by Marcussacana\nInitializing, Please Wait...";
+            const string WaitMsg = "SRL - String Reloader\nSoft-Translation Engine by Marcussacana{0}\nInitializing, Please Wait...";
+
+            string ConsoleTitle = string.Empty;
+            try {
+                ConsoleTitle = Console.Title;
+            } catch { }
+
+            if (WindowTitle == ConsoleTitle) {
+                Thread.Sleep(500);
+                _hdl = IntPtr.Zero;
+                _hdlFail = true;
+            }
+
             Graphics g = Graphics.FromHwnd(GameHandler);
             string Title = WindowTitle;
 
-            SetWindowText(GameHandler, string.Format("StringReloader - Initializing... [{0}]", Title));
+            if (Title != ConsoleTitle) 
+                SetWindowText(GameHandler, string.Format("StringReloader - Initializing... [{0}]", Title));
+            
 
-            PrintMessage(WaitMsg, -1);
+            PrintMessage(string.Format(WaitMsg, string.IsNullOrWhiteSpace(CustomCredits) ? string.Empty : "\n" + CustomCredits), -1);
 
-            SetWindowText(GameHandler, Title + " - [SRL Initialized]");
+            if (Title != ConsoleTitle) {
+                SetWindowText(GameHandler, Title + " - [SRL Initialized]");
 
-            Thread.Sleep(4000);
-            SetWindowText(GameHandler, Title);
+                Thread.Sleep(4000);
+                SetWindowText(GameHandler, Title);
+            }
         }
 
         private static void PrintMessage(string Text, int Seconds) {
@@ -241,31 +257,12 @@ namespace SRL {
         internal static void Log(string Message, bool Optional = false, params object[] Format) {
             try {
                 Message = string.Format(Message, Format);
-
-                bool Stack = Message == LastOutput;
-                LastOutput = Message;
-                if (Stack) {
-                    if (LogFile) {
-                        try {
-                            Console.CursorLeft = CursorX;
-                            Console.CursorTop = CursorY;
-                        } catch { LastOutput = null; }
-                        Console.WriteLine("{0}: {1} [x{2}]", DateTime.Now.ToShortTimeString(), Message, LogStack++);
-                    }
-                    return;
-                }
-
-                //Inside the LogFile to optimize loops without debug
+                
                 if (LogFile) {
-                    try {
-                        CursorX = Console.CursorLeft;
-                        CursorY = Console.CursorTop;
-                    } catch { LastOutput = null; }
-                    LogStack = 0;
-
                     LogWriter.WriteLine("{0}: {1}", DateTime.Now.ToShortTimeString(), Message.Replace("\r\n", "\n").Replace("\n", "\r\n"));
                     LogWriter.Flush();
                 }
+
                 if (!ConsoleShowed && (!Optional || Debugging)) {
                     IntPtr discard = GameHandler;//Initialize the handler before open the console
                     discard = IntPtr.Zero;
@@ -278,6 +275,28 @@ namespace SRL {
                 if (!ConsoleShowed && !Debugging && Optional) {
                     return;
                 }
+
+
+                bool Stack = Message == LastOutput;
+                LastOutput = Message;
+
+                if (Stack) {
+                    try {
+                        Console.CursorLeft = CursorX;
+                        Console.CursorTop = CursorY;
+
+                        Console.WriteLine("{0}: {1} [x{2}]", DateTime.Now.ToShortTimeString(), Message, ++LogStack);
+                    } catch { LastOutput = null; }
+
+                    return;
+                }
+
+                try {
+                    CursorX = Console.CursorLeft;
+                    CursorY = Console.CursorTop;
+                    LogStack = 1;
+                } catch { LastOutput = null; }
+
                 ShowWindow(hConsole, SW_SHOW);
                 Console.WriteLine("{0}: {1}", DateTime.Now.ToShortTimeString(), Message);
             } catch {

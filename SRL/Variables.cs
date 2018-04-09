@@ -117,6 +117,7 @@ namespace SRL {
         static string GameLineBreaker = "\n";
         static string LastOutput = string.Empty;
         static string CustomDir = string.Empty;
+        static string CustomCredits = string.Empty;
         
         static System.Drawing.Font Font;
         static bool Monospaced;

@@ -14,9 +14,11 @@ namespace SRL {
         /// </summary>
         internal static void CompileStrMap() {
             var DBAr = new List<SRLDatabase>();
+
             var COri = new List<char>();
             var CFak = new List<char>();
             var UOri = new List<char>();
+
             var UErr = new List<ushort>();
             var ROri = new List<string>();
             var RNew = new List<string>();
@@ -28,11 +30,12 @@ namespace SRL {
                     while (Reader.Peek() >= 0) {
                         string line = Reader.ReadLine();
                         if (line.Length == 3 && line[1] == '=') {
-                            char cOri = line[0];
-                            char cFak = line[2];
+                            char cOri = line[0], cFak = line[2];
+
                             COri.Add(cOri);
                             CFak.Add(cFak);
                         }
+
                         if (line.Contains("0x") && line.Contains('=')) {
                             string hex = line.Split('=')[1].Split('x')[1];
                             ushort Val = ushort.Parse(hex, System.Globalization.NumberStyles.HexNumber);
@@ -145,7 +148,7 @@ namespace SRL {
                     }
                     if (Reader.PeekInt() != 0x324C5253) {
                         Error("Failed to Initialize - Corrupted Data");
-                        Thread.Sleep(3000);
+                        Thread.Sleep(5000);
                         Environment.Exit(2);
                     }
                     Reader.ReadStruct(ref Data);

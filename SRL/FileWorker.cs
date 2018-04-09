@@ -235,6 +235,24 @@ namespace SRL {
                     Log("Overlay Allowed.", true);
             }
 
+            if (!string.IsNullOrWhiteSpace(Settings.CustomCredits)) {
+                CustomCredits = Settings.CustomCredits;
+                
+                //Just if you wanna hide from kids trying fake it. :)
+                if (CustomCredits.StartsWith("Fx")) {
+                    byte[] Coded = ParseHex(CustomCredits.Replace("Fx", "0x"));
+                    for (int i = 0; i < Coded.Length; i++)
+                        Coded[i] ^= 0xFF;
+
+                    CustomCredits = System.Text.Encoding.UTF8.GetString(Coded);
+                }
+
+                if (CustomCredits.StartsWith("0x")) {
+                    CustomCredits = System.Text.Encoding.UTF8.GetString(ParseHex(CustomCredits));
+                }
+
+            }
+
             if (!string.IsNullOrWhiteSpace(OverlaySettings.Padding)) {
                 PaddingSeted = false;
                 string Padding = OverlaySettings.Padding;
@@ -317,13 +335,7 @@ namespace SRL {
                 MatchDel = new string[0];
                 foreach (string str in Settings.MatchIgnore.Split(','))
                     if (str.Trim().StartsWith("0x")) {
-                        string Hex = str.Trim();
-                        Hex = Hex.Substring(2, Hex.Length - 2);
-                        byte[] Buffer = new byte[Hex.Length / 2];
-                        for (int i = 0; i < Hex.Length / 2; i++) {
-                            Buffer[i] = Convert.ToByte(Hex.Substring(i, 2), 16);
-                        }
-                        string Del = System.Text.Encoding.UTF8.GetString(Buffer);
+                        string Del = System.Text.Encoding.UTF8.GetString(ParseHex(str.Trim()));
                         AppendArray(ref MatchDel, Del, true);
                     } else
                         AppendArray(ref MatchDel, str.Replace(BreakLineFlag, "\n").Replace(ReturnLineFlag, "\r"), true);
@@ -334,13 +346,8 @@ namespace SRL {
                 TrimChars = new string[0];
                 foreach (string str in Settings.TrimChars.Split(',')) {
                     if (str.Trim().StartsWith("0x")) {
-                        string Hex = str.Trim();
-                        Hex = Hex.Substring(2, Hex.Length - 2);
-                        byte[] Buffer = new byte[Hex.Length / 2];
-                        for (int i = 0; i < Hex.Length / 2; i++) {
-                            Buffer[i] = Convert.ToByte(Hex.Substring(i, 2), 16);
-                        }
-                        string Trim = System.Text.Encoding.UTF8.GetString(Buffer);
+
+                        string Trim = System.Text.Encoding.UTF8.GetString(ParseHex(str.Trim()));
                         AppendArray(ref TrimChars, Trim, true);
                     } else
                         AppendArray(ref TrimChars, str.Replace(BreakLineFlag, "\n").Replace(ReturnLineFlag, "\r"), true);

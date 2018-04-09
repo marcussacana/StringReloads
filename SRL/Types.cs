@@ -1,8 +1,5 @@
 ﻿using AdvancedBinary;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace SRL {
     partial class StringReloader {
@@ -20,6 +17,7 @@ namespace SRL {
                 if (Cnt > 0)
                     return;
             }
+
             T[] NArr = new T[Arr.Length + 1];
             Arr.CopyTo(NArr, 0);
             NArr[Arr.Length] = Val;
@@ -102,6 +100,8 @@ namespace SRL {
             public string[] RepTrg;
         }
 
+        //Ini Settings
+
         [FieldParmaters(Name = "StringReloader")]
         struct SRLSettings {
             [FieldParmaters(DefaultValue = null, Name = "InEncoding;ReadEncoding;Encoding")]
@@ -175,6 +175,9 @@ namespace SRL {
 
             [FieldParmaters(DefaultValue = false, Name = "ReloadMaskArgs;ReloadMaskParameters;")]
             public bool ReloadMaskParameters;
+
+            [FieldParmaters(DefaultValue = "", Name = "CustomCredits;Credits;About;")]
+            public string CustomCredits;
         }
 
         [FieldParmaters(Name = "WordWrap")]
@@ -185,7 +188,7 @@ namespace SRL {
             [FieldParmaters(DefaultValue = 0, Name = "MaxWidth;Width;Length")]
             public uint Width;
 
-            [FieldParmaters(DefaultValue = 0, Name = "Size;FontSize")]
+            [FieldParmaters(DefaultValue = 0f, Name = "Size;FontSize")]
             public float Size;
 
             [FieldParmaters(DefaultValue = null, Name = "Face;FaceName;Font;FontName;FamilyName")]

@@ -741,6 +741,19 @@ namespace SRL {
             return Result;
         }      
 
+        internal static byte[] ParseHex(string Hex) {
+            if (Hex.StartsWith("0x"))
+                Hex = Hex.Substring(2, Hex.Length - 2);
+            Hex = Hex.Replace(@" ", "");
+
+            byte[] Buffer = new byte[Hex.Length / 2];
+            for (int i = 0; i < Hex.Length / 2; i++) {
+                Buffer[i] = Convert.ToByte(Hex.Substring(i, 2), 16);
+            }
+
+            return Buffer;
+        }
+
         /// <summary>
         /// Check if the string looks a dialog line
         /// </summary>
