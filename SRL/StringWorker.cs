@@ -135,7 +135,7 @@ namespace SRL {
                 }
             }
 
-            if (ReloadMaskParameters) {
+            if (ReloadMaskParameters && Initialized) {
                 for (long i = 0; i < F.LongLength; i++) {
                     if (F[i] is string)
                         F[i] = StrMap((string)F[i], IntPtr.Zero, false);
@@ -610,7 +610,10 @@ namespace SRL {
         /// </summary>
         /// <param name="Str">The string to Minify</param>
         /// <returns>The Minified String</returns>
-        internal static string SimplfyMatch(string Str) {           
+        internal static string SimplfyMatch(string Str) {
+            if (LiteMode)
+                return Str;
+
             string Output = TrimString(MergeLines(Str));
             for (int i = 0; i < MatchDel.Length; i++)
                 Output = Output.Replace(MatchDel[i], "");
@@ -637,7 +640,7 @@ namespace SRL {
         /// <param name="Txt">The String to Trim</param>
         /// <returns>The Result</returns>
         internal static string TrimString(string Input) {
-            if (NoTrim)
+            if (NoTrim || LiteMode)
                 return Input;
 
             string Result = Input;
@@ -657,7 +660,7 @@ namespace SRL {
         /// <param name="Txt">The String to Trim</param>
         /// <returns>The Result</returns>
         internal static string TrimStart(string Txt) {
-            if (NoTrim)
+            if (NoTrim || LiteMode)
                 return Txt;
 
             string rst = Txt;
@@ -696,7 +699,7 @@ namespace SRL {
         /// <param name="Txt">The String to Trim</param>
         /// <returns>The Result</returns>
         internal static string TrimEnd(string Txt) {
-            if (NoTrim)
+            if (NoTrim || LiteMode)
                 return Txt;
 
             string rst = Txt;
@@ -761,7 +764,7 @@ namespace SRL {
         /// <param name="Trim">Internal Parameter, don't change it.</param>
         /// <returns>If looks a dialog, return true, else return false.</returns>
         static bool IsDialog(string Str, bool Trim = false) {
-            if (!DialogCheck)
+            if (!DialogCheck || LiteMode)
                 return true;
 
             string String = TrimString(Str);

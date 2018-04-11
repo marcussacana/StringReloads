@@ -160,8 +160,10 @@ namespace SRL {
 
         internal static void Init() {
             try {
-                if (Initialized)
+                if (Initialized) {
+                    Log("Ops, Initialization Requested... But, is already initialized...", true);
                     return;
+                }
 
                 if (!CloseEventAdded) {
                     CloseEventAdded = true;
@@ -260,6 +262,10 @@ namespace SRL {
                 Error("Failed to Initialize...");
                 throw ex;
             }
+        }
+
+        private static string GetDBNameById(long ID) {
+            return DBNames[ID];
         }
 
         private static void WindowHook() {

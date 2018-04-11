@@ -25,40 +25,58 @@ namespace SRL {
         }
 
 #pragma warning disable 649
-        struct SRLData2 {
+        struct SRLData3 {
             [FString(Length = 4)]
             public string Signature;
 
-            [PArray(PrefixType = Const.UINT16), StructField]
-            public SRLDatabase[] Databases;
+            public ushort Version;//Planned to Future
 
-            [PArray(PrefixType = Const.UINT32)]
+            [PArray(PrefixType = Const.UINT32), StructField]
+            public SRLDatabase2[] Databases;
+
+            uint CharsCount;
+
+            [RArray(FieldName = "CharsCount")]
             public char[] OriLetters;
 
-            [PArray(PrefixType = Const.UINT32)]
+            [RArray(FieldName = "CharsCount")]
             public char[] MemoryLetters;
 
-            [PArray(PrefixType = Const.UINT32)]
+
+            uint UnkCount;
+
+            [RArray(FieldName = "UnkCount")]
             public ushort[] UnkChars;
 
-            [PArray(PrefixType = Const.UINT32)]
+            [RArray(FieldName = "UnkCount")]
             public char[] UnkReps;
 
-            [PArray(PrefixType = Const.UINT32), CString]
+
+
+            uint RepCount;
+
+            [RArray(FieldName = "RepCount"), PString(PrefixType = Const.UINT32)]
             public string[] RepOri;
 
-            [PArray(PrefixType = Const.UINT32), CString]
+            [RArray(FieldName = "RepCount"), PString(PrefixType = Const.UINT32)]
             public string[] RepTrg;
         }
 
-        struct SRLDatabase {
-            [PArray(PrefixType = Const.UINT32), CString]
+        struct SRLDatabase2 {
+            [CString]
+            public string Name;
+
+            uint EntriesCount;
+
+            [RArray(FieldName = "EntriesCount"), PString(PrefixType = Const.UINT16)]
             public string[] Original;
 
-            [PArray(PrefixType = Const.UINT32), CString]
+            [RArray(FieldName = "EntriesCount"), PString(PrefixType = Const.UINT16)]
             public string[] Replace;
+            
         }
 
+        #region Decrapted
         //Decrapted But Supported Formats
         struct TLBC {
             [FString(Length = 4)]
@@ -99,6 +117,39 @@ namespace SRL {
             [PArray(PrefixType = Const.UINT32), CString]
             public string[] RepTrg;
         }
+        struct SRLData2 {
+            [FString(Length = 4)]
+            public string Signature;
+
+            [PArray(PrefixType = Const.UINT16), StructField]
+            public SRLDatabase[] Databases;
+
+            [PArray(PrefixType = Const.UINT32)]
+            public char[] OriLetters;
+
+            [PArray(PrefixType = Const.UINT32)]
+            public char[] MemoryLetters;
+
+            [PArray(PrefixType = Const.UINT32)]
+            public ushort[] UnkChars;
+
+            [PArray(PrefixType = Const.UINT32)]
+            public char[] UnkReps;
+
+            [PArray(PrefixType = Const.UINT32), CString]
+            public string[] RepOri;
+
+            [PArray(PrefixType = Const.UINT32), CString]
+            public string[] RepTrg;
+        }
+        struct SRLDatabase {
+            [PArray(PrefixType = Const.UINT32), CString]
+            public string[] Original;
+
+            [PArray(PrefixType = Const.UINT32), CString]
+            public string[] Replace;
+        }
+        #endregion
 
         //Ini Settings
 
@@ -178,6 +229,9 @@ namespace SRL {
 
             [FieldParmaters(DefaultValue = "", Name = "CustomCredits;Credits;About;")]
             public string CustomCredits;
+
+            [FieldParmaters(DefaultValue = false, Name = "LiteMode;FastMode;CompatibiltyMode")]
+            public bool LiteMode;
         }
 
         [FieldParmaters(Name = "WordWrap")]

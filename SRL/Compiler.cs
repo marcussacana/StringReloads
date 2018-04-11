@@ -13,7 +13,7 @@ namespace SRL {
         /// Build the String.srl
         /// </summary>
         internal static void CompileStrMap() {
-            var DBAr = new List<SRLDatabase>();
+            var DBAr = new List<SRLDatabase2>();
 
             var COri = new List<char>();
             var CFak = new List<char>();
@@ -57,9 +57,13 @@ namespace SRL {
 
                 ReadDump(TLMap, ref In, ref Out, IgnoreMask: true);
 
-                DBAr.Add(new SRLDatabase() {
+                string DBN = Path.GetFileName(TLMap);
+                DBN = MaskReplace(Path.GetFileName(TLMapSrcMsk), DBN, "{0}");
+
+                DBAr.Add(new SRLDatabase2() {
                     Original = In.ToArray(),
-                    Replace = Out.ToArray()
+                    Replace = Out.ToArray(),
+                    Name = DBN
                 });
 
                 Log("{0} Found, Importing, Database ID: {1}...", false, Path.GetFileName(TLMap), DBAr.Count-1);
@@ -70,9 +74,10 @@ namespace SRL {
                 var Out = new List<string>();
 
                 ReadDump(TLMapSrc, ref In, ref Out, IgnoreMask: true);
-                DBAr.Add(new SRLDatabase() {
+                DBAr.Add(new SRLDatabase2() {
                     Original = In.ToArray(),
-                    Replace = Out.ToArray()
+                    Replace = Out.ToArray(),
+                    Name = Path.GetFileNameWithoutExtension(TLMapSrc)
                 });
 
                 Log("{0} Found, Importing, Database ID: {1}...", false, Path.GetFileName(TLMapSrc), DBAr.Count - 1);
@@ -88,8 +93,8 @@ namespace SRL {
             }
 
             Log("Building String Reloads...");
-            SRLData2 Data = new SRLData2() {
-                Signature = "SRL2",
+            SRLData3 Data = new SRLData3() {
+                Signature = "SRL3",
                 Databases = DBAr.ToArray(),
                 OriLetters = COri.ToArray(),
                 MemoryLetters = CFak.ToArray(),
@@ -109,11 +114,11 @@ namespace SRL {
             Log("Builded Successfully.");
         }
 
-        private static void SearchViolations(SRLDatabase[] DBS, char[] Ilegals) {
+        private static void SearchViolations(SRLDatabase2[] DBS, char[] Ilegals) {
             Log("Serching Chars Violations...");
             List<string> Violations = new List<string>();
 
-            foreach (SRLDatabase Database in DBS) {
+            foreach (SRLDatabase2 Database in DBS) {
                 foreach (string String in Database.Replace)
                     foreach (char Ilegal in Ilegals)
                         if (String.Contains(Ilegal))
@@ -127,14 +132,14 @@ namespace SRL {
                 }
             }
         }
-
+        
         /// <summary>
         /// Load the String.srl Data
         /// </summary>
         static void LoadData() {
             Log("Initializing String Reloads...", true);
             StartPipe();
-            var Data = new SRLData2();
+            var Data = new SRLData3();
 
             try {
                 using (StructReader Reader = new StructReader(TLMap)) {
@@ -146,11 +151,24 @@ namespace SRL {
                         SRL1Parser(Reader);
                         return;
                     }
-                    if (Reader.PeekInt() != 0x324C5253) {
+                    if (Reader.PeekInt() == 0x324C5253) {
+                        SRL2Parser(Reader);
+                        return;
+                    }
+                    if (Reader.PeekInt() != 0x334C5253) {
                         Error("Failed to Initialize - Corrupted Data");
                         Thread.Sleep(5000);
                         Environment.Exit(2);
                     }
+
+                    Reader.Seek(4, 0);
+                    if (Reader.ReadUInt32() != 0x00) {
+                        Error("Unexpected SRL Database Format");
+                        Thread.Sleep(5000);
+                        Environment.Exit(2);
+                    }
+                    Reader.Seek(0, 0);
+
                     Reader.ReadStruct(ref Data);
                     Reader.Close();
                 }
@@ -189,7 +207,7 @@ namespace SRL {
                 List<string> Temp = new List<string>();
                 StrRld = new Dictionary<string, string>();
                 long ReloadEntries = 0, MaskEntries = 0;
-                foreach (SRLDatabase Database in Data.Databases) {
+                foreach (SRLDatabase2 Database in Data.Databases) {
                     for (uint i = 0; i < Database.Original.LongLength; i++) {
                         Application.DoEvents();
                         string str = SimplfyMatch(Database.Original[i]);
@@ -229,6 +247,17 @@ namespace SRL {
                     AppendArray(ref Replaces, Data.RepOri[i]);
                     AppendArray(ref Replaces, Data.RepTrg[i]);
                 }
+
+
+                Log("Registring Databases Name...");                
+                DBNames = new Dictionary<long, string>();
+                for (long i = 0; i < Data.Databases.LongLength; i++) {
+                    DBNames[i] = Data.Databases[i].Name;
+
+                    if (LogAll)
+                        Log("Database ID: {0} Named As: {1}", true, i, DBNames[i]);
+                }
+
                 Log("Loading Complete.", true);
             } catch (Exception ex) {
                 Error("Failed to Execute: {0}\n=========\n{1}", false, ex.Message, ex.StackTrace);
@@ -275,6 +304,58 @@ namespace SRL {
             for (uint i = 0; i < DB.Original.Length; i++) {
                 AppendLst(DB.Original[i], DB.Replace[i], TLMapSrc);
             }
+            if (DB.OriLetters.LongLength + DB.UnkReps.LongLength != 0) {
+                Log("Dumping Char Reloads...", true);
+                using (TextWriter Output = File.CreateText(CharMapSrc)) {
+                    for (uint i = 0; i < DB.OriLetters.LongLength; i++) {
+                        Output.WriteLine("{0}={1}", DB.OriLetters[i], DB.MemoryLetters[i]);
+                    }
+                    for (uint i = 0; i < DB.UnkReps.LongLength; i++) {
+                        Output.WriteLine("{0}=0x{1:X4}", DB.UnkReps[i], DB.UnkChars[i]);
+                    }
+                    Output.Close();
+                }
+            }
+
+            if (DB.OriLetters.LongLength != 0) {
+                Log("Dumping Replaces...", true);
+
+                for (uint i = 0; i < DB.OriLetters.LongLength; i++) {
+                    try {
+                        string L1 = DB.RepOri[i];
+                        string L2 = DB.RepTrg[i];
+                        AppendLst(L1, L2, ReplLst);
+                    } catch { }
+                }
+            }
+
+
+            File.Delete(TLMap);
+            Log("Restarting...");
+            Init();
+        }
+        
+        /// <summary>
+         /// Convert SRL2 Database to the SRL3 Format
+         /// </summary>
+         /// <param name="Reader">Input Stream</param>
+        private static void SRL2Parser(StructReader Reader) {
+            Log("SRL2 Database Detected... Rebuilding...");
+            var DB = new SRLData2();
+            Reader.ReadStruct(ref DB);
+            Reader.Close();
+
+            if (File.Exists(TLMapSrc))
+                File.Delete(TLMapSrc);
+
+            for (ushort x = 0; x < DB.Databases.Length; x++) {
+                Log("Dumping Database Id: {0}", true, x);
+                SRLDatabase Database = DB.Databases[x];
+                for (uint i = 0; i < Database.Original.Length; i++) {
+                    AppendLst(Database.Original[i], Database.Replace[i], string.Format(TLMapSrcMsk, x));
+                }
+            }
+
             if (DB.OriLetters.LongLength + DB.UnkReps.LongLength != 0) {
                 Log("Dumping Char Reloads...", true);
                 using (TextWriter Output = File.CreateText(CharMapSrc)) {

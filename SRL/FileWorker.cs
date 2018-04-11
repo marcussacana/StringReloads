@@ -111,6 +111,7 @@ namespace SRL {
             NoReload = false;
             NoTrim = true;
             ReloadMaskParameters = false;
+            LiteMode = false;
 
             SRLSettings Settings;
             OverlaySettings OverlaySettings;
@@ -119,8 +120,12 @@ namespace SRL {
             AdvancedIni.FastOpen(out OverlaySettings, IniPath);
             AdvancedIni.FastOpen(out WordwrapSettings, IniPath);
 
-
             Log(Initialized ? "Reloading Settings..." : "Loading Settings...", true);
+
+
+            if (Settings.LiteMode) {
+                LiteMode = true;
+            }
 
             if (Settings.InEncoding != null) {
                 Log("Loading Read Encoding Config...", true);
@@ -281,7 +286,7 @@ namespace SRL {
                         Error("\"{0}\" Isn't a valid Padding Parameter", Parameter);
                     }
                 }
-            }
+            }           
 
             if (Settings.LiveSettings) {
                 if (SettingsWatcher == null) {

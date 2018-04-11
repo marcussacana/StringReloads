@@ -12,7 +12,7 @@ namespace SRL {
             try {
                 DateTime? Begin = DelayTest ? DateTime.Now : (DateTime?)null;
                 dynamic Ptr = ParsePtr(Target);
-
+                
                 if (StrRld == null) {
                     try {
                         Init();
@@ -32,13 +32,15 @@ namespace SRL {
                 }
 
 #endif
-                if (Ptr <= char.MaxValue) {
-                    return ProcessChar(Target);
-                }
+                if (!LiteMode) {
+                    if (Ptr <= char.MaxValue) {
+                        return ProcessChar(Target);
+                    }
 
-                if (CachePointers) {
-                    if (PtrCacheIn.Contains(Target))
-                        return PtrCacheOut[PtrCacheIn.IndexOf(Target)];
+                    if (CachePointers) {
+                        if (PtrCacheIn.Contains(Target))
+                            return PtrCacheOut[PtrCacheIn.IndexOf(Target)];
+                    }
                 }
 
                 string Input = GetString(Target);
@@ -60,29 +62,32 @@ namespace SRL {
                     return Target;
                 }
 
-                CacheReply(Reloaded);
-                TrimWorker(ref Reloaded, Input);
+                if (!LiteMode) {
+                    CacheReply(Reloaded);
+                    TrimWorker(ref Reloaded, Input);
 
-                if (!ShowNonReloads)
-                    UpdateOverlay(Reloaded);
+                    if (!ShowNonReloads)
+                        UpdateOverlay(Reloaded);
 
-                if (NoReload)
-                    return Target;
+                    if (NoReload)
+                        return Target;
 
-                if (LogOutput) {
-                    Log("Output: {0}", true, Reloaded);
+                    if (LogOutput) {
+                        Log("Output: {0}", true, Reloaded);
+                    }
                 }
-
                 IntPtr Output = GenString(Reloaded);
-                
-                AddPtr(Output);
-                AddPtr(Target);
 
-                if (CachePointers)
-                    CachePtr(Target, Output);
+                if (!LiteMode) {
+                    AddPtr(Output);
+                    AddPtr(Target);
 
-                if (DelayTest)
-                    Log("Delay - {0}ms", false, (DateTime.Now - Begin)?.TotalMilliseconds);
+                    if (CachePointers)
+                        CachePtr(Target, Output);
+
+                    if (DelayTest)
+                        Log("Delay - {0}ms", false, (DateTime.Now - Begin)?.TotalMilliseconds);
+                }
 
                 return Output;
             } catch (Exception ex) {

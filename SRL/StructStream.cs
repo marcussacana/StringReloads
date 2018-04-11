@@ -284,7 +284,7 @@ namespace AdvancedBinary {
             this.BigEndian = BigEndian;
             this.Encoding = Encoding;
         }
-        public StructWriter(string OutputFile, bool BigEndian = false, Encoding Encoding = null) : base(new StreamWriter(OutputFile).BaseStream) {
+        public StructWriter(string OutputFile, bool BigEndian = false, Encoding Encoding = null) : base(new FileStream(OutputFile, FileMode.OpenOrCreate, FileAccess.ReadWrite)) {
             if (Encoding == null)
                 Encoding = Encoding.UTF8;
             this.BigEndian = BigEndian;
@@ -523,7 +523,7 @@ namespace AdvancedBinary {
             this.BigEndian = BigEndian;
             this.Encoding = Encoding;
         }
-        public StructReader(string Input, bool BigEndian = false, Encoding Encoding = null) : base(new StreamReader(Input).BaseStream) {
+        public StructReader(string Input, bool BigEndian = false, Encoding Encoding = null) : base(new FileStream(Input, FileMode.OpenOrCreate, FileAccess.ReadWrite)) {
             if (Encoding == null)
                 Encoding = Encoding.UTF8;
             this.BigEndian = BigEndian;

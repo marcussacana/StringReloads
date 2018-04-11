@@ -333,7 +333,7 @@ namespace SRL {
                 }
 
                 if (Debugging)
-                    Log("Database Changed, New ID: {0}", true, DBID);
+                    Log("Database Changed to {0}, ID: {0}", true, GetDBNameById(DBID), DBID);
 
                 return Result;
             }
@@ -356,7 +356,7 @@ namespace SRL {
                 PipeWriter.Flush();
                 int NID = PipeReader.ReadInt32();
                 if (OID != NID) {
-                    Log("Database Changed, New ID: {0}", true, NID);
+                    Log("Database Changed to {0}, ID: {0}", true, GetDBNameById(NID), NID);
                 }
             }
 

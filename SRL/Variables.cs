@@ -48,6 +48,7 @@ namespace SRL {
         static Dictionary<ushort, char> CharRld;
         static Dictionary<ushort, char> UnkRld;
         static Dictionary<string, string> MskRld = null;
+        static Dictionary<long, string> DBNames = null;
 
 
         static List<IntPtr> PtrCacheIn = new List<IntPtr>();
@@ -90,6 +91,7 @@ namespace SRL {
         static bool NoReload = false;
         static bool NoTrim = false;
         static bool ReloadMaskParameters = false;
+        static bool LiteMode = false;
         
         static bool OverlayEnabled = false;
         static bool OverlayInitialized = false;

@@ -6,9 +6,13 @@ using System.Windows.Forms;
 
 namespace SRL {
     partial class StringReloader {
-        internal static void ShowLoading() {            
+        internal static void ShowLoading() {
+            if (LiteMode)
+                return;
+
             if (LoadShowed || GameHandler == IntPtr.Zero)
                 return;
+
             LoadShowed = true;
             const string WaitMsg = "SRL - String Reloader\nSoft-Translation Engine by Marcussacana{0}\nInitializing, Please Wait...";
 
@@ -107,6 +111,12 @@ namespace SRL {
 
             foreach (string Command in Commands)
                 switch (Command.ToLower().TrimStart('-', '/', '\\', ' ')) {
+                    case "litemode":
+                    case "fastmode":
+                    case "compatibilitymode":
+                    case "compatibility":
+                        LiteMode = true;
+                        break;
                     case "showlogwindow":
                     case "showconsole":
                     case "console":
@@ -236,6 +246,9 @@ namespace SRL {
         }
 
         internal static void Error(string Message, params object[] Format) {
+            if (LiteMode)
+                return;
+
             bool BakLogFile = LogFile;
             LogFile = true;
             ConsoleColor Color = Console.ForegroundColor;
@@ -245,6 +258,9 @@ namespace SRL {
             LogFile = BakLogFile;
         }
         internal static void Warning(string Message, params object[] Format) {
+            if (LiteMode)
+                return;
+
             bool BakLogFile = LogFile;
             LogFile = true & Debugging;
             ConsoleColor Color = Console.ForegroundColor;
@@ -256,6 +272,9 @@ namespace SRL {
 
         internal static void Log(string Message, bool Optional = false, params object[] Format) {
             try {
+                if (LiteMode)
+                    return;
+
                 Message = string.Format(Message, Format);
                 
                 if (LogFile) {
