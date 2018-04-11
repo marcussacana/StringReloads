@@ -162,7 +162,7 @@ namespace SRL {
                     }
 
                     Reader.Seek(4, 0);
-                    if (Reader.ReadUInt32() != 0x00) {
+                    if (Reader.ReadUInt16() != 0x00) {
                         Error("Unexpected SRL Database Format");
                         Thread.Sleep(5000);
                         Environment.Exit(2);
