@@ -249,7 +249,7 @@ namespace SRL {
                 }
 
 
-                Log("Registring Databases Name...");                
+                Log("Registring Databases Name...", true);                
                 DBNames = new Dictionary<long, string>();
                 for (long i = 0; i < Data.Databases.LongLength; i++) {
                     DBNames[i] = Data.Databases[i].Name;
