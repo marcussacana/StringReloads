@@ -329,7 +329,10 @@ namespace SRL {
         }
 
         internal static int GetTextWidth(Font Font, string Text) {
-            return System.Windows.Forms.TextRenderer.MeasureText(Text, Font).Width;
+            using (var g = Graphics.FromHwnd(IntPtr.Zero))
+                return (int)g.MeasureString(Text, Font).Width;
+
+            //return System.Windows.Forms.TextRenderer.MeasureText(Text, Font).Width;
         }
 
         internal static string MonospacedWordWrap(string String) {

@@ -1,7 +1,9 @@
 ﻿using AdvancedBinary;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
+using System.Text;
 using System.Threading;
 
 namespace SRL {
@@ -249,11 +251,11 @@ namespace SRL {
                     for (int i = 0; i < Coded.Length; i++)
                         Coded[i] ^= 0xFF;
 
-                    CustomCredits = System.Text.Encoding.UTF8.GetString(Coded);
+                    CustomCredits = Encoding.UTF8.GetString(Coded);
                 }
 
                 if (CustomCredits.StartsWith("0x")) {
-                    CustomCredits = System.Text.Encoding.UTF8.GetString(ParseHex(CustomCredits));
+                    CustomCredits = Encoding.UTF8.GetString(ParseHex(CustomCredits));
                 }
 
             }
@@ -327,7 +329,7 @@ namespace SRL {
                 FakeBreakLine = WordwrapSettings.FakeBreakLine;
 
                 if (!Monospaced)
-                    Font = new System.Drawing.Font(WordwrapSettings.FontName, WordwrapSettings.Size, WordwrapSettings.Bold ? System.Drawing.FontStyle.Bold : System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+                    Font = new Font(WordwrapSettings.FontName, WordwrapSettings.Size, WordwrapSettings.Bold ? FontStyle.Bold : FontStyle.Regular, GraphicsUnit.Pixel);
             }
 
             if (!string.IsNullOrEmpty(Settings.GameLineBreaker)) {
@@ -375,7 +377,7 @@ namespace SRL {
             if (Managed) {
                 Log("Managed Mode Enabled, Enforcing Compatible Settings", true);
                 //OverlayEnabled = false;
-                WriteEncoding = ReadEncoding = System.Text.Encoding.Unicode;
+                WriteEncoding = ReadEncoding = Encoding.Unicode;
 #if TRACE
                 Multithread = true;
 #endif

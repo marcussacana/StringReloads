@@ -48,7 +48,7 @@ namespace SRL {
             if (GameHandler == IntPtr.Zero)
                 return;
 
-            Font F = new Font("Consolas", 20.5f, FontStyle.Bold);
+            Font F = new Font("Consolas", 20.5f, FontStyle.Bold, GraphicsUnit.Pixel);
             Brush B = Brushes.BlueViolet;
             PointF Pos = new PointF(0, 0);
             var Render = Graphics.FromHwnd(GameHandler);
