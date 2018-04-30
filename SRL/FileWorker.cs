@@ -111,7 +111,7 @@ namespace SRL {
             MultipleDatabases = false;
             OverlayEnabled = false;
             NoReload = false;
-            NoTrim = true;
+            NoTrim = false;
             ReloadMaskParameters = false;
             LiteMode = false;
 
