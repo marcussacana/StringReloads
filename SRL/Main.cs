@@ -72,7 +72,7 @@ namespace SRL {
                     if (NoReload)
                         return Target;
 
-                    if (LogOutput) {
+                    if (LogAll || LogOutput) {
                         Log("Output: {0}", true, Reloaded);
                     }
                 }
