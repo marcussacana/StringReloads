@@ -60,9 +60,14 @@ namespace SRL {
 
             if (ContainsKey(Str)) {
                 DialogFound = true;
-                string Rst = EnableWordWrap ? WordWrap(GetEntry(Str)) : GetEntry(Str);
+
+                string Entry = GetEntry(Str);
+                
+                string Rst = EnableWordWrap ? WordWrap(Entry) : Entry;
                 if (Native)
                     return ReplaceChars(Rst, true);
+
+
                 return Rst;
             }
 
@@ -76,7 +81,9 @@ namespace SRL {
                 if (ContainsKey(Str)) {
                     DialogFound = true;
 
-                    string Rst = EnableWordWrap ? WordWrap(GetEntry(Str)) : GetEntry(Str);
+                    string Entry = GetEntry(Str);  
+                    
+                    string Rst = EnableWordWrap ? WordWrap(Entry) : Entry;
                     if (Native)
                         return ReplaceChars(Rst, true);
                     return Rst;
@@ -180,14 +187,25 @@ namespace SRL {
                     Log("Debug Mode Enabled...");
                 }
 
-                if (File.Exists(CustomDir + "Modifier.cs")) {
+                if (File.Exists(BaseDir + "EncodingModifier.cs")) {
+                    Log("Enabling Encoding Modifier...", true);
+                    try {
+                        DotNetVM VM = new DotNetVM(File.ReadAllText(BaseDir + "Modifier.cs", Encoding.UTF8));
+                        EncodingModifier = VM;
+                        Log("Encoding Modifier Compiled", true);
+                    } catch (Exception ex) {
+                        Error("Failed to compile the Encoding Modifier\n===========\n{0}\n===========\n{1}", ex.Message, ex.Source);
+                    }
+                }
+
+                if (File.Exists(BaseDir + "StringModifier.cs")) {
                     Log("Enabling String Modifier...", true);
                     try {
-                        DotNetVM VM = new DotNetVM(File.ReadAllText(CustomDir + "Modifier.cs", Encoding.UTF8));
-                        Modifier = VM;
-                        Log("Modifier Compiled", true);
+                        DotNetVM VM = new DotNetVM(File.ReadAllText(BaseDir + "StringModifier.cs", Encoding.UTF8));
+                        StringModifier = VM;
+                        Log("String Modifier Compiled", true);
                     } catch (Exception ex) {
-                        Error("Failed to compile the Modifier\n===========\n{0}\n===========\n{1}", ex.Message, ex.Source);
+                        Error("Failed to compile the String Modifier\n===========\n{0}\n===========\n{1}", ex.Message, ex.Source);
                     }
                 }
 

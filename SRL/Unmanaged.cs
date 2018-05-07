@@ -4,7 +4,9 @@ using System.Text;
 
 namespace SRL {
     partial class StringReloader {
-        
+        [DllImport("kernel32.dll")]
+        public static extern bool IsBadCodePtr(IntPtr Ptr);
+
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool AllocConsole();

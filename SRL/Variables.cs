@@ -127,9 +127,10 @@ namespace SRL {
         static uint MaxWidth;
 
         static DotNetVM TLIB = null;
-        static DotNetVM Modifier = null;
+        static DotNetVM EncodingModifier = null;
+        static DotNetVM StringModifier = null;
         static DotNetVM Overlay = null;
-
+        
         static string[] Replaces = new string[0];
         static string TLMap => BaseDir + "Strings.srl";
         static string TLMapSrc => BaseDir + "Strings.lst";

@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace SRL {
     public partial class StringReloader {
-        
+
         [DllExport]
         public static IntPtr Process(IntPtr Target) {
             again:;
@@ -12,7 +12,7 @@ namespace SRL {
             try {
                 DateTime? Begin = DelayTest ? DateTime.Now : (DateTime?)null;
                 dynamic Ptr = ParsePtr(Target);
-                
+
                 if (StrRld == null) {
                     try {
                         Init();
@@ -20,18 +20,20 @@ namespace SRL {
                     } catch (Exception ex) {
                         throw ex;
                     }
-                    Initialized = true;                    
+                    Initialized = true;
                 }
-                
+
                 if (Ptr == 0)
                     return IntPtr.Zero;
+
 
 #if DEBUG
                 if (LogAll) {
                     Log("Target: {0} | Ptr: {1} | char.MaxValue {2} | Convert: {3}", true, Target.ToString(), Ptr, char.MaxValue, unchecked((uint)Ptr));
                 }
 
-#endif
+#endif                
+
                 if (!LiteMode) {
                     if (Ptr <= char.MaxValue) {
                         return ProcessChar(Target);
@@ -43,8 +45,15 @@ namespace SRL {
                     }
                 }
 
+                if (IsBadCodePtr(Target) && Ptr >= char.MaxValue) {
+                    if (LogAll) {
+                        Log("BAD PTR: {0}", true, Ptr);
+                    }
+                    return Target;
+                }
+
                 string Input = GetString(Target);
-                
+
                 if (string.IsNullOrWhiteSpace(Input))
                     return Target;
 
@@ -63,6 +72,14 @@ namespace SRL {
                 }
 
                 if (!LiteMode) {
+                    if (StringModifier != null) {
+                        try {
+                            Reloaded = StringModifier.Call("Modifier", "ResultHook", Reloaded);
+                        } catch {
+                            Log("Result Hook Error...", true);
+                        }
+                    }
+
                     CacheReply(Reloaded);
                     TrimWorker(ref Reloaded, Input);
 
@@ -75,6 +92,7 @@ namespace SRL {
                     if (LogAll || LogOutput) {
                         Log("Output: {0}", true, Reloaded);
                     }
+
                 }
                 IntPtr Output = GenString(Reloaded);
 
@@ -99,6 +117,7 @@ namespace SRL {
             }
             return Target;
         }
+
 
         [DllExport(CallingConvention = CallingConvention.StdCall)]
         public static IntPtr Service(IntPtr hWnd, IntPtr hInst, IntPtr hCmdLine, int nCmdShow) {

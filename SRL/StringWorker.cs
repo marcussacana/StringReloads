@@ -400,8 +400,8 @@ namespace SRL {
         /// <param name="Decode">if False, return the hex of the string</param>
         /// <returns>The String</returns>
         internal static string GetString(IntPtr Pointer, bool Decode = true) {
-            if (Modifier != null)
-                return Modifier.Call("Modifier", "GetString", Pointer, Decode);
+            if (EncodingModifier != null)
+                return EncodingModifier.Call("Modifier", "GetString", Pointer, Decode);
 
             if (Unicode)
                 return GetStringW(Pointer, Decode);
@@ -416,8 +416,8 @@ namespace SRL {
         /// <returns>The Pointer to the new String</returns>
         internal static IntPtr GenString(string String) {
             byte[] buffer;
-            if (Modifier != null) {
-                buffer = Modifier.Call("Modifier", "GenString", String);
+            if (EncodingModifier != null) {
+                buffer = EncodingModifier.Call("Modifier", "GenString", String);
             } else {
                 int len = WriteEncoding.GetByteCount(String + "\x0");
                 buffer = new byte[len];
