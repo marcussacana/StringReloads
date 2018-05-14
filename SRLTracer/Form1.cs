@@ -19,7 +19,7 @@ namespace SRLTracer {
         }
 
         private void Managed() {
-            TBInput.Text = StringReloader.ProcessManagerd(TBInput.Text);
+            TBInput.Text = StringReloader.ProcessManaged(TBInput.Text);
         }
 
         [DllImport("SRL.dll", CallingConvention = CallingConvention.Cdecl)]

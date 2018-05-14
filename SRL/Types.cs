@@ -232,6 +232,9 @@ namespace SRL {
 
             [FieldParmaters(DefaultValue = false, Name = "LiteMode;FastMode;CompatibiltyMode")]
             public bool LiteMode;
+
+            [FieldParmaters(DefaultValue = false, Name = "RemoveIlegals;RemoveViolation;RemoveViolations;RemoveOutputViolation")]
+            public bool RemoveViolations;
         }
 
         [FieldParmaters(Name = "WordWrap")]

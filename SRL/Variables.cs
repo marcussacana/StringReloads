@@ -92,7 +92,9 @@ namespace SRL {
         static bool NoTrim = false;
         static bool ReloadMaskParameters = false;
         static bool LiteMode = false;
-        
+        static bool RemoveIlegals = false;
+
+
         static bool OverlayEnabled = false;
         static bool OverlayInitialized = false;
         static bool ShowNonReloads = false;

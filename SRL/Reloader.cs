@@ -24,6 +24,7 @@ namespace SRL {
         }
 
         internal static dynamic ParsePtr(IntPtr IntPtr) {
+            
             if (Environment.Is64BitProcess)
                 return unchecked((ulong)IntPtr.ToInt64());
             else

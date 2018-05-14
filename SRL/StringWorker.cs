@@ -66,19 +66,19 @@ namespace SRL {
                 }
 
                 if (i == 0 && !String.StartsWith(M)) {
-                    Error("Invalid Mask Replace Request\nM: {0}\nS: {1}", Mask, String);
+                    Warning("Invalid Mask Replace Request\nM: {0}\nS: {1}", Mask, String);
                     return String;
                 }
 
                 int Skiped = x;
                 while (!String.Substring(x, String.Length - x).StartsWith(M)) {
                     if (++x >= String.Length) {
-                        Error("Invalid Mask Replace Request\nM: {0}\nS: {1}", Mask, String);
+                        Warning("Invalid Mask Replace Request\nM: {0}\nS: {1}", Mask, String);
                         return String;
                     }
                 }
                 if (i + 1 >= Source.LongLength && String.Substring(x, String.Length - x) != M) {
-                    Error("Invalid Mask Replace Request\nM: {0}\nS: {1}", Mask, String);
+                    Warning("Invalid Mask Replace Request\nM: {0}\nS: {1}", Mask, String);
                     return String;
                 }
                 if (x > Skiped) {
@@ -116,7 +116,7 @@ namespace SRL {
             object[] F = Format.ToArray();
             if (Sort.Length != F.Length) {
                 //Not log as error because sometimes is just a bad input from the game.
-                Log("Invalid Mask Replace Request\nM: {0}\nS: {1}", true, Mask, String);
+                Warning("Invalid Mask Replace Request\nM: {0}\nS: {1}", true, Mask, String);
                 return String;
             }
             Array.Sort(Sort, F);
@@ -163,7 +163,7 @@ namespace SRL {
                     while (i < String.Length && String[i] != '}')
                         i++;
                     if (i >= String.Length || String[i] != '}') {
-                        Error("Bad String Format: \"{0}\"\nAt: {0}", String, o);
+                        Warning("Bad String Format: \"{0}\"\nAt: {0}", String, o);
                     }
 
                     Strings.Add(Content);
@@ -194,7 +194,7 @@ namespace SRL {
                     while (i < String.Length && String[i] != '}')
                         i++;
                     if (i >= String.Length || String[i] != '}') {
-                        Error("Bad String Format: \"{0}\"\nAt: {0}", String, o);
+                        Warning("Bad String Format: \"{0}\"\nAt: {0}", String, o);
                     }
                     o++;
                     string Str = String.Substring(o, i - o).Split(':')[0];
@@ -202,7 +202,7 @@ namespace SRL {
                     if (int.TryParse(Str, out ID))
                         IDS.Add(ID);
                     else
-                        Error("Bad Mask Format, Invalid ID: {0}", Str);
+                        Warning("Bad Mask Format, Invalid ID: {0}", Str);
                     continue;
                 }
             }

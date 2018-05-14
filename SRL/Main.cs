@@ -127,7 +127,7 @@ namespace SRL {
             return IntPtr.Zero;
         }
 
-        public static string ProcessManagerd(string Text) {
+        public static string ProcessManaged(string Text) {
             Managed = true;
             IntPtr Ptr = Marshal.StringToHGlobalAuto(Text);
             IntPtr New = Process(Ptr);
@@ -135,9 +135,10 @@ namespace SRL {
             Marshal.FreeHGlobal(Ptr);
             return Text;
         }
-        public static char ProcessManagerd(char Char) {
+        public static char ProcessManaged(char Char) {
             Managed = true;
-            return (char)(Process(new IntPtr(Char)).ToInt32() & 0xFFFF);
+            IntPtr Result = Process(new IntPtr(Char));
+            return (char)(Result.ToInt32() & 0xFFFF);
         }
     }
 }

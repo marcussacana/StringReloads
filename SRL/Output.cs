@@ -85,6 +85,12 @@ namespace SRL {
             CmdLineChecked = true;
             string[] Commands = Environment.GetCommandLineArgs();
 
+            if (Ini.GetConfigStatus(CfgName, "WorkingDir;WorkDir;DataDir", IniPath) == Ini.ConfigStatus.Ok) {
+                CustomDir = Ini.GetConfig(CfgName, "WorkingDir;WorkDir;DataDir", IniPath, true);
+                if (!CustomDir.EndsWith("\\"))
+                    CustomDir += '\\';
+            }
+
             if (Ini.GetConfig(CfgName, "Debug", IniPath, false).ToLower() == "true")
                 AppendArray(ref Commands, "-debug");
             if (Ini.GetConfig(CfgName, "Delay", IniPath, false).ToLower() == "true")

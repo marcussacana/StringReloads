@@ -15,18 +15,20 @@ namespace SRL {
         /// <param name="Path">Path to the LST file</param>
         /// <param name="In">Original Lines</param>
         /// <param name="Out">Target Lines</param>
-        static void ReadDump(string Path, ref List<string> In, ref List<string> Out, bool IgnoreOutput = true, bool IgnoreMask = false) {
+        static void ReadDump(string Path, ref List<string> In, ref List<string> Out, bool IgnoreOutput = false, bool IgnoreMask = false) {
             using (TextReader Reader = File.OpenText(Path)) {
                 while (Reader.Peek() != -1) {
                     try {
                         string L1 = Reader.ReadLine().Replace(BreakLineFlag, "\n").Replace(ReturnLineFlag, "\r");
                         string L2 = Reader.ReadLine().Replace(BreakLineFlag, "\n").Replace(ReturnLineFlag, "\r");
-
+                        if (IgnoreOutput) {
+                            In.Add(L1);
+                            continue;
+                        }
                         if (L2 != L1 || (IgnoreMask && IsMask(L1))) {
-                            if (IgnoreOutput || (!string.IsNullOrWhiteSpace(L2) && !In.Contains(L1))) {
+                            if (!string.IsNullOrWhiteSpace(L2) && !In.Contains(L1)) {
                                 In.Add(L1);
-                                if (IgnoreOutput)
-                                    Out.Add(L2);
+                                Out.Add(L2);
                             }
                         }
                     } catch (Exception ex){
@@ -114,6 +116,7 @@ namespace SRL {
             NoTrim = false;
             ReloadMaskParameters = false;
             LiteMode = false;
+            RemoveIlegals = false;
 
             SRLSettings Settings;
             OverlaySettings OverlaySettings;
@@ -230,6 +233,11 @@ namespace SRL {
             if (Settings.NoReload) {
                 NoReload = true;
                 Warning("String Injection Disabled by User...");
+            }
+
+            if (Settings.RemoveViolations) {
+                RemoveIlegals = true;
+                Warning("Violation remover enabled, please, consider manual repair...");
             }
 
             if (OverlaySettings.Enable) {
@@ -439,7 +447,7 @@ namespace SRL {
             if (File.Exists(CharMapSrc)) {
                 File.Delete(CharMapSrc);
             }
-            SRLData2 Data = new SRLData2();
+            SRLData3 Data = new SRLData3();
             StructReader Reader = new StructReader(TLMap);
             Reader.ReadStruct(ref Data);
             Reader.Close();
@@ -453,16 +461,14 @@ namespace SRL {
                     AppendLst(Str, TLMode ? Str : Data.Databases[0].Replace[i], TLMapSrc);
                 }
             } else {
-                int ID = 1;
-                foreach (SRLDatabase DataBase in Data.Databases) {
+                foreach (SRLDatabase2 DataBase in Data.Databases) {
                     for (uint i = 0; i < DataBase.Original.LongLength; i++) {
                         string Str = DataBase.Original[i];
                         if (string.IsNullOrWhiteSpace(Str))
                             continue;
 
-                        AppendLst(Str, TLMode ? Str : DataBase.Replace[i], string.Format(TLMapSrcMsk, ID));
+                        AppendLst(Str, TLMode ? Str : DataBase.Replace[i], string.Format(TLMapSrcMsk, DataBase.Name));
                     }
-                    ID++;
                 }
             }
 

@@ -83,7 +83,13 @@ namespace SRL {
                 Log("{0} Found, Importing, Database ID: {1}...", false, Path.GetFileName(TLMapSrc), DBAr.Count - 1);
             }
 
-            SearchViolations(DBAr.ToArray(), CFak.ToArray());
+            
+            var DBS = DBAr.ToArray();
+            var Ilegals = CFak.ToArray();
+            SearchViolations(DBS, Ilegals);
+
+            if (RemoveIlegals)
+                RemoveViolations(ref DBS, Ilegals);
 
             Log("{0} Databases Generated.", true, DBAr.Count);
             
@@ -95,9 +101,9 @@ namespace SRL {
             Log("Building String Reloads...");
             SRLData3 Data = new SRLData3() {
                 Signature = "SRL3",
-                Databases = DBAr.ToArray(),
+                Databases = DBS,
                 OriLetters = COri.ToArray(),
-                MemoryLetters = CFak.ToArray(),
+                MemoryLetters = Ilegals,
                 UnkChars = UErr.ToArray(),
                 UnkReps = UOri.ToArray(),
                 RepOri = ROri.ToArray(),
@@ -132,7 +138,25 @@ namespace SRL {
                 }
             }
         }
-        
+        private static void RemoveViolations(ref SRLDatabase2[] DBS, char[] Ilegals) {
+            Log("Removing Chars Violations...", true);
+            List<string> Violations = new List<string>();
+            uint Removed = 0;
+            for (uint x = 0; x < DBS.LongLength; x++) {
+                SRLDatabase2 Database = DBS[x];
+                for (uint y = 0; y < Database.Replace.LongLength; y++) {
+                    foreach (char Ilegal in Ilegals) {
+                        int Len = Database.Replace[y].Length;
+                        Database.Replace[y] = Database.Replace[y].Replace(Ilegal.ToString(), "");
+                        Removed += (uint)(Len - Database.Replace[y].Length);
+                    }
+                }
+                DBS[x] = Database;
+            }
+            Log("{0} Violations Removed", true, Removed);
+        }
+
+
         /// <summary>
         /// Load the String.srl Data
         /// </summary>
