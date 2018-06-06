@@ -258,7 +258,7 @@ namespace SRL {
         private static DateTime LastTry = DateTime.Now;
         private static bool Online {
             get {
-                if (_netstas == 1)
+                if (_netstas == 1 || IsWine)
                     return true;
                 if (_netstas == -1 || (DateTime.Now - LastTry).TotalMinutes > 10) {
                     Ping myPing = new Ping();
@@ -276,7 +276,23 @@ namespace SRL {
                 _netstas = value ? 1 : 0;
             }
         }
-        
+
+        static bool? isWine;
+        internal static bool IsWine {
+            get {
+                if (isWine.HasValue) return isWine.Value;
+
+                IntPtr hModule = GetModuleHandle(@"ntdll.dll");
+                if (hModule == IntPtr.Zero)
+                    isWine = false;
+                else {
+                    IntPtr fptr = GetProcAddress(hModule, @"wine_get_version");
+                    isWine = fptr != IntPtr.Zero;
+                }
+
+                return isWine.Value;
+            }
+        }
         private static bool GameStarted() {
             try {
                 return !string.IsNullOrWhiteSpace(System.Diagnostics.Process.GetCurrentProcess().MainWindowTitle);
