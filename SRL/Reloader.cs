@@ -113,11 +113,13 @@ namespace SRL {
             if (TLIB != null) {
                 Str = TrimString(Input);
                 if (IsDialog(Str)) {
+
                     string Ori = MergeLines(Str);
 
                     string TL = null;
                     if (Online) {
                         try {
+                            Log("Translating: \"{0}\"", true, Str);
                             TL = TLIB.Call("TLIB.Google", "Translate", Ori, SourceLang, TargetLang);
                         } catch {
                             Log("Connection Failed, Disabling MTL for 30m", true);
@@ -128,6 +130,9 @@ namespace SRL {
                     if (!Online)
                         return Input;
 
+                    if (SimplfyMatch(Ori) == SimplfyMatch(TL))
+                        TL = Ori;
+
                     if (Str != TL)
                         AppendLst(Str, TL, MTLCache);
 
@@ -137,9 +142,7 @@ namespace SRL {
                     if (!Native)
                         TL = ReplaceChars(TL);
 
-                    Log("\"{0}\" Automatically Translated.", true, Str);
                     AddEntry(SimplfyMatch(Str), TL);
-
                     return TL;
                 }
             }
@@ -187,6 +190,10 @@ namespace SRL {
                     Log("Soft-Translation Engine - By Marcussacana");
                     Log("Debug Mode Enabled...");
                 }
+
+                if (!DirectRequested)
+                    Warning("You are using SRL through the old function, it is recommended to use GetDirectProcess");
+
 
                 if (File.Exists(BaseDir + "EncodingModifier.cs")) {
                     Log("Enabling Encoding Modifier...", true);

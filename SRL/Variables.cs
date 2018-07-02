@@ -93,6 +93,7 @@ namespace SRL {
         static bool ReloadMaskParameters = false;
         static bool LiteMode = false;
         static bool RemoveIlegals = false;
+        static bool AsianInput = false;
 
 
         static bool OverlayEnabled = false;
@@ -109,6 +110,11 @@ namespace SRL {
 
         static int LogStack = 0;
         static int CursorX, CursorY;
+        
+        static string[] DenyList;
+        static string[] IgnoreList;
+        static Quote[] QuoteList;
+        static int Sensitivity;
 
 #if DEBUG
         static float LastDPI;
@@ -132,6 +138,8 @@ namespace SRL {
         static DotNetVM EncodingModifier = null;
         static DotNetVM StringModifier = null;
         static DotNetVM Overlay = null;
+
+        static bool DirectRequested = false;
         
         static string[] Replaces = new string[0];
         static string TLMap => BaseDir + "Strings.srl";
@@ -152,7 +160,6 @@ namespace SRL {
 
         static BinaryReader PipeReader = null;
         static BinaryWriter PipeWriter = null;
-
 
         static int LastDBID = 0;
         static int DBID = 0;
@@ -300,20 +307,13 @@ namespace SRL {
                 return false;
             }
         }
-
+        
         static Thread SettingsWatcher = null;
 
         static string[] MatchDel = new string[] {
             "\r", "\\r", "\n", "\\n", " ", "_r", "―", "-", "*", "♥", "①", "♪"
         };
 
-        static string[] TrimChars = new string[] {
-            " ", "'", "<", "(", "[", "“", "［", "《", "«",
-            "「", "『", "【", "]", "”", "］", "》",
-            "»", "」", "』", "】", ")", ">", "‘", "’", "〃", "″",
-            "～", "~", "―", "-", "%K", "%LC", "♪", "%P"
-        };
-
-        static string DenyChars = "@,§,$,_,<,>,/,[,],#";
+        static string[] TrimChars = new string[] { "%K", "%LC", "♪", "%P" };
     }
 }

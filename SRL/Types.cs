@@ -23,6 +23,10 @@ namespace SRL {
             NArr[Arr.Length] = Val;
             Arr = NArr;
         }
+        internal struct Quote {
+            public char Start;
+            public char End;
+        }
 
 #pragma warning disable 649
         struct SRLData3 {
@@ -167,9 +171,6 @@ namespace SRL {
             [FieldParmaters(DefaultValue = false, Name = "Multithread;DisablePipe")]
             public bool Multithread;
 
-            [FieldParmaters(DefaultValue = null, Name = "DenyChars;NoChars")]
-            public string DenyChars;
-
             [FieldParmaters(DefaultValue = false, Name = "TrimRangeMismatch;TrimRange")]
             public bool TrimRangeMismatch;
 
@@ -211,13 +212,6 @@ namespace SRL {
 
             [FieldParmaters(DefaultValue = null, Name = "BreakLine;GameBreakLine")]
             public string GameLineBreaker;
-
-            [FieldParmaters(DefaultValue = null, Name = "MatchIgnore;IgnoreMatchs")]
-            public string MatchIgnore;
-
-            [FieldParmaters(DefaultValue = null, Name = "TrimChars;TrimStrings")]
-            public string TrimChars;
-
             [FieldParmaters(DefaultValue = null, Name = "WorkingDir;WorkDir;DataDir")]
             public string WorkDirectory;
 
@@ -235,6 +229,9 @@ namespace SRL {
 
             [FieldParmaters(DefaultValue = false, Name = "RemoveIlegals;RemoveViolation;RemoveViolations;RemoveOutputViolation")]
             public bool RemoveViolations;
+
+            [FieldParmaters(DefaultValue = false, Name = "AsianInput;FromAsian;JapaneseInput;FromJapanese")]
+            public bool AsianInput;
         }
 
         [FieldParmaters(Name = "WordWrap")]
@@ -271,6 +268,20 @@ namespace SRL {
 
             [FieldParmaters(DefaultValue = null, Name = "Padding")]
             public string Padding;
+        }
+
+        [FieldParmaters(Name = "Filter")]
+        internal struct FilterSettings {
+            [FieldParmaters(DefaultValue = "", Name = "DenyList")]
+            public string DenyList;
+            [FieldParmaters(DefaultValue = "", Name = "IgnoreList")]
+            public string IgnoreList;
+            [FieldParmaters(DefaultValue = "", Name = "QuoteList")]
+            public string QuoteList;
+            [FieldParmaters(DefaultValue = "", Name = "TrimList")]
+            public string TrimList;
+            [FieldParmaters(DefaultValue = 2, Name = "Sensitivity")]
+            public int Sensitivity;
         }
 #pragma warning restore 649
     }

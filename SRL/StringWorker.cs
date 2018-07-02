@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace SRL {
     partial class StringReloader {
@@ -766,71 +766,177 @@ namespace SRL {
         /// <param name="Str">The String</param>
         /// <param name="Trim">Internal Parameter, don't change it.</param>
         /// <returns>If looks a dialog, return true, else return false.</returns>
-        static bool IsDialog(string Str, bool Trim = false) {
+        static bool IsDialog(string String) {
             if (!DialogCheck || LiteMode)
                 return true;
 
-            string String = TrimString(Str);
+            if (string.IsNullOrWhiteSpace(String))
+                return false;
 
-            if (SpecialLineBreaker)
-                String = String.Replace(GameLineBreaker, "\n");
+            string Str = String;
+            foreach (string Ignore in IgnoreList)
+                Str = Str.Replace(Ignore, "");            
 
-            bool Status = !string.IsNullOrWhiteSpace(String);
-            Status &= !string.IsNullOrWhiteSpace(TrimString(String).Trim('.', '?', '!'));
-            int Process = 0;
-            string Minified = SimplfyMatch(String);
-            while (Status) {
-                switch (Process) {
-                    default:
-                        goto ExitWhile;
-                    case 0:
-                        Status = !ContainsOR(Minified, DenyChars);
-                        break;
-                    case 1:
-                        Status = NumberLimiter(String, String.Length / 4);
-                        break;
-                    case 2:
-                        Status = Minified.Length >= 3 || EndsWithOr(String, ".,!,?") || String.StartsWith(".");
-                        break;
-                    case 3:
-                        Status = String.Contains(((char)32).ToString()) || String.StartsWith(".");
-                        break;
-                    case 4:
-                        if (String.Length > 3) {
-                            if (String[String.Length - 4] == '.' && !String.Substring(String.Length - 3, 3).Contains(".")) {
-                                Status = false;
-                            }
-                        }
-                        break;
-                    case 5:
-                        Status = ContainsOR(String.ToLower(), "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,x,w,y,z");
-                        break;
-                    case 6:
-                        if (Ranges != null) {                            
-                            uint Miss = 0;
-                            foreach (char c in Minified) {
-                                if (!InRange(c))
-                                    Miss++;
-                            }
-                            if (Miss > Minified.Length/2)
-                                Status = false;
-                        }
-                        break;
-                    case 7:
-                        int cCount = CountChars(Minified);
-                        Status = !(Minified.Length < 6 && cCount < 6);
-                        break;
+            Str = Str.Replace(GameLineBreaker, "\n");
+
+
+            string[] Words = Str.Split(' ');
+
+            int Spaces = Str.Where(x => x == ' ' || x == '\t').Count();
+            int Pontuations = Str.Where(x => ".,!?".IndexOf(x) >= 0).Count();
+            int WordCount = Words.Where(x => x.Length >= 2 && !string.IsNullOrWhiteSpace(x)).Count();
+            int Specials = Str.Where(x => char.IsSymbol(x)).Count();
+            Specials += Str.Where(x => char.IsPunctuation(x)).Count() - Pontuations;
+
+            int Uppers = Str.Where(x => char.IsUpper(x)).Count();
+            int Latim = Str.Where(x => x >= 'A' && x <= 'z').Count();
+            int Numbers = Str.Where(x => x >= '0' && x <= '9').Count();
+            int JapChars = Str.Where(x => (x >= '、' && x <= 'ヿ') || (x >= '｡' && x <= 'ﾝ')).Count();
+            int Kanjis = Str.Where(x => x >= '一' && x <= '龯').Count();
+
+
+            bool IsCaps = GetLineCase(Str) == Case.Upper;
+            bool IsJap = JapChars + Kanjis > Latim;
+
+
+            //More Points = Don't Looks a Dialogue
+            //Less Points = Looks a Dialogue
+            int Points = 0;
+
+            if (Str.Length > 4) {
+                string ext = Str.Substring(Str.Length - 4, 4);
+                try {
+                    if (System.IO.Path.GetExtension(ext).Trim('.').Length == 3)
+                        Points += 2;
+                } catch { }
+            }
+
+            bool BeginQuote = false;
+            Quote? LineQuotes = null;
+            foreach (Quote Quote in QuoteList) {
+                BeginQuote |= Str.StartsWith(Quote.Start.ToString());
+
+                if (Str.StartsWith(Quote.Start.ToString()) && Str.EndsWith(Quote.End.ToString())) {
+                    Points -= 2;
+                    LineQuotes = Quote;
+                    break;
+                } else if (Str.StartsWith(Quote.Start.ToString()) || Str.EndsWith(Quote.End.ToString())) {
+                    Points--;
+                    LineQuotes = Quote;
+                    break;
                 }
-                Process++;
             }
-            ExitWhile:
-            ;
 
-            if (!Status && !Trim) {
-                return IsDialog(String, true);
+            char Last = (LineQuotes == null ? Str.Last() : Str.TrimEnd(LineQuotes.Value.End).Last());
+            if (IsJap && (new char[] { '。', '？', '！', '…', '、' }).Contains(Last))
+                Points -= 2;
+
+            char[] PontuationList = new char[] { '.', '?', '!', '…', ',' };
+            if (!IsJap && (PontuationList).Contains(Last))
+                Points -= 2;
+
+            if (!IsJap) {
+                foreach (string Word in Words) {
+                    int WNumbers = Word.Where(c => char.IsNumber(c)).Count();
+                    int WLetters = Word.Where(c => char.IsLetter(c)).Count();
+                    if (WLetters > 0 && WNumbers > 0) {
+                        Points += 2;
+                    }
+                    if (Word.Trim(PontuationList).Where(c => PontuationList.Contains(c)).Count() != 0) {
+                        Points += 2;
+                    }
+                }
             }
-            return Status;
+
+            if (!BeginQuote && !char.IsLetter(Str.First()))
+                Points += 2;
+
+            if (Specials > WordCount)
+                Points++;
+
+            if ((Pontuations == 0) && (WordCount <= 2) && !IsJap)
+                Points++;
+
+            if (Uppers > Pontuations + 2 && !IsCaps)
+                Points++;
+
+            if (Spaces > WordCount * 2)
+                Points++;
+
+            if (IsJap && Spaces == 0)
+                Points--;
+
+            if (!IsJap && Spaces == 0)
+                Points += 2;
+
+            if (WordCount <= 2 && Numbers != 0)
+                Points++;
+
+            if (Str.Length <= 3 && !IsJap)
+                Points++;
+
+            if (Numbers >= Str.Length)
+                Points++;
+
+            if (IsJap && Kanjis / 2 > JapChars)
+                Points--;
+
+            if (IsJap && JapChars > Kanjis)
+                Points--;
+
+            if (IsJap && Latim != 0)
+                Points += 2;
+
+            if (IsJap && Pontuations != 0)
+                Points++;
+
+            if (IsJap != AsianInput)
+                return false;
+
+            return Points < Sensitivity;
         }
+        public enum Case {
+            Lower, Upper, Normal, Title
+        }
+        public static Case GetLineCase(string String) {
+            string[] Words = String.Split(' ').Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
+            Case[] WordsCase = new Case[Words.Length];
+            for (int x = 0; x < Words.Length; x++) {
+                string Word = Words[x];
+                for (int i = 0; i < Word.Length; i++) {
+                    char Char = Word[i];
+                    if (Char > 0x8000)
+                        return Case.Normal;
+
+                    if (i == 0) {
+                        if (char.IsLetter(Char) && char.IsUpper(Char)) {
+                            WordsCase[x] = (x == 0 || (char.IsPunctuation(Words[x - 1].Last()))) ? Case.Normal : Case.Title;
+                        } else {
+                            WordsCase[x] = Case.Lower;
+                        }
+                    } else {
+                        if (char.IsUpper(Char))
+                            WordsCase[x] = Case.Upper;
+                        break;
+                    }
+                }
+            }
+
+            int Titles = (from x in WordsCase where x == Case.Title select x).Count();
+            int Upper = (from x in WordsCase where x == Case.Upper select x).Count();
+            int Normal = (from x in WordsCase where x == Case.Normal select x).Count();
+            int Lower = (from x in WordsCase where x == Case.Lower select x).Count();
+
+            if (Titles > Normal && Titles > Upper && Titles > Lower)
+                return Case.Title;
+            if (Upper > Titles && Upper > Normal && Upper > Lower)
+                return Case.Upper;
+            if (Lower > Titles && Lower > Upper && Lower > Normal)
+                return Case.Normal;
+
+            return Case.Normal;
+        }
+
 
         static int CountChars(string Str) {
             List<char> Chars = new List<char>();

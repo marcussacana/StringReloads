@@ -103,7 +103,7 @@
     <DllExportOurILAsm>true</DllExportOurILAsm>
     <DllExportLeaveIntermediateFiles>false</DllExportLeaveIntermediateFiles>
     <DllExportTimeout>300000</DllExportTimeout>
-    <DllExportPeCheck>2</DllExportPeCheck>
+    <DllExportPeCheck>3</DllExportPeCheck>
   </PropertyGroup>
   <Import Project="$(SolutionDir)packages\DllExport.1.6.0\tools\net.r_eg.DllExport.targets" Condition="Exists('$(SolutionDir)packages\DllExport.1.6.0\tools\net.r_eg.DllExport.targets')" Label="8337224c9ad9e356" />
   <Target Name="DllExportRestorePkg" BeforeTargets="PrepareForBuild">

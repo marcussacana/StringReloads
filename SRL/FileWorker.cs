@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 
@@ -117,13 +118,20 @@ namespace SRL {
             ReloadMaskParameters = false;
             LiteMode = false;
             RemoveIlegals = false;
+            AsianInput = false;
+            QuoteList = new Quote[0];
+            Sensitivity = 3;
+            DenyList = new string[0];
+            IgnoreList = new string[0];
 
             SRLSettings Settings;
             OverlaySettings OverlaySettings;
             WordwrapSettings WordwrapSettings;
+            FilterSettings FilterSettings;
             AdvancedIni.FastOpen(out Settings, IniPath);
             AdvancedIni.FastOpen(out OverlaySettings, IniPath);
             AdvancedIni.FastOpen(out WordwrapSettings, IniPath);
+            AdvancedIni.FastOpen(out FilterSettings, IniPath);
 
             Log(Initialized ? "Reloading Settings..." : "Loading Settings...", true);
 
@@ -161,9 +169,9 @@ namespace SRL {
                 Warning("The Multithread Settings Changed - Restart Required");
             }
 
-            if (!string.IsNullOrWhiteSpace(Settings.DenyChars)) {
+            if (!string.IsNullOrWhiteSpace(FilterSettings.DenyList)) {
                 Log("Custom Denied Chars List Loaded...", true);
-                DenyChars = Settings.DenyChars;
+                DenyList = FilterSettings.DenyList.Split(',');
             }
 
             if (Settings.TrimRangeMismatch) {
@@ -193,6 +201,11 @@ namespace SRL {
             if (Settings.MultiDatabase) {
                 Log("Multidatabase's Matching Method Enabled...", true);
                 MultipleDatabases = true;
+            }
+
+            if (Settings.AsianInput) {
+                Log("Asian Text Mode Enabled...", true);
+                AsianInput = true;
             }
 
             if (Settings.WindowHook) {
@@ -345,29 +358,53 @@ namespace SRL {
                 SpecialLineBreaker = true;
             }
 
-            if (!string.IsNullOrEmpty(Settings.MatchIgnore)) {
+            if (!string.IsNullOrEmpty(FilterSettings.IgnoreList)) {
                 Log("Using Custom Ignore List...", true);
                 MatchDel = new string[0];
-                foreach (string str in Settings.MatchIgnore.Split(','))
+                foreach (string str in FilterSettings.IgnoreList.Split(','))
                     if (str.Trim().StartsWith("0x")) {
-                        string Del = System.Text.Encoding.UTF8.GetString(ParseHex(str.Trim()));
+                        string Del = Encoding.UTF8.GetString(ParseHex(str.Trim()));
                         AppendArray(ref MatchDel, Del, true);
                     } else
                         AppendArray(ref MatchDel, str.Replace(BreakLineFlag, "\n").Replace(ReturnLineFlag, "\r"), true);
             }
 
-            if (!string.IsNullOrEmpty(Settings.TrimChars)) {
+            if (!string.IsNullOrEmpty(FilterSettings.TrimList)) {
                 Log("Using Custom Trim List...", true);
                 TrimChars = new string[0];
-                foreach (string str in Settings.TrimChars.Split(',')) {
+                foreach (string str in FilterSettings.TrimList.Split(',')) {
                     if (str.Trim().StartsWith("0x")) {
-
-                        string Trim = System.Text.Encoding.UTF8.GetString(ParseHex(str.Trim()));
+                        string Trim = Encoding.UTF8.GetString(ParseHex(str.Trim()));
                         AppendArray(ref TrimChars, Trim, true);
                     } else
                         AppendArray(ref TrimChars, str.Replace(BreakLineFlag, "\n").Replace(ReturnLineFlag, "\r"), true);
                 }
             }
+            if (!string.IsNullOrEmpty(FilterSettings.QuoteList)) {
+                Log("Using Custom Quotes...", true);
+                foreach (string str in FilterSettings.TrimList.Split(',')) {
+                    if (string.IsNullOrEmpty(str))
+                        continue;
+                    AppendArray(ref QuoteList, new Quote() {
+                        Start = str.First(),
+                        End = str.Last()
+                    }, true);
+                    Ranges.Add(new Range() {
+                        Min = str.First(),
+                        Max = str.First()
+                    });
+                    Ranges.Add(new Range() {
+                        Min = str.Last(),
+                        Max = str.Last()
+                    });
+                }
+            }
+
+            if (FilterSettings.Sensitivity != 2) {
+                Log("Dialogue Sensitivity Level Changed to {0}", true, FilterSettings.Sensitivity);
+                Sensitivity = FilterSettings.Sensitivity;
+            }
+
 
             if (!string.IsNullOrWhiteSpace(Settings.WorkDirectory)) {
                 CustomDir = Settings.WorkDirectory.TrimStart(' ', '\\', '/').Replace("/", "\\");
@@ -379,6 +416,7 @@ namespace SRL {
 
                 Log("Custom Directory Loaded", true);
             }
+
 
             Log("Settings Loaded.", true);
 

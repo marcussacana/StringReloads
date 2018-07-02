@@ -5,8 +5,10 @@ using System.Runtime.InteropServices;
 namespace SRL {
     public partial class StringReloader {
 
+
         [DllExport]
-        public static IntPtr Process(IntPtr Target) {
+        public static IntPtr Process(IntPtr Target) => ProcessInternal(Target);
+        private static IntPtr ProcessInternal(IntPtr Target) {
             again:;
             int Tries = 0;
             try {
@@ -62,7 +64,7 @@ namespace SRL {
                 LastInput = Input;
 
                 if (ShowNonReloads) {
-                    //TrimWorker(ref Reloaded, Input); //To Translation It's Better Turn This Off.
+                    TrimWorker(ref Reloaded, Input); //To Translation It's Better Turn This Off.
                     UpdateOverlay(Reloaded);
                 }
 
@@ -125,6 +127,18 @@ namespace SRL {
             string Parameter = GetStringA(hCmdLine);
             ServiceCall(Parameter);
             return IntPtr.Zero;
+        }
+
+        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        private delegate IntPtr ProcDelegate(IntPtr Target);
+        private static ProcDelegate DirectProc = new ProcDelegate(ProcessInternal);
+
+        [DllExport]
+        public static IntPtr GetDirectProcess() {
+            try {
+                DirectRequested = true;             
+                return Marshal.GetFunctionPointerForDelegate(DirectProc);
+            } catch { return IntPtr.Zero; }
         }
 
         public static string ProcessManaged(string Text) {
