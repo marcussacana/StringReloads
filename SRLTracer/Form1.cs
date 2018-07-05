@@ -9,7 +9,9 @@ namespace SRLTracer {
         }
 
         private void button1_Click(object sender, EventArgs e) {
-                TBInput.Text = SRLUnity.Wrapper.Process(TBInput.Text);
+#if !AppVeyor
+            TBInput.Text = SRLUnity.Wrapper.Process(TBInput.Text);
+#endif
         }
 
 
