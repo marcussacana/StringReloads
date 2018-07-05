@@ -21,6 +21,7 @@ namespace SRLTracer {
             if (ofd.ShowDialog() != DialogResult.OK)
                 return;
 
+#if !AppVeyor
             Wrapper Wrapper = new Wrapper();
             foreach (string Script in ofd.FileNames) {
                 var Strings = Wrapper.Import(Script, TryLastPluginFirst: true);
@@ -28,6 +29,7 @@ namespace SRLTracer {
                     Strings[i] = SRLUnity.Wrapper.Process(Strings[i]);
                 Wrapper.Export(Strings, Script);
             }
+#endif
             MessageBox.Show("Task Finished.");
         }
     }
