@@ -70,10 +70,10 @@ After some problems with games that reload string inside a loop I created the Ge
 	call EAX              ;Calls the GetDirectProcess
 	pop EBX               ;Recovery NXT Address
 	mov [EBX+0x24], EAX   ;Save the Process Address
-    mov EAX, EBX          ;Prepare to Finish
+	mov EAX, EBX          ;Prepare to Finish
 @Finish:
 	add EAX, 0x1D         ;Ajust Pointer
-    mov EAX, [EAX]		  ;Read the Process Address
+	mov EAX, [EAX]		  ;Read the Process Address
 	ret
 
 @Ptr:
