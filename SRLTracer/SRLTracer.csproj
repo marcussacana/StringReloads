@@ -10,6 +10,7 @@
     <AssemblyName>SRLTracer</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -31,10 +32,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
@@ -61,7 +58,9 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -73,9 +72,13 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SRL\SRL.csproj">
-      <Project>{dae58cae-d595-450f-815b-36affcbfce41}</Project>
-      <Name>SRL</Name>
+    <ProjectReference Include="..\SacanaWrapper\SacanaWrapper.csproj">
+      <Project>{66c4fb33-9701-4bb2-82b0-b9ad4f807dfa}</Project>
+      <Name>SacanaWrapper</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SRLUnity\SRLUnity.csproj">
+      <Project>{67389c64-0f78-4b09-b551-9e099345022e}</Project>
+      <Name>SRLUnity</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

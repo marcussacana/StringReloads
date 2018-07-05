@@ -1,4 +1,4 @@
-# StringsReloads v1.0
+# StringsReloads v2.0
 [![Build Status](https://ci.appveyor.com/api/projects/status/github/marcussacana/StringReloads?branch=master&retina=true)](https://ci.appveyor.com/project/marcussacana/StringReloads)
 
 
@@ -24,12 +24,14 @@ Our strategy to inject the string is create a new section using tools like the S
 	push EAX		;The EAX is the string pointer or a unicode character
 	call GetProc		;Here the Srl.Process Pointer is catched
 	call EAX
-	add ESP, 0x4		;Discard the last "Push EAX" (Is Cdecl)
+	;The next line is to the SRL.Process only
+	add ESP, 0x4		;Discard the last "Push EAX" (The SRL.Process is Cdecl)
 	pop EBX			;Restore EDX, ECX, EBX Registers from the "Backup"
 	pop ECX
 	pop EDX
 	jmp RetPnt		;Continue the Execution
 ```
+Keep in mind, the add ESP, 0x4 is required when you use the SRL.Process export, if you use the SRL.ProcessSTD or SRL.GetDirectProcess you can't put this line.
 
 ---
 
@@ -52,6 +54,33 @@ If you wanna use the SRL to put Non-ASCII Characters you need call the Srl.Proce
 	mov EAX, [EAX]		;Read the import table
 	ret
 ```
+### Fastest Reload Method:
+After some problems with games that reload string inside a loop I created the GetDirectProcess, to import this function use the same method of the SRL.Process above, But you will change the GetProc, here a example code:
+
+```Assembly
+@GetProc:
+	call Nxt	    	   ;Call the label Nxt
+@Nxt:			    	   ;Declare the Nxt label
+	pop EAX 		       ;Catch the EIP :)
+	cmp dword [EAX+0x1D], 0;Verify if already have the Address
+	jne @Finish
+	push EAX              ;Backup NXT Address
+	sub EAX, 0x2050		  ;Subtract the Difference from the EIP and Import Address
+	mov EAX, [EAX]		  ;Read the import table
+	call EAX              ;Calls the GetDirectProcess
+	pop EBX               ;Recovery NXT Address
+	mov [EBX+0x24], EAX   ;Save the Process Address
+    mov EAX, EBX          ;Prepare to Finish
+@Finish:
+	add EAX, 0x1D         ;Ajust Pointer
+    mov EAX, [EAX]		  ;Read the Process Address
+	ret
+
+@Ptr:
+	dd 0                ;Here is the @Nxt: + 0x1D
+
+```
+You don't give pass nothing to this method, just call and catch the EAX, the EAX is a pointer to the Process function, using this pointer will be more fast to call the function, Keep in mind, the pointer given by the GetDirectProcess, is a STDCall function, so, you don't need pop the pointer given to the Process before
 
 ---
 
@@ -64,3 +93,4 @@ If you wanna use the SRL to put Non-ASCII Characters you need call the Srl.Proce
 	*  (Use <0x02B9E44A> for example to set the position to write your code)
 * Auto-Builds: [AppVeyor](https://ci.appveyor.com/project/marcussacana/StringReloads/build/artifacts)
 * Lastest Build: [Download](https://ci.appveyor.com/api/projects/marcussacana/StringReloads/artifacts/SRL/bin/SRLEngine.zip)
+* Auto-Releases: [Visit](https://github.com/marcussacana/StringReloads/releases/latest)

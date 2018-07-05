@@ -4,38 +4,48 @@ using System.Runtime.InteropServices;
 namespace SRLUnity {
     public static class Wrapper
     {
+        static ProcessStd Function = null;
         public static bool Is64Bits = IntPtr.Size == 8;
-#if x86
-        public static bool Is64BitsBuild = false;
 
-        [DllImport("SRLx32.dll", CallingConvention = CallingConvention.StdCall)]
-#endif
-#if x64
-        public static bool Is64BitsBuild = true;
-        [DllImport("SRLx64.dll", CallingConvention = CallingConvention.FastCall)]
-#endif
-        private extern static IntPtr Process(IntPtr Ptr);
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        private delegate IntPtr ProcessStd(IntPtr Ptr);
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        private delegate IntPtr GetDirectProcess();
 
         public static string Process(string Text) {
-            TestBuild();
+            Initialize();
 
             IntPtr Ptr = Marshal.StringToHGlobalAuto(Text);
-            IntPtr New = Process(Ptr);
+            IntPtr New = Function(Ptr);
             Text = Marshal.PtrToStringAuto(New);
             Marshal.FreeHGlobal(Ptr);
             return Text;
         }
         public static char Process(char Char) {
-            TestBuild();
-            IntPtr Result = Process(new IntPtr(Char));
+            Initialize();
+            IntPtr Result = Function(new IntPtr(Char));
             return (char)(Result.ToInt32() & 0xFFFF);
         }
 
-        private static void TestBuild() {
-            if (Is64Bits != Is64BitsBuild) {
-                string Error = $"You can't Use {(Is64BitsBuild ? "x64" : "x86")} Builds in {(Is64Bits ? "x64" : "x86")} Games";
-                throw new Exception(Error);
+        private static void Initialize() {
+            if (Function == null) {
+                IntPtr DLL = NativeMethods.LoadLibrary(Is64Bits ? "SRLx64.dll" : "SRLx86.dll");
+                IntPtr Func = NativeMethods.GetProcAddress(DLL, "ProcessStd");
+                Function = Marshal.GetDelegateForFunctionPointer(Func, typeof(ProcessStd)) as ProcessStd;
             }
         }
+
     }
+    static class NativeMethods {
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr LoadLibrary(string dllToLoad);
+
+        [DllImport("kernel32.dll")]
+        public static extern IntPtr GetProcAddress(IntPtr hModule, string procedureName);
+
+        [DllImport("kernel32.dll")]
+        public static extern bool FreeLibrary(IntPtr hModule);
+    }
+
 }

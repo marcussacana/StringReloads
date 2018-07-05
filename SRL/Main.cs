@@ -7,8 +7,12 @@ namespace SRL {
 
 
         [DllExport]
-        public static IntPtr Process(IntPtr Target) => ProcessInternal(Target);
-        private static IntPtr ProcessInternal(IntPtr Target) {
+        public static IntPtr Process(IntPtr Target) => ProcessReal(Target);
+
+        [DllExport(CallingConvention = CallingConvention.StdCall)]
+        public static IntPtr ProcessStd(IntPtr Target) => ProcessReal(Target);
+
+        private static IntPtr ProcessReal(IntPtr Target) {
             again:;
             int Tries = 0;
             try {
@@ -129,9 +133,9 @@ namespace SRL {
             return IntPtr.Zero;
         }
 
-        [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         private delegate IntPtr ProcDelegate(IntPtr Target);
-        private static ProcDelegate DirectProc = new ProcDelegate(ProcessInternal);
+        private static ProcDelegate DirectProc = new ProcDelegate(ProcessReal);
 
         [DllExport]
         public static IntPtr GetDirectProcess() {

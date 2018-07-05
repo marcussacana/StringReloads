@@ -1,6 +1,5 @@
-﻿using SRL;
+﻿using SacanaWrapper;
 using System;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace SRLTracer {
@@ -10,19 +9,26 @@ namespace SRLTracer {
         }
 
         private void button1_Click(object sender, EventArgs e) {
-            if (checkBox1.Checked)
-                System.Diagnostics.Debugger.Break();
-            if (rManaged.Checked) {
-                Managed();
-            } else
-                TBInput.Text = Process(TBInput.Text);
+                TBInput.Text = SRLUnity.Wrapper.Process(TBInput.Text);
         }
 
-        private void Managed() {
-            TBInput.Text = StringReloader.ProcessManaged(TBInput.Text);
-        }
 
-        [DllImport("SRL.dll", CallingConvention = CallingConvention.Cdecl)]
-        private static extern string Process(string Input);
+        private void button2_Click(object sender, EventArgs e) {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "All Files|*.*";
+            ofd.Multiselect = true;
+
+            if (ofd.ShowDialog() != DialogResult.OK)
+                return;
+
+            Wrapper Wrapper = new Wrapper();
+            foreach (string Script in ofd.FileNames) {
+                var Strings = Wrapper.Import(Script, TryLastPluginFirst: true);
+                for (uint i = 0; i < Strings.LongLength; i++)
+                    Strings[i] = SRLUnity.Wrapper.Process(Strings[i]);
+                Wrapper.Export(Strings, Script);
+            }
+            MessageBox.Show("Task Finished.");
+        }
     }
 }
