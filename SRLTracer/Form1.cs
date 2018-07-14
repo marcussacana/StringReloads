@@ -25,13 +25,18 @@ namespace SRLTracer {
 
 #if !AppVeyor
             Wrapper Wrapper = new Wrapper();
-            foreach (string Script in ofd.FileNames) {
+            for (int i = 0; i < ofd.FileNames.Length; i++) {
+                string Script = ofd.FileNames[i];
+                Text = $"SRLTracer - Exporting {System.IO.Path.GetFileName(Script)} ({i} of {ofd.FileNames.Length} Files)";
+                Application.DoEvents();
+
                 var Strings = Wrapper.Import(Script, TryLastPluginFirst: true);
-                for (uint i = 0; i < Strings.LongLength; i++)
-                    Strings[i] = SRLUnity.Wrapper.Process(Strings[i]);
+                for (uint x = 0; x < Strings.LongLength; x++)
+                    Strings[x] = SRLUnity.Wrapper.Process(Strings[x]);
                 Wrapper.Export(Strings, Script);
             }
 #endif
+            Text = "SRL Engine Tracer Tool";
             MessageBox.Show("Task Finished.");
         }
     }
