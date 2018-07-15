@@ -47,7 +47,7 @@ If you wanna use the SRL to put Non-ASCII Characters you need call the Srl.Proce
 ### Sample Catch Srl.Process:
 ```Assembly
 @GetProc:
-	call Nxt		;Call the label Nxt
+	call @Nxt		;Call the label Nxt
 @Nxt:				;Declare the Nxt label
 	pop EAX 		;Catch the EIP :)
 	sub EAX, 0x204C		;Subtract the Difference from the EIP and Import Address
@@ -59,7 +59,7 @@ After some problems with games that reload string inside a loop I created the Ge
 
 ```Assembly
 @GetProc:
-	call Nxt	    	   ;Call the label Nxt
+	call @Nxt	    	   ;Call the label Nxt
 @Nxt:			    	   ;Declare the Nxt label
 	pop EAX 		       ;Catch the EIP :)
 	cmp dword [EAX+0x1D], 0;Verify if already have the Address
