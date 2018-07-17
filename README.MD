@@ -47,7 +47,7 @@ If you wanna use the SRL to put Non-ASCII Characters you need call the Srl.Proce
 ### Sample Catch Srl.Process:
 ```Assembly
 @GetProc:
-	call Nxt		;Call the label Nxt
+	call @Nxt		;Call the label Nxt
 @Nxt:				;Declare the Nxt label
 	pop EAX 		;Catch the EIP :)
 	sub EAX, 0x204C		;Subtract the Difference from the EIP and Import Address
@@ -59,25 +59,25 @@ After some problems with games that reload string inside a loop I created the Ge
 
 ```Assembly
 @GetProc:
-	call Nxt	    	   ;Call the label Nxt
+	call @Nxt	    	   ;Call the label Nxt
 @Nxt:			    	   ;Declare the Nxt label
 	pop EAX 		       ;Catch the EIP :)
-	cmp dword [EAX+0x1D], 0;Verify if already have the Address
+	cmp dword [EAX+0x21], 0;Verify if already have the Address
 	jne @Finish
 	push EAX              ;Backup NXT Address
 	sub EAX, 0x2050		  ;Subtract the Difference from the EIP and Import Address
 	mov EAX, [EAX]		  ;Read the import table
 	call EAX              ;Calls the GetDirectProcess
 	pop EBX               ;Recovery NXT Address
-	mov [EBX+0x24], EAX   ;Save the Process Address
+	mov [EBX+0x21], EAX   ;Save the Process Address
 	mov EAX, EBX          ;Prepare to Finish
 @Finish:
-	add EAX, 0x1D         ;Ajust Pointer
+	add EAX, 0x21         ;Ajust Pointer
 	mov EAX, [EAX]		  ;Read the Process Address
 	ret
 
 @Ptr:
-	dd 0                ;Here is the @Nxt: + 0x1D
+	dd 0                ;Here is the @Nxt: + 0x21
 
 ```
 You don't give pass nothing to this method, just call and catch the EAX, the EAX is a pointer to the Process function, using this pointer will be more fast to call the function, Keep in mind, the pointer given by the GetDirectProcess, is a STDCall function, so, you don't need pop the pointer given to the Process before
