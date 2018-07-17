@@ -197,6 +197,12 @@ namespace SRL {
                     Reader.Close();
                 }
 
+                Log("Initializing Replaces...", true);
+                for (uint i = 0; i < Data.RepOri.LongLength; i++) {
+                    AppendArray(ref Replaces, Data.RepOri[i]);
+                    AppendArray(ref Replaces, Data.RepTrg[i]);
+                }
+
                 Log("Processing Char Reloads... 1/2", true);
                 CharRld = new Dictionary<ushort, char>();
                 for (uint i = 0; i < Data.OriLetters.LongLength; i++) {
@@ -225,6 +231,7 @@ namespace SRL {
                         UnkRld.Add(c, Data.UnkReps[i]);
                     }
                 }
+
 
                 Log("Chars Reloads Initialized, Total entries: {0} + {1}", true, UnkRld.Count, CharRld.Count);
                 Log("Processing String Reloads...", true);
@@ -266,12 +273,7 @@ namespace SRL {
                         FinishDatabase();
                 }
                 Log("String Reloads Initialized, {0} Databases Created, {1} Reload Entries, {2} Mask Entries", true, Databases.Count-1, ReloadEntries, MaskEntries);
-                Log("Initializing Replaces...", true);
-                for (uint i = 0; i < Data.RepOri.LongLength; i++) {
-                    AppendArray(ref Replaces, Data.RepOri[i]);
-                    AppendArray(ref Replaces, Data.RepTrg[i]);
-                }
-
+                
 
                 Log("Registring Databases Name...", true);                
                 DBNames = new Dictionary<long, string>();
