@@ -153,20 +153,27 @@ namespace SRL {
             return Input;
         }
 
-        internal static void UpdateOverlay(string Text) {
-            if (Overlay != null && OverlayEnabled) {
-                if (!OverlayInitialized) {
-                    Overlay.Call("Overlay.Exports", "HookWindow", GameHandler);
-                    OverlayInitialized = true;
-                }
+        internal static string UpdateOverlay(string Text) {
+            try {
+                if (Overlay != null && OverlayEnabled) {
+                    if (!OverlayInitialized) {
+                        OverlayInitialized = true;
+                        Overlay.Call("Overlay.Exports", "HookWindow", GameHandler);
+                    }
 
-                if (!PaddingSeted) {
-                    PaddingSeted = true;
-                    Overlay.Call("Overlay.Exports", "SetOverlayPadding", OPaddingTop, OPaddinBottom, OPaddinLeft, OPaddingRigth);
-                }
+                    if (!PaddingSeted) {
+                        PaddingSeted = true;
+                        Overlay.Call("Overlay.Exports", "SetOverlayPadding", OPaddingTop, OPaddinBottom, OPaddinLeft, OPaddingRigth);
+                    }
 
-                Overlay.Call("Overlay.Exports", "SetDialogue", ReplaceChars(Text, true).Replace(GameLineBreaker, "\n"));
-            }
+                    string ret = Overlay.Call("Overlay.Exports", "SetDialogue", ReplaceChars(Text, true).Replace(GameLineBreaker, "\n"));
+                    ret = ReplaceChars(ret).Replace("\n", GameLineBreaker);
+                    return ret;
+                } else if (Text.StartsWith("::EVENT")) {
+                    Text = Text.Substring(Text.IndexOf("::", 2) + 2);
+                }
+            } catch { }
+            return Text;
         }
 
         internal static void Init() {

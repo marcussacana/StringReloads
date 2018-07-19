@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -10,8 +11,8 @@ namespace Overlay {
 	{
         private string ListFN = null;
         private bool TranslationMode = false;
-        private bool AutoFontSize = false;
-        private float FixedFontSize = 8f;
+        public bool AutoFontSize = false;
+        public float FixedFontSize = 8f;
 
         static bool Initializing = false;
 		internal Overlay()
@@ -19,6 +20,7 @@ namespace Overlay {
 			InitializeComponent();
 
             TranslatePanel.Visible = TranslationMode;
+            ButtonPanel.Visible = File.Exists(AppDomain.CurrentDomain.BaseDirectory + "Strings.lst");
         }       
 
         private void LB_Legenda_TextChanged(object sender, EventArgs e) {
@@ -45,7 +47,10 @@ namespace Overlay {
             get { return DialogueBox.Text; }
 
             set {
-                Invoke(new MethodInvoker(() => {
+                if (Application.OpenForms.OfType<Overlay>().Count() == 0)
+                    Show();
+
+                    Invoke(new MethodInvoker(() => {
                     DialogueBox.Text = value;
                     DialogueBox.Invalidate();
 
@@ -70,9 +75,11 @@ namespace Overlay {
                     Application.DoEvents();
                 }
 
-                if (_DefaultInstance == null) {
+                if (_DefaultInstance == null || _DefaultInstance.IsDisposed || !_DefaultInstance.CanInvoke()) {
                     Initializing = true;
                     _DefaultInstance = new Overlay();
+                    _DefaultInstance.Show();
+                    _DefaultInstance.Hide();
                     Initializing = false;
                 }
 
@@ -80,6 +87,15 @@ namespace Overlay {
             }
         }
 
+        public bool CanInvoke() {
+            try {
+                Invoke(new MethodInvoker(() => { }));
+                return true;
+            } catch {
+                return false;
+            }
+
+        }
         private void bntSettings_Click(object sender, EventArgs e) {
             Settings Window = new Settings();
             Window.ShowDialog();
@@ -160,6 +176,14 @@ namespace Overlay {
                 }
                 String = Result;
             }
+        }
+
+        new void Invoke(Delegate Method) {
+                base.Invoke(Method);
+        }
+        private void MouseClicked(object sender, MouseEventArgs e) {
+            Point Pos = PointToScreen(e.Location);
+            Exports.SendMouseClick(Exports.HookHandler, Pos.X, Pos.Y);
         }
     }
 

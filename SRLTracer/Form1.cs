@@ -9,7 +9,7 @@ namespace SRLTracer {
         }
 
         private void button1_Click(object sender, EventArgs e) {
-#if !AppVeyor
+#if AppVeyor
             TBInput.Text = SRLUnity.Wrapper.Process(TBInput.Text);
 #endif
         }
@@ -23,7 +23,7 @@ namespace SRLTracer {
             if (ofd.ShowDialog() != DialogResult.OK)
                 return;
 
-#if !AppVeyor
+#if AppVeyor
             Wrapper Wrapper = new Wrapper();
             for (int i = 0; i < ofd.FileNames.Length; i++) {
                 string Script = ofd.FileNames[i];

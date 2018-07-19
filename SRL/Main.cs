@@ -67,9 +67,8 @@ namespace SRL {
 
                 LastInput = Input;
 
-                if (ShowNonReloads) {
-                    TrimWorker(ref Reloaded, Input); //To Translation It's Better Turn This Off.
-                    UpdateOverlay(Reloaded);
+                if (Input != Reloaded) {
+                    Reloaded = UpdateOverlay(Reloaded);
                 }
 
                 //Prevent inject a string already injected
@@ -88,9 +87,6 @@ namespace SRL {
 
                     CacheReply(Reloaded);
                     TrimWorker(ref Reloaded, Input);
-
-                    if (!ShowNonReloads)
-                        UpdateOverlay(Reloaded);
 
                     if (NoReload)
                         return Target;

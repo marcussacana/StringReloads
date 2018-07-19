@@ -57,6 +57,7 @@ namespace Overlay
             // 
             // LabelBackground
             // 
+            this.LabelBackground.BackColor = System.Drawing.Color.Fuchsia;
             this.LabelBackground.Controls.Add(this.DialogueBox);
             this.LabelBackground.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.LabelBackground.ForeColor = System.Drawing.SystemColors.ControlText;
@@ -79,6 +80,7 @@ namespace Overlay
             this.DialogueBox.Text = "Waiting Text";
             this.DialogueBox.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.DialogueBox.TextChanged += new System.EventHandler(this.LB_Legenda_TextChanged);
+            this.DialogueBox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.MouseClicked);
             // 
             // ButtonPanel
             // 
