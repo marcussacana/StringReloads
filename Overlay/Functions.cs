@@ -1,4 +1,5 @@
-﻿using System;
+﻿//#define DEBUG
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Runtime.InteropServices;
@@ -12,6 +13,13 @@ using static Overlay.Events;
 #pragma warning disable 1591
 namespace Overlay {
     public static class Exports {
+
+        public static bool TextOnly = false;
+        internal static IOverlay DefaultInstance {
+            get {
+                return (TextOnly ? (IOverlay)TextOverlay.DefaultInstance : Overlay.DefaultInstance);
+            }
+        }
         public static string SetDialogue(string text) {
             try {
                 if (text.StartsWith("::EVENT")) {
@@ -32,7 +40,7 @@ namespace Overlay {
                 }
 
                 if (EventList.Length == 0 || HookText)
-                    Overlay.DefaultInstance.ShowText(text);
+                    DefaultInstance.Text = text;
             } catch (Exception ex) {
 #if DEBUG
                 MessageBox.Show(ex.ToString());
@@ -56,16 +64,16 @@ namespace Overlay {
 
         static bool Minimized = false;
         internal static void UpdateWindow(IntPtr WindowHandler) {
-            if (!Overlay.DefaultInstance.CanInvoke())
+            if (!DefaultInstance.CanInvoke())
                 return;
 
             var Rst = new WINDOWPLACEMENT();
             GetWindowPlacement(WindowHandler, ref Rst);
             if (Rst.showCmd == WMinimized) {
-                if (Overlay.DefaultInstance.WindowState == FormWindowState.Normal) {
+                if (DefaultInstance.WindowState == FormWindowState.Normal) {
                     Minimized = true;
-                    Overlay.DefaultInstance.Invoke(new MethodInvoker(() => {
-                        Overlay.DefaultInstance.WindowState = FormWindowState.Minimized;
+                    DefaultInstance.Invoke(new MethodInvoker(() => {
+                        DefaultInstance.WindowState = FormWindowState.Minimized;
                     }));
                 }
 
@@ -75,18 +83,22 @@ namespace Overlay {
 
             if (Minimized) {
                 Minimized = false;
-                Overlay.DefaultInstance.Invoke(new MethodInvoker(() => {
-                    Overlay.DefaultInstance.WindowState = FormWindowState.Normal;
+                DefaultInstance.Invoke(new MethodInvoker(() => {
+                    DefaultInstance.WindowState = FormWindowState.Normal;
                 }));
             }
             
-            Overlay.DefaultInstance.Invoke(new MethodInvoker(() => {
+            DefaultInstance.Invoke(new MethodInvoker(() => {
                 try {
                     GetPoint(WindowHandler, out Size Size, out Point Point);
-                    Overlay.DefaultInstance.Size = Size;
-                    Overlay.DefaultInstance.Location = Point;
+                    DefaultInstance.Size = Size;
+                    DefaultInstance.Location = Point;
 
-                    Overlay.DefaultInstance.Focus();
+                    DefaultInstance.Focus();
+
+                    SetWindowPos(DefaultInstance.Handle, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+                    SetWindowPos(DefaultInstance.Handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+
                     SetForegroundWindow(WindowHandler);
                 } catch { }
             }));
@@ -125,7 +137,7 @@ namespace Overlay {
                     Application.EnableVisualStyles();
                     Application.SetCompatibleTextRenderingDefault(false);
                     
-                    Overlay.DefaultInstance.Show();
+                    DefaultInstance.Show();
 
                     new Thread(() => { SetDialogue("::EVENT0::"); }).Start();
 
@@ -139,7 +151,7 @@ namespace Overlay {
                         }
 
                         try {
-                            for (int i = 0; i < 50; i++) {
+                            for (int i = 0; i < 25; i++) {
                                 Application.DoEvents();
                                 Thread.Sleep(10);
                             }
@@ -147,7 +159,7 @@ namespace Overlay {
                     }
 
                     //Maybe Envoriment.Exit will bee needed.
-                    Overlay.DefaultInstance.Close();
+                    DefaultInstance.Close();
                 });
 
                 OverlayThread.SetApartmentState(ApartmentState.STA);
@@ -175,6 +187,15 @@ namespace Overlay {
         internal const int WNormal = 1;
         internal const int WMinimized = 2;
         internal const int WMaximized = 3;
+
+        [DllImport("user32.dll")]
+        internal static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
+        internal static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
+        internal static readonly IntPtr HWND_TOP = new IntPtr(0);
+        internal const uint SWP_NOSIZE = 0x0001;
+        internal const uint SWP_NOMOVE = 0x0002;
+        internal const uint SWP_SHOWWINDOW = 0x0040;
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -276,30 +297,30 @@ namespace Overlay {
                         case "subtitle":
                         case "set text":
                         case "text":
-                            Overlay.DefaultInstance.ShowText(CMDV.Replace("\\n", "\n"));
+                            DefaultInstance.Text = CMDV.Replace("\\n", "\n");
                             break;
                         case "clear":
                         case "clear text":
                         case "remove text":
                         case "cls":
-                            Overlay.DefaultInstance.ShowText(string.Empty);
+                            DefaultInstance.Text = string.Empty;
                             break;
                         case "hide":
                         case "close":
                         case "hide overlay":
                         case "close overlay":
-                            Overlay.DefaultInstance.Invoke(new MethodInvoker(() => {
-                                Overlay.DefaultInstance.Opacity = 1.0d;
-                                Overlay.DefaultInstance.Hide();
+                            DefaultInstance.Invoke(new MethodInvoker(() => {
+                                DefaultInstance.Opacity = 1.0d;
+                                DefaultInstance.Hide();
                             }));
                             break;
                         case "show":
                         case "open":
                         case "show overlay":
                         case "open overlay":
-                            Overlay.DefaultInstance.Invoke(new MethodInvoker(() => {
-                                Overlay.DefaultInstance.Opacity = 1.0d;
-                                Overlay.DefaultInstance.Show();
+                            DefaultInstance.Invoke(new MethodInvoker(() => {
+                                DefaultInstance.Opacity = 1.0d;
+                                DefaultInstance.Show();
                             }));
                             break;
                         case "window opacity":
@@ -307,23 +328,21 @@ namespace Overlay {
                         case "global opacity":
                         case "opacity":
                             double Opacity = double.Parse(CMDV);
-                            Overlay.DefaultInstance.Invoke(new MethodInvoker(() => {
-                                Overlay.DefaultInstance.Opacity = Opacity;
+                            DefaultInstance.Invoke(new MethodInvoker(() => {
+                                DefaultInstance.Opacity = Opacity;
                             }));
                             break;
                         case "set background color":
                         case "background color":
                         case "back color":
                         case "backcolor":
-                            Overlay.DefaultInstance.TranslatePanel.BackColor = LoadColor(CMDV, Color.FromArgb(40, 40, 40));
-                            Overlay.DefaultInstance.ButtonPanel.BackColor = LoadColor(CMDV, Color.FromArgb(40, 40, 40));
-                            Overlay.DefaultInstance.DialogueBox.BackColor = LoadColor(CMDV, Color.FromArgb(40, 40, 40));
+                            DefaultInstance.TextBackColor = LoadColor(CMDV, Color.Black);
                             break;
                         case "text color":
                         case "set text color":
                         case "fore color":
                         case "forecolor":
-                            Overlay.DefaultInstance.DialogueBox.ForeColor = LoadColor(CMDV, Color.FromArgb(40, 40, 40));
+                                DefaultInstance.TextForeColor = LoadColor(CMDV, Color.FromArgb(40, 40, 40));
                             break;
                         case "set padding":
                         case "force padding":
@@ -371,13 +390,13 @@ namespace Overlay {
                         case "set font size":
                         case "font resize":
                         case "resize font":
-                            Overlay.DefaultInstance.FixedFontSize = float.Parse(CMDV);
+                            DefaultInstance.Font = new Font(DefaultInstance.Font.FontFamily, float.Parse(CMDV), DefaultInstance.Font.Style);
                             break;
                         case "auto font size":
                         case "auto resize text":
                         case "auto font resize":
                         case "resize text":
-                            Overlay.DefaultInstance.AutoFontSize = CMDV.ToLower() == "true";
+                            DefaultInstance.AutoSize = CMDV.ToLower() == "true";
                             break;
                         case "set dock":
                         case "change dock":
@@ -395,6 +414,18 @@ namespace Overlay {
                                     break;
                             }
                             break;
+                        case "text only":
+                        case "no background":
+                        case "subtitle mode":
+                        case "hide background":
+                            string Text = DefaultInstance?.Text;
+                            DefaultInstance?.Close();
+                            DefaultInstance?.Dispose();
+                            TextOnly = CMDV.ToLower() == "true";
+                            DefaultInstance.Show();
+                            DefaultInstance.Text = Text;
+                            UpdateWindow(HookHandler);
+                            break;
                         case "hook text":
                         case "enable hook":
                         case "auto show":
@@ -406,6 +437,18 @@ namespace Overlay {
                         case "run event":
                         case "run":
                             TriggerEvent(uint.Parse(CMDV));
+                            break;
+                        case "call async":
+                        case "async":
+                        case "async invoke":
+                        case "invoke async":
+                            new Thread(() => { TriggerEvent(uint.Parse(CMDV)); }).Start();
+                            break;
+                        case "wait":
+                        case "sleep":
+                        case "delay":
+                        case "suspend":
+                            Thread.Sleep(int.Parse(CMDV));
                             break;
                         case "continue to event":
                         case "jump to event":
@@ -426,7 +469,6 @@ namespace Overlay {
                 }
             }
         }
-
 
         internal static Color LoadColor(string ColorName, Color Default) {
             try {

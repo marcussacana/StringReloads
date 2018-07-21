@@ -7,17 +7,38 @@ using System.Windows.Forms;
 
 #pragma warning disable 1591
 namespace Overlay {
-    public partial class Overlay
+    public partial class Overlay : IOverlay
 	{
+
+        public Color TextBackColor { get {
+                return DialogueBox.BackColor;
+            }
+            set {
+                DialogueBox.BackColor = value;
+            }
+        }
+
+        public Color TextForeColor {
+            get {
+                return DialogueBox.ForeColor;
+            }
+            set {
+                DialogueBox.ForeColor = value;
+            }
+        }
+
         private string ListFN = null;
         private bool TranslationMode = false;
         public bool AutoFontSize = false;
-        public float FixedFontSize = 8f;
 
         static bool Initializing = false;
 		internal Overlay()
 		{
 			InitializeComponent();
+
+
+            TopMost = true;
+            TopLevel = true;
 
             TranslatePanel.Visible = TranslationMode;
             ButtonPanel.Visible = File.Exists(AppDomain.CurrentDomain.BaseDirectory + "Strings.lst");
@@ -27,23 +48,27 @@ namespace Overlay {
             if (string.IsNullOrEmpty(DialogueBox.Text))
                 return;
 
-            DialogueBox.Font = new Font(DialogueBox.Font.Name, FixedFontSize, DialogueBox.Font.Style);
             DialogueBox.BorderStyle = BorderStyle.Fixed3D;
-            while (AutoFontSize) {
-                Font New = new Font(DialogueBox.Font.Name, DialogueBox.Font.Size + 1, DialogueBox.Font.Style);
-                using (var g = Graphics.FromHwnd(IntPtr.Zero)) {
-                    SizeF Rst = g.MeasureString(DialogueBox.Text, New);
-                    if (Rst.Width >= DialogueBox.Size.Width - 5 || Rst.Height >= DialogueBox.Size.Height - 5)
-                        break;
-                }
+            Font New = Font;
+            using (var g = Graphics.FromHwnd(IntPtr.Zero)) {
+                bool First = true;
+                if (AutoFontSize) {
+                    SizeF ExpectedSize;
+                    do {
+                        if (!First)
+                            New = new Font(New.Name, New.Size - 1, New.Style);
+                        First = false;
+                        ExpectedSize = g.MeasureString(Text, New);
 
-                DialogueBox.Font = New;
+                    } while (ExpectedSize.Width > DialogueBox.Width || ExpectedSize.Height > DialogueBox.Height);
+                }
             }
 
+            DialogueBox.Font = New;
             DialogueBox.BorderStyle = BorderStyle.None;
         }
 
-        public string DialogueText {
+        public new string Text {
             get { return DialogueBox.Text; }
 
             set {
@@ -62,9 +87,6 @@ namespace Overlay {
                 }));
             }
         }
-        public void ShowText(string Text) {
-            DialogueText = Text;
-        }
 
 		private static Overlay _DefaultInstance;
 
@@ -76,6 +98,8 @@ namespace Overlay {
                 }
 
                 if (_DefaultInstance == null || _DefaultInstance.IsDisposed || !_DefaultInstance.CanInvoke()) {
+                    if (Exports.TextOnly)
+                        return null;
                     Initializing = true;
                     _DefaultInstance = new Overlay();
                     _DefaultInstance.Show();
@@ -86,7 +110,6 @@ namespace Overlay {
                 return _DefaultInstance;
             }
         }
-
         public bool CanInvoke() {
             try {
                 Invoke(new MethodInvoker(() => { }));
@@ -103,7 +126,7 @@ namespace Overlay {
             TranslationMode = Window.TranslationMode;
             ListFN = Window.ListFile;
             AutoFontSize = Window.AutoResizeFont;
-            FixedFontSize = Window.FixedFontSize;
+            Font = new Font(Font.FontFamily, Window.FixedFontSize, Font.Style);
 
             TranslatePanel.Visible = TranslationMode;
         }
@@ -123,7 +146,7 @@ namespace Overlay {
 
             //Initial Algoritm, Needs implement overwrite feature if the string is already present.
             using (StreamWriter List = File.AppendText(AppDomain.CurrentDomain.BaseDirectory + ListFN)) {
-                List.WriteLine(DialogueText.Replace("\n", BreakLineFlag).Replace("\r", ReturnLineFlag));
+                List.WriteLine(this.Text.Replace("\n", BreakLineFlag).Replace("\r", ReturnLineFlag));
                 List.WriteLine(Text.Replace("\n", BreakLineFlag).Replace("\r", ReturnLineFlag));
             }
         }        
@@ -178,9 +201,14 @@ namespace Overlay {
             }
         }
 
-        new void Invoke(Delegate Method) {
-                base.Invoke(Method);
+        void IOverlay.Invoke(Delegate Method) {
+            Invoke(Method);
         }
+
+        void IOverlay.Focus() {
+            Focus();
+        }
+
         private void MouseClicked(object sender, MouseEventArgs e) {
             Point Pos = PointToScreen(e.Location);
             Exports.SendMouseClick(Exports.HookHandler, Pos.X, Pos.Y);

@@ -139,7 +139,8 @@ namespace Overlay
             this.Name = "Overlay";
             this.Opacity = 0.8D;
             this.Padding = new System.Windows.Forms.Padding(15);
-            this.Text = "Overlay";
+            this.ShowIcon = false;
+            this.ShowInTaskbar = false;
             this.TopMost = true;
             this.TransparencyKey = System.Drawing.Color.Fuchsia;
             this.LabelBackground.ResumeLayout(false);
