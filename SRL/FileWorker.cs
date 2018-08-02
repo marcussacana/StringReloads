@@ -122,6 +122,7 @@ namespace SRL {
             QuoteList = new Quote[0];
             Sensitivity = 3;
             UseDatabase = false;
+            AutoUnks = false;
             DenyList = new string[0];
             IgnoreList = new string[0];
 
@@ -212,6 +213,11 @@ namespace SRL {
             if (Settings.AsianInput) {
                 Log("Asian Text Mode Enabled...", true);
                 AsianInput = true;
+            }
+
+            if (Settings.AutoUnks) {
+                Log("Auto Unk Char Reload Enabled...", true);
+                AutoUnks = true;
             }
 
             if (Settings.WindowHook) {

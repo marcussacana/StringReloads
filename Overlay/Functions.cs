@@ -312,8 +312,8 @@ namespace Overlay {
                         case "hide overlay":
                         case "close overlay":
                             DefaultInstance.Invoke(new MethodInvoker(() => {
-                                DefaultInstance.Opacity = 1.0d;
-                                DefaultInstance.Hide();
+                                DefaultInstance.Opacity = 0;
+                                DefaultInstance?.Close();
                             }));
                             break;
                         case "show":

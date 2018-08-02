@@ -95,6 +95,7 @@ namespace SRL {
         static bool RemoveIlegals = false;
         static bool AsianInput = false;
         static bool ForceMTLDiagCheck = false;
+        static bool AutoUnks = false;
 
         static bool OverlayEnabled = false;
         static bool OverlayInitialized = false;

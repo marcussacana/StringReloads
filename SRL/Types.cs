@@ -233,6 +233,9 @@ namespace SRL {
 
             [FieldParmaters(DefaultValue = false, Name = "AsianInput;FromAsian;JapaneseInput;FromJapanese")]
             public bool AsianInput;
+
+            [FieldParmaters(DefaultValue = true, Name = "AutoUnkChar;AutoUnkCharReload;UnkCharByEncoding")]
+            public bool AutoUnks;
         }
 
         [FieldParmaters(Name = "WordWrap")]

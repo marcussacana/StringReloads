@@ -203,7 +203,7 @@ namespace SRL {
                     AppendArray(ref Replaces, Data.RepTrg[i]);
                 }
 
-                Log("Processing Char Reloads... 1/2", true);
+                Log("Processing Char Reloads... 1/3", true);
                 CharRld = new Dictionary<ushort, char>();
                 for (uint i = 0; i < Data.OriLetters.LongLength; i++) {
                     char cOri = Data.OriLetters[i];
@@ -223,12 +223,36 @@ namespace SRL {
                     }
                 }
 
-                Log("Processing Char Reloads... 2/2", true);
+                Log("Processing Char Reloads... 2/3", true);
                 UnkRld = new Dictionary<ushort, char>();
                 for (uint i = 0; i < Data.UnkChars.LongLength; i++) {
                     ushort c = Data.UnkChars[i];
                     if (!UnkRld.ContainsKey(c)) {
                         UnkRld.Add(c, Data.UnkReps[i]);
+                    }
+                }
+
+                Log("Processing Char Reloads... 3/3", true);
+                if (AutoUnks) {
+                    for (uint i = 0; i < Data.OriLetters.LongLength; i++) {
+                        char Char = Data.MemoryLetters[i];
+                        char OChar = Data.OriLetters[i];
+                        byte[] Buffer = WriteEncoding.GetBytes(Char.ToString());
+                        if (BitConverter.IsLittleEndian)
+                            Buffer = Buffer.Reverse().ToArray();
+
+                        if (Buffer.Length > 2) {
+                            Warning("Failed to generate Auto Unk Char to the char {0}", Char);
+                            continue;
+                        }
+
+                        byte[] DW = new byte[2];
+                        Buffer.CopyTo(DW, 0);
+                        ushort Unk = BitConverter.ToUInt16(DW, 0);
+                        if (UnkRld.ContainsKey(Unk))
+                            continue;
+
+                        UnkRld.Add(Unk, OChar);
                     }
                 }
 
