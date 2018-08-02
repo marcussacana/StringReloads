@@ -121,6 +121,7 @@ namespace SRL {
             AsianInput = false;
             QuoteList = new Quote[0];
             Sensitivity = 3;
+            UseDatabase = false;
             DenyList = new string[0];
             IgnoreList = new string[0];
 
@@ -172,6 +173,11 @@ namespace SRL {
             if (!string.IsNullOrWhiteSpace(FilterSettings.DenyList)) {
                 Log("Custom Denied Chars List Loaded...", true);
                 DenyList = FilterSettings.DenyList.Split(',');
+            }
+
+            if (FilterSettings.UseDB) {
+                Log("Filter with Database Enabled", true);
+                UseDatabase = true;
             }
 
             if (Settings.TrimRangeMismatch) {

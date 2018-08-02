@@ -92,18 +92,23 @@ namespace SRL {
             }
 
             if (ValidateMask(Input)) {
-                DialogFound = true;                
+                try {
+                    DialogFound = true;
 
-                string Result = ProcesMask(Input);
-                
-                if (Result.StartsWith(MaskWordWrap)) {
-                    Result = Result.Substring(MaskWordWrap.Length, Result.Length - MaskWordWrap.Length);
-                    Result = WordWrap(Result);
+                    string Result = ProcesMask(Input);
+
+                    if (Result.StartsWith(MaskWordWrap)) {
+                        Result = Result.Substring(MaskWordWrap.Length, Result.Length - MaskWordWrap.Length);
+                        Result = WordWrap(Result);
+                    }
+
+                    if (Native)
+                        return ReplaceChars(Result, true);
+                    return Result;
+                } catch (Exception ex) {
+                    Warning(ex.ToString());
+                    DialogFound = false;
                 }
-
-                if (Native)
-                    return ReplaceChars(Result, true);
-                return Result;
             }
 
 
@@ -113,7 +118,6 @@ namespace SRL {
             if (TLIB != null) {
                 Str = TrimString(Input);
                 if (IsDialog(Str)) {
-
                     string Ori = MergeLines(Str);
 
                     string TL = null;

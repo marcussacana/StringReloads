@@ -27,6 +27,15 @@ namespace Overlay {
             }
         }
 
+        public ContentAlignment TextAlignment {
+            get {
+                return DialogueBox.TextAlign;
+            }
+            set {
+                DialogueBox.TextAlign = value;
+            }
+        }
+
         private string ListFN = null;
         private bool TranslationMode = false;
         public bool AutoFontSize = false;
@@ -97,7 +106,7 @@ namespace Overlay {
                     Application.DoEvents();
                 }
 
-                if (_DefaultInstance == null || _DefaultInstance.IsDisposed || !_DefaultInstance.CanInvoke()) {
+                if (_DefaultInstance == null || !_DefaultInstance.CanInvoke()) {
                     if (Exports.TextOnly)
                         return null;
                     Initializing = true;
@@ -117,7 +126,6 @@ namespace Overlay {
             } catch {
                 return false;
             }
-
         }
         private void bntSettings_Click(object sender, EventArgs e) {
             Settings Window = new Settings();

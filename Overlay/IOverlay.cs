@@ -20,6 +20,8 @@ namespace Overlay {
 
         IntPtr Handle { get; }
 
+        ContentAlignment TextAlignment { get; set; }
+
         FormWindowState WindowState { get; set; }
         double Opacity { get; set; }
 

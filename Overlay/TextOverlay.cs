@@ -32,7 +32,7 @@ namespace Overlay {
                     Application.DoEvents();
                 }
 
-                if (_DefaultInstance == null || _DefaultInstance.IsDisposed || !_DefaultInstance.CanInvoke()) {
+                if (_DefaultInstance == null || !_DefaultInstance.CanInvoke()) {
                     if (!Exports.TextOnly)
                         return null;
                     Initializing = true;
@@ -92,6 +92,17 @@ namespace Overlay {
                 DrawBitmap();
             }
         }
+
+        ContentAlignment _ta;
+        public ContentAlignment TextAlignment {
+            get {
+                return _ta;
+            }
+            set {
+                _ta = value;
+                DrawBitmap();
+            }
+        }
         private void DrawBitmap() {
             lock (Content) {
                 Content = new Bitmap(Content.Width, Content.Height, PixelFormat.Format32bppArgb);
@@ -137,7 +148,17 @@ namespace Overlay {
         GraphicsPath GetStringPath(string s, float dpi, RectangleF rect, Font font) {
             GraphicsPath path = new GraphicsPath();
             float emSize = dpi * font.SizeInPoints / 72;
-            path.AddString(s, font.FontFamily, (int)font.Style, emSize, rect, new StringFormat());
+            var Format = new StringFormat();
+
+            switch (TextAlignment){
+                case ContentAlignment.MiddleCenter:
+                case ContentAlignment.TopCenter:
+                case ContentAlignment.BottomCenter:
+                    Format.Alignment = StringAlignment.Center;
+                    break;
+            }
+
+            path.AddString(s, font.FontFamily, (int)font.Style, emSize, rect, Format);
 
             return path;
         }

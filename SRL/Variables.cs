@@ -94,7 +94,7 @@ namespace SRL {
         static bool LiteMode = false;
         static bool RemoveIlegals = false;
         static bool AsianInput = false;
-
+        static bool ForceMTLDiagCheck = false;
 
         static bool OverlayEnabled = false;
         static bool OverlayInitialized = false;
@@ -115,6 +115,7 @@ namespace SRL {
         static string[] IgnoreList;
         static Quote[] QuoteList;
         static int Sensitivity;
+        static bool UseDatabase;
 
 #if DEBUG
         static float LastDPI;

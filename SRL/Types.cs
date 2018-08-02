@@ -212,6 +212,7 @@ namespace SRL {
 
             [FieldParmaters(DefaultValue = null, Name = "BreakLine;GameBreakLine")]
             public string GameLineBreaker;
+
             [FieldParmaters(DefaultValue = null, Name = "WorkingDir;WorkDir;DataDir")]
             public string WorkDirectory;
 
@@ -280,6 +281,8 @@ namespace SRL {
             public string QuoteList;
             [FieldParmaters(DefaultValue = "", Name = "TrimList")]
             public string TrimList;
+            [FieldParmaters(DefaultValue = false, Name = "UseDB")]
+            public bool UseDB;
             [FieldParmaters(DefaultValue = 2, Name = "Sensitivity")]
             public int Sensitivity;
         }

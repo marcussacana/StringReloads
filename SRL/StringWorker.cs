@@ -767,133 +767,142 @@ namespace SRL {
         /// <param name="Trim">Internal Parameter, don't change it.</param>
         /// <returns>If looks a dialog, return true, else return false.</returns>
         static bool IsDialog(string String) {
-            if (!DialogCheck || LiteMode)
-                return true;
+            try {
+                if (!DialogCheck || LiteMode)
+                    return true;
 
-            if (string.IsNullOrWhiteSpace(String))
-                return false;
+                if (string.IsNullOrWhiteSpace(String))
+                    return false;
 
-            string Str = String;
-            foreach (string Ignore in IgnoreList)
-                Str = Str.Replace(Ignore, "");            
+                if (UseDatabase && ContainsKey(String))
+                    return true;
 
-            Str = Str.Replace(GameLineBreaker, "\n");
+                string Str = String;
+                foreach (string Ignore in IgnoreList)
+                    Str = Str.Replace(Ignore, "");
 
-
-            string[] Words = Str.Split(' ');
-
-            int Spaces = Str.Where(x => x == ' ' || x == '\t').Count();
-            int Pontuations = Str.Where(x => ".,!?".IndexOf(x) >= 0).Count();
-            int WordCount = Words.Where(x => x.Length >= 2 && !string.IsNullOrWhiteSpace(x)).Count();
-            int Specials = Str.Where(x => char.IsSymbol(x)).Count();
-            Specials += Str.Where(x => char.IsPunctuation(x)).Count() - Pontuations;
-
-            int Uppers = Str.Where(x => char.IsUpper(x)).Count();
-            int Latim = Str.Where(x => x >= 'A' && x <= 'z').Count();
-            int Numbers = Str.Where(x => x >= '0' && x <= '9').Count();
-            int JapChars = Str.Where(x => (x >= '、' && x <= 'ヿ') || (x >= '｡' && x <= 'ﾝ')).Count();
-            int Kanjis = Str.Where(x => x >= '一' && x <= '龯').Count();
+                Str = Str.Replace(GameLineBreaker, "\n");
 
 
-            bool IsCaps = GetLineCase(Str) == Case.Upper;
-            bool IsJap = JapChars + Kanjis > Latim;
+                string[] Words = Str.Split(' ');
+
+                int Spaces = Str.Where(x => x == ' ' || x == '\t').Count();
+                int Pontuations = Str.Where(x => ".,!?".IndexOf(x) >= 0).Count();
+                int WordCount = Words.Where(x => x.Length >= 2 && !string.IsNullOrWhiteSpace(x)).Count();
+                int Specials = Str.Where(x => char.IsSymbol(x)).Count();
+                Specials += Str.Where(x => char.IsPunctuation(x)).Count() - Pontuations;
+
+                int Uppers = Str.Where(x => char.IsUpper(x)).Count();
+                int Latim = Str.Where(x => x >= 'A' && x <= 'z').Count();
+                int Numbers = Str.Where(x => x >= '0' && x <= '9').Count();
+                int JapChars = Str.Where(x => (x >= '、' && x <= 'ヿ') || (x >= '｡' && x <= 'ﾝ')).Count();
+                int Kanjis = Str.Where(x => x >= '一' && x <= '龯').Count();
 
 
-            //More Points = Don't Looks a Dialogue
-            //Less Points = Looks a Dialogue
-            int Points = 0;
+                bool IsCaps = GetLineCase(Str) == Case.Upper;
+                bool IsJap = JapChars + Kanjis > Latim;
 
-            if (Str.Length > 4) {
-                string ext = Str.Substring(Str.Length - 4, 4);
-                try {
-                    if (System.IO.Path.GetExtension(ext).Trim('.').Length == 3)
-                        Points += 2;
-                } catch { }
-            }
 
-            bool BeginQuote = false;
-            Quote? LineQuotes = null;
-            foreach (Quote Quote in QuoteList) {
-                BeginQuote |= Str.StartsWith(Quote.Start.ToString());
+                //More Points = Don't Looks a Dialogue
+                //Less Points = Looks a Dialogue
+                int Points = 0;
 
-                if (Str.StartsWith(Quote.Start.ToString()) && Str.EndsWith(Quote.End.ToString())) {
+                if (Str.Length > 4) {
+                    string ext = Str.Substring(Str.Length - 4, 4);
+                    try {
+                        if (System.IO.Path.GetExtension(ext).Trim('.').Length == 3)
+                            Points += 2;
+                    } catch { }
+                }
+
+                bool BeginQuote = false;
+                Quote? LineQuotes = null;
+                foreach (Quote Quote in QuoteList) {
+                    BeginQuote |= Str.StartsWith(Quote.Start.ToString());
+
+                    if (Str.StartsWith(Quote.Start.ToString()) && Str.EndsWith(Quote.End.ToString())) {
+                        Points -= 2;
+                        LineQuotes = Quote;
+                        break;
+                    } else if (Str.StartsWith(Quote.Start.ToString()) || Str.EndsWith(Quote.End.ToString())) {
+                        Points--;
+                        LineQuotes = Quote;
+                        break;
+                    }
+                }
+
+                char Last = (LineQuotes == null ? Str.Last() : Str.TrimEnd(LineQuotes.Value.End).Last());
+                if (IsJap && (new char[] { '。', '？', '！', '…', '、' }).Contains(Last))
                     Points -= 2;
-                    LineQuotes = Quote;
-                    break;
-                } else if (Str.StartsWith(Quote.Start.ToString()) || Str.EndsWith(Quote.End.ToString())) {
+
+                char[] PontuationList = new char[] { '.', '?', '!', '…', ',' };
+                if (!IsJap && (PontuationList).Contains(Last))
+                    Points -= 2;
+
+                if (!IsJap) {
+                    foreach (string Word in Words) {
+                        int WNumbers = Word.Where(c => char.IsNumber(c)).Count();
+                        int WLetters = Word.Where(c => char.IsLetter(c)).Count();
+                        if (WLetters > 0 && WNumbers > 0) {
+                            Points += 2;
+                        }
+                        if (Word.Trim(PontuationList).Where(c => PontuationList.Contains(c)).Count() != 0) {
+                            Points += 2;
+                        }
+                    }
+                }
+
+                if (!BeginQuote && !char.IsLetter(Str.First()))
+                    Points += 2;
+
+                if (Specials > WordCount)
+                    Points++;
+
+                if ((Pontuations == 0) && (WordCount <= 2) && !IsJap)
+                    Points++;
+
+                if (Uppers > Pontuations + 2 && !IsCaps)
+                    Points++;
+
+                if (Spaces > WordCount * 2)
+                    Points++;
+
+                if (IsJap && Spaces == 0)
                     Points--;
-                    LineQuotes = Quote;
-                    break;
-                }
-            }
 
-            char Last = (LineQuotes == null ? Str.Last() : Str.TrimEnd(LineQuotes.Value.End).Last());
-            if (IsJap && (new char[] { '。', '？', '！', '…', '、' }).Contains(Last))
-                Points -= 2;
+                if (!IsJap && Spaces == 0)
+                    Points += 2;
 
-            char[] PontuationList = new char[] { '.', '?', '!', '…', ',' };
-            if (!IsJap && (PontuationList).Contains(Last))
-                Points -= 2;
+                if (WordCount <= 2 && Numbers != 0)
+                    Points++;
 
-            if (!IsJap) {
-                foreach (string Word in Words) {
-                    int WNumbers = Word.Where(c => char.IsNumber(c)).Count();
-                    int WLetters = Word.Where(c => char.IsLetter(c)).Count();
-                    if (WLetters > 0 && WNumbers > 0) {
-                        Points += 2;
-                    }
-                    if (Word.Trim(PontuationList).Where(c => PontuationList.Contains(c)).Count() != 0) {
-                        Points += 2;
-                    }
-                }
-            }
+                if (Str.Length <= 3 && !IsJap)
+                    Points++;
 
-            if (!BeginQuote && !char.IsLetter(Str.First()))
-                Points += 2;
+                if (Numbers >= Str.Length)
+                    Points++;
 
-            if (Specials > WordCount)
-                Points++;
+                if (IsJap && Kanjis / 2 > JapChars)
+                    Points--;
 
-            if ((Pontuations == 0) && (WordCount <= 2) && !IsJap)
-                Points++;
+                if (IsJap && JapChars > Kanjis)
+                    Points--;
 
-            if (Uppers > Pontuations + 2 && !IsCaps)
-                Points++;
+                if (IsJap && Latim != 0)
+                    Points += 2;
 
-            if (Spaces > WordCount * 2)
-                Points++;
+                if (IsJap && Pontuations != 0)
+                    Points++;
 
-            if (IsJap && Spaces == 0)
-                Points--;
+                if (IsJap != AsianInput)
+                    return false;
 
-            if (!IsJap && Spaces == 0)
-                Points += 2;
+                return Points < Sensitivity;
 
-            if (WordCount <= 2 && Numbers != 0)
-                Points++;
-
-            if (Str.Length <= 3 && !IsJap)
-                Points++;
-
-            if (Numbers >= Str.Length)
-                Points++;
-
-            if (IsJap && Kanjis / 2 > JapChars)
-                Points--;
-
-            if (IsJap && JapChars > Kanjis)
-                Points--;
-
-            if (IsJap && Latim != 0)
-                Points += 2;
-
-            if (IsJap && Pontuations != 0)
-                Points++;
-
-            if (IsJap != AsianInput)
+            } catch {
+                Warning("Dialog Detection Failed with \"{0}\"", String);
                 return false;
-
-            return Points < Sensitivity;
+            }
         }
         public enum Case {
             Lower, Upper, Normal, Title

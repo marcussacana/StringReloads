@@ -14,7 +14,7 @@ using static Overlay.Events;
 namespace Overlay {
     public static class Exports {
 
-        public static bool TextOnly = false;
+        public static bool TextOnly = true;
         internal static IOverlay DefaultInstance {
             get {
                 return (TextOnly ? (IOverlay)TextOverlay.DefaultInstance : Overlay.DefaultInstance);
@@ -91,14 +91,16 @@ namespace Overlay {
             DefaultInstance.Invoke(new MethodInvoker(() => {
                 try {
                     GetPoint(WindowHandler, out Size Size, out Point Point);
-                    DefaultInstance.Size = Size;
-                    DefaultInstance.Location = Point;
+                    if (Size != DefaultInstance.Size)
+                        DefaultInstance.Size = Size;
+                    if (Point != DefaultInstance.Location)
+                        DefaultInstance.Location = Point;
 
-                    DefaultInstance.Focus();
 
                     SetWindowPos(DefaultInstance.Handle, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
                     SetWindowPos(DefaultInstance.Handle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
 
+                    DefaultInstance.Focus();
                     SetForegroundWindow(WindowHandler);
                 } catch { }
             }));
@@ -425,6 +427,13 @@ namespace Overlay {
                             DefaultInstance.Show();
                             DefaultInstance.Text = Text;
                             UpdateWindow(HookHandler);
+                            break;
+                        case "centralize":
+                        case "center":
+                        case "align":
+                        case "alignment":
+                            bool Center = CMDV.ToLower() == "true";
+                            DefaultInstance.TextAlignment = (Center ? ContentAlignment.MiddleCenter : ContentAlignment.MiddleLeft);
                             break;
                         case "hook text":
                         case "enable hook":
