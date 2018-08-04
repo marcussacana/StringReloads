@@ -14,6 +14,9 @@ using static Overlay.Events;
 namespace Overlay {
     public static class Exports {
 
+        internal static bool OverlayVisible = false;
+        internal static bool Initialized = false;
+
         public static bool TextOnly = true;
         internal static IOverlay DefaultInstance {
             get {
@@ -39,8 +42,18 @@ namespace Overlay {
 
                 }
 
-                if (EventList.Length == 0 || HookText)
+                if (EventList.Length == 0) {
+                    OverlayVisible = true;
+                }
+
+                if (!Initialized && OverlayVisible) {
+                    Initialized = true;
+                    DefaultInstance.Show();
+                }
+
+                if (EventList.Length == 0 || HookText) {
                     DefaultInstance.Text = text;
+                }
             } catch (Exception ex) {
 #if DEBUG
                 MessageBox.Show(ex.ToString());
@@ -139,7 +152,6 @@ namespace Overlay {
                     Application.EnableVisualStyles();
                     Application.SetCompatibleTextRenderingDefault(false);
                     
-                    DefaultInstance.Show();
 
                     new Thread(() => { SetDialogue("::EVENT0::"); }).Start();
 
@@ -299,6 +311,7 @@ namespace Overlay {
                         case "subtitle":
                         case "set text":
                         case "text":
+                            OverlayVisible = true;
                             DefaultInstance.Text = CMDV.Replace("\\n", "\n");
                             break;
                         case "clear":
@@ -311,6 +324,7 @@ namespace Overlay {
                         case "close":
                         case "hide overlay":
                         case "close overlay":
+                            OverlayVisible = false;
                             DefaultInstance.Invoke(new MethodInvoker(() => {
                                 DefaultInstance.Opacity = 0;
                                 DefaultInstance?.Close();
@@ -320,6 +334,7 @@ namespace Overlay {
                         case "open":
                         case "show overlay":
                         case "open overlay":
+                            OverlayVisible = true;
                             DefaultInstance.Invoke(new MethodInvoker(() => {
                                 DefaultInstance.Opacity = 1.0d;
                                 DefaultInstance.Show();

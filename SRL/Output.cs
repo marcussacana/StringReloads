@@ -37,10 +37,12 @@ namespace SRL {
             PrintMessage(string.Format(WaitMsg, string.IsNullOrWhiteSpace(CustomCredits) ? string.Empty : "\n" + CustomCredits), -1);
 
             if (Title != ConsoleTitle) {
-                SetWindowText(GameHandler, Title + " - [SRL Initialized]");
+				string NewTitle = Title + " - [SRL Initialized]";
+                SetWindowText(GameHandler, NewTitle);
 
                 Thread.Sleep(4000);
-                SetWindowText(GameHandler, Title);
+                if (WindowTitle == NewTitle)
+                    SetWindowText(GameHandler, Title);
             }
         }
 

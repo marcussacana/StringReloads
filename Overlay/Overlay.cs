@@ -106,8 +106,8 @@ namespace Overlay {
                     Application.DoEvents();
                 }
 
-                if (_DefaultInstance == null || !_DefaultInstance.CanInvoke()) {
-                    if (Exports.TextOnly)
+                if (Exports.OverlayVisible && (_DefaultInstance == null || !_DefaultInstance.CanInvoke())) {
+                    if (Exports.TextOnly || !Exports.OverlayVisible)
                         return null;
                     Initializing = true;
                     _DefaultInstance = new Overlay();

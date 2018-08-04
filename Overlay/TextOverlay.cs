@@ -32,7 +32,7 @@ namespace Overlay {
                     Application.DoEvents();
                 }
 
-                if (_DefaultInstance == null || !_DefaultInstance.CanInvoke()) {
+                if (Exports.OverlayVisible && (_DefaultInstance == null || !_DefaultInstance.CanInvoke())) {
                     if (!Exports.TextOnly)
                         return null;
                     Initializing = true;
