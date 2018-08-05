@@ -235,7 +235,7 @@ namespace SRL {
             }
 
             if (Settings.DecodeFromInput) {
-                Log("Enabling Character Reloader Decoding From Input...");
+                Log("Enabling Character Reloader Decoding From Input...", true);
                 DecodeCharactersFromInput = true;
             }
 
@@ -257,7 +257,7 @@ namespace SRL {
 
             if (Settings.NoReload) {
                 NoReload = true;
-                Warning("String Injection Disabled by User...");
+                Warning("String Injection Disabled by User...", true);
             }
 
             if (Settings.RemoveViolations) {

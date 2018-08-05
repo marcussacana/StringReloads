@@ -52,7 +52,7 @@ namespace SRL {
             string Str = SimplfyMatch(Input);
 
             if (LogAll || LogInput) {
-                Log("Input: {0}", false, Input);
+                Log("Input: {0}", true, Input);
             }
 
             if (InCache(Str) && DialogFound) {

@@ -180,18 +180,18 @@ namespace SRL {
                     case "debugstring":
                     case "debugencoding":
                     case "encodingtest":
-                        Log("String Deubugger Enabled");
+                        Log("String Deubugger Enabled", true);
                         LogAll = true;
                         break;
 
                     case "loginput":
                     case "login":
-                        Log("Input Log Enabled");
+                        Log("Input Log Enabled", true);
                         LogInput = true;
                         break;
                     case "logout":
                     case "logoutput":
-                        Log("Output Log Enabled");
+                        Log("Output Log Enabled", true);
                         LogOutput = true;
                         break;
                     case "dumptext":
@@ -201,7 +201,7 @@ namespace SRL {
                     case "detecttext":
                     case "detecttxt":
                         Debugging = true;
-                        Log("String Dumping Filter Enabled");
+                        Log("String Dumping Filter Enabled", true);
                         DumpStrOnly = true;
                         break;
                     case "about":
