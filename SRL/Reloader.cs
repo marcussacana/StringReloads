@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -21,6 +22,26 @@ namespace SRL {
                 Warning("Char Missed... l={0}|n=0x{1:X4}", (char)c, c);
 
             return CharInt;
+        }
+        
+        static IntPtr RestoreChar(IntPtr CharInt) {
+            char c = (char)ParsePtr(CharInt);
+            if (CharRld.ContainsValue(c))
+                return new IntPtr(CharRld.ReverseMatch(c));
+            if (UnkRld.ContainsValue(c))
+                return new IntPtr(UnkRld.ReverseMatch(c));
+
+            return CharInt;
+        }
+
+        static internal Key ReverseMatch<Key, Value>(this Dictionary<Key, Value> Dictionary, Value ValueToSearch) {
+            if (!Dictionary.ContainsValue(ValueToSearch))
+                throw new Exception("Value not Present in the Dictionary");
+
+            int Index = Dictionary.Values.Select((value, index) => new { value, index })
+                        .SkipWhile(pair => !pair.value.Equals(ValueToSearch)).FirstOrDefault().index;
+
+            return Dictionary.Keys.ElementAt(Index);
         }
 
         internal static dynamic ParsePtr(IntPtr IntPtr) {

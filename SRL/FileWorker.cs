@@ -123,6 +123,7 @@ namespace SRL {
             Sensitivity = 3;
             UseDatabase = false;
             AutoUnks = false;
+            UndoChars = false;
             DenyList = new string[0];
             IgnoreList = new string[0];
 
@@ -130,10 +131,12 @@ namespace SRL {
             OverlaySettings OverlaySettings;
             WordwrapSettings WordwrapSettings;
             FilterSettings FilterSettings;
+            HookSettings HookSettings;
             AdvancedIni.FastOpen(out Settings, IniPath);
             AdvancedIni.FastOpen(out OverlaySettings, IniPath);
             AdvancedIni.FastOpen(out WordwrapSettings, IniPath);
             AdvancedIni.FastOpen(out FilterSettings, IniPath);
+            AdvancedIni.FastOpen(out HookSettings, IniPath);
 
             Log(Initialized ? "Reloading Settings..." : "Loading Settings...", true);
 
@@ -429,6 +432,34 @@ namespace SRL {
                 Log("Custom Directory Loaded", true);
             }
 
+            if (HookSettings.GetGlyphOutline) {
+                if (!HookGlyphOutline)
+                    InstallGlyphHooks();
+                HookGlyphOutline = true;
+                Log("GetGlyphOutline Hook Enabled", true);
+            } else if (HookGlyphOutline)
+                Warning("GetGlyphOutline Hook Settings Changed - Restart Required");
+
+            if (HookSettings.TextOut) {
+                if (!HookTextOut)
+                    InstallTextOutHooks();
+                HookTextOut = true;
+                Log("TextOut Hook Enabled", true);
+            } else if (HookTextOut)
+                Warning("TextOut Hook Settings Changed - Restart Required");
+
+            if (HookSettings.ExtTextOut) {
+                if (!HookExtTextOut)
+                    InstallExtTextOutHooks();
+                HookExtTextOut = true;
+                Log("ExtTextOut Hook Enabled", true);
+            } else if (HookExtTextOut)
+                Warning("ExtTextOut Hook Settings Changed - Restart Required");
+
+            if (HookSettings.UndoChars) {
+                UndoChars = true;
+                Log("Hook Char Reloader Restoration Enabled", true);
+            }
 
             Log("Settings Loaded.", true);
 

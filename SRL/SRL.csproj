@@ -64,6 +64,8 @@
     <Compile Include="Compiler.cs" />
     <Compile Include="DNVM.cs" />
     <Compile Include="FileWorker.cs" />
+    <Compile Include="Hook\GenericHook.cs" />
+    <Compile Include="Hook\HookFX.cs" />
     <Compile Include="Ini.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="Output.cs" />

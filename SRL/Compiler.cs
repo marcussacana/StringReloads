@@ -232,8 +232,8 @@ namespace SRL {
                     }
                 }
 
-                Log("Processing Char Reloads... 3/3", true);
                 if (AutoUnks) {
+                    Log("Processing Char Reloads... 3/3", true);
                     for (uint i = 0; i < Data.OriLetters.LongLength; i++) {
                         char Char = Data.MemoryLetters[i];
                         char OChar = Data.OriLetters[i];
@@ -249,6 +249,19 @@ namespace SRL {
                         byte[] DW = new byte[2];
                         Buffer.CopyTo(DW, 0);
                         ushort Unk = BitConverter.ToUInt16(DW, 0);
+#if DEBUG
+                        Log("Unk Added: 0x{0:X4} from {1}", true, Unk, OChar);
+#endif
+                        if (UnkRld.ContainsKey(Unk))
+                            continue;
+
+                        UnkRld.Add(Unk, OChar);
+
+                        DW[1] = 0xFF;
+                        Unk = BitConverter.ToUInt16(DW, 0);
+#if DEBUG
+                        Log("Unk Added: 0x{0:X4} from {1}", true, Unk, OChar);
+#endif
                         if (UnkRld.ContainsKey(Unk))
                             continue;
 

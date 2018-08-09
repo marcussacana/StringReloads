@@ -144,14 +144,24 @@ namespace SRL {
         public static string ProcessManaged(string Text) {
             Managed = true;
             IntPtr Ptr = Marshal.StringToHGlobalAuto(Text);
-            IntPtr New = Process(Ptr);
+            IntPtr New = ProcessReal(Ptr);
             Text = Marshal.PtrToStringAuto(New);
             Marshal.FreeHGlobal(Ptr);
             return Text;
         }
+
+        static string ProcessManaged(string Text, bool Managed) {
+            bool IsManaged = Managed;
+            string Result = ProcessManaged(Text);
+            if (!Managed)
+                Managed = IsManaged;
+
+            return Result;
+        }
+
         public static char ProcessManaged(char Char) {
             Managed = true;
-            IntPtr Result = Process(new IntPtr(Char));
+            IntPtr Result = ProcessReal(new IntPtr(Char));
             return (char)(Result.ToInt32() & 0xFFFF);
         }
     }

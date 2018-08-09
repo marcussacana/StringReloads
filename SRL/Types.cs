@@ -28,7 +28,7 @@ namespace SRL {
             public char End;
         }
 
-#pragma warning disable 649
+#pragma warning disable 649, 169
         struct SRLData3 {
             [FString(Length = 4)]
             public string Signature;
@@ -289,6 +289,19 @@ namespace SRL {
             [FieldParmaters(DefaultValue = 2, Name = "Sensitivity")]
             public int Sensitivity;
         }
-#pragma warning restore 649
+
+
+        [FieldParmaters(Name = "Hook")]
+        internal struct HookSettings {
+            [FieldParmaters(Name = "GetGlyphOutline", DefaultValue = false)]
+            public bool GetGlyphOutline;
+            [FieldParmaters(Name = "TextOut", DefaultValue = false)]
+            public bool TextOut;
+            [FieldParmaters(Name = "ExtTextOut", DefaultValue = false)]
+            public bool ExtTextOut;
+            [FieldParmaters(Name = "UndoChars;UndoReloads;UndoFakeChars", DefaultValue = false)]
+            public bool UndoChars;
+        }
+#pragma warning restore 649, 169
     }
 }

@@ -94,7 +94,6 @@ namespace SRL {
         static bool LiteMode = false;
         static bool RemoveIlegals = false;
         static bool AsianInput = false;
-        static bool ForceMTLDiagCheck = false;
         static bool AutoUnks = false;
 
         static bool OverlayEnabled = false;
@@ -117,6 +116,11 @@ namespace SRL {
         static Quote[] QuoteList;
         static int Sensitivity;
         static bool UseDatabase;
+
+        static bool HookGlyphOutline;
+        static bool HookTextOut;
+        static bool HookExtTextOut;
+        static bool UndoChars;
 
 #if DEBUG
         static float LastDPI;
