@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -147,36 +148,59 @@ class AdvancedIni {
     private dynamic GetInstance(Type Format, string Value) {
         if (string.IsNullOrEmpty(Value) && Format.FullName != Const.STRING)
             throw new Exception("Invalid Value");
-
+        bool Hex = false;
+        if (Value.Trim().StartsWith("0x")) {
+            Hex = true;
+            Value = Value.Trim().Substring(2);
+        }
         switch (Format.FullName) {
             case Const.CHAR:
                 return Value[0];
             case Const.DOUBLE:
+                if (Hex)
+                    return double.Parse(Value, NumberStyles.HexNumber);
                 return double.Parse(Value);
             case Const.FLOAT:
+                if (Hex)
+                    throw new Exception("Float values can't be a hex");
                 return float.Parse(Value);
             case Const.INT16:
+                if (Hex)
+                    return short.Parse(Value, NumberStyles.HexNumber);
                 return short.Parse(Value);
             case Const.INT32:
+                if (Hex)
+                    return int.Parse(Value, NumberStyles.HexNumber);
                 return int.Parse(Value);
             case Const.INT64:
+                if (Hex)
+                    return long.Parse(Value, NumberStyles.HexNumber);
                 return long.Parse(Value);
             case Const.INT8:
+                if (Hex)
+                    return sbyte.Parse(Value, NumberStyles.HexNumber);
                 return sbyte.Parse(Value);
             case Const.STRING:
                 return Value;
             case Const.UINT16:
+                if (Hex)
+                    return ushort.Parse(Value, NumberStyles.HexNumber);
                 return ushort.Parse(Value);
             case Const.UINT32:
+                if (Hex)
+                    return uint.Parse(Value, NumberStyles.HexNumber);
                 return uint.Parse(Value);
             case Const.UINT64:
+                if (Hex)
+                    return ulong.Parse(Value, NumberStyles.HexNumber);
                 return ulong.Parse(Value);
             case Const.UINT8:
+                if (Hex)
+                    return byte.Parse(Value, NumberStyles.HexNumber);
                 return byte.Parse(Value);
-
             case Const.BOOLEAN:
                 string Lower = Value.ToLower();
-                return (new string[] { "true", "yes", "on", "enable", "active", "enabled", "actived" }).Contains(Lower);
+                return (new string[] { "true", "yes", "on", "enable", "active", "enabled", "actived", "1" }).Contains(Lower);
 
             default:
                 throw new Exception("Unexpected Field Type");

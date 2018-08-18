@@ -318,6 +318,7 @@ namespace SRL {
 
             } catch (Exception ex) {
                 Error("Failed to Initialize...");
+                PreserveStackTrace(ex);
                 throw ex;
             }
         }

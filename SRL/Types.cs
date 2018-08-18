@@ -299,6 +299,14 @@ namespace SRL {
             public bool TextOut;
             [FieldParmaters(Name = "ExtTextOut", DefaultValue = false)]
             public bool ExtTextOut;
+            [FieldParmaters(Name = "CreateFont", DefaultValue = false)]
+            public bool CreateFont;
+            [FieldParmaters(Name = "CreateFontIndirect", DefaultValue = false)]
+            public bool CreateFontIndirect;
+            [FieldParmaters(Name = "FontCharset", DefaultValue = (byte)0x1)]
+            public byte FontCharset;
+            [FieldParmaters(Name = "FaceName", DefaultValue = "")]
+            public string FaceName;
             [FieldParmaters(Name = "UndoChars;UndoReloads;UndoFakeChars", DefaultValue = false)]
             public bool UndoChars;
         }

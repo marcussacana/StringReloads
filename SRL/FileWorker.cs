@@ -456,9 +456,34 @@ namespace SRL {
             } else if (HookExtTextOut)
                 Warning("ExtTextOut Hook Settings Changed - Restart Required");
 
+            if (HookSettings.CreateFont) {
+                if (!HookCreateFont)
+                    InstallCreateFontHooks();
+                HookCreateFont = true;
+                Log("CreateFont Hook Enabled", true);
+            } else if (HookCreateFont)
+                Warning("CreateFont Hook Settings Changed - Restart Required");
+            
+            if (HookSettings.CreateFontIndirect) {
+                if (!HookCreateFontIndirect)
+                    InstallCreateFontIndirectHooks();
+                HookCreateFontIndirect = true;
+                Log("CreateFontIndirect Hook Enabled", true);
+            } else if (HookCreateFontIndirect)
+                Warning("CreateFontIndirect Hook Settings Changed - Restart Required");
+
             if (HookSettings.UndoChars) {
                 UndoChars = true;
                 Log("Hook Char Reloader Restoration Enabled", true);
+            }
+            if (HookSettings.FontCharset != 0) {
+                FontCharset = HookSettings.FontCharset;
+                Log("Font Hook Charset 0x{0:X2}", true, FontCharset);
+            }
+
+            if (!string.IsNullOrWhiteSpace(HookSettings.FaceName)) {
+                FontFaceName = HookSettings.FaceName;
+                Log("Font Hook FaceName: {0}", true, FontFaceName);
             }
 
             Log("Settings Loaded.", true);

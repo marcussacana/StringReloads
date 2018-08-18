@@ -6,6 +6,18 @@ namespace SRL {
     partial class StringReloader {
 
         [DllImport("gdi32.dll", CharSet = CharSet.Ansi, SetLastError = true)]
+        static extern IntPtr CreateFontIndirectA([In] ref LOGFONTA FontInfo);
+
+        [DllImport("gdi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        static extern IntPtr CreateFontIndirectW([In] ref LOGFONTW FontInfo);
+
+        [DllImport("gdi32.dll", CharSet = CharSet.Ansi, SetLastError = true)]
+        static extern IntPtr CreateFontA(int nHeight, int nWidth, int nEscapement, int nOrientation, int fnWeight, uint fdwItalic, uint fdwUnderline, uint fdwStrikeOut, uint fdwCharSet, uint fdwOutputPrecision, uint fdwClipPrecision, uint fdwQuality, uint fdwPitchAndFamily, string lpszFace);
+
+        [DllImport("gdi32.dll", CharSet = CharSet.Unicode)]
+        static extern IntPtr CreateFontW(int nHeight, int nWidth, int nEscapement, int nOrientation, int fnWeight, uint fdwItalic, uint fdwUnderline, uint fdwStrikeOut, uint fdwCharSet, uint fdwOutputPrecision, uint fdwClipPrecision, uint fdwQuality, uint fdwPitchAndFamily, string lpszFace);
+
+        [DllImport("gdi32.dll", CharSet = CharSet.Ansi, SetLastError = true)]
         static extern uint GetGlyphOutlineA(IntPtr hdc, uint uChar, uint uFormat, out GLYPHMETRICS lpgm, uint cbBuffer, IntPtr lpvBuffer, ref MAT2 lpmat2);
 
         [DllImport("gdi32.dll", CharSet = CharSet.Unicode)]

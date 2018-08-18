@@ -12,6 +12,9 @@ namespace SRLTracer {
 #if !AppVeyor
             TBInput.Text = SRLUnity.Wrapper.Process(TBInput.Text);
 #endif
+#if DEBUG
+            TBInput.Text = SRL.StringReloader.ProcessManaged(TBInput.Text);
+#endif
         }
 
 

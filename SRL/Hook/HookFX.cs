@@ -14,7 +14,8 @@ public class FxHook : IDisposable {
         VirtualProtect(source, nBytes, Protection.PAGE_EXECUTE_READWRITE, out old);
         Marshal.Copy(source, src, 0, nBytes);
         dst[0] = 0xE9;
-        var dx = BitConverter.GetBytes((int)destination - (int)source - nBytes);
+        var Result = (int)SRL.StringReloader.ParsePtr(destination) - (int)SRL.StringReloader.ParsePtr(source) - nBytes;
+        var dx = BitConverter.GetBytes(Result);
         Array.Copy(dx, 0, dst, 1, nBytes - 1);
         addr = source;
     }

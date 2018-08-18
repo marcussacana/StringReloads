@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Drawing;
 using System.IO;
+using System.Reflection;
+using System.Runtime.Serialization;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -221,7 +223,14 @@ namespace SRL {
                         break;
                 }
         }
+        static void PreserveStackTrace(Exception e) {
+            var ctx = new StreamingContext(StreamingContextStates.CrossAppDomain);
+            var si = new SerializationInfo(typeof(Exception), new FormatterConverter());
+            var ctor = typeof(Exception).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(SerializationInfo), typeof(StreamingContext) }, null);
 
+            e.GetObjectData(si, ctx);
+            ctor.Invoke(e, new object[] { si, ctx });
+        }
         //Portable Executable Checksum Validator
         internal static bool PECSVal(byte[] Data) {
             int PEStart = BitConverter.ToInt32(Data, 0x3c);

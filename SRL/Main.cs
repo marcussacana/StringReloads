@@ -24,6 +24,7 @@ namespace SRL {
                         Init();
                         Log("Initiallized", true);
                     } catch (Exception ex) {
+                        PreserveStackTrace(ex);
                         throw ex;
                     }
                     Initialized = true;

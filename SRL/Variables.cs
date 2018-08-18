@@ -120,6 +120,10 @@ namespace SRL {
         static bool HookGlyphOutline;
         static bool HookTextOut;
         static bool HookExtTextOut;
+        static bool HookCreateFont;
+        static bool HookCreateFontIndirect;
+        static byte FontCharset;
+        static string FontFaceName;
         static bool UndoChars;
 
 #if DEBUG
