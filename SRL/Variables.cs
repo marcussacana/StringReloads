@@ -49,6 +49,7 @@ namespace SRL {
         static Dictionary<ushort, char> UnkRld;
         static Dictionary<string, string> MskRld = null;
         static Dictionary<long, string> DBNames = null;
+        static Dictionary<string, FontRedirect> FontReplaces = new Dictionary<string, FontRedirect>();
 
 
         static List<IntPtr> PtrCacheIn = new List<IntPtr>();
@@ -117,6 +118,12 @@ namespace SRL {
         static int Sensitivity;
         static bool UseDatabase;
 
+#if DEBUG
+        static bool HookCreateWindow;
+        static bool HookCreateWindowEx;
+        static bool HookSendMessage;
+#endif
+        static bool HookSetWindowText;
         static bool HookGlyphOutline;
         static bool HookTextOut;
         static bool HookExtTextOut;

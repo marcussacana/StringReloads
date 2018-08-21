@@ -463,7 +463,7 @@ namespace SRL {
                 Log("CreateFont Hook Enabled", true);
             } else if (HookCreateFont)
                 Warning("CreateFont Hook Settings Changed - Restart Required");
-            
+
             if (HookSettings.CreateFontIndirect) {
                 if (!HookCreateFontIndirect)
                     InstallCreateFontIndirectHooks();
@@ -471,6 +471,39 @@ namespace SRL {
                 Log("CreateFontIndirect Hook Enabled", true);
             } else if (HookCreateFontIndirect)
                 Warning("CreateFontIndirect Hook Settings Changed - Restart Required");
+
+#if DEBUG
+            if (HookSettings.SendMessage) {
+                if (!HookSendMessage)
+                    InstallSendMessageHooks();
+                HookSendMessage = true;
+                Log("SendMessage Hook Enabled", true);
+            } else if (HookSendMessage)
+                Warning("SendMessage Hook Settings Changed - Restart Required");
+
+            if (HookSettings.CreateWindow) {
+                if (!HookCreateWindow)
+                    InstallCreateWindowHooks();
+                HookCreateWindow = true;
+                Log("CreateWindow Hook Enabled", true);
+            } else if (HookCreateWindow)
+                Warning("CreateWindow Hook Settings Changed - Restart Required");
+
+            if (HookSettings.CreateWindowEx) {
+                if (!HookCreateWindowEx)
+                    InstallCreateWindowExHooks();
+                HookCreateWindowEx = true;
+                Log("CreateWindowEx Hook Enabled", true);
+            } else if (HookCreateWindowEx)
+                Warning("CreateWindowEx Hook Settings Changed - Restart Required");
+#endif
+            if (HookSettings.SetWindowText) {
+                if (!HookSetWindowText)
+                    InstallSetWindowTextHooks();
+                HookSetWindowText = true;
+                Log("SetWindowText Hook Enabled", true);
+            } else if (HookSetWindowText)
+                Warning("SetWindowText Hook Settings Changed - Restart Required");
 
             if (HookSettings.UndoChars) {
                 UndoChars = true;
@@ -484,6 +517,20 @@ namespace SRL {
             if (!string.IsNullOrWhiteSpace(HookSettings.FaceName)) {
                 FontFaceName = HookSettings.FaceName;
                 Log("Font Hook FaceName: {0}", true, FontFaceName);
+            } else {
+                FontFaceName = string.Empty;
+                while (Ini.GetConfigStatus($"Hook.Font.{FontReplaces.Count}", "FromFont;From;SourceFont;Source", IniPath) == Ini.ConfigStatus.Ok) {
+                    string KEY = $"Hook.Font.{FontReplaces.Count}";
+                    string FN = Ini.GetConfig(KEY, "FromFont;From;SourceFont;Source", IniPath).Trim();
+                    FontReplaces.Add(FN, new FontRedirect() {
+                        From = FN,
+                        To = Ini.GetConfig(KEY, "ToFont;To;TargetFont;Target", IniPath),
+                        Size = Ini.GetConfig(KEY, "ChageSize;Size;DiffSize;NewSize", IniPath)
+                    });
+                }
+                if (FontReplaces.Count != 0) {
+                    Log("{0} Font Replacement Loaded", true, FontReplaces.Count);
+                }
             }
 
             Log("Settings Loaded.", true);

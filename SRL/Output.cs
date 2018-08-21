@@ -33,18 +33,18 @@ namespace SRL {
             string Title = WindowTitle;
 
             if (Title != ConsoleTitle) 
-                SetWindowText(GameHandler, string.Format("StringReloader - Initializing... [{0}]", Title));
+                SetWindowTextW(GameHandler, string.Format("StringReloader - Initializing... [{0}]", Title));
             
 
             PrintMessage(string.Format(WaitMsg, string.IsNullOrWhiteSpace(CustomCredits) ? string.Empty : "\n" + CustomCredits), -1);
 
             if (Title != ConsoleTitle) {
 				string NewTitle = Title + " - [SRL Initialized]";
-                SetWindowText(GameHandler, NewTitle);
+                SetWindowTextW(GameHandler, NewTitle);
 
                 Thread.Sleep(4000);
                 if (WindowTitle == NewTitle)
-                    SetWindowText(GameHandler, Title);
+                    SetWindowTextW(GameHandler, Title);
             }
         }
 

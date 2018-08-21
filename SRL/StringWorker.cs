@@ -414,14 +414,17 @@ namespace SRL {
         /// </summary>
         /// <param name="String">The string</param>
         /// <returns>The Pointer to the new String</returns>
-        internal static IntPtr GenString(string String) {
+        internal static IntPtr GenString(string String, bool ForceUnicode = false) {
             byte[] buffer;
-            if (EncodingModifier != null) {
-                buffer = EncodingModifier.Call("Modifier", "GenString", String);
+            if (ForceUnicode) {
+                buffer = Encoding.Unicode.GetBytes(String + "\x0");
             } else {
-                int len = WriteEncoding.GetByteCount(String + "\x0");
-                buffer = new byte[len];
-                WriteEncoding.GetBytes(String, 0, String.Length, buffer, 0);
+                if (EncodingModifier != null) {
+                    buffer = EncodingModifier.Call("Modifier", "GenString", String);
+                } else {
+                    int len = WriteEncoding.GetByteCount(String + "\x0");
+                    buffer = new byte[len];
+                    WriteEncoding.GetBytes(String, 0, String.Length, buffer, 0);
 
 #if LEAKING //Less Memory Leak, but works only with some games
                 IntPtr Pointer = LastGenerated;
@@ -436,8 +439,8 @@ namespace SRL {
                 }
                 LastGenerated = Pointer            
 #endif
+                }
             }
-
             IntPtr Pointer = Marshal.AllocHGlobal(buffer.Length);
 
             Marshal.Copy(buffer, 0, Pointer, buffer.Length);
@@ -484,7 +487,7 @@ namespace SRL {
         /// <param name="Pointer">Pointer to the string</param>
         /// <param name="Decode">if False, return the hex of the string</param>
         /// <returns></returns>
-        internal static string GetStringW(IntPtr Pointer, bool Decode = true) {
+        internal static string GetStringW(IntPtr Pointer, bool Decode = true, bool ForceUnicode = false) {
             int len = 0;
             while (Marshal.ReadInt16(Pointer, len) != 0)
                 len += 2;
@@ -496,7 +499,7 @@ namespace SRL {
             }
 
             if (Decode)
-                return ReadEncoding.GetString(buffer);
+                return ForceUnicode ? Encoding.Unicode.GetString(buffer) : ReadEncoding.GetString(buffer);
             else
                 return ParseBytes(buffer);
         }

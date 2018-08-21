@@ -293,6 +293,16 @@ namespace SRL {
 
         [FieldParmaters(Name = "Hook")]
         internal struct HookSettings {
+#if DEBUG
+            [FieldParmaters(Name = "CreateWindow", DefaultValue = false)]
+            public bool CreateWindow;
+            [FieldParmaters(Name = "CreateWindowEx", DefaultValue = false)]
+            public bool CreateWindowEx;
+            [FieldParmaters(Name = "SendMessage", DefaultValue = false)]
+            public bool SendMessage;
+#endif
+            [FieldParmaters(Name = "SetWindowText", DefaultValue = false)]
+            public bool SetWindowText;
             [FieldParmaters(Name = "GetGlyphOutline", DefaultValue = false)]
             public bool GetGlyphOutline;
             [FieldParmaters(Name = "TextOut", DefaultValue = false)]
@@ -309,6 +319,12 @@ namespace SRL {
             public string FaceName;
             [FieldParmaters(Name = "UndoChars;UndoReloads;UndoFakeChars", DefaultValue = false)]
             public bool UndoChars;
+        }
+
+        internal struct FontRedirect {
+            public string From;
+            public string To;
+            public string Size;
         }
 #pragma warning restore 649, 169
     }

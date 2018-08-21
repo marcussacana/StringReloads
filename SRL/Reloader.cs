@@ -50,8 +50,26 @@ namespace SRL {
                 return unchecked((ulong)IntPtr.ToInt64());
             else
                 return unchecked((uint)IntPtr.ToInt32());
-        }       
-       
+        }
+
+        internal static string RedirFaceName(string FaceName) {
+            if (LogAll) {
+                Log("Font Redirect Request: {0}", true, FaceName);
+            }
+            if (!FontReplaces.ContainsKey(FaceName.Trim())) {
+                if (!string.IsNullOrWhiteSpace(FontFaceName))
+                    return FontFaceName;
+                return FaceName;
+            }
+            return FontReplaces[FaceName.Trim()].To;
+        }
+        internal static string RedirFontSize(string FaceName) {
+            if (!FontReplaces.ContainsKey(FaceName.Trim())) {
+                return null;
+            }
+            return FontReplaces[FaceName.Trim()].Size;
+        }
+
 
         /// <summary>
         /// Reload a String

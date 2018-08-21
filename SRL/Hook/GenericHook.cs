@@ -18,6 +18,16 @@ namespace SRL {
         static CreateFontWDelegate dCreateFontW = null;
         static CreateFontIndirectADelegate dCreateFontIndirectA = null;
         static CreateFontIndirectWDelegate dCreateFontIndirectW = null;
+#if DEBUG
+        static SendMessageADelegate dSendMessageA = null;
+        static SendMessageWDelegate dSendMessageW = null;
+        static CreateWindowExADelegate dCreateWindowExA = null;
+        static CreateWindowExWDelegate dCreateWindowExW = null;
+        static CreateWindowADelegate dCreateWindowA = null;
+        static CreateWindowWDelegate dCreateWindowW = null;
+#endif
+        static SetWindowTextADelegate dSetWindowTextA;
+        static SetWindowTextWDelegate dSetWindowTextW;
 
         static FxHook OutlineA;
         static FxHook OutlineW;
@@ -29,6 +39,16 @@ namespace SRL {
         static FxHook hCreatFontW;
         static FxHook hCreatFontIndirectA;
         static FxHook hCreatFontIndirectW;
+#if DEBUG
+        static FxHook hSendMessageA;
+        static FxHook hSendMessageW;
+        static FxHook hCreateWindowExA;
+        static FxHook hCreateWindowExW;
+        static FxHook hCreateWindowA;
+        static FxHook hCreateWindowW;
+#endif
+        static FxHook hSetWindowTextA;
+        static FxHook hSetWindowTextW;
 
         static void InstallGlyphHooks() {
             dOutlineA = new GetGlyphOutlineDelegate(hGetGlyphOutlineA);
@@ -63,8 +83,8 @@ namespace SRL {
         }
 
         static void InstallCreateFontHooks() {
-            dCreateFontA = new CreateFontADelegate(hCreateFontA);
-            dCreateFontW = new CreateFontWDelegate(hCreateFontW);
+            dCreateFontA = new CreateFontADelegate(hCreateFont);
+            dCreateFontW = new CreateFontWDelegate(hCreateFont);
 
             hCreatFontA = new FxHook("gdi32.dll", "CreateFontA", dCreateFontA);
             hCreatFontW = new FxHook("gdi32.dll", "CreateFontW", dCreateFontW);
@@ -83,6 +103,52 @@ namespace SRL {
 
             hCreatFontIndirectA.Install();
             hCreatFontIndirectW.Install();
+        }
+
+#if DEBUG
+        static void InstallSendMessageHooks() {
+            dSendMessageA = new SendMessageADelegate(SendMessageAHook);
+            dSendMessageW = new SendMessageWDelegate(SendMessageWHook);
+
+            hSendMessageA = new FxHook("user32.dll", "SendMessageA", dSendMessageA);
+            hSendMessageW = new FxHook("user32.dll", "SendMessageW", dSendMessageW);
+
+            hSendMessageA.Install();
+            hSendMessageW.Install();
+        }
+
+        static void InstallCreateWindowHooks() {
+            dCreateWindowA = new CreateWindowADelegate(CreateWindow);
+            dCreateWindowW = new CreateWindowWDelegate(CreateWindow);
+
+            hCreateWindowA = new FxHook("user32.dll", "CreateWindowA", dCreateWindowA);
+            hCreateWindowW = new FxHook("user32.dll", "CreateWindowW", dCreateWindowW);
+
+            hCreateWindowA.Install();
+            hCreateWindowW.Install();
+        }
+
+        static void InstallCreateWindowExHooks() {
+            dCreateWindowExA = new CreateWindowExADelegate(CreateWindowEx);
+            dCreateWindowExW = new CreateWindowExWDelegate(CreateWindowEx);
+
+            hCreateWindowExA = new FxHook("user32.dll", "CreateWindowExA", dCreateWindowExA);
+            hCreateWindowExW = new FxHook("user32.dll", "CreateWindowExW", dCreateWindowExW);
+
+            hCreateWindowExA.Install();
+            hCreateWindowExW.Install();
+        }
+#endif
+
+        static void InstallSetWindowTextHooks() {
+            dSetWindowTextA = new SetWindowTextADelegate(SetWindowTextHook);
+            dSetWindowTextW = new SetWindowTextWDelegate(SetWindowTextHook);
+
+            hSetWindowTextA = new FxHook("user32.dll", "SetWindowTextA", dSetWindowTextA);
+            hSetWindowTextW = new FxHook("user32.dll", "SetWindowTextW", dSetWindowTextW);
+
+            hSetWindowTextA.Install();
+            hSetWindowTextW.Install();
         }
 
         public static uint hGetGlyphOutlineA(IntPtr hdc, uint uChar, uint uFormat, out GLYPHMETRICS lpgm, uint cbBuffer, IntPtr lpvBuffer, ref MAT2 lpmat2) {
@@ -158,9 +224,20 @@ namespace SRL {
         }
 
 
-        static IntPtr hCreateFontW(int nHeight, int nWidth, int nEscapement, int nOrientation, int fnWeight, uint fdwItalic, uint fdwUnderline, uint fdwStrikeOut, uint fdwCharSet, uint fdwOutputPrecision, uint fdwClipPrecision, uint fdwQuality, uint fdwPitchAndFamily, string lpszFace) {
-            if (!string.IsNullOrEmpty(FontFaceName))
-                lpszFace = FontFaceName;
+        static IntPtr hCreateFont(int nHeight, int nWidth, int nEscapement, int nOrientation, int fnWeight, uint fdwItalic, uint fdwUnderline, uint fdwStrikeOut, uint fdwCharSet, uint fdwOutputPrecision, uint fdwClipPrecision, uint fdwQuality, uint fdwPitchAndFamily, string lpszFace) {
+            if (RedirFontSize(lpszFace) != null) {
+                string Change = RedirFontSize(lpszFace);
+                if (Change.StartsWith("+")) {
+                    nWidth += int.Parse(Change);
+                } else {
+                    int Val = int.Parse(Change);
+                    if (Val <= 0)
+                        nWidth += Val;
+                    else
+                        nWidth = Val;
+                }
+            }
+            lpszFace = RedirFaceName(lpszFace);
 
             if (FontCharset != 0)
                 fdwCharSet = FontCharset;
@@ -168,7 +245,7 @@ namespace SRL {
 
 #if DEBUG
             if (Debugging)
-                Log("CreateFontW Hooked, {0} 0x{1:X2}", true, lpszFace, fdwCharSet);
+                Log("CreateFont Hooked, {0} 0x{1:X2}", true, lpszFace, fdwCharSet);
 #endif
 
             hCreatFontW.Uninstall();
@@ -178,29 +255,21 @@ namespace SRL {
             return Result;
         }
 
-
-        static IntPtr hCreateFontA(int nHeight, int nWidth, int nEscapement, int nOrientation, int fnWeight, uint fdwItalic, uint fdwUnderline, uint fdwStrikeOut, uint fdwCharSet, uint fdwOutputPrecision, uint fdwClipPrecision, uint fdwQuality, uint fdwPitchAndFamily, [MarshalAs(UnmanagedType.LPTStr)] string lpszFace) {
-            if (!string.IsNullOrEmpty(FontFaceName))
-                lpszFace = FontFaceName;
-
-            if (FontCharset != 0)
-                fdwCharSet = FontCharset;
-
-
-#if DEBUG
-            if (Debugging)
-                Log("CreateFontA Hooked, {0} 0x{1:X2}", true, lpszFace, fdwCharSet);
-#endif
-
-            hCreatFontA.Uninstall();
-            var Result = CreateFontA(nHeight, nWidth, nEscapement, nOrientation, fnWeight, fdwItalic, fdwUnderline, fdwStrikeOut, fdwCharSet, fdwOutputPrecision, fdwClipPrecision, fdwQuality, fdwPitchAndFamily, lpszFace);
-            hCreatFontA.Install();
-
-            return Result;
-        }
         static IntPtr hCreateFontIndirectA(ref LOGFONTA FontInfo) {
-            if (!string.IsNullOrEmpty(FontFaceName))
-                FontInfo.lfFaceName = FontFaceName;
+            if (RedirFontSize(FontInfo.lfFaceName) != null) {
+                string Change = RedirFontSize(FontInfo.lfFaceName);
+                if (Change.StartsWith("+")) {
+                    FontInfo.lfWidth += int.Parse(Change);
+                } else {
+                    int Val = int.Parse(Change);
+                    if (Val <= 0)
+                        FontInfo.lfWidth += Val;
+                    else
+                        FontInfo.lfWidth = Val;
+                }
+            }
+            FontInfo.lfFaceName = RedirFaceName(FontInfo.lfFaceName);
+
 
             if (FontCharset != 0)
                 FontInfo.lfCharSet = FontCharset;
@@ -218,8 +287,19 @@ namespace SRL {
             return Result;
         }
         static IntPtr hCreateFontIndirectW(ref LOGFONTW FontInfo) {
-            if (!string.IsNullOrEmpty(FontFaceName))
-                FontInfo.lfFaceName = FontFaceName;
+            if (RedirFontSize(FontInfo.lfFaceName) != null) {
+                string Change = RedirFontSize(FontInfo.lfFaceName);
+                if (Change.StartsWith("+")) {
+                    FontInfo.lfWidth += int.Parse(Change);
+                } else {
+                    int Val = int.Parse(Change);
+                    if (Val <= 0)
+                        FontInfo.lfWidth += Val;
+                    else
+                        FontInfo.lfWidth = Val;
+                }
+            }
+            FontInfo.lfFaceName = RedirFaceName(FontInfo.lfFaceName);
 
             if (FontCharset != 0)
                 FontInfo.lfCharSet = FontCharset;
@@ -237,6 +317,73 @@ namespace SRL {
             return Result;
         }
 
+#if DEBUG
+        static Int32 SendMessageWHook(int hWnd, int Msg, int wParam, IntPtr lParam) {
+            if (Msg == WM_SETTEXT) {
+                string Text = GetStringW(lParam, ForceUnicode: true);
+
+                if (Debugging)
+                    Log("SendMessage Hooked, WM_SETTEXT: {0}", true, Text);
+
+                string Reload = StrMap(Text, IntPtr.Zero, true);
+                if (Text != Reload) {
+                    lParam = GenString(Reload, true);
+                }
+            }
+            hSendMessageW.Uninstall();
+            var Rst = SendMessageW(hWnd, Msg, wParam, lParam);
+            hSendMessageW.Install();
+            return Rst;
+        }
+        static Int32 SendMessageAHook(int hWnd, int Msg, int wParam, IntPtr lParam) {
+            if (Msg == WM_SETTEXT) {
+                string Text = GetStringA(lParam);
+
+                if (Debugging)
+                    Log("WM_SETTEXT: {0}", true, Text);
+
+                string Reload = StrMap(Text, IntPtr.Zero, true);
+                if (Text != Reload) {
+                    lParam = GenString(Reload);
+                }
+            }
+            hSendMessageA.Uninstall();
+            var Rst = SendMessageA(hWnd, Msg, wParam, lParam);
+            hSendMessageA.Install();
+            return Rst;
+        }
+
+        static IntPtr CreateWindowEx(WindowStylesEx dwExStyle, string lpClassName, string lpWindowName, WindowStyles dwStyle, int x, int y, int nWidth, int nHeight, IntPtr hWndParent, IntPtr hMenu, IntPtr hInstance, IntPtr lpParam) {
+            if (Debugging)
+                Log("CreateWindowEx Hooked, {0}", true, lpWindowName);
+
+            string Reload = StrMap(lpWindowName, IntPtr.Zero, true);
+
+            hCreateWindowExW.Uninstall();
+            var Rst = CreateWindowExW(dwExStyle, lpClassName, lpWindowName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
+            hCreateWindowExW.Install();
+            return Rst;
+        }
+        static IntPtr CreateWindow(string lpClassName, string lpWindowName, uint dwStyle, int x, int y, int nWidth, int nHeight, IntPtr hWndParent, IntPtr hMenu, IntPtr hInstance, IntPtr lpParam) {
+            if (Debugging)
+                Log("CreateWindow Hooked, {0}", true, lpWindowName);
+
+            string Reload = StrMap(lpWindowName, IntPtr.Zero, true);
+
+            hCreateWindowExW.Uninstall();
+            var Rst = CreateWindowW(lpClassName, lpWindowName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
+            hCreateWindowExW.Install();
+            return Rst;
+        }
+#endif
+        static bool SetWindowTextHook(IntPtr hwnd, string lpString) { 
+            lpString = StrMap(lpString, IntPtr.Zero, true);
+
+            hSetWindowTextW.Uninstall();
+            var Ret = SetWindowTextW(hwnd, lpString);
+            hSetWindowTextW.Install();
+            return Ret;
+        }
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
         struct LOGFONTA {
@@ -311,6 +458,32 @@ namespace SRL {
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true, CharSet = CharSet.Unicode)]
         delegate IntPtr CreateFontWDelegate(int nHeight, int nWidth, int nEscapement, int nOrientation, int fnWeight, uint fdwItalic, uint fdwUnderline, uint fdwStrikeOut, uint fdwCharSet, uint fdwOutputPrecision, uint fdwClipPrecision, uint fdwQuality, uint fdwPitchAndFamily, [MarshalAs(UnmanagedType.LPWStr)] string lpszFace);
-    
+
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true)]
+        delegate Int32 SendMessageADelegate(int hWnd, int Msg, int wParam, IntPtr lParam);
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true)]
+        delegate Int32 SendMessageWDelegate(int hWnd, int Msg, int wParam, IntPtr lParam);
+
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true, CharSet = CharSet.Ansi)]
+        delegate IntPtr CreateWindowExADelegate(WindowStylesEx dwExStyle, [MarshalAs(UnmanagedType.LPStr)] string lpClassName, [MarshalAs(UnmanagedType.LPStr)] string lpWindowName, WindowStyles dwStyle, int x, int y, int nWidth, int nHeight, IntPtr hWndParent, IntPtr hMenu, IntPtr hInstance, IntPtr lpParam);
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true, CharSet = CharSet.Unicode)]
+        delegate IntPtr CreateWindowExWDelegate(WindowStylesEx dwExStyle, [MarshalAs(UnmanagedType.LPWStr)] string lpClassName, [MarshalAs(UnmanagedType.LPWStr)] string lpWindowName, WindowStyles dwStyle, int x, int y, int nWidth, int nHeight, IntPtr hWndParent, IntPtr hMenu, IntPtr hInstance, IntPtr lpParam);
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true, CharSet = CharSet.Ansi)]
+        delegate IntPtr CreateWindowADelegate([MarshalAs(UnmanagedType.LPStr)] string lpClassName, [MarshalAs(UnmanagedType.LPStr)] string lpWindowName, uint dwStyle, int x, int y, int nWidth, int nHeight, IntPtr hWndParent, IntPtr hMenu, IntPtr hInstance, IntPtr lpParam);
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true, CharSet = CharSet.Unicode)]
+        delegate IntPtr CreateWindowWDelegate([MarshalAs(UnmanagedType.LPWStr)] string lpClassName, [MarshalAs(UnmanagedType.LPWStr)] string lpWindowName, uint dwStyle, int x, int y, int nWidth, int nHeight, IntPtr hWndParent, IntPtr hMenu, IntPtr hInstance, IntPtr lpParam);
+
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true, CharSet = CharSet.Ansi)]
+        delegate bool SetWindowTextADelegate(IntPtr hwnd, [MarshalAs(UnmanagedType.LPStr)] string lpString);
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true, CharSet = CharSet.Unicode)]
+        delegate bool SetWindowTextWDelegate(IntPtr hwnd, [MarshalAs(UnmanagedType.LPWStr)] string lpString);
     }
 }
