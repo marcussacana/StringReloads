@@ -146,6 +146,8 @@ namespace SRL {
             Managed = true;
             IntPtr Ptr = Marshal.StringToHGlobalAuto(Text);
             IntPtr New = ProcessReal(Ptr);
+            if (New == Ptr)
+                return Text;
             Text = Marshal.PtrToStringAuto(New);
             Marshal.FreeHGlobal(Ptr);
             return Text;

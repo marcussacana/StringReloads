@@ -17,7 +17,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;AppVeyor</DefineConstants>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -26,7 +26,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;AppVeyor</DefineConstants>
+    <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -82,6 +82,10 @@
     <ProjectReference Include="..\SRLUnity\SRLUnity.csproj">
       <Project>{67389c64-0f78-4b09-b551-9e099345022e}</Project>
       <Name>SRLUnity</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SRL\SRL.csproj">
+      <Project>{dae58cae-d595-450f-815b-36affcbfce41}</Project>
+      <Name>SRL</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

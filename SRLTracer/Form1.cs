@@ -36,7 +36,11 @@ namespace SRLTracer {
 
                 var Strings = Wrapper.Import(Script, TryLastPluginFirst: true);
                 for (uint x = 0; x < Strings.LongLength; x++)
+#if DEBUG
+                    Strings[x] = SRL.StringReloader.ProcessManaged(Strings[x]);
+#else
                     Strings[x] = SRLUnity.Wrapper.Process(Strings[x]);
+#endif
                 Wrapper.Export(Strings, Script);
             }
 #endif
