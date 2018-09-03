@@ -57,6 +57,9 @@ namespace SRL {
                 Log("Font Redirect Request: {0}", true, FaceName);
             }
             if (!FontReplaces.ContainsKey(FaceName.Trim())) {
+                if (!FontReplaces.ContainsKey("*"))
+                    return FontReplaces["*"].To;
+
                 if (!string.IsNullOrWhiteSpace(FontFaceName))
                     return FontFaceName;
                 return FaceName;
@@ -67,6 +70,8 @@ namespace SRL {
             if (!FontReplaces.ContainsKey(FaceName.Trim())) {
                 return null;
             }
+            if (!FontReplaces.ContainsKey("*"))
+                return FontReplaces["*"].Size;
             return FontReplaces[FaceName.Trim()].Size;
         }
 
