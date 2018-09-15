@@ -42,7 +42,7 @@
     </StartupObject>
   </PropertyGroup>
   <PropertyGroup>
-    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <RunPostBuildEvent>Always</RunPostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="DllExport, PublicKeyToken=8337224c9ad9e356">
@@ -86,8 +86,11 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>cd "$(ProjectDir)"
+copy ".\$(OutDir)SRL.dll" ".\$(OutDir)SRL.dll.bak"
+"$(ProjectDir)tool\Finish.exe"
+copy ".\$(OutDir)SRL.dll.bak" ".\$(OutDir)SRL.dll"
+del ".\$(OutDir)SRL.dll.bak"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>
