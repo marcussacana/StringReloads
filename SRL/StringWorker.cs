@@ -271,9 +271,9 @@ namespace SRL {
                 return String;
 
             string Rst = String.Replace(" " + GameLineBreaker + " ", "  ");
-            Rst = String.Replace(GameLineBreaker + " ", " ");
-            Rst = String.Replace(" " + GameLineBreaker, " ");
-            Rst = String.Replace(GameLineBreaker, " ");
+            Rst = Rst.Replace(GameLineBreaker + " ", " ");
+            Rst = Rst.Replace(" " + GameLineBreaker, " ");
+            Rst = Rst.Replace(GameLineBreaker, " ");
             return Rst;
         }
 
