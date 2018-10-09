@@ -87,7 +87,7 @@ namespace SRL {
             if (DecodeCharactersFromInput)
                 Input = ReplaceChars(Input, true);            
 
-            if (!DialogFound && !IsDialog(Input))
+            if (!DialogFound && !Input.IsDialog())
                 return Input;          
 
             if (string.IsNullOrWhiteSpace(Input))
@@ -157,11 +157,11 @@ namespace SRL {
 
 
             if (Debugging)
-                Mismatch(Input);
+                Missmatch(Input);
 
             if (TLIB != null) {
                 Str = TrimString(Input);
-                if (IsDialog(Str)) {
+                if (Str.IsDialog()) {
                     string Ori = MergeLines(Str);
 
                     string TL = null;

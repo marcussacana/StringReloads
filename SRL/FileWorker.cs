@@ -66,9 +66,9 @@ namespace SRL {
         /// Dump a Mismatch if debugging
         /// </summary>
         /// <param name="String">Mismatched String</param>
-        internal static void Mismatch(string String) {
+        internal static void Missmatch(string String) {
             try {
-                if (!IsDialog(String) && DumpStrOnly)
+                if (!String.IsDialog() && DumpStrOnly)
                     return;
 
                 string Txt = SimplfyMatch(String);
