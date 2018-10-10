@@ -504,6 +504,17 @@ namespace SRL {
                 Log("SetWindowText Hook Enabled", true);
             } else if (HookSetWindowText)
                 Warning("SetWindowText Hook Settings Changed - Restart Required");
+            new Thread(() => {
+                while (!DialogFound)
+                    Thread.Sleep(100);
+                if (HookSettings.MultiByteToWideChar) {
+                    if (!HookMultiByteToWideChar)
+                        InstallMultiByteToWideChar();
+                    HookMultiByteToWideChar = true;
+                    Log("MultiByteToWideChar Hook Enabled", true);
+                } else if (HookMultiByteToWideChar)
+                    Warning("MultiByteToWideChar Hook Settings Changed - Restart Required");
+            }).Start();
 
             if (HookSettings.UndoChars) {
                 UndoChars = true;

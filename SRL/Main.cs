@@ -77,6 +77,8 @@ namespace SRL {
                     return Target;
                 }
 
+                DialogFound = true;
+
                 if (!LiteMode) {
                     if (StringModifier != null) {
                         try {

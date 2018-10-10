@@ -123,6 +123,7 @@ namespace SRL {
         static bool HookCreateWindowEx;
         static bool HookSendMessage;
 #endif
+        static bool HookMultiByteToWideChar;
         static bool HookSetWindowText;
         static bool HookGlyphOutline;
         static bool HookTextOut;

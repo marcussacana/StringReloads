@@ -4,6 +4,9 @@ using System.Text;
 
 namespace SRL {
     partial class StringReloader {
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern int MultiByteToWideChar(int CodePage, uint dwFlags, IntPtr lpMultiByteStr, int cbMultiByte, IntPtr lpWideCharStr, int cchWideChar);
+
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Ansi)]
         static extern IntPtr CreateWindowExA(WindowStylesEx dwExStyle, [MarshalAs(UnmanagedType.LPStr)] string lpClassName, [MarshalAs(UnmanagedType.LPStr)] string lpWindowName, WindowStyles dwStyle, int x, int y, int nWidth, int nHeight, IntPtr hWndParent, IntPtr hMenu, IntPtr hInstance, IntPtr lpParam);
         

@@ -104,8 +104,6 @@ namespace SRL {
             }
 
             if (ContainsKey(Str)) {
-                DialogFound = true;
-
                 string Entry = GetEntry(Str);
                 
                 string Rst = EnableWordWrap ? WordWrap(Entry) : Entry;
@@ -124,7 +122,6 @@ namespace SRL {
 
                 Str = SimplfyMatch(Str);
                 if (ContainsKey(Str)) {
-                    DialogFound = true;
 
                     string Entry = GetEntry(Str);  
                     
@@ -137,7 +134,6 @@ namespace SRL {
 
             if (ValidateMask(Input)) {
                 try {
-                    DialogFound = true;
 
                     string Result = ProcesMask(Input);
 
@@ -151,7 +147,6 @@ namespace SRL {
                     return Result;
                 } catch (Exception ex) {
                     Warning(ex.ToString());
-                    DialogFound = false;
                 }
             }
 

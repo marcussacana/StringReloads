@@ -399,14 +399,14 @@ namespace SRL {
         /// <param name="Pointer">The pointer to the string</param>
         /// <param name="Decode">if False, return the hex of the string</param>
         /// <returns>The String</returns>
-        internal static string GetString(IntPtr Pointer, bool Decode = true) {
+        internal static string GetString(IntPtr Pointer, bool Decode = true, int? Len = null, int? CP = null) {
             if (EncodingModifier != null)
                 return EncodingModifier.Call("Modifier", "GetString", Pointer, Decode);
 
-            if (Unicode)
+            if (Unicode && CP == null && Len == null)
                 return GetStringW(Pointer, Decode);
             else
-                return GetStringA(Pointer, Decode);
+                return GetStringA(Pointer, Decode, CP, Len);
         }
 
         /// <summary>
@@ -414,7 +414,7 @@ namespace SRL {
         /// </summary>
         /// <param name="String">The string</param>
         /// <returns>The Pointer to the new String</returns>
-        internal static IntPtr GenString(string String, bool ForceUnicode = false) {
+        internal static IntPtr GenString(string String, bool ForceUnicode = false, IntPtr? ForcePointer = null) {
             byte[] buffer;
             if (ForceUnicode) {
                 buffer = Encoding.Unicode.GetBytes(String + "\x0");
@@ -441,7 +441,7 @@ namespace SRL {
 #endif
                 }
             }
-            IntPtr Pointer = Marshal.AllocHGlobal(buffer.Length);
+            IntPtr Pointer = ForcePointer ?? Marshal.AllocHGlobal(buffer.Length);
 
             Marshal.Copy(buffer, 0, Pointer, buffer.Length);
 
@@ -459,10 +459,13 @@ namespace SRL {
         /// <param name="Pointer">Pointer to the string</param>
         /// <param name="Decode">if False, return the hex of the string</param>
         /// <returns></returns>
-        internal static string GetStringA(IntPtr Pointer, bool Decode = true) {
+        internal static string GetStringA(IntPtr Pointer, bool Decode = true, int? CP = null, int? Len = null) {
             int len = 0;
-            while (Marshal.ReadByte(Pointer, len) != 0)
-                ++len;
+            if (Len == null) {
+                while (Marshal.ReadByte(Pointer, len) != 0)
+                    ++len;
+            } else
+                len = Len.Value;
 
             byte[] buffer = new byte[len];
             Marshal.Copy(Pointer, buffer, 0, buffer.Length);
@@ -471,10 +474,25 @@ namespace SRL {
                 Log("Input: {0}", true, ParseBytes(buffer));
             }
 
-            if (Unicode) {
+            if (Unicode && CP == null) {
                 return Encoding.Default.GetString(buffer);
             } else {
-                if (Decode)
+                if (CP != null) {
+                    Encoding Enco;
+                    switch (CP) {
+                        case 0:
+                        case 3:
+                        case 2:
+                        case 1:
+                            Enco = Encoding.Default;
+                            break;
+
+                        default:
+                            Enco = (from x in Encoding.GetEncodings() where x.CodePage == CP select x.GetEncoding()).FirstOrDefault() ?? WriteEncoding;
+                            break;
+                    }
+                    return Enco.GetString(buffer);
+                } else if (Decode)
                     return ReadEncoding.GetString(buffer);
                 else
                     return ParseBytes(buffer);
@@ -503,7 +521,6 @@ namespace SRL {
             else
                 return ParseBytes(buffer);
         }
-
 
         /// <summary>
         /// Check if a Char is in the User Acceptable Range
@@ -775,6 +792,9 @@ namespace SRL {
 
             if (UseDatabase && ContainsKey(String))
                 return true;
+			
+			if (!DialogCheck)
+				return true;
 
             string Str = String.Trim();
             foreach (string Ignore in IgnoreList)

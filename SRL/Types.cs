@@ -301,6 +301,8 @@ namespace SRL {
             [FieldParmaters(Name = "SendMessage", DefaultValue = false)]
             public bool SendMessage;
 #endif
+            [FieldParmaters(Name = "MultiByteToWideChar", DefaultValue = false)]
+            public bool MultiByteToWideChar;
             [FieldParmaters(Name = "SetWindowText", DefaultValue = false)]
             public bool SetWindowText;
             [FieldParmaters(Name = "GetGlyphOutline", DefaultValue = false)]

@@ -14,6 +14,7 @@ namespace SRL {
         static CreateFontWDelegate dCreateFontW = null;
         static CreateFontIndirectADelegate dCreateFontIndirectA = null;
         static CreateFontIndirectWDelegate dCreateFontIndirectW = null;
+        static MultiByteToWideCharDelegate dMultiByteToWideChar = null;
 #if DEBUG
         static SendMessageADelegate dSendMessageA = null;
         static SendMessageWDelegate dSendMessageW = null;
@@ -45,6 +46,9 @@ namespace SRL {
 #endif
         static FxHook hSetWindowTextA;
         static FxHook hSetWindowTextW;
+
+
+        static FxHook hMultiByteToWideChar;
 
         static void InstallGlyphHooks() {
             dOutlineA = new GetGlyphOutlineDelegate(hGetGlyphOutlineA);
@@ -145,6 +149,14 @@ namespace SRL {
 
             hSetWindowTextA.Install();
             hSetWindowTextW.Install();
+        }
+
+        static void InstallMultiByteToWideChar() {
+            dMultiByteToWideChar = new MultiByteToWideCharDelegate(MultiByteToWideCharHook);
+
+            hMultiByteToWideChar = new FxHook("kernel32.dll", "MultiByteToWideChar", dMultiByteToWideChar);
+
+            hMultiByteToWideChar.Install();
         }
 
         public static uint hGetGlyphOutlineA(IntPtr hdc, uint uChar, uint uFormat, out GLYPHMETRICS lpgm, uint cbBuffer, IntPtr lpvBuffer, ref MAT2 lpmat2) {
@@ -381,6 +393,31 @@ namespace SRL {
             return Ret;
         }
 
+        static int MultiByteToWideCharHook(int Codepage, uint dwFlags, IntPtr Input, int cbMultiByte, IntPtr Output, int cchWideChar) {
+            hMultiByteToWideChar.Uninstall();
+            if (!Initialized || cbMultiByte == 0) {
+                int Rst = MultiByteToWideChar(Codepage, dwFlags, Input, cbMultiByte, Output, cchWideChar);
+                hMultiByteToWideChar.Install();
+                return Rst;
+            }
+            string Str = GetString(Input, Len: cbMultiByte == -1 ? null : (int?)cbMultiByte, CP: Codepage);
+            string RStr = Str;
+            RStr = StrMap(Str, Input, true);
+
+            if (RStr == Str) {
+                int Rst = MultiByteToWideChar(Codepage, dwFlags, Input, cbMultiByte, Output, cchWideChar);
+                hMultiByteToWideChar.Install();
+                return Rst;
+            }
+
+            Log("MBTWC Hook: {0}", true, RStr);
+
+            Output = GenString(RStr, true, Output == IntPtr.Zero ? null : (IntPtr?)Output);
+
+            hMultiByteToWideChar.Install();
+            return cchWideChar;
+        }
+
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
         struct LOGFONTA {
             public const int LF_FACESIZE = 32;
@@ -457,10 +494,10 @@ namespace SRL {
 
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true)]
-        delegate Int32 SendMessageADelegate(int hWnd, int Msg, int wParam, IntPtr lParam);
+        delegate int SendMessageADelegate(int hWnd, int Msg, int wParam, IntPtr lParam);
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true)]
-        delegate Int32 SendMessageWDelegate(int hWnd, int Msg, int wParam, IntPtr lParam);
+        delegate int SendMessageWDelegate(int hWnd, int Msg, int wParam, IntPtr lParam);
 
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true, CharSet = CharSet.Ansi)]
@@ -481,5 +518,9 @@ namespace SRL {
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true, CharSet = CharSet.Unicode)]
         delegate bool SetWindowTextWDelegate(IntPtr hwnd, [MarshalAs(UnmanagedType.LPWStr)] string lpString);
+
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true)]
+        delegate int MultiByteToWideCharDelegate(int CodePage, uint dwFlags, IntPtr lpMultiByteStr, int cbMultiByte, IntPtr lpWideCharStr, int cchWideChar);
     }
 }
