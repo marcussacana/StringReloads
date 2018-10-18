@@ -236,6 +236,12 @@ namespace SRL {
 
             [FieldParmaters(DefaultValue = true, Name = "AutoUnkChar;AutoUnkCharReload;UnkCharByEncoding")]
             public bool AutoUnks;
+
+            [FieldParmaters(DefaultValue = true, Name = "CaseSensitive")]
+            public bool CaseSensitive;
+
+            [FieldParmaters(DefaultValue = false, Name = "NotCachedOnly;IgnoreCached;IgnoreInCache")]
+            public bool NotCachedOnly;
         }
 
         [FieldParmaters(Name = "WordWrap")]
@@ -286,6 +292,8 @@ namespace SRL {
             public string TrimList;
             [FieldParmaters(DefaultValue = false, Name = "UseDB")]
             public bool UseDB;
+            [FieldParmaters(DefaultValue = false, Name = "ForceTrim")]
+            public bool ForceTrim;
             [FieldParmaters(DefaultValue = 2, Name = "Sensitivity")]
             public int Sensitivity;
         }

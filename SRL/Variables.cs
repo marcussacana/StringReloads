@@ -96,6 +96,8 @@ namespace SRL {
         static bool RemoveIlegals = false;
         static bool AsianInput = false;
         static bool AutoUnks = false;
+        static bool CaseSensitive = false;
+        static bool NotCachedOnly = false;
 
         static bool OverlayEnabled = false;
         static bool OverlayInitialized = false;
@@ -117,6 +119,7 @@ namespace SRL {
         static Quote[] QuoteList;
         static int Sensitivity;
         static bool UseDatabase;
+        static bool ForceTrim;
 
 #if DEBUG
         static bool HookCreateWindow;

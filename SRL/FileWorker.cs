@@ -124,6 +124,9 @@ namespace SRL {
             UseDatabase = false;
             AutoUnks = false;
             UndoChars = false;
+            CaseSensitive = false;
+            ForceTrim = false;
+            NotCachedOnly = false;
             DenyList = new string[0];
             IgnoreList = new string[0];
 
@@ -267,6 +270,13 @@ namespace SRL {
                 RemoveIlegals = true;
                 Warning("Violation remover enabled, please, consider manual repair...");
             }
+
+            if (Settings.NotCachedOnly) {
+                NotCachedOnly = true;
+                Log("Not Cached Only Reloader Mode Enabled", true);
+            }
+
+            CaseSensitive = Settings.CaseSensitive;
 
             if (OverlaySettings.Enable) {
                 OverlayEnabled = true;
@@ -420,6 +430,10 @@ namespace SRL {
                 Sensitivity = FilterSettings.Sensitivity;
             }
 
+            if (FilterSettings.ForceTrim) {
+                Log("Dialogue Filter Trim Enforcement Enabled", true);
+                ForceTrim = true;
+            }
 
             if (!string.IsNullOrWhiteSpace(Settings.WorkDirectory)) {
                 CustomDir = Settings.WorkDirectory.TrimStart(' ', '\\', '/').Replace("/", "\\");

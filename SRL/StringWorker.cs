@@ -470,7 +470,7 @@ namespace SRL {
             byte[] buffer = new byte[len];
             Marshal.Copy(Pointer, buffer, 0, buffer.Length);
 
-            if (LogInput) {
+            if ((LogInput || LogAll) && !DumpStrOnly) {
                 Log("Input: {0}", true, ParseBytes(buffer));
             }
 
@@ -512,7 +512,7 @@ namespace SRL {
             byte[] buffer = new byte[len];
             Marshal.Copy(Pointer, buffer, 0, buffer.Length);
 
-            if (LogInput) {
+            if ((LogInput || LogAll) && !DumpStrOnly) {                
                 Log("Input: {0}", true, ParseBytes(buffer));
             }
 
@@ -641,7 +641,7 @@ namespace SRL {
             for (int i = 0; i < MatchDel.Length; i++)
                 Output = Output.Replace(MatchDel[i], "");
 
-            return Output;
+            return CaseSensitive ? Output : Output.ToLower();
         }
 
         /// <summary>
@@ -662,13 +662,13 @@ namespace SRL {
         /// </summary>
         /// <param name="Txt">The String to Trim</param>
         /// <returns>The Result</returns>
-        internal static string TrimString(string Input) {
-            if (NoTrim || LiteMode)
+        internal static string TrimString(string Input, bool Force = false) {
+            if ((NoTrim || LiteMode) && !Force)
                 return Input;
 
             string Result = Input;
-            Result = TrimStart(Result);
-            Result = TrimEnd(Result);
+            Result = TrimStart(Result, Force);
+            Result = TrimEnd(Result, Force);
 #if DEBUG
             if (LogAll) {
                 Log("Trim: {0} to {1}", true, Input, Result);
@@ -682,8 +682,8 @@ namespace SRL {
         /// </summary>
         /// <param name="Txt">The String to Trim</param>
         /// <returns>The Result</returns>
-        internal static string TrimStart(string Txt) {
-            if (NoTrim || LiteMode)
+        internal static string TrimStart(string Txt, bool Force = false) {
+            if ((NoTrim || LiteMode) && !Force)
                 return Txt;
 
             string rst = Txt;
@@ -721,8 +721,8 @@ namespace SRL {
         /// </summary>
         /// <param name="Txt">The String to Trim</param>
         /// <returns>The Result</returns>
-        internal static string TrimEnd(string Txt) {
-            if (NoTrim || LiteMode)
+        internal static string TrimEnd(string Txt, bool Force = false) {
+            if ((NoTrim || LiteMode) && !Force)
                 return Txt;
 
             string rst = Txt;
@@ -797,6 +797,10 @@ namespace SRL {
 				return true;
 
             string Str = String.Trim();
+
+            if (ForceTrim)
+                Str = TrimString(Str, true);
+
             foreach (string Ignore in IgnoreList)
                 if (!string.IsNullOrEmpty(Ignore))
                     Str = Str.Replace(Ignore, "");
@@ -808,6 +812,8 @@ namespace SRL {
 
             Str = Str.Replace(GameLineBreaker, "\n");
 
+            if (string.IsNullOrWhiteSpace(Str))
+                return false;
 
             string[] Words = Str.Split(' ');
 

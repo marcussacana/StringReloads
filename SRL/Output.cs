@@ -202,7 +202,6 @@ namespace SRL {
                     case "detectstring":
                     case "detecttext":
                     case "detecttxt":
-                        Debugging = true;
                         Log("String Dumping Filter Enabled", true);
                         DumpStrOnly = true;
                         break;

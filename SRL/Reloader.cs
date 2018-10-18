@@ -85,9 +85,11 @@ namespace SRL {
         /// <returns></returns>
         internal static string StrMap(string Input, IntPtr InputPtr, bool Native) {
             if (DecodeCharactersFromInput)
-                Input = ReplaceChars(Input, true);            
+                Input = ReplaceChars(Input, true);
 
-            if (!DialogFound && !Input.IsDialog())
+            bool IsDialog = Input.IsDialog();
+
+            if (!DialogFound && !IsDialog)
                 return Input;          
 
             if (string.IsNullOrWhiteSpace(Input))
@@ -95,11 +97,15 @@ namespace SRL {
 
             string Str = SimplfyMatch(Input);
 
-            if (LogAll || LogInput) {
-                Log("Input: {0}", true, Input);
+            if ((LogAll || LogInput) && (!DumpStrOnly || IsDialog)) {
+                if (!DumpStrOnly || !InCache("LOG: " + Str)) {
+                    Log("[{1}] Input: {0}", true, Input, IsDialog ? "D" : "S");
+                    if (DumpStrOnly)
+                        CacheReply("LOG: " + Str);
+                }
             }
 
-            if (InCache(Str) && DialogFound) {
+            if (InCache(Str) && DialogFound && NotCachedOnly) {
                 return Input;
             }
 
