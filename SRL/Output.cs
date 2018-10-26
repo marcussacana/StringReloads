@@ -339,6 +339,10 @@ namespace SRL {
             }
         }
 
+        public static void HideConsole() {
+            ShowWindow(hConsole, SW_HIDE);
+        }
+
         public static void ForcePaint(IntPtr Handle) {
             RedrawWindow(Handle, IntPtr.Zero, IntPtr.Zero, (RDW_ERASE | RDW_INVALIDATE));
         }

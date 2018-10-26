@@ -129,6 +129,8 @@ namespace SRL {
             NotCachedOnly = false;
             DenyList = new string[0];
             IgnoreList = new string[0];
+            RldPrefix = string.Empty;
+            RldSufix = string.Empty;
 
             SRLSettings Settings;
             OverlaySettings OverlaySettings;
@@ -275,6 +277,17 @@ namespace SRL {
                 NotCachedOnly = true;
                 Log("Not Cached Only Reloader Mode Enabled", true);
             }
+
+            if (Settings.SetOutputEncoding) { 
+                Log("Console Output Encoding Changed", false);
+                if (!Debugging) {
+                    ConsoleShowed = false;
+                    HideConsole();
+                }
+            }
+
+            RldPrefix = Settings.ReloadedPrefix;
+            RldSufix = Settings.ReloadedSufix;
 
             CaseSensitive = Settings.CaseSensitive;
 

@@ -209,7 +209,22 @@ namespace SRL {
 
             return IDS.ToArray();
         }
-        
+
+        internal static string PrefixWorker(string Str) {
+            string Reloaded = Str;
+            if (Reloaded.Contains(AntiPrefixFlag) || string.IsNullOrEmpty(RldPrefix))
+                Reloaded = Reloaded.Replace(AntiPrefixFlag, string.Empty);
+            else
+                Reloaded = RldPrefix + Reloaded;            
+
+            if (Reloaded.Contains(AntiSufixFlag) || string.IsNullOrEmpty(RldSufix))
+                Reloaded = Reloaded.Replace(AntiSufixFlag, string.Empty);
+            else
+                Reloaded = Reloaded + RldSufix;
+            
+            return Reloaded;
+        }
+
         /// <summary>
         /// Wordwrap a string
         /// </summary>

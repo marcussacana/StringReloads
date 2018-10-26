@@ -225,6 +225,12 @@ namespace SRL {
             [FieldParmaters(DefaultValue = "", Name = "CustomCredits;Credits;About;")]
             public string CustomCredits;
 
+            [FieldParmaters(DefaultValue = "", Name = "ReloadedPrefix;Prefix")]
+            public string ReloadedPrefix;
+
+            [FieldParmaters(DefaultValue = "", Name = "ReloadedSufix;Sufix")]
+            public string ReloadedSufix;
+
             [FieldParmaters(DefaultValue = false, Name = "LiteMode;FastMode;CompatibiltyMode")]
             public bool LiteMode;
 
@@ -242,6 +248,9 @@ namespace SRL {
 
             [FieldParmaters(DefaultValue = false, Name = "NotCachedOnly;IgnoreCached;IgnoreInCache")]
             public bool NotCachedOnly;
+
+            [FieldParmaters(DefaultValue = false, Name = "SetOutEncoding;SetOutputEncoding;ForceOutputEncoding")]
+            public bool SetOutputEncoding;
         }
 
         [FieldParmaters(Name = "WordWrap")]

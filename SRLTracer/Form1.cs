@@ -33,15 +33,22 @@ namespace SRLTracer {
                 string Script = ofd.FileNames[i];
                 Text = $"SRLTracer - Exporting {System.IO.Path.GetFileName(Script)} ({i} of {ofd.FileNames.Length} Files)";
                 Application.DoEvents();
-
-                var Strings = Wrapper.Import(Script, TryLastPluginFirst: true);
-                for (uint x = 0; x < Strings.LongLength; x++)
+                try {
+                    bool Export = false;
+                    var Strings = Wrapper.Import(Script, TryLastPluginFirst: true);
+                    for (uint x = 0; x < Strings.LongLength; x++) {
+                        string Ori = Strings[x];
 #if DEBUG
-                    Strings[x] = SRL.StringReloader.ProcessManaged(Strings[x]);
+                        Strings[x] = SRL.StringReloader.ProcessManaged(Strings[x]);
 #else
-                    Strings[x] = SRLUnity.Wrapper.Process(Strings[x]);
+                        Strings[x] = SRLUnity.Wrapper.Process(Strings[x]);
 #endif
-                Wrapper.Export(Strings, Script);
+                        if (Strings[x] != Ori)
+                            Export = true;
+                    }
+                    if (Export)
+                        Wrapper.Export(Strings, Script);
+                } catch { }
             }
 #endif
             Text = "SRL Engine Tracer Tool";

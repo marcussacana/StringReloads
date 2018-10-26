@@ -13,6 +13,8 @@ namespace SRL {
         const string ReturnLineFlag = "::RETURNLINE::";
         const string AntiWordWrapFlag = "::NOWORDWRAP::";
         const string AntiMaskParser = "::NOMASK::";
+        const string AntiPrefixFlag = "::NOPREFIX::";
+        const string AntiSufixFlag = "::NOSUFIX::";
         const string MaskWordWrap = "::FULLWORDWRAP::";
 
         const string CfgName = "StringReloader";
@@ -113,7 +115,10 @@ namespace SRL {
 
         static int LogStack = 0;
         static int CursorX, CursorY;
-        
+
+        static string RldPrefix;
+        static string RldSufix;
+
         static string[] DenyList;
         static string[] IgnoreList;
         static Quote[] QuoteList;

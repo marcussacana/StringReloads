@@ -88,6 +88,8 @@ namespace SRL {
                         }
                     }
 
+                    Reloaded = PrefixWorker(Reloaded);
+
                     CacheReply(Reloaded);
                     TrimWorker(ref Reloaded, Input);
 
@@ -152,9 +154,9 @@ namespace SRL {
                 return Text;
             Text = Marshal.PtrToStringAuto(New);
             Marshal.FreeHGlobal(Ptr);
+            Marshal.FreeHGlobal(New);
             return Text;
         }
-
         static string ProcessManaged(string Text, bool Managed) {
             bool IsManaged = Managed;
             string Result = ProcessManaged(Text);
