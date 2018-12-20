@@ -251,6 +251,10 @@ namespace SRL {
 
             [FieldParmaters(DefaultValue = false, Name = "SetOutEncoding;SetOutputEncoding;ForceOutputEncoding")]
             public bool SetOutputEncoding;
+
+            [FieldParmaters(DefaultValue = false, Name = "AllowEmptyReloads;AllowEmptyReload;AllowEmpty;DisableEmptyFilter")]
+            public bool AllowEmptyReloads;
+
         }
 
         [FieldParmaters(Name = "WordWrap")]

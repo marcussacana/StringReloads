@@ -26,10 +26,13 @@ namespace SRL {
                             In.Add(L1);
                             continue;
                         }
+
                         if (L2 != L1 || (IgnoreMask && IsMask(L1))) {
-                            if (!string.IsNullOrWhiteSpace(L2) && !In.Contains(L1)) {
-                                In.Add(L1);
-                                Out.Add(L2);
+                            if (!string.IsNullOrWhiteSpace(L2) || AllowEmpty) {
+                                if (!In.Contains(L1)) {
+                                    In.Add(L1);
+                                    Out.Add(L2);
+                                }
                             }
                         }
                     } catch (Exception ex){
@@ -127,6 +130,7 @@ namespace SRL {
             CaseSensitive = false;
             ForceTrim = false;
             NotCachedOnly = false;
+            AllowEmpty = false;
             DenyList = new string[0];
             IgnoreList = new string[0];
             RldPrefix = string.Empty;
@@ -276,6 +280,11 @@ namespace SRL {
             if (Settings.NotCachedOnly) {
                 NotCachedOnly = true;
                 Log("Not Cached Only Reloader Mode Enabled", true);
+            }
+
+            if (Settings.AllowEmptyReloads) {
+                AllowEmpty = true;
+                Log("Empty Reloader Filter Disabled", true);
             }
 
             if (Settings.SetOutputEncoding) { 

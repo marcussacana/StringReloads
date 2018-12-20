@@ -100,6 +100,7 @@ namespace SRL {
         static bool AutoUnks = false;
         static bool CaseSensitive = false;
         static bool NotCachedOnly = false;
+        static bool AllowEmpty = false;
 
         static bool OverlayEnabled = false;
         static bool OverlayInitialized = false;

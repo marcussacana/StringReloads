@@ -9,7 +9,9 @@ namespace SRLTracer {
         }
 
         private void button1_Click(object sender, EventArgs e) {
-#if !AppVeyor
+#if AppVeyor
+            MessageBox.Show("Sorry but the AppVeyor build don't works, Please, build this project by yourself");
+#else
 #if DEBUG
             TBInput.Text = SRL.StringReloader.ProcessManaged(TBInput.Text);
 #else
@@ -27,7 +29,9 @@ namespace SRLTracer {
             if (ofd.ShowDialog() != DialogResult.OK)
                 return;
 
-#if !AppVeyor
+#if AppVeyor
+            MessageBox.Show("Sorry but the AppVeyor build don't works, Please, build this project by yourself");
+#else
             Wrapper Wrapper = new Wrapper();
             for (int i = 0; i < ofd.FileNames.Length; i++) {
                 string Script = ofd.FileNames[i];
