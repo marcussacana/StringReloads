@@ -326,14 +326,19 @@ namespace SRL {
                 rst = rst.Substring(0, rst.Length - GameLineBreaker.Length);
 
             if (FakeBreakLine) {
+                float SpaceLen = GetTextWidth(Font, " ") /*- (GetTextWidth(Font, "_")*2)*/;
                 string[] Splited = rst.Replace(GameLineBreaker, "\n").Split('\n');
                 string NewRst = string.Empty;
                 for (int i = 0; i < Splited.Length; i++) {
                     string tmp = Splited[i];
+
+                    int Spaces = 0;
                     bool Last = i + 1 >= Splited.Length;
                     if (!Last)
-                        while (GetTextWidth(Font, tmp) < MaxWidth)
-                            tmp += ' ';
+                        while (GetTextWidth(Font, tmp) + (SpaceLen * Spaces) < MaxWidth)
+                            Spaces++;
+
+                    tmp += new string(' ', Spaces);
 
                     NewRst += tmp;
                 }
@@ -343,11 +348,13 @@ namespace SRL {
             return rst;
         }
 
-        internal static int GetTextWidth(Font Font, string Text) {
-            using (var g = Graphics.FromHwnd(IntPtr.Zero))
-                return (int)g.MeasureString(Text, Font).Width;
-
-            //return System.Windows.Forms.TextRenderer.MeasureText(Text, Font).Width;
+        internal static float GetTextWidth(Font Font, string Text) {
+            try {
+                using (var g = Graphics.FromHwnd(IntPtr.Zero))
+                    return g.MeasureString(Text, Font).Width;
+            } catch {
+                return System.Windows.Forms.TextRenderer.MeasureText(Text, Font).Width;
+            }
         }
 
         internal static string MonospacedWordWrap(string String) {
