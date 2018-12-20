@@ -171,5 +171,13 @@ namespace SRL {
             IntPtr Result = ProcessReal(new IntPtr(Char));
             return (char)(Result.ToInt32() & 0xFFFF);
         }
+
+        //EntryPoint to the RemoteLoader
+        public static int EntryPoint(string Argument) {
+            try {
+                ProcessReal(IntPtr.Zero);
+            } catch (Exception ex){ Log("Error: {0}", false, ex.ToString()); }
+            return 0;
+        }
     }
 }

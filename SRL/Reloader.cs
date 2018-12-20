@@ -279,7 +279,7 @@ namespace SRL {
                     Warning("SRL Engine - Unauthenticated Debug Build");
 #else
                     Error("SRL Engine - Unauthenticated Public Build");
-                    return;                    
+                    return;
 #endif
                 }
 
