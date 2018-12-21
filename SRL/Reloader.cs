@@ -23,15 +23,15 @@ namespace SRL {
 
             return CharInt;
         }
-        
-        static IntPtr RestoreChar(IntPtr CharInt) {
-            char c = (char)ParsePtr(CharInt);
-            if (CharRld.ContainsValue(c))
-                return new IntPtr(CharRld.ReverseMatch(c));
-            if (UnkRld.ContainsValue(c))
-                return new IntPtr(UnkRld.ReverseMatch(c));
 
-            return CharInt;
+        static char ProcessChar(char Char) => (char)ProcessChar(new IntPtr(Char)).ToInt32();
+        static char RestoreChar(char Char) {
+            if (CharRld.ContainsValue(Char))
+                return (char)CharRld.ReverseMatch(Char);
+            if (UnkRld.ContainsValue(Char))
+                return (char)UnkRld.ReverseMatch(Char);
+
+            return Char;
         }
 
         static internal Key ReverseMatch<Key, Value>(this Dictionary<Key, Value> Dictionary, Value ValueToSearch) {

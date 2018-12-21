@@ -326,7 +326,7 @@ namespace SRL {
                 rst = rst.Substring(0, rst.Length - GameLineBreaker.Length);
 
             if (FakeBreakLine) {
-                float SpaceLen = GetTextWidth(Font, " ") /*- (GetTextWidth(Font, "_")*2)*/;
+                float SpaceLen = GetTextWidth(Font, "_ _") - (GetTextWidth(Font, "_")*2);
                 string[] Splited = rst.Replace(GameLineBreaker, "\n").Split('\n');
                 string NewRst = string.Empty;
                 for (int i = 0; i < Splited.Length; i++) {

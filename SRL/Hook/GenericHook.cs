@@ -192,7 +192,14 @@ namespace SRL {
             if (UndoChars) {
                 for (int i = 0; i < lpString.Length; i++) {
                     char C = lpString[i];
-                    char OC = (char)ParsePtr(RestoreChar(new IntPtr(C)));
+                    char OC = RestoreChar(C);
+                    if (OC != C)
+                        lpString = lpString.Replace(C, OC);
+                }
+            } else {
+                for (int i = 0; i < lpString.Length; i++) {
+                    char C = lpString[i];
+                    char OC = ProcessChar(C);
                     if (OC != C)
                         lpString = lpString.Replace(C, OC);
                 }
@@ -214,7 +221,14 @@ namespace SRL {
             if (UndoChars) {
                 for (int i = 0; i < lpString.Length; i++) {
                     char C = lpString[i];
-                    char OC = (char)ParsePtr(RestoreChar(new IntPtr(C)));
+                    char OC = RestoreChar(C);
+                    if (OC != C)
+                        lpString = lpString.Replace(C, OC);
+                }
+            } else {
+                for (int i = 0; i < lpString.Length; i++) {
+                    char C = lpString[i];
+                    char OC = ProcessChar(C);
                     if (OC != C)
                         lpString = lpString.Replace(C, OC);
                 }
