@@ -254,7 +254,7 @@ namespace SRL {
                 if (File.Exists(BaseDir + "EncodingModifier.cs")) {
                     Log("Enabling Encoding Modifier...", true);
                     try {
-                        DotNetVM VM = new DotNetVM(File.ReadAllText(BaseDir + "Modifier.cs", Encoding.UTF8));
+                        DotNetVM VM = new DotNetVM(File.ReadAllText(BaseDir + "EncodingModifier.cs", Encoding.UTF8));
                         EncodingModifier = VM;
                         Log("Encoding Modifier Compiled", true);
                     } catch (Exception ex) {
