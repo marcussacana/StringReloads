@@ -367,7 +367,7 @@ namespace SRL {
 
         [FieldParmaters(Name = "Intro")]
         internal struct IntroSettings {
-            [FieldParmaters(Name = "Seconds;Time;Duration", DefaultValue = false)]
+            [FieldParmaters(Name = "Seconds;Time;Duration", DefaultValue = 0)]
             public int Seconds;
 
             [FieldParmaters(Name = "ShowWindow", DefaultValue = true)]
