@@ -1,5 +1,8 @@
 ﻿using AdvancedBinary;
+using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Media;
 
 namespace SRL {
     partial class StringReloader {
@@ -56,7 +59,6 @@ namespace SRL {
             public char[] UnkReps;
 
 
-
             uint RepCount;
 
             [RArray(FieldName = "RepCount"), PString(PrefixType = Const.UINT32)]
@@ -64,6 +66,25 @@ namespace SRL {
 
             [RArray(FieldName = "RepCount"), PString(PrefixType = Const.UINT32)]
             public string[] RepTrg;
+        }
+
+        struct SRLIntro {
+            [StructField, PArray(PrefixType = Const.UINT8)]
+            public IntroContainer[] Intros;
+        }
+
+        struct IntroContainer {
+            [PArray(PrefixType = Const.UINT32)]
+            public byte[] Bitmap;
+
+            [PArray(PrefixType = Const.UINT32)]
+            public byte[] Wav;
+
+            [Ignore]
+            public Bitmap Texture => Image.FromStream(new MemoryStream(Bitmap)) as Bitmap;
+
+            [Ignore]
+            public bool HasSound => Wav.Length != 0;
         }
 
         struct SRLDatabase2 {
@@ -80,8 +101,8 @@ namespace SRL {
             
         }
 
-        #region Decrapted
-        //Decrapted But Supported Formats
+        #region Deprecated
+        //Deprecated But Supported Formats
         struct TLBC {
             [FString(Length = 4)]
             public string Signature;
@@ -342,6 +363,19 @@ namespace SRL {
             public string FaceName;
             [FieldParmaters(Name = "UndoChars;UndoReloads;UndoFakeChars", DefaultValue = false)]
             public bool UndoChars;
+        }
+
+        [FieldParmaters(Name = "Intro")]
+        internal struct IntroSettings {
+            [FieldParmaters(Name = "Seconds;Time;Duration", DefaultValue = false)]
+            public int Seconds;
+
+            [FieldParmaters(Name = "ShowWindow", DefaultValue = true)]
+            public bool ShowWindow;
+            [FieldParmaters(Name = "SetWindowPos", DefaultValue = true)]
+            public bool SetWindowPos;
+            [FieldParmaters(Name = "MoveWindow", DefaultValue = false)]
+            public bool MoveWindow;
         }
 
         internal struct FontRedirect {

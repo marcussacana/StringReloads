@@ -5,7 +5,7 @@ using System.Text;
 namespace SRL {
     partial class StringReloader {
         [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern int MultiByteToWideChar(int CodePage, uint dwFlags, IntPtr lpMultiByteStr, int cbMultiByte, IntPtr lpWideCharStr, int cchWideChar);
+        static extern int MultiByteToWideChar(int CodePage, uint dwFlags, IntPtr lpMultiByteStr, int cbMultiByte, IntPtr lpWideCharStr, int cchWideChar);
 
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Ansi)]
         static extern IntPtr CreateWindowExA(WindowStylesEx dwExStyle, [MarshalAs(UnmanagedType.LPStr)] string lpClassName, [MarshalAs(UnmanagedType.LPStr)] string lpWindowName, WindowStyles dwStyle, int x, int y, int nWidth, int nHeight, IntPtr hWndParent, IntPtr hMenu, IntPtr hInstance, IntPtr lpParam);
@@ -56,65 +56,96 @@ namespace SRL {
         static extern bool ExtTextOutW(IntPtr hdc, int X, int Y, uint fuOptions, [In] ref RECT lprc, [MarshalAs(UnmanagedType.LPWStr)] string lpString, uint cbCount, [In] IntPtr lpDx);
 
         [DllImport("kernel32.dll")]
-        public static extern bool IsBadCodePtr(IntPtr Ptr);
+        static extern bool IsBadCodePtr(IntPtr Ptr);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool AllocConsole();
 
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Ansi)]
-        public static extern bool SetWindowTextA(IntPtr hwnd,[MarshalAs(UnmanagedType.LPStr)] string lpString);
+        static extern bool SetWindowTextA(IntPtr hwnd,[MarshalAs(UnmanagedType.LPStr)] string lpString);
 
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        public static extern bool SetWindowTextW(IntPtr hwnd,[MarshalAs(UnmanagedType.LPWStr)] string lpString);
+        static extern bool SetWindowTextW(IntPtr hwnd,[MarshalAs(UnmanagedType.LPWStr)] string lpString);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        public static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+        static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
 
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        public static extern int GetWindowTextLength(IntPtr hWnd);
+        static extern int GetWindowTextLength(IntPtr hWnd);
 
         [DllImport("user32", SetLastError = true)]
-        public static extern int EnumWindows(CallBack x, int y);
+        static extern int EnumWindows(CallBack x, int y);
 
         [DllImport("user32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool EnumChildWindows(IntPtr hwndParent, CallBack lpEnumFunc, IntPtr lParam);
+        static extern bool EnumChildWindows(IntPtr hwndParent, CallBack lpEnumFunc, IntPtr lParam);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        public static extern IntPtr SendMessage(HandleRef hWnd, uint Msg, IntPtr wParam, string lParam);
+        static extern IntPtr SendMessage(HandleRef hWnd, uint Msg, IntPtr wParam, string lParam);
 
         [DllImport("user32.dll", SetLastError = true)]
-        public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
+        static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
 
         [DllImport("user32.dll")]
-        public static extern int GetMenuItemCount(IntPtr hMenu);
+        static extern int GetMenuItemCount(IntPtr hMenu);
 
         [DllImport("user32.dll")]
-        public static extern IntPtr GetMenu(IntPtr hWnd);
+        static extern IntPtr GetMenu(IntPtr hWnd);
 
 
         [DllImport(@"kernel32.dll", CharSet = CharSet.Ansi, ExactSpelling = true, SetLastError = true)]
-        internal static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
+        static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
 
         [DllImport(@"kernel32.dll", CharSet = CharSet.Auto)]
-        public static extern IntPtr GetModuleHandle(string lpModuleName);
+        static extern IntPtr GetModuleHandle(string lpModuleName);
 
 
         [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        public static extern bool GetMenuItemInfo(IntPtr hMenu, int uItem, bool fByPosition, ref MENUITEMINFO lpmii);
+        static extern bool GetMenuItemInfo(IntPtr hMenu, int uItem, bool fByPosition, ref MENUITEMINFO lpmii);
 
         [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        public static extern bool SetMenuItemInfo(IntPtr hMenu, int uItem, bool fByPosition, [In] ref MENUITEMINFO lpmii);
+        static extern bool SetMenuItemInfo(IntPtr hMenu, int uItem, bool fByPosition, [In] ref MENUITEMINFO lpmii);
 
         [DllImport("user32.dll")]
-        public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
         [DllImport("kernel32.dll")]
-        public static extern IntPtr GetConsoleWindow();
+        static extern IntPtr GetConsoleWindow();
+
 
         [DllImport("User32.dll")]
-        public static extern bool RedrawWindow(IntPtr hWnd, IntPtr rec, IntPtr recptr, uint Flags);
+        static extern bool RedrawWindow(IntPtr hWnd, IntPtr rec, IntPtr recptr, uint Flags);
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, SetWindowPosFlags uFlags);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
+
+
+        [DllImport("user32.dll")]
+        static extern sbyte GetMessage(out MSG lpMsg, IntPtr hWnd, uint wMsgFilterMin, uint wMsgFilterMax);
+        [DllImport("user32.dll")]
+        static extern bool TranslateMessage([In] ref MSG lpMsg);
+        [DllImport("user32.dll")]
+        static extern IntPtr DispatchMessage([In] ref MSG lpmsg);
+
+        [StructLayout(LayoutKind.Sequential)]
+
+        public struct MSG {
+            public IntPtr hWnd;
+            public uint Message;
+            public UIntPtr wParam;
+            public IntPtr lParam;
+            public int time;
+            public POINT pt;
+        }
+
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
         public struct MENUITEMINFO {
@@ -282,8 +313,69 @@ namespace SRL {
         public const int SW_SHOW = 5;
         public const int RDW_INVALIDATE = 0x0001;
         public const int RDW_ERASE = 0x0004;
+        public const int RDW_UPDATENOW = 0x0100;
 
-        [Flags]
+        [Flags()]
+        private enum SetWindowPosFlags : uint {
+            /// <summary>If the calling thread and the thread that owns the window are attached to different input queues, 
+            /// the system posts the request to the thread that owns the window. This prevents the calling thread from 
+            /// blocking its execution while other threads process the request.</summary>
+            /// <remarks>SWP_ASYNCWINDOWPOS</remarks>
+            AsynchronousWindowPosition = 0x4000,
+            /// <summary>Prevents generation of the WM_SYNCPAINT message.</summary>
+            /// <remarks>SWP_DEFERERASE</remarks>
+            DeferErase = 0x2000,
+            /// <summary>Draws a frame (defined in the window's class description) around the window.</summary>
+            /// <remarks>SWP_DRAWFRAME</remarks>
+            DrawFrame = 0x0020,
+            /// <summary>Applies new frame styles set using the SetWindowLong function. Sends a WM_NCCALCSIZE message to 
+            /// the window, even if the window's size is not being changed. If this flag is not specified, WM_NCCALCSIZE 
+            /// is sent only when the window's size is being changed.</summary>
+            /// <remarks>SWP_FRAMECHANGED</remarks>
+            FrameChanged = 0x0020,
+            /// <summary>Hides the window.</summary>
+            /// <remarks>SWP_HIDEWINDOW</remarks>
+            HideWindow = 0x0080,
+            /// <summary>Does not activate the window. If this flag is not set, the window is activated and moved to the 
+            /// top of either the topmost or non-topmost group (depending on the setting of the hWndInsertAfter 
+            /// parameter).</summary>
+            /// <remarks>SWP_NOACTIVATE</remarks>
+            DoNotActivate = 0x0010,
+            /// <summary>Discards the entire contents of the client area. If this flag is not specified, the valid 
+            /// contents of the client area are saved and copied back into the client area after the window is sized or 
+            /// repositioned.</summary>
+            /// <remarks>SWP_NOCOPYBITS</remarks>
+            DoNotCopyBits = 0x0100,
+            /// <summary>Retains the current position (ignores X and Y parameters).</summary>
+            /// <remarks>SWP_NOMOVE</remarks>
+            IgnoreMove = 0x0002,
+            /// <summary>Does not change the owner window's position in the Z order.</summary>
+            /// <remarks>SWP_NOOWNERZORDER</remarks>
+            DoNotChangeOwnerZOrder = 0x0200,
+            /// <summary>Does not redraw changes. If this flag is set, no repainting of any kind occurs. This applies to 
+            /// the client area, the nonclient area (including the title bar and scroll bars), and any part of the parent 
+            /// window uncovered as a result of the window being moved. When this flag is set, the application must 
+            /// explicitly invalidate or redraw any parts of the window and parent window that need redrawing.</summary>
+            /// <remarks>SWP_NOREDRAW</remarks>
+            DoNotRedraw = 0x0008,
+            /// <summary>Same as the SWP_NOOWNERZORDER flag.</summary>
+            /// <remarks>SWP_NOREPOSITION</remarks>
+            DoNotReposition = 0x0200,
+            /// <summary>Prevents the window from receiving the WM_WINDOWPOSCHANGING message.</summary>
+            /// <remarks>SWP_NOSENDCHANGING</remarks>
+            DoNotSendChangingEvent = 0x0400,
+            /// <summary>Retains the current size (ignores the cx and cy parameters).</summary>
+            /// <remarks>SWP_NOSIZE</remarks>
+            IgnoreResize = 0x0001,
+            /// <summary>Retains the current Z order (ignores the hWndInsertAfter parameter).</summary>
+            /// <remarks>SWP_NOZORDER</remarks>
+            IgnoreZOrder = 0x0004,
+            /// <summary>Displays the window.</summary>
+            /// <remarks>SWP_SHOWWINDOW</remarks>
+            ShowWindow = 0x0040
+        }
+
+            [Flags]
         public enum WindowStylesEx : uint {
             /// <summary>Specifies a window that accepts drag-drop files.</summary>
             WS_EX_ACCEPTFILES = 0x00000010,

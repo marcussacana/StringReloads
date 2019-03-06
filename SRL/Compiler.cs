@@ -101,6 +101,7 @@ namespace SRL {
             Log("Building String Reloads...");
             SRLData3 Data = new SRLData3() {
                 Signature = "SRL3",
+                Version = 1,
                 Databases = DBS,
                 OriLetters = COri.ToArray(),
                 MemoryLetters = Ilegals,
@@ -110,11 +111,34 @@ namespace SRL {
                 RepTrg = RNew.ToArray()
             };
 
+            List<IntroContainer> Container = new List<IntroContainer>();
+            while (File.Exists(string.Format(IntroMsk, Container.Count, "png"))) {
+                string pTexture = string.Format(IntroMsk, Container.Count, "png");
+                string pSound = string.Format(IntroMsk, Container.Count, "wav");
+
+                IntroContainer cContainer = new IntroContainer() {
+                    Bitmap = File.ReadAllBytes(pTexture),
+                    Wav = new byte[0]
+                };
+
+                if (File.Exists(pSound))
+                    cContainer.Wav = File.ReadAllBytes(pSound);
+
+                Container.Add(cContainer);
+            }
+
+            SRLIntro Intros = new SRLIntro() {
+                Intros = Container.ToArray()
+            };
+
+            Log("{0} Intro(s) Found", true, Intros.Intros.Length);
+
             if (File.Exists(TLMap))
                 File.Delete(TLMap);
 
             using (StructWriter Writer = new StructWriter(TLMap)){
                 Writer.WriteStruct(ref Data);
+                Writer.WriteStruct(ref Intros);
                 Writer.Close();
             }
             Log("Builded Successfully.");
@@ -186,7 +210,7 @@ namespace SRL {
                     }
 
                     Reader.Seek(4, 0);
-                    if (Reader.ReadUInt16() != 0x00) {
+                    if (Reader.ReadUInt16() > 1) {
                         Error("Unexpected SRL Database Format");
                         Thread.Sleep(5000);
                         Environment.Exit(2);
@@ -194,131 +218,140 @@ namespace SRL {
                     Reader.Seek(0, 0);
 
                     Reader.ReadStruct(ref Data);
-                    Reader.Close();
-                }
 
-                Log("Initializing Replaces...", true);
-                for (uint i = 0; i < Data.RepOri.LongLength; i++) {
-                    AppendArray(ref Replaces, Data.RepOri[i]);
-                    AppendArray(ref Replaces, Data.RepTrg[i]);
-                }
-
-                Log("Processing Char Reloads... 1/3", true);
-                CharRld = new Dictionary<ushort, char>();
-                for (uint i = 0; i < Data.OriLetters.LongLength; i++) {
-                    char cOri = Data.OriLetters[i];
-                    char cPrx = Data.MemoryLetters[i];
-                    if (!CharRld.ContainsKey(cPrx)) {
-                        CharRld.Add(cPrx, cOri);
-                        AppendArray(ref Replaces, cOri.ToString());
-                        AppendArray(ref Replaces, cPrx.ToString());
-
-                        Range Range = new Range() {
-                            Min = cPrx,
-                            Max = cPrx
-                        };
-
-                        if (!Ranges.Contains(Range))
-                            Ranges.Add(Range);
+                    Log("Initializing Replaces...", true);
+                    for (uint i = 0; i < Data.RepOri.LongLength; i++) {
+                        AppendArray(ref Replaces, Data.RepOri[i]);
+                        AppendArray(ref Replaces, Data.RepTrg[i]);
                     }
-                }
 
-                Log("Processing Char Reloads... 2/3", true);
-                UnkRld = new Dictionary<ushort, char>();
-                for (uint i = 0; i < Data.UnkChars.LongLength; i++) {
-                    ushort c = Data.UnkChars[i];
-                    if (!UnkRld.ContainsKey(c)) {
-                        UnkRld.Add(c, Data.UnkReps[i]);
-                    }
-                }
-
-                if (AutoUnks) {
-                    Log("Processing Char Reloads... 3/3", true);
+                    Log("Processing Char Reloads... 1/3", true);
+                    CharRld = new Dictionary<ushort, char>();
                     for (uint i = 0; i < Data.OriLetters.LongLength; i++) {
-                        char Char = Data.MemoryLetters[i];
-                        char OChar = Data.OriLetters[i];
-                        byte[] Buffer = WriteEncoding.GetBytes(Char.ToString());
-                        if (BitConverter.IsLittleEndian)
-                            Buffer = Buffer.Reverse().ToArray();
+                        char cOri = Data.OriLetters[i];
+                        char cPrx = Data.MemoryLetters[i];
+                        if (!CharRld.ContainsKey(cPrx)) {
+                            CharRld.Add(cPrx, cOri);
+                            AppendArray(ref Replaces, cOri.ToString());
+                            AppendArray(ref Replaces, cPrx.ToString());
 
-                        if (Buffer.Length > 2) {
-                            Warning("Failed to generate Auto Unk Char to the char {0}", Char);
-                            continue;
+                            Range Range = new Range() {
+                                Min = cPrx,
+                                Max = cPrx
+                            };
+
+                            if (!Ranges.Contains(Range))
+                                Ranges.Add(Range);
                         }
-
-                        byte[] DW = new byte[2];
-                        Buffer.CopyTo(DW, 0);
-                        ushort Unk = BitConverter.ToUInt16(DW, 0);
-#if DEBUG
-                        Log("Unk Added: 0x{0:X4} from {1}", true, Unk, OChar);
-#endif
-                        if (UnkRld.ContainsKey(Unk))
-                            continue;
-
-                        UnkRld.Add(Unk, OChar);
-
-                        DW[1] = 0xFF;
-                        Unk = BitConverter.ToUInt16(DW, 0);
-#if DEBUG
-                        Log("Unk Added: 0x{0:X4} from {1}", true, Unk, OChar);
-#endif
-                        if (UnkRld.ContainsKey(Unk))
-                            continue;
-
-                        UnkRld.Add(Unk, OChar);
                     }
-                }
+
+                    Log("Processing Char Reloads... 2/3", true);
+                    UnkRld = new Dictionary<ushort, char>();
+                    for (uint i = 0; i < Data.UnkChars.LongLength; i++) {
+                        ushort c = Data.UnkChars[i];
+                        if (!UnkRld.ContainsKey(c)) {
+                            UnkRld.Add(c, Data.UnkReps[i]);
+                        }
+                    }
+
+                    if (AutoUnks) {
+                        Log("Processing Char Reloads... 3/3", true);
+                        for (uint i = 0; i < Data.OriLetters.LongLength; i++) {
+                            char Char = Data.MemoryLetters[i];
+                            char OChar = Data.OriLetters[i];
+                            byte[] Buffer = WriteEncoding.GetBytes(Char.ToString());
+                            if (BitConverter.IsLittleEndian)
+                                Buffer = Buffer.Reverse().ToArray();
+
+                            if (Buffer.Length > 2) {
+                                Warning("Failed to generate Auto Unk Char to the char {0}", Char);
+                                continue;
+                            }
+
+                            byte[] DW = new byte[2];
+                            Buffer.CopyTo(DW, 0);
+                            ushort Unk = BitConverter.ToUInt16(DW, 0);
+#if DEBUG
+                        Log("Unk Added: 0x{0:X4} from {1}", true, Unk, OChar);
+#endif
+                            if (UnkRld.ContainsKey(Unk))
+                                continue;
+
+                            UnkRld.Add(Unk, OChar);
+
+                            DW[1] = 0xFF;
+                            Unk = BitConverter.ToUInt16(DW, 0);
+#if DEBUG
+                        Log("Unk Added: 0x{0:X4} from {1}", true, Unk, OChar);
+#endif
+                            if (UnkRld.ContainsKey(Unk))
+                                continue;
+
+                            UnkRld.Add(Unk, OChar);
+                        }
+                    }
 
 
-                Log("Chars Reloads Initialized, Total entries: {0} + {1}", true, UnkRld.Count, CharRld.Count);
-                Log("Processing String Reloads...", true);
-                List<string> Temp = new List<string>();
-                StrRld = new Dictionary<string, string>();
-                long ReloadEntries = 0, MaskEntries = 0;
-                foreach (SRLDatabase2 Database in Data.Databases) {
-                    for (uint i = 0; i < Database.Original.LongLength; i++) {
-                        Application.DoEvents();
-                        string str = SimplfyMatch(Database.Original[i]);
-                        if (!ContainsKey(str, true)) {
-                            if (IsMask(Database.Original[i])) {
-                                if (LiteralMaskMatch) {
+                    Log("Chars Reloads Initialized, Total entries: {0} + {1}", true, UnkRld.Count, CharRld.Count);
+                    Log("Processing String Reloads...", true);
+                    List<string> Temp = new List<string>();
+                    StrRld = new Dictionary<string, string>();
+                    long ReloadEntries = 0, MaskEntries = 0;
+                    foreach (SRLDatabase2 Database in Data.Databases) {
+                        for (uint i = 0; i < Database.Original.LongLength; i++) {
+                            Application.DoEvents();
+                            string str = SimplfyMatch(Database.Original[i]);
+                            if (!ContainsKey(str, true)) {
+                                if (IsMask(Database.Original[i])) {
+                                    if (LiteralMaskMatch) {
+                                        AddEntry(str, ReplaceChars(Database.Replace[i]));
+                                        ReloadEntries++;
+                                    }
+
+                                    if (Database.Replace[i].StartsWith(AntiMaskParser)) {
+                                        Database.Replace[i] = Database.Replace[i].Substring(AntiMaskParser.Length, Database.Replace[i].Length - AntiMaskParser.Length);
+                                    } else {
+                                        //Prevent Duplicates
+                                        if (!Temp.Contains(Database.Original[i]))
+                                            Temp.Add(Database.Original[i]);
+                                        else
+                                            continue;
+
+                                        AddMask(Database.Original[i], ReplaceChars(Database.Replace[i]));
+                                        MaskEntries++;
+                                        continue;
+                                    }
+                                } else {
                                     AddEntry(str, ReplaceChars(Database.Replace[i]));
                                     ReloadEntries++;
                                 }
-
-                                if (Database.Replace[i].StartsWith(AntiMaskParser)) {
-                                    Database.Replace[i] = Database.Replace[i].Substring(AntiMaskParser.Length, Database.Replace[i].Length - AntiMaskParser.Length);
-                                } else {
-                                    //Prevent Duplicates
-                                    if (!Temp.Contains(Database.Original[i]))
-                                        Temp.Add(Database.Original[i]);
-                                    else
-                                        continue;
-
-                                    AddMask(Database.Original[i], ReplaceChars(Database.Replace[i]));
-                                    MaskEntries++;
-                                    continue;
-                                }
-                            } else {
-                                AddEntry(str, ReplaceChars(Database.Replace[i]));
-                                ReloadEntries++;
                             }
                         }
+
+                        if (MultipleDatabases)
+                            FinishDatabase();
+                    }
+                    Log("String Reloads Initialized, {0} Databases Created, {1} Reload Entries, {2} Mask Entries", true, Databases.Count - 1, ReloadEntries, MaskEntries);
+
+
+                    Log("Registring Databases Name...", true);
+                    DBNames = new Dictionary<long, string>();
+                    for (long i = 0; i < Data.Databases.LongLength; i++) {
+                        DBNames[i] = Data.Databases[i].Name;
+
+                        if (LogAll)
+                            Log("Database ID: {0} Named As: {1}", true, i, DBNames[i]);
                     }
 
-                    if (MultipleDatabases)
-                        FinishDatabase();
-                }
-                Log("String Reloads Initialized, {0} Databases Created, {1} Reload Entries, {2} Mask Entries", true, Databases.Count-1, ReloadEntries, MaskEntries);
-                
-
-                Log("Registring Databases Name...", true);                
-                DBNames = new Dictionary<long, string>();
-                for (long i = 0; i < Data.Databases.LongLength; i++) {
-                    DBNames[i] = Data.Databases[i].Name;
-
-                    if (LogAll)
-                        Log("Database ID: {0} Named As: {1}", true, i, DBNames[i]);
+                    if (Data.Version > 0) {
+                        Log("Loading Intros...", true);
+                        SRLIntro Intros = new SRLIntro();
+                        Reader.ReadStruct(ref Intros);
+                        Introduction = Intros.Intros;
+                    } else
+                        Warning("The SRL Data is outdated, try rebuild it.");
+                    
+                    Reader.Close();
                 }
 
                 Log("Loading Complete.", true);

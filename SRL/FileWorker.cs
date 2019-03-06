@@ -131,6 +131,11 @@ namespace SRL {
             ForceTrim = false;
             NotCachedOnly = false;
             AllowEmpty = false;
+            HookShowWindow = false;
+            HookSetWindowPos = false;
+            HookMoveWindow = false;
+            Seconds = 0;
+
             DenyList = new string[0];
             IgnoreList = new string[0];
             RldPrefix = string.Empty;
@@ -141,11 +146,13 @@ namespace SRL {
             WordwrapSettings WordwrapSettings;
             FilterSettings FilterSettings;
             HookSettings HookSettings;
+            IntroSettings IntroSettings;
             AdvancedIni.FastOpen(out Settings, IniPath);
             AdvancedIni.FastOpen(out OverlaySettings, IniPath);
             AdvancedIni.FastOpen(out WordwrapSettings, IniPath);
             AdvancedIni.FastOpen(out FilterSettings, IniPath);
             AdvancedIni.FastOpen(out HookSettings, IniPath);
+            AdvancedIni.FastOpen(out IntroSettings, IniPath);
 
             Log(Initialized ? "Reloading Settings..." : "Loading Settings...", true);
 
@@ -579,6 +586,25 @@ namespace SRL {
                     Log("{0} Font Replacement Loaded", true, FontReplaces.Count);
                 }
             }
+            
+            if (IntroSettings.ShowWindow) {
+                HookShowWindow = true;
+
+                Log("Intro Injector (ShowWindow) Enabled", true);
+            }
+            if (IntroSettings.SetWindowPos) {
+                HookSetWindowPos = true;
+
+                Log("Intro Injector (SetWindowPos) Enabled", true);
+            }
+            if (IntroSettings.MoveWindow) {
+                HookMoveWindow = true;
+
+                Log("Intro Injector (MoveWindow) Enabled", true);
+            }
+
+            if (IntroSettings.Seconds > 0)
+                Seconds = IntroSettings.Seconds;
 
             Log("Settings Loaded.", true);
 
@@ -647,57 +673,76 @@ namespace SRL {
             if (File.Exists(CharMapSrc)) {
                 File.Delete(CharMapSrc);
             }
-            SRLData3 Data = new SRLData3();
-            StructReader Reader = new StructReader(TLMap);
-            Reader.ReadStruct(ref Data);
-            Reader.Close();
+            using (StructReader Reader = new StructReader(TLMap)) {
+                SRLData3 Data = new SRLData3();
+                Reader.ReadStruct(ref Data);
 
-            if (Data.Databases.Length <= 1) {
-                for (uint i = 0; i < Data.Databases[0].Original.LongLength; i++) {
-                    string Str = Data.Databases[0].Original[i];
-                    if (string.IsNullOrWhiteSpace(Str))
-                        continue;
-
-                    AppendLst(Str, TLMode ? Str : Data.Databases[0].Replace[i], TLMapSrc);
-                }
-            } else {
-                foreach (SRLDatabase2 DataBase in Data.Databases) {
-                    for (uint i = 0; i < DataBase.Original.LongLength; i++) {
-                        string Str = DataBase.Original[i];
+                if (Data.Databases.Length <= 1) {
+                    for (uint i = 0; i < Data.Databases[0].Original.LongLength; i++) {
+                        string Str = Data.Databases[0].Original[i];
                         if (string.IsNullOrWhiteSpace(Str))
                             continue;
 
-                        AppendLst(Str, TLMode ? Str : DataBase.Replace[i], string.Format(TLMapSrcMsk, DataBase.Name));
+                        AppendLst(Str, TLMode ? Str : Data.Databases[0].Replace[i], TLMapSrc);
+                    }
+                } else {
+                    foreach (SRLDatabase2 DataBase in Data.Databases) {
+                        for (uint i = 0; i < DataBase.Original.LongLength; i++) {
+                            string Str = DataBase.Original[i];
+                            if (string.IsNullOrWhiteSpace(Str))
+                                continue;
+
+                            AppendLst(Str, TLMode ? Str : DataBase.Replace[i], string.Format(TLMapSrcMsk, DataBase.Name));
+                        }
                     }
                 }
-            }
 
-            if (Data.OriLetters.LongLength + Data.UnkReps.LongLength != 0) {
-                Log("Dumping Char Reloads...", true);
-                using (TextWriter Output = File.CreateText(CharMapSrc)) {
+                if (Data.OriLetters.LongLength + Data.UnkReps.LongLength != 0) {
+                    Log("Dumping Char Reloads...", true);
+                    using (TextWriter Output = File.CreateText(CharMapSrc)) {
+                        for (uint i = 0; i < Data.OriLetters.LongLength; i++) {
+                            Output.WriteLine("{0}={1}", Data.OriLetters[i], Data.MemoryLetters[i]);
+                        }
+                        for (uint i = 0; i < Data.UnkReps.LongLength; i++) {
+                            Output.WriteLine("{0}=0x{1:X4}", Data.UnkReps[i], Data.UnkChars[i]);
+                        }
+                        Output.Close();
+                    }
+                }
+
+                if (Data.OriLetters.LongLength != 0) {
+                    Log("Dumping Replaces...", true);
+
                     for (uint i = 0; i < Data.OriLetters.LongLength; i++) {
-                        Output.WriteLine("{0}={1}", Data.OriLetters[i], Data.MemoryLetters[i]);
+                        try {
+                            string L1 = Data.RepOri[i];
+                            string L2 = Data.RepTrg[i];
+                            AppendLst(L1, L2, ReplLst);
+                        } catch { }
                     }
-                    for (uint i = 0; i < Data.UnkReps.LongLength; i++) {
-                        Output.WriteLine("{0}=0x{1:X4}", Data.UnkReps[i], Data.UnkChars[i]);
+                }
+
+                if (Data.Version > 0) {
+                    Log("Dumping Intros...", true);
+
+                    SRLIntro Intros = new SRLIntro();
+                    Reader.ReadStruct(ref Intros);
+
+                    for (byte i = 0; i < Intros.Intros.Length; i++) {
+                        var Intro = Intros.Intros[i];
+                        string sBitmap = string.Format(IntroMsk, i, "png");
+                        string sSound = string.Format(IntroMsk, i, "wav");
+
+                        File.WriteAllBytes(sBitmap, Intro.Bitmap);
+                        if (Intro.HasSound)
+                            File.WriteAllBytes(sSound, Intro.Wav);
                     }
-                    Output.Close();
                 }
+
+                Log("Data Dumped...", true);
+
+                Reader.Close();
             }
-
-            if (Data.OriLetters.LongLength != 0) {
-                Log("Dumping Replaces...", true);
-
-                for (uint i = 0; i < Data.OriLetters.LongLength; i++) {
-                    try {
-                        string L1 = Data.RepOri[i];
-                        string L2 = Data.RepTrg[i];
-                        AppendLst(L1, L2, ReplLst);
-                    } catch { }
-                }
-            }
-
-            Log("Data Dumped...", true);
         }
     }
 }

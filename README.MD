@@ -1,4 +1,4 @@
-# StringsReloads v3.0
+# StringsReloads v3.5
 [![Build Status](https://ci.appveyor.com/api/projects/status/github/marcussacana/StringReloads?branch=master&retina=true)](https://ci.appveyor.com/project/marcussacana/StringReloads)
 
 
@@ -9,6 +9,7 @@ This is a tool created to inject strings using low level code
 * Help with a customizable Auto-WordWrap.
 * Help translating text from native window controls.
 * Help translate strings with unpredictable content using masks
+* Allow put your group logo in the game startup
 * Can use with just a small assembly knowledge
 
 

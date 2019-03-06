@@ -313,6 +313,7 @@ namespace SRL {
                 }
 
                 LoadData();
+                InstallIntroInjector();
 
                 if (Debugging && File.Exists(TLMapSrc)) {
                     Log("Loading Dumped Data...");

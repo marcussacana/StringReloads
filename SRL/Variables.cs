@@ -147,6 +147,11 @@ namespace SRL {
         static float LastDPI;
 #endif
 
+        static bool HookShowWindow;
+        static bool HookSetWindowPos;
+        static bool HookMoveWindow;
+        static int Seconds;
+
         static string StrLstSufix = string.Empty;
         static string SourceLang = string.Empty;
         static string TargetLang = string.Empty;
@@ -173,6 +178,7 @@ namespace SRL {
         static string TLMapSrc => BaseDir + "Strings.lst";
         static string TLMapSrcMsk => BaseDir + "Strings-{0}.lst";
         static string CharMapSrc => BaseDir + "Chars.lst";
+        static string IntroMsk => BaseDir + "Intro{0}.{1}";
         static string TLDP => BaseDir + "TLIB.dll";
         static string OEDP => BaseDir + "Overlay.dll";
         static string IniPath => AppDomain.CurrentDomain.BaseDirectory + "Srl.ini";
@@ -342,5 +348,8 @@ namespace SRL {
         };
 
         static string[] TrimChars = new string[] { "%K", "%LC", "♪", "%P" };
+
+
+        static IntroContainer[] Introduction;
     }
 }
