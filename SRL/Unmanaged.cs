@@ -127,12 +127,16 @@ namespace SRL {
         [DllImport("user32.dll", SetLastError = true)]
         static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
 
+        [DllImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool IsWindowVisible(IntPtr hWnd);
 
-        [DllImport("user32.dll")]
+
+        [DllImport("user32.dll", SetLastError = true)]
         static extern sbyte GetMessage(out MSG lpMsg, IntPtr hWnd, uint wMsgFilterMin, uint wMsgFilterMax);
-        [DllImport("user32.dll")]
+        [DllImport("user32.dll", SetLastError = true)]
         static extern bool TranslateMessage([In] ref MSG lpMsg);
-        [DllImport("user32.dll")]
+        [DllImport("user32.dll", SetLastError = true)]
         static extern IntPtr DispatchMessage([In] ref MSG lpmsg);
 
         [StructLayout(LayoutKind.Sequential)]

@@ -370,6 +370,8 @@ namespace SRL {
             [FieldParmaters(Name = "Seconds;Time;Duration", DefaultValue = 0)]
             public int Seconds;
 
+            [FieldParmaters(Name = "CreatWindowEx", DefaultValue = false)]
+            public bool CreateWindowEx;
             [FieldParmaters(Name = "ShowWindow", DefaultValue = true)]
             public bool ShowWindow;
             [FieldParmaters(Name = "SetWindowPos", DefaultValue = true)]

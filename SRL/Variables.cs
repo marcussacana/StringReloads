@@ -147,6 +147,7 @@ namespace SRL {
         static float LastDPI;
 #endif
 
+        static bool HookCreateWindowEx;
         static bool HookShowWindow;
         static bool HookSetWindowPos;
         static bool HookMoveWindow;

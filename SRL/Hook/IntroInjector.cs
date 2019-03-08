@@ -11,6 +11,12 @@ using System.Windows.Forms;
 namespace SRL {
     static partial class StringReloader {
 
+#if !DEBUG
+        static CreateWindowExADelegate CreateWindowExADel;
+        static CreateWindowExWDelegate CreateWindowExWDel;
+        static FxHook CreateWindowExAHook;
+        static FxHook CreateWindowExWHook;
+#endif
         static ShowWindowDelegate ShowWindowDel;
         static SetWindowPosDelegate SetWindowPosDel;
         static MoveWindowDelegate MoveWindowDel;
@@ -20,7 +26,14 @@ namespace SRL {
         static void InstallIntroInjector() {
             if (ShowWindowHook != null)
                 return;
-
+#if !DEBUG
+            CreateWindowExADel = new CreateWindowExADelegate(hCreateWindowEx);
+            CreateWindowExWDel = new CreateWindowExWDelegate(hCreateWindowEx);
+            CreateWindowExAHook = new FxHook("user32.dll", "CreateWindowExA", CreateWindowExADel);
+            CreateWindowExWHook = new FxHook("user32.dll", "CreateWindowExW", CreateWindowExWDel);
+            if (HookCreateWindowEx)
+                CreateWindowExADel = new CreateWindowExADelegate(hCreateWindowEx);
+#endif
             ShowWindowDel = new ShowWindowDelegate(hShowWindow);
             ShowWindowHook = new FxHook("user32.dll", "ShowWindow", ShowWindowDel);
             if (HookShowWindow)
@@ -57,6 +70,13 @@ namespace SRL {
             ShowIntro(hWnd);
             return Result;
         }
+        static IntPtr hCreateWindowEx(WindowStylesEx dwExStyle, string lpClassName, string lpWindowName, WindowStyles dwStyle, int x, int y, int nWidth, int nHeight, IntPtr hWndParent, IntPtr hMenu, IntPtr hInstance, IntPtr lpParam) {
+            CreateWindowExWHook.Uninstall();
+            IntPtr Result = CreateWindowExW(dwExStyle, lpClassName, lpWindowName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
+            CreateWindowExWHook.Install();
+            ShowIntro(Result);
+            return Result;
+        }
 
         static void ShowIntro(IntPtr hWnd) {
             if (IntroInitialized)
@@ -65,6 +85,9 @@ namespace SRL {
                 return;
 
             IntroInitialized = true;
+
+            if (!IsWindowVisible(hWnd))
+                ShowWindow(hWnd, SW_SHOW);
 
             try {
 

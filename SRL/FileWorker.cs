@@ -131,6 +131,7 @@ namespace SRL {
             ForceTrim = false;
             NotCachedOnly = false;
             AllowEmpty = false;
+            HookCreateWindowEx = false;
             HookShowWindow = false;
             HookSetWindowPos = false;
             HookMoveWindow = false;
@@ -585,6 +586,12 @@ namespace SRL {
                 if (FontReplaces.Count != 0) {
                     Log("{0} Font Replacement Loaded", true, FontReplaces.Count);
                 }
+            }
+
+            if (IntroSettings.CreateWindowEx) {
+                HookCreateWindowEx = true;
+
+                Log("Intro Injector (CreateWindowEx) Enabled", true);
             }
             
             if (IntroSettings.ShowWindow) {
