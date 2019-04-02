@@ -158,12 +158,12 @@ class AdvancedIni {
                 return Value[0];
             case Const.DOUBLE:
                 if (Hex)
-                    return double.Parse(Value, NumberStyles.HexNumber);
-                return double.Parse(Value);
+                    return double.Parse(Value, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+                return double.Parse(Value, CultureInfo.InvariantCulture);
             case Const.FLOAT:
                 if (Hex)
                     throw new Exception("Float values can't be a hex");
-                return float.Parse(Value);
+                return float.Parse(Value, CultureInfo.InvariantCulture);
             case Const.INT16:
                 if (Hex)
                     return short.Parse(Value, NumberStyles.HexNumber);
@@ -276,6 +276,9 @@ internal class Const {
 
 class Ini {
     internal static string GetConfig(string Key, string Name, string Path, bool Required = true) {
+        if (GetConfigStatus(Key, Name, Path) == ConfigStatus.NoFile)
+            return string.Empty;
+
         byte[] CFG = File.ReadAllBytes(Path);
         return GetConfig(Key, Name, CFG, Required);
     }

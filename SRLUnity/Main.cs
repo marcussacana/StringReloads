@@ -61,7 +61,7 @@ namespace SRLUnity {
                     };
 
                     int Loop = 0;
-                    IntPtr DLL = IntPtr.Zero;
+                    IntPtr DLL = NativeMethods.LoadLibrary(DLLName);
                     while (DLL == IntPtr.Zero) {
                         if (!File.Exists(Paths[Loop] + DLLName)) {
                             Loop++;
@@ -69,6 +69,8 @@ namespace SRLUnity {
                         }
 
                         DLL = NativeMethods.LoadLibrary(Paths[Loop] + DLLName);
+                        if (DLL == IntPtr.Zero)
+                            DLL = NativeMethods.LoadLibrary(Paths[Loop] + DLLName.Replace("/", "\\"));
                     }
                     IntPtr Func = NativeMethods.GetProcAddress(DLL, "ProcessStd");
                     Function = Marshal.GetDelegateForFunctionPointer(Func, typeof(ProcessStd)) as ProcessStd;
