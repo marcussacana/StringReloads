@@ -23,6 +23,8 @@ namespace SRL {
         static FxHook ShowWindowHook;
         static FxHook SetWindowPosHook;
         static FxHook MoveWindowHook;
+
+        static bool SysCall = true;
         static void InstallIntroInjector() {
             if (ShowWindowHook != null)
                 return;
@@ -34,6 +36,14 @@ namespace SRL {
             if (HookCreateWindowEx)
                 CreateWindowExADel = new CreateWindowExADelegate(hCreateWindowEx);
 #endif
+
+            SysCall = !CheckLibrary("win32u.dll");
+
+            if (SysCall)
+            {
+                Log("Intro Injector SysCall Support Enabled", true);
+            } 
+
             ShowWindowDel = new ShowWindowDelegate(hShowWindow);
             ShowWindowHook = new FxHook("user32.dll", "ShowWindow", ShowWindowDel);
             if (HookShowWindow)
@@ -54,18 +64,45 @@ namespace SRL {
 
         static bool IntroInitialized = false;
         static bool hShowWindow(IntPtr hWnd, int nCmdShow) {
+            if (SysCall)
+            {
+                ShowWindowHook.Uninstall();
+                bool Rst = ShowWindow(hWnd, nCmdShow);
+                ShowWindowHook.Install();
+                ShowIntro(hWnd);
+                return Rst;
+            }
+
             bool Result = NtUserShowWindow(hWnd, nCmdShow);
             ShowIntro(hWnd);
             return Result;
         }
 
         static bool hSetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, SetWindowPosFlags uFlags) {
+            if (SysCall)
+            {
+                SetWindowPosHook.Uninstall();
+                bool Rst = SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
+                SetWindowPosHook.Install();
+                ShowIntro(hWnd);
+                return Rst;
+            }
+
             bool Result = NtUserSetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
             ShowIntro(hWnd);
             return Result;
         }
 
         static bool hMoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint) {
+            if (SysCall)
+            {
+                MoveWindowHook.Uninstall();
+                bool Rst = MoveWindow(hWnd, X, Y, nWidth, nHeight, bRepaint);
+                MoveWindowHook.Install();
+                ShowIntro(hWnd);
+                return Rst;
+            }
+
             bool Result = NtUserMoveWindow(hWnd, X, Y, nWidth, nHeight, bRepaint);
             ShowIntro(hWnd);
             return Result;
@@ -285,6 +322,8 @@ namespace SRL {
             }
         }
 
+        static bool CheckLibrary(string fileName) => LoadLibrary(fileName) == IntPtr.Zero;
+
         struct IntroHelper {
             public Bitmap[] Fade;
             public Color Background;
@@ -302,6 +341,9 @@ namespace SRL {
 
         [DllImport("win32u.dll", CallingConvention = CallingConvention.StdCall, SetLastError = true)]
         internal static extern bool NtUserMoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
+
+        [DllImport("kernel32", SetLastError = true)]
+        internal static extern IntPtr LoadLibrary(string lpFileName);
 
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall, SetLastError = true)]
