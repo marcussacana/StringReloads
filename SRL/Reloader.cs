@@ -243,7 +243,7 @@ namespace SRL {
 
                 if (Debugging)
                 {
-                    Log(ConsoleColor.Green, "Strings Reloads - v4.0", true);
+                    Log(ConsoleColor.Green, "Strings Reloads - v" + SRLVersion, true);
                     Log(ConsoleColor.Green, "Soft-Translation Engine - By Marcussacana", true);
                     Log(ConsoleColor.Green, "Debug Mode Enabled...", true);
                 }

@@ -336,6 +336,12 @@ namespace SRL {
                 return isWine.Value;
             }
         }
+        internal static string SRLVersion {
+            get {
+                var Version = System.Diagnostics.FileVersionInfo.GetVersionInfo(SrlDll);
+                return Version.FileMajorPart + "." + Version.FileMinorPart;
+            }
+        }
         private static bool GameStarted() {
             try {
                 return !string.IsNullOrWhiteSpace(System.Diagnostics.Process.GetCurrentProcess().MainWindowTitle);
