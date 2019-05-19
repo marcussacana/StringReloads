@@ -158,6 +158,10 @@ namespace SRL {
                         Writer.Flush();
                         Log("Command Finished, In: {0}, Out: {1}", true, 1, 1);
                         break;
+                    case PipeCommands.SetDBID:
+                        DBID = Reader.ReadInt32();
+                        Log("Command Finished, In: {0}, Out: {1}", true, 2, 0);
+                        break;
                     default:
                         if (!OK)
                             MessageBox.Show("Recived Invalid Command to the pipe service...", "SRL Engine", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -341,9 +345,7 @@ namespace SRL {
             int OID = 0;
 
             if (Debugging) {
-                PipeWriter.Write((byte)PipeCommands.GetDBID);
-                PipeWriter.Flush();
-                OID = PipeReader.ReadInt32();
+                OID = GetDBID();
             }
 
             PipeWriter.Write((byte)PipeCommands.GetReload);
@@ -352,15 +354,38 @@ namespace SRL {
             string Return = PipeReader.ReadString();
 
             if (Debugging) {
-                PipeWriter.Write((byte)PipeCommands.GetDBID);
-                PipeWriter.Flush();
-                int NID = PipeReader.ReadInt32();
+                int NID = GetDBID();
                 if (OID != NID) {
                     Log("Database Changed to {0}, ID: {0}", true, GetDBNameById(NID), NID);
                 }
             }
 
             return Return;
+        }
+
+        private static int GetDBID()
+        {
+            PipeWriter.Write((byte)PipeCommands.GetDBID);
+            PipeWriter.Flush();
+            return PipeReader.ReadInt32();
+        }
+
+        private static void SetDBID(int ID)
+        {
+            if (Debugging)
+            {
+                Log("Database Changed to {0}, ID: {0}", true, GetDBNameById(ID), ID);
+            }
+
+            if (Multithread)
+            {
+                DBID = ID;
+                return;
+            }
+
+            PipeWriter.Write((byte)PipeCommands.SetDBID);
+            PipeWriter.Write(ID);
+            PipeWriter.Flush();
         }
         private static int GetPipeID() {
             return new Random().Next(0, int.MaxValue);

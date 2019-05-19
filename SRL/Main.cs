@@ -69,7 +69,7 @@ namespace SRL {
                 LastInput = Input;
 
                 if (Input != Reloaded) {
-                    Reloaded = UpdateOverlay(Reloaded);
+                    Reloaded = PostReload(Reloaded);
                 }
 
                 //Prevent inject a string already injected

@@ -57,8 +57,9 @@ namespace SRL {
 
                 ReadDump(TLMap, ref In, ref Out, IgnoreMask: true);
 
-                string DBN = Path.GetFileName(TLMap);
-                DBN = MaskReplace(Path.GetFileName(TLMapSrcMsk), DBN, "{0}");
+                const string NamedLstPrefix = "Strings-";
+                string DBN = Path.GetFileNameWithoutExtension(TLMap);
+                DBN = DBN.Substring(NamedLstPrefix.Length);
 
                 DBAr.Add(new SRLDatabase2() {
                     Original = In.ToArray(),
@@ -331,16 +332,15 @@ namespace SRL {
                         if (MultipleDatabases)
                             FinishDatabase();
                     }
-                    Log("String Reloads Initialized, {0} Databases Created, {1} Reload Entries, {2} Mask Entries", true, Databases.Count - 1, ReloadEntries, MaskEntries);
+                    Log("String Reloads Initialized, {0} Databases Created, {1} Reload Entries, {2} Mask Entries", true, Databases.Count, ReloadEntries, MaskEntries);
 
 
                     Log("Registring Databases Name...", true);
                     DBNames = new Dictionary<long, string>();
-                    for (long i = 0; i < Data.Databases.LongLength; i++) {
+                    for (long i = 0; i < Data.Databases.Length; i++) {
                         DBNames[i] = Data.Databases[i].Name;
 
-                        if (LogAll)
-                            Log("Database ID: {0} Named As: {1}", true, i, DBNames[i]);
+                        Log("Database ID: {0} Named As: {1}", true, i, DBNames[i]);
                     }
 
                     if (Data.Version > 0) {

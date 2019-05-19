@@ -202,6 +202,38 @@ namespace SRL {
             return Input;
         }
 
+        internal static string PostReload(string Reloaded)
+        {
+            Reloaded = UpdateOverlay(Reloaded);
+
+            const string SwitchDatabasePrefix = "::SETDB-";
+            if (Reloaded.StartsWith(SwitchDatabasePrefix))
+            {
+                string DB = Reloaded.Substring(SwitchDatabasePrefix.Length);
+                DB = DB.Substring(0, DB.IndexOf("::"));
+
+                bool IsDBName = false;
+                if (int.TryParse(DB, out int DBID))
+                {
+                    if (DBNames.ContainsKey(DBID))
+                        SetDBID(DBID);
+                    else IsDBName = true;
+                }
+                else IsDBName = true;
+                if (IsDBName)
+                {
+                    if (DBNames.ContainsValue(DB))
+                        SetDBID((int)DBNames.ReverseMatch(DB));
+                    else
+                        Error("Database \"{0}\" not found", DB);
+                }
+
+                Reloaded = Reloaded.Substring(Reloaded.IndexOf("::", 2) + 2);
+            }
+
+            return Reloaded;
+        }
+
         internal static string UpdateOverlay(string Text) {
             try {
                 if (Overlay != null && OverlayEnabled) {
@@ -351,6 +383,11 @@ namespace SRL {
 
         private static string GetDBNameById(long ID) {
             return DBNames[ID];
+        }
+
+        private static long GetDBIdByName(string Name)
+        {
+            return DBNames.ReverseMatch(Name);
         }
 
         private static void WindowHook() {
