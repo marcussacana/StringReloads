@@ -286,6 +286,20 @@ namespace SRL {
             LogFile = BakLogFile;
         }
 
+        internal static void Log(ConsoleColor Color, string Message, bool Optional = false, params object[] Format)
+        {
+            if (LiteMode)
+                return;
+
+            bool BakLogFile = LogFile;
+            LogFile = true & Debugging;
+            ConsoleColor ColorBack = Console.ForegroundColor;
+            Console.ForegroundColor = Color;
+            Log(Message, Optional, Format);
+            Console.ForegroundColor = ColorBack;
+            LogFile = BakLogFile;
+        }
+
         internal static void Log(string Message, bool Optional = false, params object[] Format) {
             try {
                 if (LiteMode)

@@ -135,7 +135,9 @@ namespace SRL {
             HookShowWindow = false;
             HookSetWindowPos = false;
             HookMoveWindow = false;
+            CheckProportion = false;
             Seconds = 0;
+            MinSize = 0;
 
             DenyList = new string[0];
             IgnoreList = new string[0];
@@ -610,8 +612,18 @@ namespace SRL {
                 Log("Intro Injector (MoveWindow) Enabled", true);
             }
 
+            if (IntroSettings.CheckProportion)
+            {
+                CheckProportion = true;
+
+                Log("Intro Injector Proportion Validator Enabled", true);
+            }
+
             if (IntroSettings.Seconds > 0)
                 Seconds = IntroSettings.Seconds;
+
+            if (IntroSettings.MinSize > 0)
+                MinSize = IntroSettings.MinSize;
 
             Log("Settings Loaded.", true);
 

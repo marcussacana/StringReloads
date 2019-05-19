@@ -151,7 +151,9 @@ namespace SRL {
         static bool HookShowWindow;
         static bool HookSetWindowPos;
         static bool HookMoveWindow;
+        static bool CheckProportion;
         static int Seconds;
+        static int MinSize;
 
         static string StrLstSufix = string.Empty;
         static string SourceLang = string.Empty;

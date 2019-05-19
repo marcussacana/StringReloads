@@ -241,10 +241,11 @@ namespace SRL {
                 CheckArguments();
                 LoadConfig();
 
-                if (Debugging) {
-                    Log("Strings Reloads - v1.0");
-                    Log("Soft-Translation Engine - By Marcussacana");
-                    Log("Debug Mode Enabled...");
+                if (Debugging)
+                {
+                    Log(ConsoleColor.Green, "Strings Reloads - v4.0", true);
+                    Log(ConsoleColor.Green, "Soft-Translation Engine - By Marcussacana", true);
+                    Log(ConsoleColor.Green, "Debug Mode Enabled...", true);
                 }
 
                 if (!DirectRequested)

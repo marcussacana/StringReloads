@@ -37,12 +37,9 @@ namespace SRL {
                 CreateWindowExADel = new CreateWindowExADelegate(hCreateWindowEx);
 #endif
 
-            SysCall = !CheckLibrary("win32u.dll");
+            SysCall = !ValidLibrary("win32u.dll");
 
-            if (SysCall)
-            {
-                Log("Intro Injector SysCall Support Enabled", true);
-            } 
+            Log($"Intro Injector SysCall Support {(SysCall ? "Enabled" : "Disabled")}", true);
 
             ShowWindowDel = new ShowWindowDelegate(hShowWindow);
             ShowWindowHook = new FxHook("user32.dll", "ShowWindow", ShowWindowDel);
@@ -69,12 +66,18 @@ namespace SRL {
                 ShowWindowHook.Uninstall();
                 bool Rst = ShowWindow(hWnd, nCmdShow);
                 ShowWindowHook.Install();
-                ShowIntro(hWnd);
+
+                if (nCmdShow != SW_HIDE)
+                    ShowIntro(hWnd);
+
                 return Rst;
             }
 
             bool Result = NtUserShowWindow(hWnd, nCmdShow);
-            ShowIntro(hWnd);
+
+            if (nCmdShow != SW_HIDE)
+                ShowIntro(hWnd);
+
             return Result;
         }
 
@@ -129,7 +132,12 @@ namespace SRL {
             try {
 
                 var WindowSize = GetWindowSize(hWnd);
-                if (WindowSize.Height < 100 || WindowSize.Width < 100) {
+                if (WindowSize.Height < MinSize || WindowSize.Width < MinSize) {
+                    IntroInitialized = false;
+                    return;
+                }
+
+                if (CheckProportion && WindowSize.Width < WindowSize.Height) {
                     IntroInitialized = false;
                     return;
                 }
@@ -322,7 +330,7 @@ namespace SRL {
             }
         }
 
-        static bool CheckLibrary(string fileName) => LoadLibrary(fileName) == IntPtr.Zero;
+        static bool ValidLibrary(string fileName) => LoadLibrary(fileName) != IntPtr.Zero;
 
         struct IntroHelper {
             public Bitmap[] Fade;

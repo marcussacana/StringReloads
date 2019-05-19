@@ -369,6 +369,10 @@ namespace SRL {
         internal struct IntroSettings {
             [FieldParmaters(Name = "Seconds;Time;Duration", DefaultValue = 0)]
             public int Seconds;
+            [FieldParmaters(Name = "MinSize;Size;MinimalSize", DefaultValue = 0)]
+            public int MinSize;
+            [FieldParmaters(Name = "CheckProportion;ValidateProportion", DefaultValue = false)]
+            public bool CheckProportion;
 
             [FieldParmaters(Name = "CreatWindowEx", DefaultValue = false)]
             public bool CreateWindowEx;
