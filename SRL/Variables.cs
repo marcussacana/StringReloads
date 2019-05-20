@@ -156,6 +156,8 @@ namespace SRL {
         static int Seconds;
         static int MinSize;
 
+        static bool NoDatabase;
+
         static string StrLstSufix = string.Empty;
         static string SourceLang = string.Empty;
         static string TargetLang = string.Empty;

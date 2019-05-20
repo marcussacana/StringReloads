@@ -335,18 +335,24 @@ namespace SRL {
                 if (!File.Exists(TLMap) || Ini.GetConfig(CfgName, "Rebuild", IniPath, false).ToLower() == "true") {
                     Log("Unabled to load the {0}", false, TLMap);
                     bool ContainsSplitedList = Directory.GetFiles(BaseDir, Path.GetFileName(string.Format(TLMapSrcMsk, "*"))).Length != 0;
-                    if (File.Exists(TLMapSrc) || ContainsSplitedList) {
+
+                    if (File.Exists(TLMapSrc) || ContainsSplitedList)
+                    {
                         Log("Compiling String Reloads, Please Wait...");
                         CompileStrMap();
-                    } else {
-                        Error("Can't Compile Strings because the Strings.lst has not found.");
-                        Thread.Sleep(5000);
-                        Environment.Exit(2);
+                    }
+                    else
+                    {
+                        NoDatabase = true;
+                        Warning("Can't Compile Strings because the SRL don't found any LST.");
                     }
                 }
 
-                LoadData();
-                InstallIntroInjector();
+                if (!NoDatabase)
+                {
+                    LoadData();
+                    InstallIntroInjector();
+                }
 
                 if (Debugging && File.Exists(TLMapSrc)) {
                     Log("Loading Dumped Data...");

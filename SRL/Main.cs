@@ -12,7 +12,7 @@ namespace SRL {
         [DllExport(CallingConvention = CallingConvention.StdCall)]
         public static IntPtr ProcessStd(IntPtr Target) => ProcessReal(Target);
 
-        private static IntPtr ProcessReal(IntPtr Target) {
+        internal static IntPtr ProcessReal(IntPtr Target) {
             again:;
             int Tries = 0;
             try {
