@@ -333,7 +333,7 @@ namespace SRL {
                 }
 
                 if (!File.Exists(TLMap) || Ini.GetConfig(CfgName, "Rebuild", IniPath, false).ToLower() == "true") {
-                    Log("Unabled to load the {0}", false, TLMap);
+                    Log("Unabled to load the {0}", true, TLMap);
                     bool ContainsSplitedList = Directory.GetFiles(BaseDir, Path.GetFileName(string.Format(TLMapSrcMsk, "*"))).Length != 0;
 
                     if (File.Exists(TLMapSrc) || ContainsSplitedList)
