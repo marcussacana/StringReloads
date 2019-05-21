@@ -478,6 +478,15 @@ namespace SRL {
                 Log("Custom Directory Loaded", true);
             }
 
+            if (HookSettings.CreateFile) {
+                if (!HookCreateFile)
+                    InstallCreateFileHooks();
+                HookCreateFile = true;
+                Log("CreateFile Hook Enabled", true);
+            }
+            else if (HookGlyphOutline)
+                Warning("CreateFile Hook Settings Changed - Restart Required");
+
             if (HookSettings.GetGlyphOutline) {
                 if (!HookGlyphOutline)
                     InstallGlyphHooks();

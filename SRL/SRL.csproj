@@ -65,7 +65,8 @@
     <Compile Include="Compiler.cs" />
     <Compile Include="DNVM.cs" />
     <Compile Include="FileWorker.cs" />
-    <Compile Include="Hook\GenericHook.cs" />
+    <Compile Include="Hook\FileHook.cs" />
+    <Compile Include="Hook\TextHook.cs" />
     <Compile Include="Hook\HookFX.cs" />
     <Compile Include="Hook\IntroInjector.cs" />
     <Compile Include="Ini.cs" />
