@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Runtime.InteropServices;
 
 namespace SRL
@@ -15,12 +14,13 @@ namespace SRL
             dCreateFileA = new CreateFileADelegate(CreateFile);
             dCreateFileW = new CreateFileWDelegate(CreateFile);
 
-            hCreateFileA = new FxHook("kernel32.dll", "CreateFileA", dCreateFileA);
-            hCreateFileW = new FxHook("kernel32.dll", "CreateFileW", dCreateFileW);
-            hGetFileAttrA = new FxHook("kernel32.dll", "GetFileAttributesA", dGetFileAttrA);
-            hGetFileAttrW = new FxHook("kernel32.dll", "GetFileAttributesW", dGetFileAttrW);
-            hGetFileAttrExA = new FxHook("kernel32.dll", "GetFileAttributesExA", dGetFileAttrExA);
-            hGetFileAttrExW = new FxHook("kernel32.dll", "GetFileAttributesExW", dGetFileAttrExW);
+            hCreateFileA = AutoHookCreator("kernel32.dll", "CreateFileA", dCreateFileA);
+            hCreateFileW = AutoHookCreator("kernel32.dll", "CreateFileW", dCreateFileW);
+            hGetFileAttrA = AutoHookCreator("kernel32.dll", "GetFileAttributesA", dGetFileAttrA);
+            hGetFileAttrW = AutoHookCreator("kernel32.dll", "GetFileAttributesW", dGetFileAttrW);
+            hGetFileAttrExA = AutoHookCreator("kernel32.dll", "GetFileAttributesExA", dGetFileAttrExA);
+            hGetFileAttrExW = AutoHookCreator("kernel32.dll", "GetFileAttributesExW", dGetFileAttrExW);
+
 
             hCreateFileA.Install();
             hCreateFileW.Install();
@@ -87,12 +87,12 @@ namespace SRL
         static CreateFileADelegate dCreateFileA;
         static CreateFileWDelegate dCreateFileW;
 
-        static FxHook hGetFileAttrA;
-        static FxHook hGetFileAttrW;
-        static FxHook hGetFileAttrExA;
-        static FxHook hGetFileAttrExW;
-        static FxHook hCreateFileA;
-        static FxHook hCreateFileW;
+        static UnmanagedHook hGetFileAttrA;
+        static UnmanagedHook hGetFileAttrW;
+        static UnmanagedHook hGetFileAttrExA;
+        static UnmanagedHook hGetFileAttrExW;
+        static UnmanagedHook hCreateFileA;
+        static UnmanagedHook hCreateFileW;
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Ansi, SetLastError = true)]
         delegate uint GetFileAttributesADelegate([MarshalAs(UnmanagedType.LPStr)] string Filepath);

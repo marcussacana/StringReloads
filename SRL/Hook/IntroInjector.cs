@@ -14,45 +14,40 @@ namespace SRL {
 #if !DEBUG
         static CreateWindowExADelegate CreateWindowExADel;
         static CreateWindowExWDelegate CreateWindowExWDel;
-        static FxHook CreateWindowExAHook;
-        static FxHook CreateWindowExWHook;
+        static UnmanagedHook CreateWindowExAHook;
+        static UnmanagedHook CreateWindowExWHook;
 #endif
         static ShowWindowDelegate ShowWindowDel;
         static SetWindowPosDelegate SetWindowPosDel;
         static MoveWindowDelegate MoveWindowDel;
-        static FxHook ShowWindowHook;
-        static FxHook SetWindowPosHook;
-        static FxHook MoveWindowHook;
+        static UnmanagedHook ShowWindowHook;
+        static UnmanagedHook SetWindowPosHook;
+        static UnmanagedHook MoveWindowHook;
 
-        static bool SysCall = true;
         static void InstallIntroInjector() {
             if (ShowWindowHook != null)
                 return;
 #if !DEBUG
             CreateWindowExADel = new CreateWindowExADelegate(hCreateWindowEx);
             CreateWindowExWDel = new CreateWindowExWDelegate(hCreateWindowEx);
-            CreateWindowExAHook = new FxHook("user32.dll", "CreateWindowExA", CreateWindowExADel);
-            CreateWindowExWHook = new FxHook("user32.dll", "CreateWindowExW", CreateWindowExWDel);
+            CreateWindowExAHook = AutoHookCreator("user32.dll", "CreateWindowExA", CreateWindowExADel);
+            CreateWindowExWHook = AutoHookCreator("user32.dll", "CreateWindowExW", CreateWindowExWDel);
             if (HookCreateWindowEx)
                 CreateWindowExADel = new CreateWindowExADelegate(hCreateWindowEx);
 #endif
 
-            SysCall = !ValidLibrary("win32u.dll");
-
-            Log($"Intro Injector SysCall Support {(SysCall ? "Enabled" : "Disabled")}", true);
-
             ShowWindowDel = new ShowWindowDelegate(hShowWindow);
-            ShowWindowHook = new FxHook("user32.dll", "ShowWindow", ShowWindowDel);
+            ShowWindowHook = AutoHookCreator("user32.dll", "ShowWindow", ShowWindowDel);
             if (HookShowWindow)
                 ShowWindowHook.Install();
 
             SetWindowPosDel = new SetWindowPosDelegate(hSetWindowPos);
-            SetWindowPosHook = new FxHook("user32.dll", "SetWindowPos", SetWindowPosDel);
+            SetWindowPosHook = AutoHookCreator("user32.dll", "SetWindowPos", SetWindowPosDel);
             if (HookSetWindowPos)
                 SetWindowPosHook.Install();
 
             MoveWindowDel = new MoveWindowDelegate(hMoveWindow);
-            MoveWindowHook = new FxHook("user32.dll", "MoveWindow", MoveWindowDel);
+            MoveWindowHook = AutoHookCreator("user32.dll", "MoveWindow", MoveWindowDel);
             if (HookMoveWindow)
                 MoveWindowHook.Install();
 
@@ -60,60 +55,59 @@ namespace SRL {
         }
 
         static bool IntroInitialized = false;
-        static bool hShowWindow(IntPtr hWnd, int nCmdShow) {
-            if (SysCall)
-            {
+        static bool hShowWindow(IntPtr hWnd, int nCmdShow)
+        {
+            if (!ShowWindowHook.ImportHook)
                 ShowWindowHook.Uninstall();
-                bool Rst = ShowWindow(hWnd, nCmdShow);
+
+            bool Rst = ShowWindow(hWnd, nCmdShow);
+
+            if (!ShowWindowHook.ImportHook)
                 ShowWindowHook.Install();
-
-                if (nCmdShow != SW_HIDE)
-                    ShowIntro(hWnd);
-
-                return Rst;
-            }
-
-            bool Result = NtUserShowWindow(hWnd, nCmdShow);
 
             if (nCmdShow != SW_HIDE)
                 ShowIntro(hWnd);
 
-            return Result;
+            return Rst;
         }
 
-        static bool hSetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, SetWindowPosFlags uFlags) {
-            if (SysCall)
-            {
+        static bool hSetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, SetWindowPosFlags uFlags)
+        {
+            if (!SetWindowPosHook.ImportHook)
                 SetWindowPosHook.Uninstall();
-                bool Rst = SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
+
+            bool Rst = SetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
+
+            if (!SetWindowPosHook.ImportHook)
                 SetWindowPosHook.Install();
-                ShowIntro(hWnd);
-                return Rst;
-            }
-
-            bool Result = NtUserSetWindowPos(hWnd, hWndInsertAfter, X, Y, cx, cy, uFlags);
             ShowIntro(hWnd);
-            return Result;
+
+            return Rst;
         }
 
-        static bool hMoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint) {
-            if (SysCall)
-            {
+        static bool hMoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint)
+        {
+            if (!MoveWindowHook.ImportHook)
                 MoveWindowHook.Uninstall();
-                bool Rst = MoveWindow(hWnd, X, Y, nWidth, nHeight, bRepaint);
-                MoveWindowHook.Install();
-                ShowIntro(hWnd);
-                return Rst;
-            }
 
-            bool Result = NtUserMoveWindow(hWnd, X, Y, nWidth, nHeight, bRepaint);
+            bool Rst = MoveWindow(hWnd, X, Y, nWidth, nHeight, bRepaint);
+
+            if (!MoveWindowHook.ImportHook)
+                MoveWindowHook.Install();
+
             ShowIntro(hWnd);
-            return Result;
+
+            return Rst;
         }
-        static IntPtr hCreateWindowEx(WindowStylesEx dwExStyle, string lpClassName, string lpWindowName, WindowStyles dwStyle, int x, int y, int nWidth, int nHeight, IntPtr hWndParent, IntPtr hMenu, IntPtr hInstance, IntPtr lpParam) {
-            CreateWindowExWHook.Uninstall();
+        static IntPtr hCreateWindowEx(WindowStylesEx dwExStyle, string lpClassName, string lpWindowName, WindowStyles dwStyle, int x, int y, int nWidth, int nHeight, IntPtr hWndParent, IntPtr hMenu, IntPtr hInstance, IntPtr lpParam)
+        {
+            if (!CreateWindowExWHook.ImportHook)
+                CreateWindowExWHook.Uninstall();
+
             IntPtr Result = CreateWindowExW(dwExStyle, lpClassName, lpWindowName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
-            CreateWindowExWHook.Install();
+
+            if (!CreateWindowExWHook.ImportHook)
+                CreateWindowExWHook.Install();
             ShowIntro(Result);
             return Result;
         }
@@ -330,7 +324,13 @@ namespace SRL {
             }
         }
 
-        static bool ValidLibrary(string fileName) => LoadLibrary(fileName) != IntPtr.Zero;
+        static bool ValidExport(string Module, string Function)
+        {
+            var hModule = LoadLibrary(Module);
+            if (hModule == IntPtr.Zero)
+                return false;
+            return GetProcAddress(hModule, Function) != IntPtr.Zero;
+        }
 
         struct IntroHelper {
             public Bitmap[] Fade;

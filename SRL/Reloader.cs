@@ -271,14 +271,13 @@ namespace SRL {
                 }
 
                 CheckArguments();
-                LoadConfig();
-
                 if (Debugging)
                 {
                     Log(ConsoleColor.Green, "Strings Reloads - v" + SRLVersion, true);
                     Log(ConsoleColor.Green, "Soft-Translation Engine - By Marcussacana", true);
                     Log(ConsoleColor.Green, "Debug Mode Enabled...", true);
                 }
+                LoadConfig();
 
                 if (!DirectRequested)
                     Warning("You are using SRL through the old function, it is recommended to use GetDirectProcess");

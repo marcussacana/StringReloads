@@ -146,7 +146,8 @@ namespace SRL {
             } catch { return IntPtr.Zero; }
         }
 
-        public static string ProcessManaged(string Text) {
+        public static string ProcessManaged(string Text)
+        {
             Managed = true;
             IntPtr Ptr = Marshal.StringToHGlobalAuto(Text);
             IntPtr New = ProcessReal(Ptr);
@@ -157,15 +158,18 @@ namespace SRL {
             Marshal.FreeHGlobal(New);
             return Text;
         }
-        static string ProcessManaged(string Text, bool Managed) {
-            bool IsManaged = Managed;
-            string Result = ProcessManaged(Text);
-            if (!Managed)
-                Managed = IsManaged;
-
-            return Result;
+        public static string Process(string Text)
+        {
+            Managed = true;
+            IntPtr Ptr = Marshal.StringToHGlobalAuto(Text);
+            IntPtr New = ProcessReal(Ptr);
+            if (New == Ptr)
+                return Text;
+            Text = Marshal.PtrToStringAuto(New);
+            Marshal.FreeHGlobal(Ptr);
+            Marshal.FreeHGlobal(New);
+            return Text;
         }
-
         public static char ProcessManaged(char Char) {
             Managed = true;
             IntPtr Result = ProcessReal(new IntPtr(Char));

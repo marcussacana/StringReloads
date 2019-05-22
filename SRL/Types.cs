@@ -343,6 +343,8 @@ namespace SRL {
             [FieldParmaters(Name = "SendMessage", DefaultValue = false)]
             public bool SendMessage;
 #endif
+            [FieldParmaters(Name = "ImportHook", DefaultValue = false)]
+            public bool ImportHook;
             [FieldParmaters(Name = "CreateFile", DefaultValue = false)]
             public bool CreateFile;
             [FieldParmaters(Name = "MultiByteToWideChar", DefaultValue = false)]

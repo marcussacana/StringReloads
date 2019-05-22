@@ -26,36 +26,36 @@ namespace SRL {
         static SetWindowTextADelegate dSetWindowTextA;
         static SetWindowTextWDelegate dSetWindowTextW;
 
-        static FxHook OutlineA;
-        static FxHook OutlineW;
-        static FxHook hTextOutA;
-        static FxHook hTextOutW;
-        static FxHook hExtTextOutA;
-        static FxHook hExtTextOutW;
-        static FxHook hCreatFontA;
-        static FxHook hCreatFontW;
-        static FxHook hCreatFontIndirectA;
-        static FxHook hCreatFontIndirectW;
+        static UnmanagedHook OutlineA;
+        static UnmanagedHook OutlineW;
+        static UnmanagedHook hTextOutA;
+        static UnmanagedHook hTextOutW;
+        static UnmanagedHook hExtTextOutA;
+        static UnmanagedHook hExtTextOutW;
+        static UnmanagedHook hCreatFontA;
+        static UnmanagedHook hCreatFontW;
+        static UnmanagedHook hCreatFontIndirectA;
+        static UnmanagedHook hCreatFontIndirectW;
 #if DEBUG
-        static FxHook hSendMessageA;
-        static FxHook hSendMessageW;
-        static FxHook hCreateWindowExA;
-        static FxHook hCreateWindowExW;
-        static FxHook hCreateWindowA;
-        static FxHook hCreateWindowW;
+        static UnmanagedHook hSendMessageA;
+        static UnmanagedHook hSendMessageW;
+        static UnmanagedHook hCreateWindowExA;
+        static UnmanagedHook hCreateWindowExW;
+        static UnmanagedHook hCreateWindowA;
+        static UnmanagedHook hCreateWindowW;
 #endif
-        static FxHook hSetWindowTextA;
-        static FxHook hSetWindowTextW;
+        static UnmanagedHook hSetWindowTextA;
+        static UnmanagedHook hSetWindowTextW;
 
 
-        static FxHook hMultiByteToWideChar;
+        static UnmanagedHook hMultiByteToWideChar;
 
         static void InstallGlyphHooks() {
             dOutlineA = new GetGlyphOutlineDelegate(hGetGlyphOutlineA);
             dOutlineW = new GetGlyphOutlineDelegate(hGetGlyphOutlineW);
 
-            OutlineA = new FxHook("gdi32.dll", "GetGlyphOutlineA", dOutlineA);
-            OutlineW = new FxHook("gdi32.dll", "GetGlyphOutlineW", dOutlineW);
+            OutlineA = AutoHookCreator("gdi32.dll", "GetGlyphOutlineA", dOutlineA);
+            OutlineW = AutoHookCreator("gdi32.dll", "GetGlyphOutlineW", dOutlineW);
 
             OutlineA.Install();
             OutlineW.Install();
@@ -65,18 +65,19 @@ namespace SRL {
             dTextOutA = new TextOutADelegate(hTextOut);
             dTextOutW = new TextOutWDelegate(hTextOut);
 
-            hTextOutA = new FxHook("gdi32.dll", "TextOutA", dTextOutA);
-            hTextOutW = new FxHook("gdi32.dll", "TextOutW", dTextOutW);
+            hTextOutA = AutoHookCreator("gdi32.dll", "TextOutA", dTextOutA);
+            hTextOutW = AutoHookCreator("gdi32.dll", "TextOutW", dTextOutW);
 
             hTextOutA.Install();
             hTextOutW.Install();
         }
+
         static void InstallExtTextOutHooks() {
             dExtTextOutA = new ExtTextOutADelegate(hExtTextOut);
             dExtTextOutW = new ExtTextOutWDelegate(hExtTextOut);
 
-            hExtTextOutA = new FxHook("gdi32.dll", "ExtTextOutA", dExtTextOutA);
-            hExtTextOutW = new FxHook("gdi32.dll", "ExtTextOutW", dExtTextOutW);
+            hExtTextOutA = AutoHookCreator("gdi32.dll", "ExtTextOutA", dExtTextOutA);
+            hExtTextOutW = AutoHookCreator("gdi32.dll", "ExtTextOutW", dExtTextOutW);
 
             hExtTextOutA.Install();
             hExtTextOutW.Install();
@@ -86,8 +87,8 @@ namespace SRL {
             dCreateFontA = new CreateFontADelegate(hCreateFont);
             dCreateFontW = new CreateFontWDelegate(hCreateFont);
 
-            hCreatFontA = new FxHook("gdi32.dll", "CreateFontA", dCreateFontA);
-            hCreatFontW = new FxHook("gdi32.dll", "CreateFontW", dCreateFontW);
+            hCreatFontA = AutoHookCreator("gdi32.dll", "CreateFontA", dCreateFontA);
+            hCreatFontW = AutoHookCreator("gdi32.dll", "CreateFontW", dCreateFontW);
 
             hCreatFontA.Install();
             hCreatFontW.Install();
@@ -98,8 +99,8 @@ namespace SRL {
             dCreateFontIndirectW = new CreateFontIndirectWDelegate(hCreateFontIndirectW);
 
 
-            hCreatFontIndirectA = new FxHook("gdi32.dll", "CreateFontIndirectA", dCreateFontIndirectA);
-            hCreatFontIndirectW = new FxHook("gdi32.dll", "CreateFontIndirectW", dCreateFontIndirectW);
+            hCreatFontIndirectA = AutoHookCreator("gdi32.dll", "CreateFontIndirectA", dCreateFontIndirectA);
+            hCreatFontIndirectW = AutoHookCreator("gdi32.dll", "CreateFontIndirectW", dCreateFontIndirectW);
 
             hCreatFontIndirectA.Install();
             hCreatFontIndirectW.Install();
@@ -110,8 +111,8 @@ namespace SRL {
             dSendMessageA = new SendMessageADelegate(SendMessageAHook);
             dSendMessageW = new SendMessageWDelegate(SendMessageWHook);
 
-            hSendMessageA = new FxHook("user32.dll", "SendMessageA", dSendMessageA);
-            hSendMessageW = new FxHook("user32.dll", "SendMessageW", dSendMessageW);
+            hSendMessageA = AutoHookCreator("user32.dll", "SendMessageA", dSendMessageA);
+            hSendMessageW = AutoHookCreator("user32.dll", "SendMessageW", dSendMessageW);
 
             hSendMessageA.Install();
             hSendMessageW.Install();
@@ -121,8 +122,8 @@ namespace SRL {
             dCreateWindowA = new CreateWindowADelegate(CreateWindow);
             dCreateWindowW = new CreateWindowWDelegate(CreateWindow);
 
-            hCreateWindowA = new FxHook("user32.dll", "CreateWindowA", dCreateWindowA);
-            hCreateWindowW = new FxHook("user32.dll", "CreateWindowW", dCreateWindowW);
+            hCreateWindowA = AutoHookCreator("user32.dll", "CreateWindowA", dCreateWindowA);
+            hCreateWindowW = AutoHookCreator("user32.dll", "CreateWindowW", dCreateWindowW);
 
             hCreateWindowA.Install();
             hCreateWindowW.Install();
@@ -132,8 +133,8 @@ namespace SRL {
             dCreateWindowExA = new CreateWindowExADelegate(CreateWindowEx);
             dCreateWindowExW = new CreateWindowExWDelegate(CreateWindowEx);
 
-            hCreateWindowExA = new FxHook("user32.dll", "CreateWindowExA", dCreateWindowExA);
-            hCreateWindowExW = new FxHook("user32.dll", "CreateWindowExW", dCreateWindowExW);
+            hCreateWindowExA = AutoHookCreator("user32.dll", "CreateWindowExA", dCreateWindowExA);
+            hCreateWindowExW = AutoHookCreator("user32.dll", "CreateWindowExW", dCreateWindowExW);
 
             hCreateWindowExA.Install();
             hCreateWindowExW.Install();
@@ -144,8 +145,8 @@ namespace SRL {
             dSetWindowTextA = new SetWindowTextADelegate(SetWindowTextHook);
             dSetWindowTextW = new SetWindowTextWDelegate(SetWindowTextHook);
 
-            hSetWindowTextA = new FxHook("user32.dll", "SetWindowTextA", dSetWindowTextA);
-            hSetWindowTextW = new FxHook("user32.dll", "SetWindowTextW", dSetWindowTextW);
+            hSetWindowTextA = AutoHookCreator("user32.dll", "SetWindowTextA", dSetWindowTextA);
+            hSetWindowTextW = AutoHookCreator("user32.dll", "SetWindowTextW", dSetWindowTextW);
 
             hSetWindowTextA.Install();
             hSetWindowTextW.Install();
@@ -154,7 +155,7 @@ namespace SRL {
         static void InstallMultiByteToWideChar() {
             dMultiByteToWideChar = new MultiByteToWideCharDelegate(MultiByteToWideCharHook);
 
-            hMultiByteToWideChar = new FxHook("kernel32.dll", "MultiByteToWideChar", dMultiByteToWideChar);
+            hMultiByteToWideChar = AutoHookCreator("kernel32.dll", "MultiByteToWideChar", dMultiByteToWideChar);
 
             hMultiByteToWideChar.Install();
         }
@@ -167,6 +168,8 @@ namespace SRL {
             if (Debugging)
                 Log("OutlineA Hooked, {0:X4}", true, uChar);
 #endif
+            if (OutlineA.ImportHook)
+                return GetGlyphOutlineA(hdc, uChar, uFormat, out lpgm, cbBuffer, lpvBuffer, ref lpmat2);
 
             OutlineA.Uninstall();
             uint Ret = GetGlyphOutlineA(hdc, uChar, uFormat, out lpgm, cbBuffer, lpvBuffer, ref lpmat2);
@@ -181,6 +184,9 @@ namespace SRL {
                 Log("OutlineW Hooked, {0:X4}", true, uChar);
 #endif
 
+            if (OutlineW.ImportHook)
+                return GetGlyphOutlineW(hdc, uChar, uFormat, out lpgm, cbBuffer, lpvBuffer, ref lpmat2);
+
             OutlineW.Uninstall();
             uint Ret = GetGlyphOutlineW(hdc, uChar, uFormat, out lpgm, cbBuffer, lpvBuffer, ref lpmat2);
             OutlineW.Install();
@@ -188,7 +194,7 @@ namespace SRL {
         }
 
         public static bool hTextOut(IntPtr hdc, int nXStart, int nYStart, string lpString, int cbString) {
-            lpString = ProcessManaged(lpString, false);
+            lpString = Process(lpString);
             if (UndoChars) {
                 for (int i = 0; i < lpString.Length; i++) {
                     char C = lpString[i];
@@ -205,10 +211,11 @@ namespace SRL {
                 }
             }
 
-#if DEBUG
-            if (Debugging)
+            if (LogInput)
                 Log("TextOut Hooked, {0}", true, lpString);
-#endif
+
+            if (hTextOutW.ImportHook)
+                return TextOutW(hdc, nXStart, nYStart, lpString, cbString);
 
             hTextOutW.Uninstall();
             bool Rst = TextOutW(hdc, nXStart, nYStart, lpString, cbString);
@@ -217,7 +224,7 @@ namespace SRL {
         }
 
         public static bool hExtTextOut(IntPtr hdc, int X, int Y, uint fuOptions, ref RECT lprc, string lpString, uint cbCount, IntPtr lpDx) {
-            lpString = ProcessManaged(lpString, false);
+            lpString = Process(lpString);
             if (UndoChars) {
                 for (int i = 0; i < lpString.Length; i++) {
                     char C = lpString[i];
@@ -234,10 +241,13 @@ namespace SRL {
                 }
             }
 
-#if DEBUG
-            if (Debugging)
+
+            if (LogInput)
                 Log("ExtTextOut Hooked, {0}", true, lpString);
-#endif
+
+
+            if (hExtTextOutW.ImportHook)
+                return ExtTextOutW(hdc, X, Y, fuOptions, ref lprc, lpString, cbCount, lpDx);
 
             hExtTextOutW.Uninstall();
             bool Rst = ExtTextOutW(hdc, X, Y, fuOptions, ref lprc, lpString, cbCount, lpDx);
@@ -265,10 +275,11 @@ namespace SRL {
                 fdwCharSet = FontCharset;
 
 
-#if DEBUG
-            if (Debugging)
+            if (LogInput)
                 Log("CreateFont Hooked, {0} 0x{1:X2}", true, lpszFace, fdwCharSet);
-#endif
+
+            if (hCreateFileW.ImportHook)
+                return CreateFontW(nHeight, nWidth, nEscapement, nOrientation, fnWeight, fdwItalic, fdwUnderline, fdwStrikeOut, fdwCharSet, fdwOutputPrecision, fdwClipPrecision, fdwQuality, fdwPitchAndFamily, lpszFace);
 
             hCreatFontW.Uninstall();
             var Result = CreateFontW(nHeight, nWidth, nEscapement, nOrientation, fnWeight, fdwItalic, fdwUnderline, fdwStrikeOut, fdwCharSet, fdwOutputPrecision, fdwClipPrecision, fdwQuality, fdwPitchAndFamily, lpszFace);
@@ -296,11 +307,11 @@ namespace SRL {
             if (FontCharset != 0)
                 FontInfo.lfCharSet = FontCharset;
 
-
-#if DEBUG
-            if (Debugging)
+            if (LogInput)
                 Log("CreateIndirectA Hooked, {0} 0x{1:X2}", true, FontInfo.lfFaceName, FontInfo.lfCharSet);
-#endif
+
+            if (hCreatFontIndirectA.ImportHook)
+                return CreateFontIndirectA(ref FontInfo);
 
             hCreatFontIndirectA.Uninstall();
             var Result = CreateFontIndirectA(ref FontInfo);
@@ -326,11 +337,11 @@ namespace SRL {
             if (FontCharset != 0)
                 FontInfo.lfCharSet = FontCharset;
 
-
-#if DEBUG
-            if (Debugging)
+            if (LogInput)
                 Log("CreateIndirectW Hooked, {0} 0x{1:X2}", true, FontInfo.lfFaceName, FontInfo.lfCharSet);
-#endif
+
+            if (hCreatFontIndirectW.ImportHook)
+                return CreateFontIndirectW(ref FontInfo);
 
             hCreatFontIndirectW.Uninstall();
             var Result = CreateFontIndirectW(ref FontInfo);
@@ -352,6 +363,10 @@ namespace SRL {
                     lParam = GenString(Reload, true);
                 }
             }
+
+            if (hSendMessageW.ImportHook)
+                return SendMessageW(hWnd, Msg, wParam, lParam);
+
             hSendMessageW.Uninstall();
             var Rst = SendMessageW(hWnd, Msg, wParam, lParam);
             hSendMessageW.Install();
@@ -369,6 +384,10 @@ namespace SRL {
                     lParam = GenString(Reload);
                 }
             }
+
+            if (hSendMessageA.ImportHook)
+                return SendMessageA(hWnd, Msg, wParam, lParam);
+
             hSendMessageA.Uninstall();
             var Rst = SendMessageA(hWnd, Msg, wParam, lParam);
             hSendMessageA.Install();
@@ -381,8 +400,11 @@ namespace SRL {
 
             string Reload = StrMap(lpWindowName, IntPtr.Zero, true);
 
+            if (hCreateWindowExW.ImportHook)
+                return CreateWindowExW(dwExStyle, lpClassName, Reload, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
+
             hCreateWindowExW.Uninstall();
-            var Rst = CreateWindowExW(dwExStyle, lpClassName, lpWindowName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
+            var Rst = CreateWindowExW(dwExStyle, lpClassName, Reload, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
             hCreateWindowExW.Install();
             return Rst;
         }
@@ -392,14 +414,20 @@ namespace SRL {
 
             string Reload = StrMap(lpWindowName, IntPtr.Zero, true);
 
+            if (hCreateWindowExW.ImportHook)
+                return CreateWindowW(lpClassName, Reload, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
+
             hCreateWindowExW.Uninstall();
-            var Rst = CreateWindowW(lpClassName, lpWindowName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
+            var Rst = CreateWindowW(lpClassName, Reload, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
             hCreateWindowExW.Install();
             return Rst;
         }
 #endif
         static bool SetWindowTextHook(IntPtr hwnd, string lpString) { 
             lpString = StrMap(lpString, IntPtr.Zero, true);
+
+            if (hSetWindowTextW.ImportHook)
+                return SetWindowTextW(hwnd, lpString);
 
             hSetWindowTextW.Uninstall();
             var Ret = SetWindowTextW(hwnd, lpString);
@@ -408,10 +436,14 @@ namespace SRL {
         }
 
         static int MultiByteToWideCharHook(int Codepage, uint dwFlags, IntPtr Input, int cbMultiByte, IntPtr Output, int cchWideChar) {
-            hMultiByteToWideChar.Uninstall();
+
+            if (!hMultiByteToWideChar.ImportHook)
+                hMultiByteToWideChar.Uninstall();
+
             if (!Initialized || cbMultiByte == 0) {
                 int Rst = MultiByteToWideChar(Codepage, dwFlags, Input, cbMultiByte, Output, cchWideChar);
-                hMultiByteToWideChar.Install();
+                if (!hMultiByteToWideChar.ImportHook)
+                    hMultiByteToWideChar.Install();
                 return Rst;
             }
             string Str = GetString(Input, Len: cbMultiByte == -1 ? null : (int?)cbMultiByte, CP: Codepage);
@@ -420,15 +452,19 @@ namespace SRL {
 
             if (RStr == Str) {
                 int Rst = MultiByteToWideChar(Codepage, dwFlags, Input, cbMultiByte, Output, cchWideChar);
-                hMultiByteToWideChar.Install();
+                if (!hMultiByteToWideChar.ImportHook)
+                    hMultiByteToWideChar.Install();
                 return Rst;
             }
 
-            Log("MBTWC Hook: {0}", true, RStr);
+            if (LogInput)
+                Log("MBTWC Hook: {0}", true, RStr);
 
             Output = GenString(RStr, true, Output == IntPtr.Zero ? null : (IntPtr?)Output);
 
-            hMultiByteToWideChar.Install();
+            if (!hMultiByteToWideChar.ImportHook)
+                hMultiByteToWideChar.Install();
+
             return cchWideChar;
         }
 

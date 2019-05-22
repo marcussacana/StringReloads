@@ -131,6 +131,7 @@ namespace SRL {
             ForceTrim = false;
             NotCachedOnly = false;
             AllowEmpty = false;
+            ImportHook = false;
             HookCreateWindowEx = false;
             HookShowWindow = false;
             HookSetWindowPos = false;
@@ -626,6 +627,12 @@ namespace SRL {
                 CheckProportion = true;
 
                 Log("Intro Injector Proportion Validator Enabled", true);
+            }
+
+            if (HookSettings.ImportHook)
+            {
+                ImportHook = true;
+                Log("Import Table Hook Method Enabled", true);
             }
 
             if (IntroSettings.Seconds > 0)

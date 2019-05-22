@@ -261,35 +261,25 @@ namespace SRL {
             return true;
         }
 
-        internal static void Error(string Message, params object[] Format) {
-            if (LiteMode)
-                return;
-
-            bool BakLogFile = LogFile;
-            LogFile = true;
-            ConsoleColor Color = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Red;
-            Log(Message, false, Format);
-            Console.ForegroundColor = Color;
-            LogFile = BakLogFile;
-        }
-        internal static void Warning(string Message, params object[] Format) {
-            if (LiteMode)
-                return;
-
-            bool BakLogFile = LogFile;
-            LogFile = true & Debugging;
-            ConsoleColor Color = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Log(Message, true, Format);
-            Console.ForegroundColor = Color;
-            LogFile = BakLogFile;
-        }
+        internal static void Error(string Message, params object[] Format) =>
+            Log(ConsoleColor.Red, Message, false, Format);
+        internal static void Warning(string Message, params object[] Format) =>
+            Log(ConsoleColor.Yellow, Message, true, Format);
 
         internal static void Log(ConsoleColor Color, string Message, bool Optional = false, params object[] Format)
         {
             if (LiteMode)
                 return;
+
+            if (!ConsoleShowed)
+            {
+                Log("", true);
+
+                if (ConsoleShowed)
+                    Console.Clear();
+                else
+                    return;
+            }
 
             bool BakLogFile = LogFile;
             LogFile = true & Debugging;
