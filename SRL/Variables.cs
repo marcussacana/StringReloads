@@ -232,12 +232,19 @@ namespace SRL {
             }
         }
 
+        static bool? DbgFlg = null;
         static bool _FrcDbg = false;
         static bool Debugging {
             get {
                 if (_FrcDbg)
                     return true;
-                return File.Exists(BaseDir + "DEBUG");
+
+                if (DbgFlg.HasValue)
+                    return DbgFlg.Value;
+
+                DbgFlg = File.Exists(BaseDir + "DEBUG");
+
+                return DbgFlg.Value;
             }
             set {
                 _FrcDbg = value;

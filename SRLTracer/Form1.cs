@@ -1,4 +1,5 @@
-﻿using SacanaWrapper;
+﻿//#define DEBUG
+using SacanaWrapper;
 using System;
 using System.Windows.Forms;
 

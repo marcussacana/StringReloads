@@ -51,6 +51,9 @@ namespace SRL {
         static UnmanagedHook hMultiByteToWideChar;
 
         static void InstallGlyphHooks() {
+            if (Managed)
+                return;
+
             dOutlineA = new GetGlyphOutlineDelegate(hGetGlyphOutlineA);
             dOutlineW = new GetGlyphOutlineDelegate(hGetGlyphOutlineW);
 
@@ -61,7 +64,11 @@ namespace SRL {
             OutlineW.Install();
         }
 
-        static void InstallTextOutHooks() {
+        static void InstallTextOutHooks()
+        {
+            if (Managed)
+                return;
+
             dTextOutA = new TextOutADelegate(hTextOut);
             dTextOutW = new TextOutWDelegate(hTextOut);
 
@@ -72,7 +79,11 @@ namespace SRL {
             hTextOutW.Install();
         }
 
-        static void InstallExtTextOutHooks() {
+        static void InstallExtTextOutHooks()
+        {
+            if (Managed)
+                return;
+
             dExtTextOutA = new ExtTextOutADelegate(hExtTextOut);
             dExtTextOutW = new ExtTextOutWDelegate(hExtTextOut);
 
@@ -83,7 +94,11 @@ namespace SRL {
             hExtTextOutW.Install();
         }
 
-        static void InstallCreateFontHooks() {
+        static void InstallCreateFontHooks()
+        {
+            if (Managed)
+                return;
+
             dCreateFontA = new CreateFontADelegate(hCreateFont);
             dCreateFontW = new CreateFontWDelegate(hCreateFont);
 
@@ -94,7 +109,11 @@ namespace SRL {
             hCreatFontW.Install();
         }
 
-        static void InstallCreateFontIndirectHooks() {
+        static void InstallCreateFontIndirectHooks()
+        {
+            if (Managed)
+                return;
+
             dCreateFontIndirectA = new CreateFontIndirectADelegate(hCreateFontIndirectA);
             dCreateFontIndirectW = new CreateFontIndirectWDelegate(hCreateFontIndirectW);
 
@@ -108,6 +127,8 @@ namespace SRL {
 
 #if DEBUG
         static void InstallSendMessageHooks() {
+            if (Managed)
+                return;
             dSendMessageA = new SendMessageADelegate(SendMessageAHook);
             dSendMessageW = new SendMessageWDelegate(SendMessageWHook);
 
@@ -119,6 +140,8 @@ namespace SRL {
         }
 
         static void InstallCreateWindowHooks() {
+            if (Managed)
+                return;
             dCreateWindowA = new CreateWindowADelegate(CreateWindow);
             dCreateWindowW = new CreateWindowWDelegate(CreateWindow);
 
@@ -130,6 +153,8 @@ namespace SRL {
         }
 
         static void InstallCreateWindowExHooks() {
+            if (Managed)
+                return;
             dCreateWindowExA = new CreateWindowExADelegate(CreateWindowEx);
             dCreateWindowExW = new CreateWindowExWDelegate(CreateWindowEx);
 
@@ -141,7 +166,11 @@ namespace SRL {
         }
 #endif
 
-        static void InstallSetWindowTextHooks() {
+        static void InstallSetWindowTextHooks()
+        {
+            if (Managed)
+                return;
+
             dSetWindowTextA = new SetWindowTextADelegate(SetWindowTextHook);
             dSetWindowTextW = new SetWindowTextWDelegate(SetWindowTextHook);
 
@@ -152,7 +181,11 @@ namespace SRL {
             hSetWindowTextW.Install();
         }
 
-        static void InstallMultiByteToWideChar() {
+        static void InstallMultiByteToWideChar()
+        {
+            if (Managed)
+                return;
+
             dMultiByteToWideChar = new MultiByteToWideCharDelegate(MultiByteToWideCharHook);
 
             hMultiByteToWideChar = AutoHookCreator("kernel32.dll", "MultiByteToWideChar", dMultiByteToWideChar);

@@ -343,6 +343,7 @@ namespace SRL {
                     else
                     {
                         NoDatabase = true;
+                        StrRld = new Dictionary<string, string>();
                         Warning("Can't Compile Strings because the SRL don't found any LST.");
                     }
                 }

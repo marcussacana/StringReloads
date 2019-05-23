@@ -37,7 +37,7 @@ namespace SRLUnity {
 
         public static string Process(string Text) {
             Initialize();
-
+            
             IntPtr Ptr = Marshal.StringToHGlobalAuto(Text);
             IntPtr New = Function(Ptr);
             Text = Marshal.PtrToStringAuto(New);

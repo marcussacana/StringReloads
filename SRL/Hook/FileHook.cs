@@ -7,6 +7,9 @@ namespace SRL
     {
         static void InstallCreateFileHooks()
         {
+            if (Managed)
+                return;
+
             dGetFileAttrA = new GetFileAttributesADelegate(GetFileAttributes);
             dGetFileAttrW = new GetFileAttributesWDelegate(GetFileAttributes);
             dGetFileAttrExA = new GetFileAttributesExADelegate(GetFileAttributesEx);

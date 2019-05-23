@@ -9,6 +9,7 @@ using System.Threading;
 using System.Windows.Forms;
 
 namespace SRL {
+
     static partial class StringReloader {
 
 #if !DEBUG
@@ -25,7 +26,7 @@ namespace SRL {
         static UnmanagedHook MoveWindowHook;
 
         static void InstallIntroInjector() {
-            if (ShowWindowHook != null)
+            if (ShowWindowHook != null || Managed)
                 return;
 #if !DEBUG
             CreateWindowExADel = new CreateWindowExADelegate(hCreateWindowEx);
