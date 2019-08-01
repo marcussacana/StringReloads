@@ -337,7 +337,7 @@ namespace SRL {
                 }
 
                 if (Debugging)
-                    Log("Database Changed to {0}, ID: {0}", true, GetDBNameById(DBID), DBID);
+                    Log("Database Changed to {0}, ID: {1}", true, GetDBNameById(DBID), DBID);
 
                 return Result;
             }
@@ -356,7 +356,7 @@ namespace SRL {
             if (Debugging) {
                 int NID = GetDBID();
                 if (OID != NID) {
-                    Log("Database Changed to {0}, ID: {0}", true, GetDBNameById(NID), NID);
+                    Log("Database Changed to {0}, ID: {1}", true, GetDBNameById(NID), NID);
                 }
             }
 
@@ -374,7 +374,7 @@ namespace SRL {
         {
             if (Debugging)
             {
-                Log("Database Changed to {0}, ID: {0}", true, GetDBNameById(ID), ID);
+                Log("Database Changed to {0}, ID: {1}", true, GetDBNameById(ID), ID);
             }
 
             if (Multithread)

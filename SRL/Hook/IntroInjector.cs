@@ -100,6 +100,8 @@ namespace SRL {
 
             return Rst;
         }
+
+#if !DEBUG
         static IntPtr hCreateWindowEx(WindowStylesEx dwExStyle, string lpClassName, string lpWindowName, WindowStyles dwStyle, int x, int y, int nWidth, int nHeight, IntPtr hWndParent, IntPtr hMenu, IntPtr hInstance, IntPtr lpParam)
         {
             if (!CreateWindowExWHook.ImportHook)
@@ -112,7 +114,7 @@ namespace SRL {
             ShowIntro(Result);
             return Result;
         }
-
+#endif
         static void ShowIntro(IntPtr hWnd) {
             if (IntroInitialized)
                 return;

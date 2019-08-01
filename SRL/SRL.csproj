@@ -80,7 +80,11 @@
     <Compile Include="Types.cs" />
     <Compile Include="Unmanaged.cs" />
     <Compile Include="Variables.cs" />
+    <Compile Include="Wrapper\bink.cs" />
     <Compile Include="Wrapper\d3d9.cs" />
+    <Compile Include="Wrapper\dinput8.cs" />
+    <Compile Include="Wrapper\kirikiri.cs" />
+    <Compile Include="Wrapper\Util.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="SRL.ini">

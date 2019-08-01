@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using static SRL.StringReloader;
+using static SRL.Wrapper.Tools;
 
 namespace SRL.Wrapper
 {
@@ -10,34 +10,22 @@ namespace SRL.Wrapper
     /// </summary>
     public static class D3D9
     {
-        public static bool WOW64 => !Environment.Is64BitProcess && Environment.Is64BitOperatingSystem;
         public static IntPtr RealHandler;
-        public static bool RealLoaded = false;
         public static void LoadRetail()
         {
-            if (RealLoaded)
+            if (RealHandler != IntPtr.Zero)
                 return;
-
-            RealLoaded = true;
 
             try
             {
-                ProcessReal(IntPtr.Zero);
+                StringReloader.ProcessReal(IntPtr.Zero);
             }
             catch { }
 
-            string Path = WOW64 ? Environment.GetFolderPath(Environment.SpecialFolder.SystemX86): Environment.SystemDirectory;
-            if (!Path.EndsWith("\\"))
-                Path += "\\";
+            RealHandler = LoadLibrary("d3d9.dll");
 
-            Path += "d3d9.dll";
-
-            RealHandler = LoadLibrary(Path);
-            if (RealHandler == IntPtr.Zero)
-            {
-                Error("Failed to load: " + Path);
-                Environment.Exit(0x505);//ERROR_DELAY_LOAD_FAILED
-            }
+            if (RealHandler == IntPtr.Zero)            
+                Environment.Exit(0x505);//ERROR_DELAY_LOAD_FAILED            
 
 
             Create =   GetDelegate<RET_1>(RealHandler, "Direct3DCreate9",   false);
@@ -67,7 +55,6 @@ namespace SRL.Wrapper
                 if (Optional)
                     return null;
 
-                Error("Failed to load: " + Function);
                 Environment.Exit(0x505);//ERROR_DELAY_LOAD_FAILED
             }
             return (T)Marshal.GetDelegateForFunctionPointer(Address, typeof(T));

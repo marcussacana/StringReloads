@@ -130,7 +130,6 @@ namespace SRL {
 
 #if DEBUG
         static bool HookCreateWindow;
-        static bool HookCreateWindowEx;
         static bool HookSendMessage;
 #endif
         static bool ImportHook;

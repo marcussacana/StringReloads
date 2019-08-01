@@ -87,7 +87,7 @@ At WordWrap
 -"Monospaced" When false the FontName, FontSize, Bold are required
 -"FakeBreakLine" If the engine don't have any breakline char, the fakebreakline full the line with space to automatically break the line where needed
 -"FontName" The font face name to be used in the string measure
--"FontSize" The font size to be used in hte string measure (decimal)
+-"FontSize" The font size to be used in the string measure (decimal)
 -"Bold" If true, the string will measure using bold font
 -"MaxWidth" When Monospaced is true, put the max count of characters per line, when false, the max line width in pixels
 
