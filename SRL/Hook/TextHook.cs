@@ -32,8 +32,8 @@ namespace SRL {
         static UnmanagedHook hTextOutW;
         static UnmanagedHook hExtTextOutA;
         static UnmanagedHook hExtTextOutW;
-        static UnmanagedHook hCreatFontA;
-        static UnmanagedHook hCreatFontW;
+        static UnmanagedHook hCreateFontA;
+        static UnmanagedHook hCreateFontW;
         static UnmanagedHook hCreatFontIndirectA;
         static UnmanagedHook hCreatFontIndirectW;
 #if DEBUG
@@ -102,11 +102,11 @@ namespace SRL {
             dCreateFontA = new CreateFontADelegate(hCreateFont);
             dCreateFontW = new CreateFontWDelegate(hCreateFont);
 
-            hCreatFontA = AutoHookCreator("gdi32.dll", "CreateFontA", dCreateFontA);
-            hCreatFontW = AutoHookCreator("gdi32.dll", "CreateFontW", dCreateFontW);
+            hCreateFontA = AutoHookCreator("gdi32.dll", "CreateFontA", dCreateFontA);
+            hCreateFontW = AutoHookCreator("gdi32.dll", "CreateFontW", dCreateFontW);
 
-            hCreatFontA.Install();
-            hCreatFontW.Install();
+            hCreateFontA.Install();
+            hCreateFontW.Install();
         }
 
         static void InstallCreateFontIndirectHooks()
@@ -311,12 +311,12 @@ namespace SRL {
             if (LogInput)
                 Log("CreateFont Hooked, {0} 0x{1:X2}", true, lpszFace, fdwCharSet);
 
-            if (hCreateFileW.ImportHook)
+            if (hCreateFontW.ImportHook)
                 return CreateFontW(nHeight, nWidth, nEscapement, nOrientation, fnWeight, fdwItalic, fdwUnderline, fdwStrikeOut, fdwCharSet, fdwOutputPrecision, fdwClipPrecision, fdwQuality, fdwPitchAndFamily, lpszFace);
 
-            hCreatFontW.Uninstall();
+            hCreateFontW.Uninstall();
             var Result = CreateFontW(nHeight, nWidth, nEscapement, nOrientation, fnWeight, fdwItalic, fdwUnderline, fdwStrikeOut, fdwCharSet, fdwOutputPrecision, fdwClipPrecision, fdwQuality, fdwPitchAndFamily, lpszFace);
-            hCreatFontW.Install();
+            hCreateFontW.Install();
 
             return Result;
         }
