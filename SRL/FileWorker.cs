@@ -611,6 +611,7 @@ namespace SRL {
 
                 Log("Intro Injector (ShowWindow) Enabled", true);
             }
+
             if (IntroSettings.SetWindowPos) {
                 HookSetWindowPos = true;
 

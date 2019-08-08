@@ -111,6 +111,7 @@ namespace SRL {
 
             if (!CreateWindowExWHook.ImportHook)
                 CreateWindowExWHook.Install();
+
             ShowIntro(Result);
             return Result;
         }

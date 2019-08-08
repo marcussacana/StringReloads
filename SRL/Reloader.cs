@@ -316,7 +316,7 @@ namespace SRL {
                 }
 
                 if (File.Exists(OEDP) && Overlay == null) {
-                    Overlay = new DotNetVM(OEDP);
+                    Overlay = new DotNetVM(File.ReadAllBytes(OEDP));
                     Log("Overlay Enabled.", true);
                 }
 
@@ -325,7 +325,7 @@ namespace SRL {
                         if (Ini.GetConfigStatus("MTL", "TargetLang", IniPath) == Ini.ConfigStatus.Ok) {
                             SourceLang = Ini.GetConfig("MTL", "SourceLang", IniPath, true);
                             TargetLang = Ini.GetConfig("MTL", "TargetLang", IniPath, true);
-                            TLIB = new DotNetVM(TLDP);
+                            TLIB = new DotNetVM(File.ReadAllBytes(TLDP));
                             Log("Machine Translation Enabled", true);
                         }
                     }
