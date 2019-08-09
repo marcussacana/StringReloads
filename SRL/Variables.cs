@@ -159,9 +159,12 @@ namespace SRL {
 
         static bool NoDatabase;
 
-        static string StrLstSufix = string.Empty;
+
         static string SourceLang = string.Empty;
         static string TargetLang = string.Empty;
+        static bool MassiveMode;
+
+        static string StrLstSufix = string.Empty;
         static string LastInput = string.Empty;
         static string GameLineBreaker = "\n";
         static string LastOutput = string.Empty;

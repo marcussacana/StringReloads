@@ -388,6 +388,18 @@ namespace SRL {
             public bool MoveWindow;
         }
 
+        [FieldParmaters(Name = "MTL")]
+        internal struct MTLSettings {
+            [FieldParmaters(Name = "Enabled;Enable")]
+            public bool Enabled;
+            [FieldParmaters(Name = "MassiveMode;ArrayMode;MultilineMode")]
+            public bool MassiveMode;
+            [FieldParmaters(Name = "SourceLang;SourceLanguage;Source;TranslateFrom;From")]
+            public string SourceLang;
+            [FieldParmaters(Name = "TargetLang;TargetLanguage;Target;TranslateTo;To")]
+            public string TargetLang;
+        }
+
         internal struct FontRedirect {
             public string From;
             public string To;

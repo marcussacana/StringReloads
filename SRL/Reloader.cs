@@ -169,7 +169,7 @@ namespace SRL {
                     if (Online) {
                         try {
                             Log("Translating: \"{0}\"", true, Str);
-                            TL = TLIB.Call("TLIB.Google", "Translate", Ori, SourceLang, TargetLang);
+                            TL = TLIB.Call("TLIB.Google", "Translate", MassiveMode ? (object)new string[] { Ori } : Ori, SourceLang, TargetLang);
                         } catch {
                             Log("Connection Failed, Disabling MTL for 30m", true);
                             Online = false;
@@ -321,13 +321,13 @@ namespace SRL {
                 }
 
                 if (File.Exists(TLDP) && TLIB == null) {
-                    if (Ini.GetConfigStatus("MTL", "SourceLang", IniPath) == Ini.ConfigStatus.Ok) {
-                        if (Ini.GetConfigStatus("MTL", "TargetLang", IniPath) == Ini.ConfigStatus.Ok) {
-                            SourceLang = Ini.GetConfig("MTL", "SourceLang", IniPath, true);
-                            TargetLang = Ini.GetConfig("MTL", "TargetLang", IniPath, true);
-                            TLIB = new DotNetVM(File.ReadAllBytes(TLDP));
-                            Log("Machine Translation Enabled", true);
-                        }
+                    AdvancedIni.FastOpen(out MTLSettings Settings, IniPath);
+                    if (Settings.Enabled) {
+                        SourceLang = Settings.SourceLang;
+                        TargetLang = Settings.TargetLang;
+                        MassiveMode = Settings.MassiveMode;
+                        TLIB = new DotNetVM(File.ReadAllBytes(TLDP));
+                        Log("Machine Translation Enabled", true);
                     }
                 }
 
