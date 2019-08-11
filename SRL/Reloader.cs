@@ -138,7 +138,7 @@ namespace SRL {
                 }
             }
 
-            if (ValidateMask(Input)) {
+            if (!DisableMasks && ValidateMask(Input)) {
                 try {
 
                     string Result = ProcesMask(Input);

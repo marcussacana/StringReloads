@@ -12,6 +12,13 @@ N: Read more in the end of this FAQ
 R: Yes, and you can use my tool without say Thx to me.
 N: If you really wanna prevent the string dump, modify the srlx32.dll, is a managed dll, not obfuscated.
 
+-How to publish?
+R: Well, Disable the Debug, LogInput, LogOutput, LogFile, Rebuild in the SRL.ini
+Then remove the WorkingDir and move the Strings.lst to the same directory of the SRL.ini
+After this you just need include in your patch the String.srl, SRLx32.dll, SRL.ini and the Game.exe
+N: If you rename the SRLx32.dll to dinput8.dll or d3d9.dll the SRL will initialize very early, then
+if you have a problem of the game freezing after the new game/load game, try this.
+
 
 -A BIG DELAY EVERY FUCKING LINE
 R: Ehh... hm... Maybe your cpu is trash?
@@ -41,35 +48,35 @@ At StringsReloader
 -"OutEncoding" The same; but used to return a matched string...
 -"Encoding" Set the InEncoding and OutEncoding the same encoding.
 -"Wide" True or False; Is the setting to modify the read/write method to Encoding with 16-bits
--"AntiCrash" True or False; Is the setting to games who crash on close, this can fix some cases terminating the process on you request to close it.
--"FreeOnExit" A alternative to the AntiCrash
--"MatchIgnore" Txt1,Txt2,Txt3; Is a setting to append at the default Match ignore list, every string in the list is ignored by the string match.
--"TrimChars" (,),*; Is a setting to append strings to trim from end and begin of every line, this don't affect the return string.
+-"Debug" Enable the Debug Output Window
 -"Delay" Log the Delay to reload very string 
 -"Dump" Dump the Strings.srl including the translation
 -"DumpRetail" Dump the Strings.srl but don't export the translation
--"Debug" Enable the Debug Output Window
+-"DetectText" When the Debug mode is enable, the dumpper will append to the Strings.lst only lines that as recognized as dialogue
 -"LogAll" Verbose mode, log all string reloads
 -"LogInput" Log all strings that the game requested the SRL translation
 -"LogOutput" Log all strings that the SRL return to the game
 -"LogFile" Save the Log window output to the a file (SRL.log)
 -"Unsafe" When false the SRL don't initialize while the game don't try load a string that is recognized game as dialogue.
 -"Rebuild" Rebuild the Strings.srl every time that the game starts
--"TrimRangeMismatch" Trim from the begin and end all chars from input strings that isn't in the "AcceptableRange" list
--"AcceptableRanges" Acceptable range of chars, use the char: - to specify a range, like 0-9, A-z, you can put a single char too, just don't put the -
+-"AntiCrash" True or False; Is the setting to games who crash on close, this can fix some cases terminating the process on you request to close it.
+-"FreeOnExit" A alternative to the AntiCrash
+-"TrimRangeMismatch" When true trim from the start and end all chars from input strings that isn't in the "AcceptableRange" list
+-"AcceptableRanges" Acceptable range of chars, use the char: - to specify a range, like 0-9, A-z, you can put a single char too, just don't put the - before the end
 -"NoTrim" Disable all trim algorithms of the SRL
 -"BreakLine" Set if the game have their own breakline flag, (the default is the 0x0A byte)
 -"ReloadedPrefix" Put a prefix in all reloaded lines
 -"ReloadedSufix" Put a sufix in all realoaded lines
--"Multithread" Make the SRL optimized for Multithreaded games, when false the SRL create a new process to store their database, keep true
+-"Multithread" Make the SRL optimized for Multithreaded games, when false the SRL create a new process to store their database, if unsure keep true
 -"WindowHook" Try hook all windows user interface strings and allow translate it
 -"Invalidate" If the WindowHook only translate when you put the cursor over the text, enable this
 -"CachePointer" Cache the reload and speed up if the game request it again
 -"NoDiagCheck" Allways think in a string as a Dialogue, Don't enable with Unsafe=false
 -"LiteralMask" Reload strings Mask literally
+-"DisableMask" When true disables the Mask Reloader Feature
 -"LiveSettings" Reload the SRL.ini without restart the game (Some features require restart)
 -"DecodeInputRemap" Restore any char reload in the input string before process
--"MultiDatabase" Create multiple databases to every .lst file, Increase memory usage but speed up the SRL
+-"MultiDatabase" Create multiple databases to every .lst file, Increase memory usage but speed up the SRL, if unsure keep true
 -"NoReload" Disable the SRL
 -"WorkingDir" Set a custom directory as workspace of the SRL, keep empty to use the SRL dll directory
 -"ReloadMaskArgs" If a mask contains a string that needs be translated, keep true
@@ -77,6 +84,7 @@ At StringsReloader
 -"LiteMode" Disable many features of the SRL to speed up
 -"RemoveViolations" If you put a char in the .lst that is being used by the Char Reloader feature, when true, the SRL will cutoff all 'ilegal' chars
 -"AsianInput" Hint the Dialogue Detection algorithm saying if the game is a japanese game or not.
+-"AutoUnks" Automatically create the unknow char reload list based on your reloads.
 -"CaseSensitive" The SRL database match can match with case senstive or not, just change this
 -"NotCachedOnly" Use the pointer cache to don't allow the SRL process again the same string
 -"SetOutEncoding" If the Debug Low Window (aka console) display invalid chars, set true
@@ -92,7 +100,8 @@ At WordWrap
 -"MaxWidth" When Monospaced is true, put the max count of characters per line, when false, the max line width in pixels
 
 At MTL
--Self-Explanatory entries... But to enable the TLib.dll is required in the game directory, contact-me
+-"MassiveMode" When true will use the array translation method of the TLIB instead the single line method.
+-Self-Explanatory entries... But to enable the TLib.dll (A private library) is required in the game directory, contact-me
 
 At Overlay (Required the Overlay.dll in the directory)
 -"Enabled" Enable or Disable the Overlay
@@ -101,7 +110,7 @@ At Overlay (Required the Overlay.dll in the directory)
 At Filter (Dialogue Detection algorithm)
 -"DenyList" List of all characters that never will appear in a dialogue (split with ,)
 -"QuoteList" List of all quotes that appears in the game (split with ,)
--"IgnoreList" List of things to ignore when try detect if is a dialogue
+-"IgnoreList" List of things to ignore when try detect if is a dialogue or match a line, If starts with >> you will append the default list
 -"TrimList" List of characters that can appears in the begin or end of a string that needs be removed before process the dialogue
 -"Sensitivity" The dialogue sensitivity level, (can use negative values), bigger values are more 'permessive' than smaller values (5 is recommended)
 -"UseDB" If the string is present in the database is automatically accepted as dialogue
@@ -136,8 +145,66 @@ At [Hook.Font.?] (You can create any amount of font remap, just put Hook.Font.0,
 
 -How to use the Intro
 R: To the intro hook catch the game initilization it's obvious, the SRL needs initialize before the game,
-N: If the SRL have a delayed initialization try rename the SRLx32.dll to d3d9.dll, and modify the game exe to load the d3d9.dll and not the old SRLx32.dll
+N: If the SRL have a delayed initialization try rename the SRLx32.dll to d3d9.dll or dinput8.dll (recommended), and modify the game exe to load the d3d9.dll and not the old SRLx32.dll
 
 -I have 2 identic lines that but I don't want the same translation to both
 R: Split the .LST in 2 files, the .lst format don't support duplicated lines, then put one of those lines in a new .lst file
-N: If you put ::SETDB-Sample:: in the first of the line translation, the SRL will change to the "Strings-Sample.lst" after match the current string, with this you can translate a duplicate that appears one after other
+N: If you put ::SETDB-Sample:: in the first of the line translation, the SRL will change to the "Strings-Sample.lst"
+after match the current string, with this you can translate a duplicate that appears one after other
+
+-About the .lst format
+The .lst format is a simple plain text format pattern created by me that can be used for any game,
+A .lst file is like a 'match and replace' list to the SRL, for each dialogue of the game, we have
+a pair of the same line, where the first line is the "Match Line" and the secondi s the "Reload Line"
+The Match Line is what the SRL will use to know when he need return the translation (the Reload Line)
+Don't change the match line or can break things.
+
+We have the "Mask Lines" too, the Mask line is any line that use {0}, {1}, {2} and etc...
+You can think in the mask as a wildcard but with a small cool features, for example:
+
+You used {0} coins, you have {1} coins left.
+Shit, I lost {0} coins with this shit.... Now I have only {1} coins...
+
+As allways, the first line is the match line, and the second the reload line.
+This Reload is literally a String.Format, then you can do thing like {0:N5} or {0:D5} to modify the result string.
+
+And of course the .lst accept some tags, all tags is prefixed and sufixed with "::" (Without quote), for example:
+
+::SETDB-??:: (Where ?? is your database name or id (see in the console))
+This tag force the SRL change to another .lst file (aka database) when the SRL reload the target line.
+This tag can be used only in the reload line, don't use in the match line.
+
+::BREAKLINE::
+This tag represent the 0x0A character, in other words the break line.
+This tag can be usen in the match and reload lines.
+
+::RETURNLINE::
+This tag represent the 0x0D character, in other words the carriage return.
+This tag can be used in hte match and reload lines.
+
+::NOWORDWRAP::
+This tag force the SRL don't wordwrap the target line.
+This tag can be used only in the reload line, and in the begin of the line.
+
+::NOMASK::
+This tag tells to the SRL the current line isn't a mask match line, don't forget to enable the LiteralMask to use the line as Reload
+This tag can be used only in the reload line, and in the begin of the line.
+
+::NOPREFIX::
+This tag force the SRL don't append the "ReloadedPrefix" to the target line.
+This tag can be used only in the reload line.
+
+::NOSUFIX::
+Like the ::NOPREFIX::, but don't append the "ReloadedSufix"
+
+::FULLWORDWRAP::
+This tag force the SRL do wordwrap in the sub-strings of all masks reloaded.
+This tag can be used only in the reload line, and in the begin of the line.
+
+::MAXWIDTH[??]:: (Where ?? is your width)
+This tag force the SRL use the especified width to the wordwrap the target line.
+This tag can be used only in the reload line, and in the begin of the line.
+
+::EVENT??:: (Where the ?? is the event id)
+This tag trigger a overlay event of the SRL with the specified ID
+This tag can be used only in the reload line, and in the begin of the line.

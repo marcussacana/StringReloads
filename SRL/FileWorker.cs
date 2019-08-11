@@ -109,6 +109,7 @@ namespace SRL {
             DecodeCharactersFromInput = false;
             InvalidateWindow = false;
             LiteralMaskMatch = false;
+            DisableMasks = false;
             DialogCheck = true;
             FreeOnExit = false;
             CachePointers = false;
@@ -241,6 +242,11 @@ namespace SRL {
             if (Settings.AutoUnks) {
                 Log("Auto Unk Char Reload Enabled...", true);
                 AutoUnks = true;
+            }
+
+            if (Settings.DisableMask) {
+                DisableMasks = true;
+                Log("Masks Reloader Disabled...", true);
             }
 
             if (Settings.WindowHook) {
@@ -418,8 +424,12 @@ namespace SRL {
 
             if (!string.IsNullOrEmpty(FilterSettings.IgnoreList)) {
                 Log("Using Custom Ignore List...", true);
-                MatchDel = new string[0];
-                foreach (string str in FilterSettings.IgnoreList.Split(','))
+                string IgnoreList = FilterSettings.IgnoreList;
+                if (!IgnoreList.StartsWith(">>"))
+                    MatchDel = new string[0];
+                else
+                    IgnoreList = IgnoreList.Substring(2);
+                foreach (string str in IgnoreList.Split(','))
                     if (str.Trim().StartsWith("0x")) {
                         string Del = Encoding.UTF8.GetString(ParseHex(str.Trim()));
                         AppendArray(ref MatchDel, Del, true);
@@ -663,10 +673,10 @@ namespace SRL {
         private static void LoadRanges() {
             Ranges = new List<Range>();
             string RangeList = Ini.GetConfig(CfgName, "AcceptableRanges;AcceptableRange;ValidRange;ValidRanges", IniPath, true);
-            for (int i = 0; i < RangeList.Length - 1;) {
+            for (int i = 0; i < RangeList.Length;) {
                 char c = RangeList[i];
-                char c2 = RangeList[i + 1];
-                if (c2 == '-') {
+                char c2 = i + 1 < RangeList.Length ? RangeList[i + 1] : ' ';
+                if (c2 == '-' && i + 2 < RangeList.Length) {
                     char c3 = RangeList[i + 2];
                     if (c <= c3) {
                         Range Range = new Range() {

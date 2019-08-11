@@ -88,6 +88,7 @@ namespace SRL {
         static bool FreeOnExit = false;
         static bool DialogCheck = true;
         static bool LiteralMaskMatch = false;
+        static bool DisableMasks = false;
         static bool DecodeCharactersFromInput = false;
         static bool WindowHookRunning = false;
         static bool MultipleDatabases = false;

@@ -207,6 +207,9 @@ namespace SRL {
             [FieldParmaters(DefaultValue = false, Name = "LiteralMask;MaskLiteralMatch;MaskMatch")]
             public bool LiteralMaskMatch;
 
+            [FieldParmaters(DefaultValue = false, Name = "DisableMask;NoMask;DisableMasks;NoMasks")]
+            public bool DisableMask;
+
             [FieldParmaters(DefaultValue = false, Name = "MultiDatabase;MultiDB;SplitDatabase;SplitDB")]
             public bool MultiDatabase;
 
