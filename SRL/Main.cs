@@ -97,7 +97,10 @@ namespace SRL {
                         return Target;
 
                     if (LogAll || LogOutput) {
-                        Log("Output: {0}", true, Reloaded);
+                        if (AllowDuplicates)
+                            Log("Output: {0}\r\nDB Current Index: {1}", true, Reloaded);
+                        else
+                            Log("Output: {0}", true, Reloaded);
                     }
 
                 }

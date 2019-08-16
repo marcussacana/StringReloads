@@ -29,7 +29,7 @@ namespace SRL {
 
                         if (L2 != L1 || (IgnoreMask && IsMask(L1))) {
                             if (!string.IsNullOrWhiteSpace(L2) || AllowEmpty) {
-                                if (!In.Contains(L1)) {
+                                if (!In.Contains(L1) || AllowDuplicates) {
                                     In.Add(L1);
                                     Out.Add(L2);
                                 }
@@ -303,6 +303,12 @@ namespace SRL {
                 AllowEmpty = true;
                 Log("Empty Reloader Filter Disabled", true);
             }
+
+            if (!Initialized && Settings.AllowDuplicates) {
+                AllowDuplicates = true;
+                Log("Duplicate Reload Support Enabled", true);
+            } else if (Settings.AllowDuplicates != AllowDuplicates)
+                Warning("Duplicate Reload Support Changed - Restart Required");
 
             if (Settings.SetOutputEncoding) { 
                 Log("Console Output Encoding Changed", false);

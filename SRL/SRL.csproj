@@ -63,6 +63,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Compiler.cs" />
+    <Compile Include="DuplicableDictionary.cs" />
     <Compile Include="DNVM.cs" />
     <Compile Include="FileWorker.cs" />
     <Compile Include="Hook\FileHook.cs" />

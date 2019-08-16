@@ -26,6 +26,31 @@ namespace SRL {
             NArr[Arr.Length] = Val;
             Arr = NArr;
         }
+
+        enum PipeCommands : byte {
+            FindMissed = 0,
+            AddMissed = 1,
+            FindReload = 2,
+            AddReload = 3,
+            GetReload = 4,
+            True = 5,
+            False = 6,
+            AddPtr = 7,
+            GetPtrs = 8,
+            EndPipe = 9,
+            AddMask = 10,
+            ChkMask = 11,
+            RldMask = 12,
+            AdvDB = 13,
+            GetDBID = 14,
+            SetDBID = 15,
+            GetDBIndex = 16
+        }
+
+        struct Range {
+            internal uint Min;
+            internal uint Max;
+        }
         internal struct Quote {
             public char Start;
             public char End;
@@ -279,6 +304,8 @@ namespace SRL {
             [FieldParmaters(DefaultValue = false, Name = "AllowEmptyReloads;AllowEmptyReload;AllowEmpty;DisableEmptyFilter")]
             public bool AllowEmptyReloads;
 
+            [FieldParmaters(DefaultValue = false, Name = "AllowDuplicates;AllowDuplicate;AllowDuplicateReloads;AcceptDuplicates;AcceptDuplicate")]
+            public bool AllowDuplicates;
         }
 
         [FieldParmaters(Name = "WordWrap")]

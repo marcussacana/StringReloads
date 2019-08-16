@@ -86,9 +86,30 @@ At StringsReloader
 -"AsianInput" Hint the Dialogue Detection algorithm saying if the game is a japanese game or not.
 -"AutoUnks" Automatically create the unknow char reload list based on your reloads.
 -"CaseSensitive" The SRL database match can match with case senstive or not, just change this
--"NotCachedOnly" Use the pointer cache to don't allow the SRL process again the same string
+-"NotCachedOnly" Use the pointer cache to don't allow the SRL process again the same string, usefull when the SRL injection point is inside a for each char loop of the string
 -"SetOutEncoding" If the Debug Low Window (aka console) display invalid chars, set true
 -"AllowEmptyReloads" Keep in the database Reloads that don't change nothing
+-"AllowDuplicates" Allow a single database contains more than one reload for the same match line
+
+About the AllowDuplicates
+Well, After basically 2 years devlopling the SRL, I added support to the SRL can match
+different text for a same line, This feature is disabled by default because the old method
+to match the string is 15x faster than the new method, in others words enabling this feature
+make the SRL match the game text more slow, and of couse, will increase the cpu usage too.
+Wow shit! 15x?! Yes, but you don't need worry much since the SRL is very, but very fast
+to match a string, in a small database in the old method he can match like 500000 times 
+the reloads using only 0.01 ms, and when using the new method he will use 0.18 ms.
+Then it's really more slow but isn't something that you will notice when use...
+Oh Good! But if we have more gains than lost with this new method, why is disable by default?
+Well, Well... Basically the SRL already can match a duplicate line in the old method,
+You just need split the database in parts and the SRL will give priority to the last database
+that he found a translation, and you can need use the ::SETDB-??:: sometimes too, like when
+the duplicate is just after the last, But Enabling this new feature you don't need 
+split the database in many .lst's to match a duplicate, and don't need use the ::SETDB-??::,
+The SRL will give priority to the closest line of the lastest matched line in the same database,
+Keep in mind, when the SRL change to other database he don't reset the 'last match' position
+of the related database, then if the game return to a .lst that has already matched something
+can give unexpected results, then keep sure to test everything before you relase your patch.
 
 At WordWrap
 -"Enable" Disable or Enable the SRL Auto Wordwrap engine

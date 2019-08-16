@@ -296,13 +296,13 @@ namespace SRL {
                     Log("Chars Reloads Initialized, Total entries: {0} + {1}", true, UnkRld.Count, CharRld.Count);
                     Log("Processing String Reloads...", true);
                     List<string> Temp = new List<string>();
-                    StrRld = new Dictionary<string, string>();
+                    StrRld = CreateDictionary();
                     long ReloadEntries = 0, MaskEntries = 0;
                     foreach (SRLDatabase2 Database in Data.Databases) {
                         for (uint i = 0; i < Database.Original.LongLength; i++) {
                             Application.DoEvents();
                             string str = SimplfyMatch(Database.Original[i]);
-                            if (!ContainsKey(str, true)) {
+                            if (AllowDuplicates || !ContainsKey(str, true)) {
                                 if (IsMask(Database.Original[i])) {
                                     if (LiteralMaskMatch) {
                                         AddEntry(str, ReplaceChars(Database.Replace[i]));

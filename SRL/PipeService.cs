@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
@@ -8,6 +9,11 @@ using System.Windows.Forms;
 namespace SRL {
     static partial class StringReloader {        
         public static int ServiceCall(string ID) {
+            if (ID.Contains(ServiceDuplicateFlag)) {
+                ID = ID.Split('|').First();
+                AllowDuplicates = true;
+            }
+                
             string SName = string.Format(ServiceMask, ID);
 
             if (Debugging)
@@ -18,9 +24,9 @@ namespace SRL {
         }
 
         private static void Service(string ServiceName) {
-            StrRld = new System.Collections.Generic.Dictionary<string, string>();
-            MskRld = new System.Collections.Generic.Dictionary<string, string>();
-            Missed = new System.Collections.Generic.List<string>();
+            StrRld = CreateDictionary();
+            MskRld = CreateDictionary();
+            Missed = new List<string>();
 
             NamedPipeServerStream Server = new NamedPipeServerStream(ServiceName, PipeDirection.InOut, 2, PipeTransmissionMode.Byte);
             Server.WaitForConnection();
@@ -37,7 +43,7 @@ namespace SRL {
                         OK = true;
                         string Original = Reader.ReadString();
                         string Reloader = Reader.ReadString();
-                        if (!StrRld.ContainsKey(Original))
+                        if (!StrRld.ContainsKey(Original) || AllowDuplicates)
                             StrRld.Add(Original, Reloader);
                         Log("Command Finished, In: {0}, Out: {1}", true, 2, 0);
                         break;
@@ -123,7 +129,7 @@ namespace SRL {
                         OK = true;
                         string Input = Reader.ReadString();
                         string Reload = Reader.ReadString();
-                        if (!MskRld.ContainsKey(Input))
+                        if (!MskRld.ContainsKey(Input) || AllowDuplicates)
                             MskRld.Add(Input, Reload);
                         Log("Command Finished, In {0}, Out: {1}", true, 2, 0);
                         break;
@@ -161,6 +167,11 @@ namespace SRL {
                     case PipeCommands.SetDBID:
                         DBID = Reader.ReadInt32();
                         Log("Command Finished, In: {0}, Out: {1}", true, 2, 0);
+                        break;
+                    case PipeCommands.GetDBIndex:
+                        Writer.Write(((DuplicableDictionary<string, string>)StrRld).LastKeyIndex);
+                        Writer.Flush();
+                        Log("Command Finished, In: {0}, Out: {1}", true, 1, 1);
                         break;
                     default:
                         if (!OK)
@@ -284,7 +295,7 @@ namespace SRL {
         }
 
 
-        private static string ProcesMask(string Original) {
+        private static string ProcessMask(string Original) {
             if (Multithread) {
                 string Mask = (from x in MskRld.Keys where MaskMatch(x, Original) select x).FirstOrDefault();
                 return MaskReplace(Mask, Original, MskRld[Mask]);
@@ -387,6 +398,19 @@ namespace SRL {
             PipeWriter.Write(ID);
             PipeWriter.Flush();
         }
+
+        private static int GetCurrentDBIndex() {
+            if (!AllowDuplicates)
+                return -1;
+
+            if (Multithread) {
+                return ((DuplicableDictionary<string, string>)StrRld).LastKeyIndex;
+            }
+
+            PipeWriter.Write((byte)PipeCommands.GetDBIndex);
+            PipeWriter.Flush();
+            return PipeReader.ReadInt32();
+        }
         private static int GetPipeID() {
             return new Random().Next(0, int.MaxValue);
         }
@@ -394,9 +418,9 @@ namespace SRL {
         private static void StartPipe() {
             if (Multithread) {
                 Log("Pipe Service Disabled.", true);
-                StrRld = new System.Collections.Generic.Dictionary<string, string>();
-                MskRld = new System.Collections.Generic.Dictionary<string, string>();
-                Missed = new System.Collections.Generic.List<string>();
+                StrRld = CreateDictionary();
+                MskRld = CreateDictionary();
+                Missed = new List<string>();
                 return;
             }
 
@@ -405,6 +429,9 @@ namespace SRL {
 
                 int ServiceID = GetPipeID();
                 string Service = string.Format(ServiceMask, ServiceID);
+
+                if (AllowDuplicates)
+                    Service += ServiceDuplicateFlag;
 
 #if DEBUG
                 new System.Threading.Thread(() => ServiceCall(ServiceID.ToString())).Start();

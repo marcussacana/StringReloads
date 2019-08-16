@@ -19,38 +19,15 @@ namespace SRL {
 
         const string CfgName = "StringReloader";
         const string ServiceMask = "StringReloaderPipeID-{0}";
+        const string ServiceDuplicateFlag = "|Duplicate";
 
         const int CacheLength = 200;
-
-        enum PipeCommands : byte {
-            FindMissed = 0,
-            AddMissed = 1,
-            FindReload = 2,
-            AddReload = 3,
-            GetReload = 4,
-            True = 5,
-            False = 6,
-            AddPtr = 7,
-            GetPtrs = 8,
-            EndPipe = 9,
-            AddMask = 10,
-            ChkMask = 11,
-            RldMask = 12,
-            AdvDB = 13,
-            GetDBID = 14,
-            SetDBID = 15
-        }
-
-        struct Range {
-            internal uint Min;
-            internal uint Max;
-        }
 
         static int GamePID = System.Diagnostics.Process.GetCurrentProcess().Id;
 
         static Dictionary<ushort, char> CharRld;
         static Dictionary<ushort, char> UnkRld;
-        static Dictionary<string, string> MskRld = null;
+        static IDictionary<string, string> MskRld = null;
         static Dictionary<long, string> DBNames = null;
         static Dictionary<string, FontRedirect> FontReplaces = new Dictionary<string, FontRedirect>();
 
@@ -103,6 +80,7 @@ namespace SRL {
         static bool CaseSensitive = false;
         static bool NotCachedOnly = false;
         static bool AllowEmpty = false;
+        static bool AllowDuplicates = false;
 
         static bool OverlayEnabled = false;
         static bool OverlayInitialized = false;
@@ -207,14 +185,14 @@ namespace SRL {
 
         static int LastDBID = 0;
         static int DBID = 0;
-        static List<Dictionary<string, string>> Databases = null;
-        static Dictionary<string, string> StrRld {
+        static List<IDictionary<string, string>> Databases = null;
+        static IDictionary<string, string> StrRld {
             get {
                 if (Databases == null)
-                    Databases = new List<Dictionary<string, string>>() { null };
+                    Databases = new List<IDictionary<string, string>>() { null };
 
                 if (DBID >= Databases.Count)
-                    Databases.Add(new Dictionary<string, string>());
+                    Databases.Add(CreateDictionary());
 
                 if (DBID >= Databases.Count)
                     throw new Exception("GET - Invalid Database ID");
@@ -223,10 +201,10 @@ namespace SRL {
             }
             set {
                 if (Databases == null)
-                    Databases = new List<Dictionary<string, string>>() { null };
+                    Databases = new List<IDictionary<string, string>>() { null };
 
                 if (DBID >= Databases.Count)
-                    Databases.Add(new Dictionary<string, string>());
+                    Databases.Add(CreateDictionary());
 
                 if (DBID >= Databases.Count)
                     throw new Exception("SET - Invalid Database ID");

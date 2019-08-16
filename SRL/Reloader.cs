@@ -99,7 +99,7 @@ namespace SRL {
 
             if ((LogAll || LogInput) && (!DumpStrOnly || IsDialog)) {
                 if (!DumpStrOnly || !InCache("LOG: " + Str)) {
-                    Log("[{1}] Input: {0}", true, Input, IsDialog ? "D" : "S");
+                    Log("[{1}|{2}] Input: {0}", true, Input, IsDialog ? "D" : "S", GetCurrentDBIndex());
                     if (DumpStrOnly)
                         CacheReply("LOG: " + Str);
                 }
@@ -141,7 +141,7 @@ namespace SRL {
             if (!DisableMasks && ValidateMask(Input)) {
                 try {
 
-                    string Result = ProcesMask(Input);
+                    string Result = ProcessMask(Input);
 
                     if (Result.StartsWith(MaskWordWrap)) {
                         Result = Result.Substring(MaskWordWrap.Length, Result.Length - MaskWordWrap.Length);
@@ -343,7 +343,7 @@ namespace SRL {
                     else
                     {
                         NoDatabase = true;
-                        StrRld = new Dictionary<string, string>();
+                        StrRld = CreateDictionary();
                         Warning("Can't Compile Strings because the SRL don't found any LST.");
                     }
                 }
@@ -375,7 +375,7 @@ namespace SRL {
 
                     for (int i = 0; i < Ori.Count; i++) {
                         string Match = SimplfyMatch(Ori[i]);
-                        if (!ContainsKey(Match))
+                        if (AllowDuplicates || !ContainsKey(Match))
                             AddEntry(Match, ReplaceChars(TL[i]));
                     }
                 }
@@ -514,6 +514,11 @@ namespace SRL {
                 System.Diagnostics.Process.GetCurrentProcess().Kill();
             }
         }
-                
+        
+        private static IDictionary<string, string> CreateDictionary() {
+            return AllowDuplicates ? 
+                (IDictionary<string, string>) new DuplicableDictionary<string, string>() :
+                (IDictionary<string, string>) new Dictionary<string, string>();
+        }
     }
 }

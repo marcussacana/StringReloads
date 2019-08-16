@@ -1,6 +1,8 @@
 ﻿//#define DEBUG
 using SacanaWrapper;
+using SRL;
 using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 
 namespace SRLTracer {
