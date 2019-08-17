@@ -81,6 +81,9 @@ namespace SRL {
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool EnumChildWindows(IntPtr hwndParent, CallBack lpEnumFunc, IntPtr lParam);
 
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool SetForegroundWindow(IntPtr hWnd);
+
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         static extern IntPtr SendMessage(HandleRef hWnd, uint Msg, IntPtr wParam, string lParam);
 
@@ -315,6 +318,7 @@ namespace SRL {
         public const uint MIIM_SUBMENU = 0x00000004;
         public const int SW_HIDE = 0;
         public const int SW_SHOW = 5;
+        public const int SW_RESTORE = 9; 
         public const int RDW_INVALIDATE = 0x0001;
         public const int RDW_ERASE = 0x0004;
         public const int RDW_UPDATENOW = 0x0100;

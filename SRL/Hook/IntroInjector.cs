@@ -123,10 +123,6 @@ namespace SRL {
                 return;
 
             IntroInitialized = true;
-
-            if (!IsWindowVisible(hWnd))
-                ShowWindow(hWnd, SW_SHOW);
-
             try {
 
                 var WindowSize = GetWindowSize(hWnd);
@@ -139,6 +135,13 @@ namespace SRL {
                     IntroInitialized = false;
                     return;
                 }
+
+                if (!IsWindowVisible(hWnd))
+                    ShowWindow(hWnd, SW_SHOW);
+
+                ShowWindow(hWnd, SW_RESTORE);
+                SetForegroundWindow(hWnd);
+
 
                 IntroHelper[] Intros = (from x in Introduction select LoadIntro(x, WindowSize)).ToArray();
 
