@@ -2,8 +2,10 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace SRL {
-    public partial class StringReloader {
+namespace SRL
+{
+    public partial class StringReloader
+    {
 
 
         [DllExport]
@@ -12,18 +14,24 @@ namespace SRL {
         [DllExport(CallingConvention = CallingConvention.StdCall)]
         public static IntPtr ProcessStd(IntPtr Target) => ProcessReal(Target);
 
-        internal static IntPtr ProcessReal(IntPtr Target) {
-            again:;
+        internal static IntPtr ProcessReal(IntPtr Target)
+        {
+        again:;
             int Tries = 0;
-            try {
+            try
+            {
                 DateTime? Begin = DelayTest ? DateTime.Now : (DateTime?)null;
                 dynamic Ptr = ParsePtr(Target);
 
-                if (StrRld == null) {
-                    try {
+                if (StrRld == null)
+                {
+                    try
+                    {
                         Init();
                         Log("Initiallized", true);
-                    } catch (Exception ex) {
+                    }
+                    catch (Exception ex)
+                    {
                         PreserveStackTrace(ex);
                         throw ex;
                     }
@@ -41,19 +49,24 @@ namespace SRL {
 
 #endif                
 
-                if (!LiteMode) {
-                    if (Ptr <= char.MaxValue) {
+                if (!LiteMode)
+                {
+                    if (Ptr <= char.MaxValue)
+                    {
                         return ProcessChar(Target);
                     }
 
-                    if (CachePointers) {
+                    if (CachePointers)
+                    {
                         if (PtrCacheIn.Contains(Target))
                             return PtrCacheOut[PtrCacheIn.IndexOf(Target)];
                     }
                 }
 
-                if (IsBadCodePtr(Target) && Ptr >= char.MaxValue) {
-                    if (LogAll) {
+                if (IsBadCodePtr(Target) && Ptr >= char.MaxValue)
+                {
+                    if (LogAll)
+                    {
                         Log("BAD PTR: {0}", true, Ptr);
                     }
                     return Target;
@@ -68,22 +81,29 @@ namespace SRL {
 
                 LastInput = Input;
 
-                if (Input != Reloaded) {
+                if (Input != Reloaded)
+                {
                     Reloaded = PostReload(Reloaded);
                 }
 
                 //Prevent inject a string already injected
-                if (Input == Reloaded) {
+                if (Input == Reloaded)
+                {
                     return Target;
                 }
 
                 DialogFound = true;
 
-                if (!LiteMode) {
-                    if (StringModifier != null) {
-                        try {
+                if (!LiteMode)
+                {
+                    if (StringModifier != null)
+                    {
+                        try
+                        {
                             Reloaded = StringModifier.Call("Modifier", "ResultHook", Reloaded);
-                        } catch {
+                        }
+                        catch
+                        {
                             Log("Result Hook Error...", true);
                         }
                     }
@@ -96,7 +116,8 @@ namespace SRL {
                     if (NoReload)
                         return Target;
 
-                    if (LogAll || LogOutput) {
+                    if (LogAll || LogOutput)
+                    {
                         if (AllowDuplicates)
                             Log("Output: {0}\r\nDB Current Index: {1}", true, Reloaded);
                         else
@@ -106,7 +127,8 @@ namespace SRL {
                 }
                 IntPtr Output = GenString(Reloaded);
 
-                if (!LiteMode) {
+                if (!LiteMode)
+                {
                     AddPtr(Output);
                     AddPtr(Target);
 
@@ -118,7 +140,9 @@ namespace SRL {
                 }
 
                 return Output;
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 Error("Ops, a Bug...\n{0}\n======================\n{1}\n============================\n{2}\n============================\n{3}", ex.Message, ex.StackTrace, ex.Data, ex.Source);
 
                 if (Tries++ < 3)
@@ -130,7 +154,8 @@ namespace SRL {
 
 
         [DllExport(CallingConvention = CallingConvention.StdCall)]
-        public static IntPtr Service(IntPtr hWnd, IntPtr hInst, IntPtr hCmdLine, int nCmdShow) {
+        public static IntPtr Service(IntPtr hWnd, IntPtr hInst, IntPtr hCmdLine, int nCmdShow)
+        {
             hConsole = hCmdLine;
             string Parameter = GetStringA(hCmdLine);
             ServiceCall(Parameter);
@@ -142,11 +167,14 @@ namespace SRL {
         private static ProcDelegate DirectProc = new ProcDelegate(ProcessReal);
 
         [DllExport]
-        public static IntPtr GetDirectProcess() {
-            try {
-                DirectRequested = true;             
+        public static IntPtr GetDirectProcess()
+        {
+            try
+            {
+                DirectRequested = true;
                 return Marshal.GetFunctionPointerForDelegate(DirectProc);
-            } catch { return IntPtr.Zero; }
+            }
+            catch { return IntPtr.Zero; }
         }
 
         public static string ProcessManaged(string Text)
@@ -173,17 +201,21 @@ namespace SRL {
             Marshal.FreeHGlobal(New);
             return Text;
         }
-        public static char ProcessManaged(char Char) {
+        public static char ProcessManaged(char Char)
+        {
             Managed = true;
             IntPtr Result = ProcessReal(new IntPtr(Char));
             return (char)(Result.ToInt32() & 0xFFFF);
         }
 
         //EntryPoint to the RemoteLoader
-        public static int EntryPoint(string Argument) {
-            try {
+        public static int EntryPoint(string Argument)
+        {
+            try
+            {
                 ProcessReal(IntPtr.Zero);
-            } catch (Exception ex){ Log("Error: {0}", false, ex.ToString()); }
+            }
+            catch (Exception ex) { Log("Error: {0}", false, ex.ToString()); }
             return 0;
         }
     }

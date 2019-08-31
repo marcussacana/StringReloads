@@ -41,6 +41,13 @@ R: SRLx32.dll is corrupted, maybe...
 R: Maybe you need modify the CreateFont function, break the CreateFont Calls and see the right place to change the font encoding
 N: Try enalbed the CreateFont Hook and set the Charset to 0x00 in the SRL.ini
 
+-What in the hell is the "AutoEngineHook" feature?
+R: Now the SRL can be installed with the string reload feature working just by placing the SRL dll in the directory, 
+don't support any engine but maybe in the future I add support to more games.
+N: To use this feature you can just rename the SRLx32.dll to d3d9.dll, dinput8.dll, or any other supported wrapper,
+then when the game bootup the SRL will automatically install him-self in the game, If the game crash when you use
+the SRL as wrapper, try enable the "LoadLibraryFix"
+
 -About the SRL.ini
 I will explain only what looks needed, run the game with "-help" to se the others value...
 At StringsReloader
@@ -95,7 +102,7 @@ About the AllowDuplicates
 Well, After basically 2 years devlopling the SRL, I added support to the SRL can match
 different text for a same line, This feature is disabled by default because the old method
 to match the string is 15x faster than the new method, in others words enabling this feature
-make the SRL match the game text more slow, and of couse, will increase the cpu usage too.
+make the SRL match the game text more slow, and of course, will increase the cpu usage too.
 Wow shit! 15x?! Yes, but you don't need worry much since the SRL is very, but very fast
 to match a string, in a small database in the old method he can match like 500000 times 
 the reloads using only 0.01 ms, and when using the new method he will use 0.18 ms.
@@ -147,6 +154,8 @@ At Intro
 -"MoveWindow" Hook the MoveWindow to show the Intro
 
 At Hook
+-"AutoEngineHook" Try Detect the game engine and Auto-Install the SRL Engine in the game (Supported Engines: SoftPal)
+-"LoadLibraryFix" Hook the LoadLibrary to redirect the wrapper dll to the retail dll (Use if the game crash when using the SRL as wrapper)
 -"CreateFile" Hook the game file reading and allow he read files from the SRL worspace or a directory called "Patch"
 -"UndoChars" Undo the char reload in the MultiByteToWideChar, TextOut and ExtTextOut hooks
 -"MultibyteToWideChar" Hook the MultibyteToWideChar and reload the string

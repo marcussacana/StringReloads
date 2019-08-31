@@ -6,24 +6,29 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace SRL {
-    static partial class StringReloader {        
-        public static int ServiceCall(string ID) {
-            if (ID.Contains(ServiceDuplicateFlag)) {
+namespace SRL
+{
+    static partial class StringReloader
+    {
+        public static int ServiceCall(string ID)
+        {
+            if (ID.Contains(ServiceDuplicateFlag))
+            {
                 ID = ID.Split('|').First();
                 AllowDuplicates = true;
             }
-                
+
             string SName = string.Format(ServiceMask, ID);
 
             if (Debugging)
                 Log("Debug Mode Enabled.");
 
-            Task.Factory.StartNew(() => Service(SName)).Wait();           
+            Task.Factory.StartNew(() => Service(SName)).Wait();
             return 0;
         }
 
-        private static void Service(string ServiceName) {
+        private static void Service(string ServiceName)
+        {
             StrRld = CreateDictionary();
             MskRld = CreateDictionary();
             Missed = new List<string>();
@@ -35,10 +40,12 @@ namespace SRL {
             BinaryWriter Writer = new BinaryWriter(Server);
 
             bool OK = true;
-            while (Server.IsConnected) {
+            while (Server.IsConnected)
+            {
                 PipeCommands Command = (PipeCommands)Reader.ReadByte();
                 Log("Command Recived: {0}", true, Command.ToString());
-                switch (Command) {
+                switch (Command)
+                {
                     case PipeCommands.AddReload:
                         OK = true;
                         string Original = Reader.ReadString();
@@ -67,19 +74,24 @@ namespace SRL {
                     case PipeCommands.GetReload:
                         OK = true;
                         string RLD = Reader.ReadString();
-                        try {
+                        try
+                        {
                             string Rst = null;
                             if (StrRld.ContainsKey(RLD))
                                 Rst = StrRld[RLD];
                             else
-                                for (DBID = 0; DBID < Databases.Count; DBID++) {
-                                    if (StrRld.ContainsKey(RLD)) {
+                                for (DBID = 0; DBID < Databases.Count; DBID++)
+                                {
+                                    if (StrRld.ContainsKey(RLD))
+                                    {
                                         Rst = StrRld[RLD];
                                         break;
                                     }
                                 }
                             Writer.Write(Rst);
-                        } catch (Exception ex) {
+                        }
+                        catch (Exception ex)
+                        {
                             Writer.Write(RLD);
                             Log("Exception Handled\n=================\n{0}\n{1}", true, ex.Message, ex.StackTrace);
                         }
@@ -88,9 +100,11 @@ namespace SRL {
                         break;
                     case PipeCommands.AddMissed:
                         OK = true;
-                        try {
+                        try
+                        {
                             Missed.Add(Reader.ReadString());
-                        } catch { }
+                        }
+                        catch { }
                         Log("Command Finished, In: {0}, Out: {1}", true, 1, 1);
                         break;
                     case PipeCommands.FindMissed:
@@ -104,16 +118,19 @@ namespace SRL {
                         break;
                     case PipeCommands.AddPtr:
                         OK = true;
-                        try {
+                        try
+                        {
                             Ptrs.Add(Reader.ReadInt64());
-                        } catch { }
+                        }
+                        catch { }
                         Log("Command Finished, In: {0}, Out: {1}", true, 1, 0);
                         break;
                     case PipeCommands.GetPtrs:
                         OK = true;
                         uint Replys = 1;
                         Writer.Write(Ptrs.Count);
-                        foreach (long Ptr in Ptrs) {
+                        foreach (long Ptr in Ptrs)
+                        {
                             Writer.Write(Ptr);
                             Replys++;
                         }
@@ -135,7 +152,7 @@ namespace SRL {
                         break;
                     case PipeCommands.ChkMask:
                         string String = Reader.ReadString();
-                        
+
                         string[] Result = (from x in MskRld.Keys where MaskMatch(x, String) select x).ToArray();
 
                         Writer.Write((byte)((Result.Length > 0) ? PipeCommands.True : PipeCommands.False));
@@ -184,16 +201,19 @@ namespace SRL {
             Reader.Close();
             Writer.Close();
         }
-        private static void EndPipe() {
+        private static void EndPipe()
+        {
             if (Multithread)
                 return;
 
             PipeWriter.Write((byte)PipeCommands.EndPipe);
             PipeWriter.Flush();
         }
-        private static void AddPtr(IntPtr Ptr) {
+        private static void AddPtr(IntPtr Ptr)
+        {
             long Pointer = Ptr.ToInt64();
-            if (Multithread) {
+            if (Multithread)
+            {
                 if (!Ptrs.Contains(Pointer))
                     Ptrs.Add(Pointer);
                 return;
@@ -204,11 +224,14 @@ namespace SRL {
             PipeWriter.Flush();
         }
 
-        private static IntPtr[] GetPtrs() {            
-            if (Multithread) {
+        private static IntPtr[] GetPtrs()
+        {
+            if (Multithread)
+            {
                 long[] Arr = Ptrs.ToArray();
                 IntPtr[] Rst = new IntPtr[Arr.LongLength];
-                for (long i = 0; i < Rst.LongLength; i++) {
+                for (long i = 0; i < Rst.LongLength; i++)
+                {
                     Rst[i] = new IntPtr(Arr[i]);
                 }
                 return Rst;
@@ -220,15 +243,18 @@ namespace SRL {
             long Count = PipeReader.ReadInt64();
             IntPtr[] RstPtrs = new IntPtr[Count];
 
-            for (long i = 0; i < Count; i++) {
+            for (long i = 0; i < Count; i++)
+            {
                 RstPtrs[i] = new IntPtr(PipeReader.ReadInt64());
             }
 
             return RstPtrs;
         }
 
-        private static void AddMissed(string Line) {
-            if (Multithread) {
+        private static void AddMissed(string Line)
+        {
+            if (Multithread)
+            {
                 if (!Missed.Contains(Line))
                     Missed.Add(Line);
                 return;
@@ -239,8 +265,10 @@ namespace SRL {
             PipeWriter.Flush();
         }
 
-        private static bool ContainsMissed(string Line) {
-            if (Multithread) {
+        private static bool ContainsMissed(string Line)
+        {
+            if (Multithread)
+            {
                 return Missed.Contains(Line);
             }
 
@@ -249,8 +277,10 @@ namespace SRL {
             PipeWriter.Flush();
             return PipeReader.ReadByte() == (byte)PipeCommands.True;
         }
-        private static bool ContainsKey(string Line, bool EnforceAtualDatabase = false) {
-            if (Multithread) {
+        private static bool ContainsKey(string Line, bool EnforceAtualDatabase = false)
+        {
+            if (Multithread)
+            {
                 if (StrRld.ContainsKey(Line))
                     return true;
 
@@ -267,8 +297,10 @@ namespace SRL {
             return PipeReader.ReadByte() == (byte)PipeCommands.True;
         }
 
-        private static void AddMask(string ReadMask, string WriteMask) {
-            if (Multithread) {
+        private static void AddMask(string ReadMask, string WriteMask)
+        {
+            if (Multithread)
+            {
                 MskRld.Add(ReadMask, WriteMask);
                 return;
             }
@@ -279,8 +311,10 @@ namespace SRL {
             PipeWriter.Flush();
         }
 
-        private static bool ValidateMask(string String) {
-            if (Multithread) {
+        private static bool ValidateMask(string String)
+        {
+            if (Multithread)
+            {
                 string[] Result = (from x in MskRld.Keys where MaskMatch(x, String) select x).ToArray();
                 if (Result.Length > 0)
                     return true;
@@ -295,8 +329,10 @@ namespace SRL {
         }
 
 
-        private static string ProcessMask(string Original) {
-            if (Multithread) {
+        private static string ProcessMask(string Original)
+        {
+            if (Multithread)
+            {
                 string Mask = (from x in MskRld.Keys where MaskMatch(x, Original) select x).FirstOrDefault();
                 return MaskReplace(Mask, Original, MskRld[Mask]);
             }
@@ -308,8 +344,10 @@ namespace SRL {
             return PipeReader.ReadString();
         }
 
-        private static void AddEntry(string Key, string Value) {
-            if (Multithread) {
+        private static void AddEntry(string Key, string Value)
+        {
+            if (Multithread)
+            {
                 StrRld.Add(Key, Value);
                 return;
             }
@@ -319,9 +357,11 @@ namespace SRL {
             PipeWriter.Write(Value);
             PipeWriter.Flush();
         }
-        
-        private static void FinishDatabase() {
-            if (Multithread) {
+
+        private static void FinishDatabase()
+        {
+            if (Multithread)
+            {
                 if (DBID >= Databases.Count)
                     return;
 
@@ -334,14 +374,18 @@ namespace SRL {
             PipeWriter.Flush();
         }
 
-        private static string GetEntry(string Key) {
-            if (Multithread) {
+        private static string GetEntry(string Key)
+        {
+            if (Multithread)
+            {
                 if (StrRld.ContainsKey(Key))
                     return StrRld[Key];
 
                 string Result = string.Empty;
-                for (DBID = 0; DBID < Databases.Count; DBID++) {
-                    if (StrRld.ContainsKey(Key)) {
+                for (DBID = 0; DBID < Databases.Count; DBID++)
+                {
+                    if (StrRld.ContainsKey(Key))
+                    {
                         Result = StrRld[Key];
                         break;
                     }
@@ -355,7 +399,8 @@ namespace SRL {
 
             int OID = 0;
 
-            if (Debugging) {
+            if (Debugging)
+            {
                 OID = GetDBID();
             }
 
@@ -364,9 +409,11 @@ namespace SRL {
             PipeWriter.Flush();
             string Return = PipeReader.ReadString();
 
-            if (Debugging) {
+            if (Debugging)
+            {
                 int NID = GetDBID();
-                if (OID != NID) {
+                if (OID != NID)
+                {
                     Log("Database Changed to {0}, ID: {1}", true, GetDBNameById(NID), NID);
                 }
             }
@@ -399,11 +446,13 @@ namespace SRL {
             PipeWriter.Flush();
         }
 
-        private static int GetCurrentDBIndex() {
+        private static int GetCurrentDBIndex()
+        {
             if (!AllowDuplicates)
                 return -1;
 
-            if (Multithread) {
+            if (Multithread)
+            {
                 return ((DuplicableDictionary<string, string>)StrRld).LastKeyIndex;
             }
 
@@ -411,12 +460,15 @@ namespace SRL {
             PipeWriter.Flush();
             return PipeReader.ReadInt32();
         }
-        private static int GetPipeID() {
+        private static int GetPipeID()
+        {
             return new Random().Next(0, int.MaxValue);
         }
 
-        private static void StartPipe() {
-            if (Multithread) {
+        private static void StartPipe()
+        {
+            if (Multithread)
+            {
                 Log("Pipe Service Disabled.", true);
                 StrRld = CreateDictionary();
                 MskRld = CreateDictionary();
@@ -424,7 +476,8 @@ namespace SRL {
                 return;
             }
 
-            if (PipeClient == null) {
+            if (PipeClient == null)
+            {
                 Log("Starting Pipe Service...", true);
 
                 int ServiceID = GetPipeID();
@@ -437,9 +490,11 @@ namespace SRL {
                 new System.Threading.Thread(() => ServiceCall(ServiceID.ToString())).Start();
 #else
                 string Args = string.Format("{0},{1} {2}", Path.GetFileName(SrlDll), "Service", ServiceID);
-            
-                var Proc = new System.Diagnostics.Process() {
-                    StartInfo = new System.Diagnostics.ProcessStartInfo() {
+
+                var Proc = new System.Diagnostics.Process()
+                {
+                    StartInfo = new System.Diagnostics.ProcessStartInfo()
+                    {
                         UseShellExecute = false,
                         FileName = "rundll32",
                         Arguments = Args,
@@ -448,11 +503,15 @@ namespace SRL {
                 };
                 Proc.Start();
 #endif
-                while (PipeClient == null) {
-                    try {
+                while (PipeClient == null)
+                {
+                    try
+                    {
                         PipeClient = new NamedPipeClientStream(Service);
                         PipeClient.Connect();
-                    } catch (Exception ex){
+                    }
+                    catch (Exception ex)
+                    {
                         PipeClient = null;
                         Log("Pipe Exception: {0}", true, ex.Message);
                     }

@@ -1,4 +1,4 @@
-# StringsReloads v4.0
+# StringsReloads v5.0
 [![Build Status](https://ci.appveyor.com/api/projects/status/github/marcussacana/StringReloads?branch=master&retina=true)](https://ci.appveyor.com/project/marcussacana/StringReloads)
 
 
@@ -84,6 +84,11 @@ After some problems with games that reload string inside a loop I created the Ge
 You don't give pass nothing to this method, just call and catch the EAX, the EAX is a pointer to the Process function, using this pointer will be more fast to call the function, Keep in mind, the pointer given by the GetDirectProcess, is a STDCall function, so, you don't need pop the pointer given to the Process before
 
 ---
+
+### Auto-Install Feature:
+The SRL have a feature to automatically install the SRL in the game engine without you need know how to patch the game, just rename the SRLx32.dll to d3d9.dll; dinput8.dll or any other supported wrapper [See Here what is supported](https://github.com/marcussacana/StringReloads/tree/master/SRL/Wrapper), then in the SRL.ini set the AutoEngineHook to true  
+*Currently only the SoftPal engine is supported by this feature.*
+
 
 ### Build Dependencies:
 *	[vsSoluctionBuildEvents](https://github.com/3F/vsSolutionBuildEvent)

@@ -63,8 +63,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Compiler.cs" />
+    <Compile Include="Config.cs" />
     <Compile Include="DuplicableDictionary.cs" />
     <Compile Include="DNVM.cs" />
+    <Compile Include="Engine\SoftPal.cs" />
+    <Compile Include="Engine\Wrapper.cs" />
     <Compile Include="FileWorker.cs" />
     <Compile Include="Hook\FileHook.cs" />
     <Compile Include="Hook\TextHook.cs" />
@@ -86,6 +89,7 @@
     <Compile Include="Wrapper\dinput8.cs" />
     <Compile Include="Wrapper\kirikiri.cs" />
     <Compile Include="Wrapper\Util.cs" />
+    <Compile Include="Wrapper\vorbisfile.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="SRL.ini">

@@ -16,35 +16,31 @@ namespace SRL.Wrapper
             if (RealHandler != IntPtr.Zero)
                 return;
 
-            try
-            {
-                StringReloader.ProcessReal(IntPtr.Zero);
-            }
-            catch { }
-
             RealHandler = LoadLibrary("d3d9.dll");
 
-            if (RealHandler == IntPtr.Zero)            
+            if (RealHandler == IntPtr.Zero)
                 Environment.Exit(0x505);//ERROR_DELAY_LOAD_FAILED            
 
 
-            Create =   GetDelegate<RET_1>(RealHandler, "Direct3DCreate9",   false);
+            Create = GetDelegate<RET_1>(RealHandler, "Direct3DCreate9", false);
             CreateEx = GetDelegate<RET_2>(RealHandler, "Direct3DCreate9Ex", false);
 
 
-            BeginEvent =                      GetDelegate<RET_2>(RealHandler,  "D3DPERF_BeginEvent");
-            EndEvent =                        GetDelegate<RET_0>(RealHandler,  "D3DPERF_EndEvent");
-            SetMarker =                       GetDelegate<NULL_2>(RealHandler, "D3DPERF_SetMarker");
-            SetRegion =                       GetDelegate<NULL_2>(RealHandler, "D3DPERF_SetRegion");
-            QueryRepeatFrame =                GetDelegate<RET_0>(RealHandler,  "D3DPERF_QueryRepeatFrame");
-            SetOptions =                      GetDelegate<NULL_1>(RealHandler, "D3DPERF_SetOptions");
-            GetStatus =                       GetDelegate<RET_0>(RealHandler,  "D3DPERF_GetStatus");
-            DbgSetLevel =                     GetDelegate<RET_0>(RealHandler,  "DebugSetLevel");
-            DbgSetMute =                      GetDelegate<RET_1>(RealHandler,  "DebugSetMute");
-            PSampleTexture =                  GetDelegate<RET_0>(RealHandler,  "PSGPSampleTexture");
-            PError =                          GetDelegate<RET_0>(RealHandler,  "PSGPError");
-            ShaderValidator =                 GetDelegate<RET_0>(RealHandler,  "Direct3DShaderValidatorCreate9");
-            EnableMaximizedWindowedModeShim = GetDelegate<RET_1>(RealHandler,  "EnableMaximizedWindowedModeShim");
+            BeginEvent = GetDelegate<RET_2>(RealHandler, "D3DPERF_BeginEvent");
+            EndEvent = GetDelegate<RET_0>(RealHandler, "D3DPERF_EndEvent");
+            SetMarker = GetDelegate<NULL_2>(RealHandler, "D3DPERF_SetMarker");
+            SetRegion = GetDelegate<NULL_2>(RealHandler, "D3DPERF_SetRegion");
+            QueryRepeatFrame = GetDelegate<RET_0>(RealHandler, "D3DPERF_QueryRepeatFrame");
+            SetOptions = GetDelegate<NULL_1>(RealHandler, "D3DPERF_SetOptions");
+            GetStatus = GetDelegate<RET_0>(RealHandler, "D3DPERF_GetStatus");
+            DbgSetLevel = GetDelegate<RET_0>(RealHandler, "DebugSetLevel");
+            DbgSetMute = GetDelegate<RET_1>(RealHandler, "DebugSetMute");
+            PSampleTexture = GetDelegate<RET_0>(RealHandler, "PSGPSampleTexture");
+            PError = GetDelegate<RET_0>(RealHandler, "PSGPError");
+            ShaderValidator = GetDelegate<RET_0>(RealHandler, "Direct3DShaderValidatorCreate9");
+            EnableMaximizedWindowedModeShim = GetDelegate<RET_1>(RealHandler, "EnableMaximizedWindowedModeShim");
+
+            InitializeSRL();
         }
 
         static T GetDelegate<T>(IntPtr Handler, string Function, bool Optional = true) where T : Delegate

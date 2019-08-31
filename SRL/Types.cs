@@ -4,9 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Media;
 
-namespace SRL {
-    partial class StringReloader {
-        
+namespace SRL
+{
+    partial class StringReloader
+    {
+
         /// <summary>
         /// Universal Array Append
         /// </summary>
@@ -14,8 +16,10 @@ namespace SRL {
         /// <param name="Arr">The Array to Append</param>
         /// <param name="Val">The value to append in the array</param>
         /// <param name="CheckDouble">Don't Append if the array already contains this value.</param>
-        internal static void AppendArray<T>(ref T[] Arr, T Val, bool CheckDouble = false) {
-            if (CheckDouble) {
+        internal static void AppendArray<T>(ref T[] Arr, T Val, bool CheckDouble = false)
+        {
+            if (CheckDouble)
+            {
                 int Cnt = (from x in Arr where x.Equals(Val) select x).Count();
                 if (Cnt > 0)
                     return;
@@ -27,7 +31,8 @@ namespace SRL {
             Arr = NArr;
         }
 
-        enum PipeCommands : byte {
+        enum PipeCommands : byte
+        {
             FindMissed = 0,
             AddMissed = 1,
             FindReload = 2,
@@ -47,17 +52,20 @@ namespace SRL {
             GetDBIndex = 16
         }
 
-        struct Range {
+        struct Range
+        {
             internal uint Min;
             internal uint Max;
         }
-        internal struct Quote {
+        internal struct Quote
+        {
             public char Start;
             public char End;
         }
 
 #pragma warning disable 649, 169
-        struct SRLData3 {
+        struct SRLData3
+        {
             [FString(Length = 4)]
             public string Signature;
 
@@ -93,12 +101,14 @@ namespace SRL {
             public string[] RepTrg;
         }
 
-        struct SRLIntro {
+        struct SRLIntro
+        {
             [StructField, PArray(PrefixType = Const.UINT8)]
             public IntroContainer[] Intros;
         }
 
-        struct IntroContainer {
+        struct IntroContainer
+        {
             [PArray(PrefixType = Const.UINT32)]
             public byte[] Bitmap;
 
@@ -112,7 +122,8 @@ namespace SRL {
             public bool HasSound => Wav.Length != 0;
         }
 
-        struct SRLDatabase2 {
+        struct SRLDatabase2
+        {
             [CString]
             public string Name;
 
@@ -123,12 +134,13 @@ namespace SRL {
 
             [RArray(FieldName = "EntriesCount"), PString(PrefixType = Const.UINT16)]
             public string[] Replace;
-            
+
         }
 
         #region Deprecated
         //Deprecated But Supported Formats
-        struct TLBC {
+        struct TLBC
+        {
             [FString(Length = 4)]
             public string Signature;
 
@@ -139,7 +151,8 @@ namespace SRL {
             public string[] Replace;
 
         }
-        struct SRLData1 {
+        struct SRLData1
+        {
             [FString(Length = 4)]
             public string Signature;
 
@@ -167,7 +180,8 @@ namespace SRL {
             [PArray(PrefixType = Const.UINT32), CString]
             public string[] RepTrg;
         }
-        struct SRLData2 {
+        struct SRLData2
+        {
             [FString(Length = 4)]
             public string Signature;
 
@@ -192,7 +206,8 @@ namespace SRL {
             [PArray(PrefixType = Const.UINT32), CString]
             public string[] RepTrg;
         }
-        struct SRLDatabase {
+        struct SRLDatabase
+        {
             [PArray(PrefixType = Const.UINT32), CString]
             public string[] Original;
 
@@ -204,7 +219,8 @@ namespace SRL {
         //Ini Settings
 
         [FieldParmaters(Name = "StringReloader")]
-        struct SRLSettings {
+        struct SRLSettings
+        {
             [FieldParmaters(DefaultValue = null, Name = "InEncoding;ReadEncoding;Encoding")]
             public string InEncoding;
 
@@ -309,7 +325,8 @@ namespace SRL {
         }
 
         [FieldParmaters(Name = "WordWrap")]
-        public struct WordwrapSettings {
+        public struct WordwrapSettings
+        {
             [FieldParmaters(DefaultValue = false, Name = "Enable;Enabled")]
             public bool Enabled;
 
@@ -333,7 +350,8 @@ namespace SRL {
         }
 
         [FieldParmaters(Name = "Overlay")]
-        public struct OverlaySettings {
+        public struct OverlaySettings
+        {
             [FieldParmaters(DefaultValue = false, Name = "EnableOverlay;Enabled;Enable;ShowOverlay")]
             public bool Enable;
 
@@ -345,7 +363,8 @@ namespace SRL {
         }
 
         [FieldParmaters(Name = "Filter")]
-        internal struct FilterSettings {
+        internal struct FilterSettings
+        {
             [FieldParmaters(DefaultValue = "", Name = "DenyList")]
             public string DenyList;
             [FieldParmaters(DefaultValue = "", Name = "IgnoreList")]
@@ -364,7 +383,8 @@ namespace SRL {
 
 
         [FieldParmaters(Name = "Hook")]
-        internal struct HookSettings {
+        internal struct HookSettings
+        {
 #if DEBUG
             [FieldParmaters(Name = "CreateWindow", DefaultValue = false)]
             public bool CreateWindow;
@@ -397,10 +417,15 @@ namespace SRL {
             public string FaceName;
             [FieldParmaters(Name = "UndoChars;UndoReloads;UndoFakeChars", DefaultValue = false)]
             public bool UndoChars;
+            [FieldParmaters(Name = "AutoSRLInstall;AutoGameHook;AutoEngineHook", DefaultValue = false)]
+            public bool AutoEngineHook;
+            [FieldParmaters(Name = "LoadLibraryFix;LoadLibrary", DefaultValue = false)]
+            public bool LoadLibraryFix;
         }
 
         [FieldParmaters(Name = "Intro")]
-        internal struct IntroSettings {
+        internal struct IntroSettings
+        {
             [FieldParmaters(Name = "Seconds;Time;Duration", DefaultValue = 0)]
             public int Seconds;
             [FieldParmaters(Name = "MinSize;Size;MinimalSize", DefaultValue = 0)]
@@ -419,7 +444,8 @@ namespace SRL {
         }
 
         [FieldParmaters(Name = "MTL")]
-        internal struct MTLSettings {
+        internal struct MTLSettings
+        {
             [FieldParmaters(Name = "Enabled;Enable")]
             public bool Enabled;
             [FieldParmaters(Name = "MassiveMode;ArrayMode;MultilineMode")]
@@ -430,7 +456,8 @@ namespace SRL {
             public string TargetLang;
         }
 
-        internal struct FontRedirect {
+        internal struct FontRedirect
+        {
             public string From;
             public string To;
             public string Size;

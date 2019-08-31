@@ -5,15 +5,18 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace SRL {
-    partial class StringReloader {
+namespace SRL
+{
+    partial class StringReloader
+    {
 
         /// <summary>
         /// Check if the string is a Mask
         /// </summary>
         /// <param name="String">The String to Verify</param>
         /// <returns>If is a mask, return true.</returns>
-        internal static bool IsMask(string String) {
+        internal static bool IsMask(string String)
+        {
             return SplitMask(String).Length > 1;
         }
 
@@ -23,9 +26,11 @@ namespace SRL {
         /// <param name="Mask">The Mask to check</param>
         /// <param name="String">The String to try match with the mask</param>
         /// <returns>If String is usable with this mask, return true</returns>
-        internal static bool MaskMatch(string Mask, string String) {
+        internal static bool MaskMatch(string Mask, string String)
+        {
             string[] Source = SplitMask(Mask);
-            for (int i = 0, x = 0; i < Source.LongLength; i++) {
+            for (int i = 0, x = 0; i < Source.LongLength; i++)
+            {
                 string M = Source[i];
                 if (M == string.Empty)
                     continue;
@@ -33,7 +38,8 @@ namespace SRL {
                 if (i == 0 && !String.StartsWith(M))
                     return false;
 
-                while (!String.Substring(x, String.Length - x).StartsWith(M)) {
+                while (!String.Substring(x, String.Length - x).StartsWith(M))
+                {
                     if (++x >= String.Length)
                         return false;
                 }
@@ -53,35 +59,44 @@ namespace SRL {
         /// <param name="String">The Original String</param>
         /// <param name="Target">The Target String Mask</param>
         /// <returns>The Modified Target String</returns>
-        internal static string MaskReplace(string Mask, string String, string Target) {
+        internal static string MaskReplace(string Mask, string String, string Target)
+        {
             List<object> Format = new List<object>();
             string[] Source = SplitMask(Mask);
-            for (int i = 0, x = 0; i < Source.LongLength; i++) {
+            for (int i = 0, x = 0; i < Source.LongLength; i++)
+            {
                 string M = Source[i];
-                if (string.IsNullOrEmpty(M)) {
-                    if (i + 1 >= Source.LongLength) {
+                if (string.IsNullOrEmpty(M))
+                {
+                    if (i + 1 >= Source.LongLength)
+                    {
                         Format.Add(String.Substring(x, String.Length - x));
                     }
                     continue;
                 }
 
-                if (i == 0 && !String.StartsWith(M)) {
+                if (i == 0 && !String.StartsWith(M))
+                {
                     Warning("Invalid Mask Replace Request\nM: {0}\nS: {1}", Mask, String);
                     return String;
                 }
 
                 int Skiped = x;
-                while (!String.Substring(x, String.Length - x).StartsWith(M)) {
-                    if (++x >= String.Length) {
+                while (!String.Substring(x, String.Length - x).StartsWith(M))
+                {
+                    if (++x >= String.Length)
+                    {
                         Warning("Invalid Mask Replace Request\nM: {0}\nS: {1}", Mask, String);
                         return String;
                     }
                 }
-                if (i + 1 >= Source.LongLength && String.Substring(x, String.Length - x) != M) {
+                if (i + 1 >= Source.LongLength && String.Substring(x, String.Length - x) != M)
+                {
                     Warning("Invalid Mask Replace Request\nM: {0}\nS: {1}", Mask, String);
                     return String;
                 }
-                if (x > Skiped) {
+                if (x > Skiped)
+                {
                     string Content = String.Substring(Skiped, x - Skiped);
 
                     #region FuckYouAppVeyor
@@ -114,7 +129,8 @@ namespace SRL {
 
             int[] Sort = MaskSort(Mask);
             object[] F = Format.ToArray();
-            if (Sort.Length != F.Length) {
+            if (Sort.Length != F.Length)
+            {
                 //Not log as error because sometimes is just a bad input from the game.
                 Warning("Invalid Mask Replace Request\nM: {0}\nS: {1}", true, Mask, String);
                 return String;
@@ -124,22 +140,28 @@ namespace SRL {
 
             //::MAXWIDTH[?]::
             uint BakWidth = MaxWidth;
-            if (Target.StartsWith("::MAXWIDTH[")) {
+            if (Target.StartsWith("::MAXWIDTH["))
+            {
                 string Width = Target.Split('[')[1].Split(']')[0];
                 int TagLen = 14 + Width.Length;
-                if (Target.Substring(TagLen - 3, 3) == "]::") {
+                if (Target.Substring(TagLen - 3, 3) == "]::")
+                {
                     Target = Target.Substring(TagLen, Target.Length - TagLen);
-                    try {
+                    try
+                    {
                         MaxWidth = uint.Parse(Width);
-                    } catch { }
+                    }
+                    catch { }
                 }
             }
 
-            if (ReloadMaskParameters && Initialized) {
-                for (long i = 0; i < F.LongLength; i++) {
+            if (ReloadMaskParameters && Initialized)
+            {
+                for (long i = 0; i < F.LongLength; i++)
+                {
                     if (F[i] is string)
                         F[i] = StrMap((string)F[i], IntPtr.Zero, false);
-                    
+
                 }
             }
 
@@ -153,16 +175,20 @@ namespace SRL {
         /// </summary>
         /// <param name="String">The Mask</param>
         /// <returns>The Splited Mask</returns>
-        internal static string[] SplitMask(string String) {
+        internal static string[] SplitMask(string String)
+        {
             List<string> Strings = new List<string>();
             string Content = string.Empty;
-            for (int i = 0; i < String.Length; i++) {
+            for (int i = 0; i < String.Length; i++)
+            {
                 char c = String[i];
-                if (c == '{' && !Content.EndsWith("\\")) {
+                if (c == '{' && !Content.EndsWith("\\"))
+                {
                     int o = i;
                     while (i < String.Length && String[i] != '}')
                         i++;
-                    if (i >= String.Length || String[i] != '}') {
+                    if (i >= String.Length || String[i] != '}')
+                    {
                         Warning("Bad String Format: \"{0}\"\nAt: {0}", String, o);
                     }
 
@@ -170,7 +196,8 @@ namespace SRL {
                     Content = string.Empty;
                     continue;
                 }
-                if (Content.EndsWith("\\") && c == '{') {
+                if (Content.EndsWith("\\") && c == '{')
+                {
                     Content = Content.Substring(0, Content.Length - 1);
                 }
                 Content += c;
@@ -184,16 +211,20 @@ namespace SRL {
         /// </summary>
         /// <param name="String">The Mask</param>
         /// <returns>The Index Array</returns>
-        internal static int[] MaskSort(string String) {
+        internal static int[] MaskSort(string String)
+        {
             List<int> IDS = new List<int>();
             string Content = string.Empty;
-            for (int i = 0; i < String.Length; i++) {
+            for (int i = 0; i < String.Length; i++)
+            {
                 char c = String[i];
-                if (c == '{' && !Content.EndsWith("\\")) {
+                if (c == '{' && !Content.EndsWith("\\"))
+                {
                     int o = i;
                     while (i < String.Length && String[i] != '}')
                         i++;
-                    if (i >= String.Length || String[i] != '}') {
+                    if (i >= String.Length || String[i] != '}')
+                    {
                         Warning("Bad String Format: \"{0}\"\nAt: {0}", String, o);
                     }
                     o++;
@@ -210,18 +241,19 @@ namespace SRL {
             return IDS.ToArray();
         }
 
-        internal static string PrefixWorker(string Str) {
+        internal static string PrefixWorker(string Str)
+        {
             string Reloaded = Str;
             if (Reloaded.Contains(AntiPrefixFlag) || string.IsNullOrEmpty(RldPrefix))
                 Reloaded = Reloaded.Replace(AntiPrefixFlag, string.Empty);
             else
-                Reloaded = RldPrefix + Reloaded;            
+                Reloaded = RldPrefix + Reloaded;
 
             if (Reloaded.Contains(AntiSufixFlag) || string.IsNullOrEmpty(RldSufix))
                 Reloaded = Reloaded.Replace(AntiSufixFlag, string.Empty);
             else
                 Reloaded = Reloaded + RldSufix;
-            
+
             return Reloaded;
         }
 
@@ -230,33 +262,42 @@ namespace SRL {
         /// </summary>
         /// <param name="Input">The string to wordwrap</param>
         /// <returns>The Result String</returns>        
-        internal static string WordWrap(string Input) {
+        internal static string WordWrap(string Input)
+        {
             if (Input.StartsWith(AntiWordWrapFlag))
                 return Input.Substring(AntiWordWrapFlag.Length, Input.Length - AntiWordWrapFlag.Length);
 
             //::MAXWIDTH[?]::
             uint BakWidth = MaxWidth;
-            if (Input.StartsWith("::MAXWIDTH[")) {
+            if (Input.StartsWith("::MAXWIDTH["))
+            {
                 string Width = Input.Split('[')[1].Split(']')[0];
                 int TagLen = 14 + Width.Length;
-                if (Input.Substring(TagLen - 3, 3) == "]::") {
+                if (Input.Substring(TagLen - 3, 3) == "]::")
+                {
                     Input = Input.Substring(TagLen, Input.Length - TagLen);
-                    try {
+                    try
+                    {
                         MaxWidth = uint.Parse(Width);
-                    } catch { }
+                    }
+                    catch { }
                 }
             }
 
-            if (FakeBreakLine) {
+            if (FakeBreakLine)
+            {
                 while (Input.Contains(@"  "))
                     Input = Input.Replace(@"  ", @" ");
             }
 
-            if (Monospaced) {
+            if (Monospaced)
+            {
                 string Rst = MonospacedWordWrap(MergeLines(Input));
                 MaxWidth = BakWidth;
                 return Rst;
-            } else {
+            }
+            else
+            {
 #if DEBUG
                 if (Debugging) {
                     if (LastDPI != DPI) {
@@ -281,7 +322,8 @@ namespace SRL {
         /// </summary>
         /// <param name="String">The string to remove the breakline</param>
         /// <returns>The Result</returns>
-        internal static string MergeLines(string String) {
+        internal static string MergeLines(string String)
+        {
             if (NoTrim)
                 return String;
 
@@ -293,43 +335,52 @@ namespace SRL {
         }
 
         #region WordWrap
-        private static string MultispacedWordWrap(string String) {
+        private static string MultispacedWordWrap(string String)
+        {
             StringBuilder sb = new StringBuilder();
             if (MaxWidth == 0)
                 return String;
             string[] Words = String.Split(' ');
             string Line = string.Empty;
-            foreach (string Word in Words) {
-                if (GetTextWidth(Font, Line + Word) > MaxWidth) {
-                    if (Line == string.Empty) {
+            foreach (string Word in Words)
+            {
+                if (GetTextWidth(Font, Line + Word) > MaxWidth)
+                {
+                    if (Line == string.Empty)
+                    {
                         string Overload = string.Empty;
                         int Cnt = 0;
                         while (GetTextWidth(Font, Word.Substring(0, Word.Length - Cnt)) > MaxWidth)
                             Cnt++;
                         sb.AppendLine(Word.Substring(0, Word.Length - Cnt));
                         Line = Word.Substring(Word.Length - Cnt, Cnt);
-                    } else {
+                    }
+                    else
+                    {
                         sb.AppendLine(Line);
                         Line = Word;
                     }
-                } else
+                }
+                else
                     Line += (Line == string.Empty) ? Word : " " + Word;
             }
             if (Line != string.Empty)
                 sb.AppendLine(Line);
 
             string rst = sb.ToString().Replace("\r\n", "\n");
-            
+
             rst = rst.Replace("\n", GameLineBreaker);
 
             if (rst.EndsWith(GameLineBreaker))
                 rst = rst.Substring(0, rst.Length - GameLineBreaker.Length);
 
-            if (FakeBreakLine) {
-                float SpaceLen = GetTextWidth(Font, "_ _") - (GetTextWidth(Font, "_")*2);
+            if (FakeBreakLine)
+            {
+                float SpaceLen = GetTextWidth(Font, "_ _") - (GetTextWidth(Font, "_") * 2);
                 string[] Splited = rst.Replace(GameLineBreaker, "\n").Split('\n');
                 string NewRst = string.Empty;
-                for (int i = 0; i < Splited.Length; i++) {
+                for (int i = 0; i < Splited.Length; i++)
+                {
                     string tmp = Splited[i];
 
                     int Spaces = 0;
@@ -348,28 +399,36 @@ namespace SRL {
             return rst;
         }
 
-        internal static float GetTextWidth(Font Font, string Text) {
-            try {
+        internal static float GetTextWidth(Font Font, string Text)
+        {
+            try
+            {
                 using (var g = Graphics.FromHwnd(IntPtr.Zero))
                     return g.MeasureString(Text, Font).Width;
-            } catch {
+            }
+            catch
+            {
                 return System.Windows.Forms.TextRenderer.MeasureText(Text, Font).Width;
             }
         }
 
-        internal static string MonospacedWordWrap(string String) {
+        internal static string MonospacedWordWrap(string String)
+        {
             int pos, next;
             StringBuilder sb = new StringBuilder();
             if (MaxWidth < 1)
                 return String;
-            for (pos = 0; pos < String.Length; pos = next) {
+            for (pos = 0; pos < String.Length; pos = next)
+            {
                 int eol = String.IndexOf(GameLineBreaker, pos);
                 if (eol == -1)
                     next = eol = String.Length;
                 else
                     next = eol + GameLineBreaker.Length;
-                if (eol > pos) {
-                    do {
+                if (eol > pos)
+                {
+                    do
+                    {
                         int len = eol - pos;
                         if (len > MaxWidth)
                             len = BreakLine(String, pos, (int)MaxWidth);
@@ -379,18 +438,21 @@ namespace SRL {
                         while (pos < eol && char.IsWhiteSpace(String[pos]))
                             pos++;
                     } while (eol > pos);
-                } else sb.Append(GameLineBreaker);
+                }
+                else sb.Append(GameLineBreaker);
             }
             string rst = sb.ToString();
 
 
             if (rst.EndsWith(GameLineBreaker))
                 rst = rst.Substring(0, rst.Length - GameLineBreaker.Length);
-            
-            if (FakeBreakLine) {
+
+            if (FakeBreakLine)
+            {
                 string[] Splited = rst.Replace(GameLineBreaker, "\n").Split('\n');
                 string NewRst = string.Empty;
-                for (int i = 0; i < Splited.Length; i++) {
+                for (int i = 0; i < Splited.Length; i++)
+                {
                     string tmp = Splited[i];
                     bool Last = i + 1 >= Splited.Length;
                     if (!Last)
@@ -403,7 +465,8 @@ namespace SRL {
 
             return rst;
         }
-        private static int BreakLine(string text, int pos, int max) {
+        private static int BreakLine(string text, int pos, int max)
+        {
             int i = max - 1;
             while (i >= 0 && !char.IsWhiteSpace(text[pos + i]))
                 i--;
@@ -413,15 +476,16 @@ namespace SRL {
                 i--;
             return i + 1;
         }
-#endregion
-        
+        #endregion
+
         /// <summary>
         /// Detect the correct string reader method, and load it
         /// </summary>
         /// <param name="Pointer">The pointer to the string</param>
         /// <param name="Decode">if False, return the hex of the string</param>
         /// <returns>The String</returns>
-        internal static string GetString(IntPtr Pointer, bool Decode = true, int? Len = null, int? CP = null) {
+        internal static string GetString(IntPtr Pointer, bool Decode = true, int? Len = null, int? CP = null)
+        {
             if (EncodingModifier != null)
                 return EncodingModifier.Call("Modifier", "GetString", Pointer, Decode);
 
@@ -436,14 +500,21 @@ namespace SRL {
         /// </summary>
         /// <param name="String">The string</param>
         /// <returns>The Pointer to the new String</returns>
-        internal static IntPtr GenString(string String, bool ForceUnicode = false, IntPtr? ForcePointer = null) {
+        internal static IntPtr GenString(string String, bool ForceUnicode = false, IntPtr? ForcePointer = null)
+        {
             byte[] buffer;
-            if (ForceUnicode) {
+            if (ForceUnicode)
+            {
                 buffer = Encoding.Unicode.GetBytes(String + "\x0");
-            } else {
-                if (EncodingModifier != null) {
+            }
+            else
+            {
+                if (EncodingModifier != null)
+                {
                     buffer = EncodingModifier.Call("Modifier", "GenString", String);
-                } else {
+                }
+                else
+                {
                     int len = WriteEncoding.GetByteCount(String + "\x0");
                     buffer = new byte[len];
                     WriteEncoding.GetBytes(String, 0, String.Length, buffer, 0);
@@ -467,7 +538,8 @@ namespace SRL {
 
             Marshal.Copy(buffer, 0, Pointer, buffer.Length);
 
-            if (LogAll) {
+            if (LogAll)
+            {
                 string New = GetString(Pointer);
                 Log("Old: {0}\nNew: {1}\nHex: {2}", false, String, New, ParseBytes(buffer));
             }
@@ -481,27 +553,36 @@ namespace SRL {
         /// <param name="Pointer">Pointer to the string</param>
         /// <param name="Decode">if False, return the hex of the string</param>
         /// <returns></returns>
-        internal static string GetStringA(IntPtr Pointer, bool Decode = true, int? CP = null, int? Len = null) {
+        internal static string GetStringA(IntPtr Pointer, bool Decode = true, int? CP = null, int? Len = null)
+        {
             int len = 0;
-            if (Len == null) {
+            if (Len == null)
+            {
                 while (Marshal.ReadByte(Pointer, len) != 0)
                     ++len;
-            } else
+            }
+            else
                 len = Len.Value;
 
             byte[] buffer = new byte[len];
             Marshal.Copy(Pointer, buffer, 0, buffer.Length);
 
-            if ((LogInput || LogAll) && !DumpStrOnly) {
+            if ((LogInput || LogAll) && !DumpStrOnly)
+            {
                 Log("Input: {0}", true, ParseBytes(buffer));
             }
 
-            if (Unicode && CP == null) {
+            if (Unicode && CP == null)
+            {
                 return Encoding.Default.GetString(buffer);
-            } else {
-                if (CP != null) {
+            }
+            else
+            {
+                if (CP != null)
+                {
                     Encoding Enco;
-                    switch (CP) {
+                    switch (CP)
+                    {
                         case 0:
                         case 3:
                         case 2:
@@ -514,7 +595,8 @@ namespace SRL {
                             break;
                     }
                     return Enco.GetString(buffer);
-                } else if (Decode)
+                }
+                else if (Decode)
                     return ReadEncoding.GetString(buffer);
                 else
                     return ParseBytes(buffer);
@@ -527,14 +609,16 @@ namespace SRL {
         /// <param name="Pointer">Pointer to the string</param>
         /// <param name="Decode">if False, return the hex of the string</param>
         /// <returns></returns>
-        internal static string GetStringW(IntPtr Pointer, bool Decode = true, bool ForceUnicode = false) {
+        internal static string GetStringW(IntPtr Pointer, bool Decode = true, bool ForceUnicode = false)
+        {
             int len = 0;
             while (Marshal.ReadInt16(Pointer, len) != 0)
                 len += 2;
             byte[] buffer = new byte[len];
             Marshal.Copy(Pointer, buffer, 0, buffer.Length);
 
-            if ((LogInput || LogAll) && !DumpStrOnly) {                
+            if ((LogInput || LogAll) && !DumpStrOnly)
+            {
                 Log("Input: {0}", true, ParseBytes(buffer));
             }
 
@@ -549,7 +633,8 @@ namespace SRL {
         /// </summary>
         /// <param name="Char">The Char to Check</param>
         /// <returns>If the char is in the acceptable range, return true</returns>
-        internal static bool InRange(char Char) {
+        internal static bool InRange(char Char)
+        {
             foreach (Range Range in Ranges)
                 if (Char >= Range.Min && Char <= Range.Max)
                     return true;
@@ -561,11 +646,13 @@ namespace SRL {
         /// </summary>
         /// <param name="String">String to Restore</param>
         /// <param name="Original">Original Template</param>
-        internal static void TrimWorker(ref string String, string Original) {
+        internal static void TrimWorker(ref string String, string Original)
+        {
             if (NoTrim)
                 return;
 
-            if (LogAll) {
+            if (LogAll)
+            {
                 Log("Trim Request:\nOri: {0}\nStr: {1}", true, Original, String);
             }
 
@@ -580,7 +667,8 @@ namespace SRL {
             Diff = Original.Length - Test.Length;
             String += Original.Substring(Original.Length - Diff, Diff);
 
-            if (LogAll) {
+            if (LogAll)
+            {
                 Log("Trim Result: {0}", true, String);
             }
         }
@@ -589,7 +677,8 @@ namespace SRL {
         /// Add a Reply to the Cache
         /// </summary>
         /// <param name="Str">The Reply String</param>
-        internal static void CacheReply(string Str) {
+        internal static void CacheReply(string Str)
+        {
             string Reply = SimplfyMatch(Str);
 
             if (Replys.Contains(Reply))
@@ -610,7 +699,8 @@ namespace SRL {
         /// Check if a String is in the cache
         /// </summary>
         /// <param name="Str">The Reply String</param>
-        internal static bool InCache(string Str) {
+        internal static bool InCache(string Str)
+        {
             string Reply = SimplfyMatch(Str);
 
             if (Replys.Contains(Reply))
@@ -633,7 +723,8 @@ namespace SRL {
         /// </summary>
         /// <param name="Input">Original Pointer</param>
         /// <param name="Output">Response Pointer</param>
-        internal static void CachePtr(IntPtr Input, IntPtr Output) {
+        internal static void CachePtr(IntPtr Input, IntPtr Output)
+        {
             if (PtrCacheIn.Contains(Input))
                 return;
 
@@ -655,7 +746,8 @@ namespace SRL {
         /// </summary>
         /// <param name="Str">The string to Minify</param>
         /// <returns>The Minified String</returns>
-        internal static string SimplfyMatch(string Str) {
+        internal static string SimplfyMatch(string Str)
+        {
             if (LiteMode)
                 return Str;
 
@@ -671,7 +763,8 @@ namespace SRL {
         /// </summary>
         /// <param name="Input">The String to Replace</param>
         /// <returns>The Result String</returns>
-        internal static string ReplaceChars(string Input, bool Restore = false) {
+        internal static string ReplaceChars(string Input, bool Restore = false)
+        {
             string Output = Input;
             for (int i = 0; i < Replaces.Length; i += 2)
                 Output = Output.Replace(Restore ? Replaces[i + 1] : Replaces[i], Restore ? Replaces[i] : Replaces[i + 1]);
@@ -684,7 +777,8 @@ namespace SRL {
         /// </summary>
         /// <param name="Txt">The String to Trim</param>
         /// <returns>The Result</returns>
-        internal static string TrimString(string Input, bool Force = false) {
+        internal static string TrimString(string Input, bool Force = false)
+        {
             if ((NoTrim || LiteMode) && !Force)
                 return Input;
 
@@ -704,27 +798,34 @@ namespace SRL {
         /// </summary>
         /// <param name="Txt">The String to Trim</param>
         /// <returns>The Result</returns>
-        internal static string TrimStart(string Txt, bool Force = false) {
+        internal static string TrimStart(string Txt, bool Force = false)
+        {
             if ((NoTrim || LiteMode) && !Force)
                 return Txt;
 
             string rst = Txt;
-            foreach (string str in TrimChars) {
+            foreach (string str in TrimChars)
+            {
                 if (string.IsNullOrEmpty(str))
                     continue;
-                while (rst.StartsWith(str)) {
+                while (rst.StartsWith(str))
+                {
                     rst = rst.Substring(str.Length, rst.Length - str.Length);
                 }
             }
 
-            if (TrimRangeMismatch && Ranges != null) {
+            if (TrimRangeMismatch && Ranges != null)
+            {
                 int Len = rst.Length - 1;
-                while (Len != rst.Length) {
+                while (Len != rst.Length)
+                {
                     Len = rst.Length;
-                    while (!string.IsNullOrEmpty(rst) && !InRange(rst[0])) {
+                    while (!string.IsNullOrEmpty(rst) && !InRange(rst[0]))
+                    {
                         rst = rst.TrimStart(rst[0]);
                     }
-                    if (!string.IsNullOrEmpty(rst) && rst.Length > 2 && !InRange(rst[1]) && !InRange(rst[2])) {
+                    if (!string.IsNullOrEmpty(rst) && rst.Length > 2 && !InRange(rst[1]) && !InRange(rst[2]))
+                    {
                         rst = rst.TrimStart(rst[0]);
                         continue;
                     }
@@ -743,27 +844,34 @@ namespace SRL {
         /// </summary>
         /// <param name="Txt">The String to Trim</param>
         /// <returns>The Result</returns>
-        internal static string TrimEnd(string Txt, bool Force = false) {
+        internal static string TrimEnd(string Txt, bool Force = false)
+        {
             if ((NoTrim || LiteMode) && !Force)
                 return Txt;
 
             string rst = Txt;
-            foreach (string str in TrimChars) {
+            foreach (string str in TrimChars)
+            {
                 if (string.IsNullOrEmpty(str))
                     continue;
-                while (rst.EndsWith(str)) {
+                while (rst.EndsWith(str))
+                {
                     rst = rst.Substring(0, rst.Length - str.Length);
                 }
             }
-            
-            if (TrimRangeMismatch && Ranges != null) {
+
+            if (TrimRangeMismatch && Ranges != null)
+            {
                 int Len = rst.Length - 1;
-                while (Len != rst.Length) {
+                while (Len != rst.Length)
+                {
                     Len = rst.Length;
-                    while (!string.IsNullOrEmpty(rst) && !InRange(rst[rst.Length - 1])) {
+                    while (!string.IsNullOrEmpty(rst) && !InRange(rst[rst.Length - 1]))
+                    {
                         rst = rst.TrimEnd(rst[rst.Length - 1]);
                     }
-                    if (!string.IsNullOrEmpty(rst) && rst.Length > 2 && !InRange(rst[rst.Length - 2]) && !InRange(rst[rst.Length - 3])) {
+                    if (!string.IsNullOrEmpty(rst) && rst.Length > 2 && !InRange(rst[rst.Length - 2]) && !InRange(rst[rst.Length - 3]))
+                    {
                         rst = rst.TrimStart(rst[rst.Length - 1]);
                         continue;
                     }
@@ -782,20 +890,23 @@ namespace SRL {
         /// </summary>
         /// <param name="Arr">Byte Array to Convert</param>
         /// <returns>The Result Hex</returns>
-        internal static string ParseBytes(byte[] Arr) {
+        internal static string ParseBytes(byte[] Arr)
+        {
             string Result = "0x";
             foreach (byte b in Arr)
                 Result += string.Format("{0:X2}", b);
             return Result;
-        }      
+        }
 
-        internal static byte[] ParseHex(string Hex) {
+        internal static byte[] ParseHex(string Hex)
+        {
             if (Hex.StartsWith("0x"))
                 Hex = Hex.Substring(2, Hex.Length - 2);
             Hex = Hex.Replace(@" ", "");
 
             byte[] Buffer = new byte[Hex.Length / 2];
-            for (int i = 0; i < Hex.Length / 2; i++) {
+            for (int i = 0; i < Hex.Length / 2; i++)
+            {
                 Buffer[i] = Convert.ToByte(Hex.Substring(i, 2), 16);
             }
 
@@ -808,15 +919,16 @@ namespace SRL {
         /// <param name="Str">The String</param>
         /// <param name="Trim">Internal Parameter, don't change it.</param>
         /// <returns>If looks a dialog, return true, else return false.</returns>
-        public static bool IsDialog(this string String) {
+        public static bool IsDialog(this string String)
+        {
             if (string.IsNullOrWhiteSpace(String))
                 return false;
 
             if (UseDatabase && ContainsKey(String))
                 return true;
-			
-			if (!DialogCheck)
-				return true;
+
+            if (!DialogCheck)
+                return true;
 
             string Str = String.Trim();
 
@@ -830,7 +942,7 @@ namespace SRL {
             foreach (string Deny in DenyList)
                 if (!string.IsNullOrEmpty(Deny) && Str.ToLower().Contains(Deny.ToLower()))
                     return false;
-                
+
 
             Str = Str.Replace(GameLineBreaker, "\n");
 
@@ -855,7 +967,7 @@ namespace SRL {
             int NumbersJap = Str.Where(x => x >= '０' && x <= '９').Count();
             int JapChars = Str.Where(x => (x >= '、' && x <= 'ヿ') || (x >= '｡' && x <= 'ﾝ')).Count();
             int Kanjis = Str.Where(x => x >= '一' && x <= '龯').Count();
-            
+
 
             bool IsCaps = GetLineCase(Str) == Case.Upper;
             bool IsJap = JapChars + Kanjis > Latim / 2;
@@ -865,30 +977,38 @@ namespace SRL {
             //Less Points = Looks a Dialogue
             int Points = 0;
 
-            if (Str.Length > 4) {
+            if (Str.Length > 4)
+            {
                 string ext = Str.Substring(Str.Length - 4, 4);
-                try {
+                try
+                {
                     if (System.IO.Path.GetExtension(ext).Trim('.').Length == 3)
                         Points += 2;
-                } catch { }
+                }
+                catch { }
             }
 
             bool BeginQuote = false;
             Quote? LineQuotes = null;
-            foreach (Quote Quote in QuoteList) {
+            foreach (Quote Quote in QuoteList)
+            {
                 BeginQuote |= Str.StartsWith(Quote.Start.ToString());
 
-                if (Str.StartsWith(Quote.Start.ToString()) && Str.EndsWith(Quote.End.ToString())) {
+                if (Str.StartsWith(Quote.Start.ToString()) && Str.EndsWith(Quote.End.ToString()))
+                {
                     Points -= 3;
                     LineQuotes = Quote;
                     break;
-                } else if (Str.StartsWith(Quote.Start.ToString()) || Str.EndsWith(Quote.End.ToString())) {
+                }
+                else if (Str.StartsWith(Quote.Start.ToString()) || Str.EndsWith(Quote.End.ToString()))
+                {
                     Points--;
                     LineQuotes = Quote;
                     break;
                 }
             }
-            try {
+            try
+            {
                 char Last = (LineQuotes == null ? Str.Last() : Str.TrimEnd(LineQuotes.Value.End).Last());
                 if (IsJap && PontuationJapList.Contains(Last))
                     Points -= 3;
@@ -896,8 +1016,10 @@ namespace SRL {
                 if (!IsJap && (PontuationList).Contains(Last))
                     Points -= 3;
 
-            } catch { }
-            try {
+            }
+            catch { }
+            try
+            {
                 char First = (LineQuotes == null ? Str.First() : Str.TrimEnd(LineQuotes.Value.Start).First());
                 if (IsJap && PontuationJapList.Contains(First))
                     Points -= 3;
@@ -905,16 +1027,21 @@ namespace SRL {
                 if (!IsJap && (PontuationList).Contains(First))
                     Points -= 3;
 
-            } catch { }
+            }
+            catch { }
 
-            if (!IsJap) {
-                foreach (string Word in Words) {
+            if (!IsJap)
+            {
+                foreach (string Word in Words)
+                {
                     int WNumbers = Word.Where(c => char.IsNumber(c)).Count();
                     int WLetters = Word.Where(c => char.IsLetter(c)).Count();
-                    if (WLetters > 0 && WNumbers > 0) {
+                    if (WLetters > 0 && WNumbers > 0)
+                    {
                         Points += 2;
                     }
-                    if (Word.Trim(PontuationList).Where(c => PontuationList.Contains(c)).Count() != 0) {
+                    if (Word.Trim(PontuationList).Where(c => PontuationList.Contains(c)).Count() != 0)
+                    {
                         Points += 2;
                     }
                 }
@@ -989,30 +1116,41 @@ namespace SRL {
             bool Result = Points < Sensitivity;
             return Result;
         }
-        internal static double PercentOf(this string String, int Value) {
+        internal static double PercentOf(this string String, int Value)
+        {
             var Result = Value / (double)String.Length;
             return Result * 100;
         }
-        public enum Case {
+        public enum Case
+        {
             Lower, Upper, Normal, Title
         }
-        public static Case GetLineCase(string String) {
+        public static Case GetLineCase(string String)
+        {
             string[] Words = String.Split(' ').Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
             Case[] WordsCase = new Case[Words.Length];
-            for (int x = 0; x < Words.Length; x++) {
+            for (int x = 0; x < Words.Length; x++)
+            {
                 string Word = Words[x];
-                for (int i = 0; i < Word.Length; i++) {
+                for (int i = 0; i < Word.Length; i++)
+                {
                     char Char = Word[i];
                     if (Char > 0x8000)
                         return Case.Normal;
 
-                    if (i == 0) {
-                        if (char.IsLetter(Char) && char.IsUpper(Char)) {
+                    if (i == 0)
+                    {
+                        if (char.IsLetter(Char) && char.IsUpper(Char))
+                        {
                             WordsCase[x] = (x == 0 || (char.IsPunctuation(Words[x - 1].Last()))) ? Case.Normal : Case.Title;
-                        } else {
+                        }
+                        else
+                        {
                             WordsCase[x] = Case.Lower;
                         }
-                    } else {
+                    }
+                    else
+                    {
                         if (char.IsUpper(Char))
                             WordsCase[x] = Case.Upper;
                         break;
@@ -1036,9 +1174,11 @@ namespace SRL {
         }
 
 
-        static int CountChars(string Str) {
+        static int CountChars(string Str)
+        {
             List<char> Chars = new List<char>();
-            foreach (var chr in Str) {
+            foreach (var chr in Str)
+            {
                 if (Chars.Contains(chr))
                     continue;
                 Chars.Add(chr);
@@ -1051,16 +1191,18 @@ namespace SRL {
         /// </summary>
         /// <param name="Name">Name/Id of the encoding</param>
         /// <returns>Result Encoding, Thrown if fails.</returns>
-        static Encoding ParseEncodingName(string Name) {
-            switch (Name.ToLower().Trim().Replace("-", "")) {
+        static Encoding ParseEncodingName(string Name)
+        {
+            switch (Name.ToLower().Trim().Replace("-", ""))
+            {
                 case "default":
                     return Encoding.Default;
 
                 case "japanese":
                 case "shiftjis":
                 case "sjis":
-                    return Encoding.GetEncoding(932);                
-                
+                    return Encoding.GetEncoding(932);
+
                 case "utf8":
                     return Encoding.UTF8;
 
@@ -1076,7 +1218,8 @@ namespace SRL {
 
                 default:
                     int ID = 0;
-                    if (int.TryParse(Name, out ID)) {
+                    if (int.TryParse(Name, out ID))
+                    {
                         return Encoding.GetEncoding(ID);
                     }
                     return Encoding.GetEncoding(Name);
@@ -1089,7 +1232,8 @@ namespace SRL {
         /// <param name="text">The String</param>
         /// <param name="v">The list of strings to match</param>
         /// <returns></returns>
-        static bool EndsWithOr(string text, string v) {
+        static bool EndsWithOr(string text, string v)
+        {
             string[] letters = v.Split(',');
             foreach (string letter in letters)
                 if (text.EndsWith(letter))
@@ -1103,7 +1247,8 @@ namespace SRL {
         /// <param name="text">The String</param>
         /// <param name="val">The Number Limit</param>
         /// <returns></returns>
-        static bool NumberLimiter(string text, int val) {
+        static bool NumberLimiter(string text, int val)
+        {
             int min = '0', max = '9', total = 0;
             int asmin = '０', asmax = '９';
             foreach (char chr in text)
@@ -1120,7 +1265,8 @@ namespace SRL {
         /// <param name="text">The Text</param>
         /// <param name="MASK">List of substrings to match, in this format: Str1,Str2,Str3</param>
         /// <returns></returns>
-        static bool ContainsOR(string text, string MASK) {
+        static bool ContainsOR(string text, string MASK)
+        {
             string[] entries = MASK.Split(',');
             foreach (string entry in entries)
                 if (text.Contains(entry))

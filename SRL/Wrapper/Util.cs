@@ -1,15 +1,21 @@
 ﻿using System;
-using System.Diagnostics;
+//using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 
-namespace SRL.Wrapper {
-    static class Tools {
+namespace SRL.Wrapper
+{
+    static class Tools
+    {
 
         internal static string CurrentDllName = Path.GetFileName(Assembly.GetExecutingAssembly().Location).ToLower();
         internal static string CurrentDllPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+        internal static string RealDllPath = null;
+        internal static IntPtr RealHandler;
 
         static bool WOW64 => !Environment.Is64BitProcess && Environment.Is64BitOperatingSystem;
 
@@ -64,6 +70,9 @@ namespace SRL.Wrapper {
         internal delegate void NULL_8(IntPtr A, IntPtr B, IntPtr C, IntPtr D, IntPtr E, IntPtr F, IntPtr G, IntPtr H);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
+        internal delegate void NULL_6(IntPtr A, IntPtr B, IntPtr C, IntPtr D, IntPtr E, IntPtr F);
+
+        [UnmanagedFunctionPointer(CallingConvention.Winapi)]
         internal delegate void NULL_5(IntPtr A, IntPtr B, IntPtr C, IntPtr D, IntPtr E);
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi)]
@@ -87,9 +96,12 @@ namespace SRL.Wrapper {
         [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Unicode)]
         internal static extern IntPtr LoadLibraryW(string lpFileName);
 
-        internal static IntPtr LoadLibrary(string lpFileName) {
+        internal static IntPtr LoadLibrary(string lpFileName)
+        {
+
             string DllPath = lpFileName;
-            if (lpFileName.Length < 2 || lpFileName[1] != ':') {
+            if (lpFileName.Length < 2 || lpFileName[1] != ':')
+            {
                 string DLL = Path.GetFileNameWithoutExtension(lpFileName);
                 DllPath = Path.Combine(Environment.CurrentDirectory, $"{DLL}_ori.dll");
 
@@ -103,13 +115,16 @@ namespace SRL.Wrapper {
                 if (!File.Exists(DllPath) && CurrentDllName != lpFileName.ToLower())
                     DllPath = Path.Combine(CurrentDllPath, $"{DLL}.dll.ori");
 
-                if (!File.Exists(DllPath)) {
+                if (!File.Exists(DllPath))
+                {
                     DllPath = WOW64 ? Environment.GetFolderPath(Environment.SpecialFolder.SystemX86) : Environment.SystemDirectory;
                     DllPath = Path.Combine(DllPath, $"{DLL}.dll");
                 }
             }
 
-            IntPtr Handler = LoadLibraryW(DllPath);
+            RealDllPath = DllPath;
+
+            IntPtr Handler = RealHandler = LoadLibraryW(DllPath);
 
             if (Handler == IntPtr.Zero)
                 Environment.Exit(0x505);//ERROR_DELAY_LOAD_FAILED
@@ -117,10 +132,13 @@ namespace SRL.Wrapper {
             return Handler;
         }
 
-        internal static T GetDelegate<T>(IntPtr Handler, string Function, bool Optional = true) where T : Delegate {
+        internal static T GetDelegate<T>(IntPtr Handler, string Function, bool Optional = true) where T : Delegate
+        {
             IntPtr Address = GetProcAddress(Handler, Function);
-            if (Address == IntPtr.Zero) {
-                if (Optional) {
+            if (Address == IntPtr.Zero)
+            {
+                if (Optional)
+                {
                     return null;
                 }
 
@@ -129,16 +147,28 @@ namespace SRL.Wrapper {
             return (T)Marshal.GetDelegateForFunctionPointer(Address, typeof(T));
         }
 
-        public static bool IsWow64(Process Target) {
-            try {
-                if (IsWow64Process(Target.Handle, out bool WOW64)) {
-                    if (Environment.Is64BitOperatingSystem && WOW64)
-                        return true;
-                }
-            } catch { }
-            return false;
+        public static void InitializeSRL()
+        {
+            try
+            {
+                StringReloader.ProcessReal(IntPtr.Zero);
+            }
+            catch { }
         }
 
+        public static void WaitForExit(this Thread Thread)
+        {
+            while (Thread.IsRunning())
+            {
+                Thread.Sleep(100);
+            }
+        }
+
+        private static bool IsRunning(this Thread Thread)
+        {
+            return Thread.ThreadState == ThreadState.Running || Thread.ThreadState == ThreadState.Background
+                || Thread.ThreadState == ThreadState.WaitSleepJoin;
+        }
 
         static ulong ToUInt64(this IntPtr Ptr) => unchecked((ulong)Ptr.ToInt64());
         static uint ToUInt32(this IntPtr Ptr) => unchecked((uint)(Ptr.ToInt64() & 0xFFFFFFFF));
@@ -153,7 +183,8 @@ namespace SRL.Wrapper {
         static int ToInt32(this byte[] Data, int Address = 0) => BitConverter.ToInt32(Data, Address);
         static long ToInt64(this byte[] Data, int Address = 0) => BitConverter.ToInt64(Data, Address);
 
-        static IntPtr ToIntPtr(this byte[] Data, bool? x64 = null) {
+        static IntPtr ToIntPtr(this byte[] Data, bool? x64 = null)
+        {
             if (x64.HasValue)
                 return new IntPtr(x64.Value ? Data.ToInt64() : Data.ToInt32());
             if (Data.Length >= 8)
@@ -162,11 +193,13 @@ namespace SRL.Wrapper {
         }
 
 
-        static bool ChangeProtection(IntPtr Address, int Range, Protection Protection, out Protection OriginalProtection) {
+        static bool ChangeProtection(IntPtr Address, int Range, Protection Protection, out Protection OriginalProtection)
+        {
             return VirtualProtect(Address, Range, Protection, out OriginalProtection);
         }
 
-        static bool ChangeProtection(IntPtr Address, int Range, Protection Protection) {
+        static bool ChangeProtection(IntPtr Address, int Range, Protection Protection)
+        {
             return VirtualProtect(Address, Range, Protection, out Protection OriginalProtection);
         }
 
@@ -182,7 +215,8 @@ namespace SRL.Wrapper {
         [DllImport("psapi.dll", SetLastError = true)]
         public static extern uint GetModuleFileNameEx(IntPtr hProcess, IntPtr hModule, [Out] StringBuilder lpBaseName, int nSize);
 
-        enum Protection {
+        enum Protection
+        {
             PAGE_NOACCESS = 0x01,
             PAGE_READONLY = 0x02,
             PAGE_READWRITE = 0x04,
@@ -195,7 +229,8 @@ namespace SRL.Wrapper {
             PAGE_NOCACHE = 0x200,
             PAGE_WRITECOMBINE = 0x400
         }
-        public enum DwFilterFlag : uint {
+        public enum DwFilterFlag : uint
+        {
             LIST_MODULES_DEFAULT = 0x0,
             LIST_MODULES_32BIT = 0x01,
             LIST_MODULES_64BIT = 0x02,
@@ -204,7 +239,8 @@ namespace SRL.Wrapper {
 
     }
 
-    struct ImportEntry {
+    struct ImportEntry
+    {
 
         /// <summary>
         /// The Imported Module Name

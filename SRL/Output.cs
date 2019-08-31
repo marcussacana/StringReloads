@@ -6,9 +6,12 @@ using System.Runtime.Serialization;
 using System.Threading;
 using System.Windows.Forms;
 
-namespace SRL {
-    partial class StringReloader {
-        internal static void ShowLoading() {
+namespace SRL
+{
+    partial class StringReloader
+    {
+        internal static void ShowLoading()
+        {
             if (LiteMode)
                 return;
 
@@ -19,11 +22,14 @@ namespace SRL {
             const string WaitMsg = "SRL - String Reloader\nSoft-Translation Engine by Marcussacana{0}\nInitializing, Please Wait...";
 
             string ConsoleTitle = string.Empty;
-            try {
+            try
+            {
                 ConsoleTitle = Console.Title;
-            } catch { }
+            }
+            catch { }
 
-            if (WindowTitle == ConsoleTitle) {
+            if (WindowTitle == ConsoleTitle)
+            {
                 Thread.Sleep(500);
                 _hdl = IntPtr.Zero;
                 _hdlFail = true;
@@ -32,14 +38,15 @@ namespace SRL {
             Graphics g = Graphics.FromHwnd(GameHandler);
             string Title = WindowTitle;
 
-            if (Title != ConsoleTitle) 
+            if (Title != ConsoleTitle)
                 SetWindowTextW(GameHandler, string.Format("StringReloader - Initializing... [{0}]", Title));
-            
+
 
             PrintMessage(string.Format(WaitMsg, string.IsNullOrWhiteSpace(CustomCredits) ? string.Empty : "\n" + CustomCredits), -1);
 
-            if (Title != ConsoleTitle) {
-				string NewTitle = Title + " - [SRL Initialized]";
+            if (Title != ConsoleTitle)
+            {
+                string NewTitle = Title + " - [SRL Initialized]";
                 SetWindowTextW(GameHandler, NewTitle);
 
                 Thread.Sleep(4000);
@@ -48,7 +55,8 @@ namespace SRL {
             }
         }
 
-        private static void PrintMessage(string Text, int Seconds) {
+        private static void PrintMessage(string Text, int Seconds)
+        {
             if (GameHandler == IntPtr.Zero)
                 return;
 
@@ -59,37 +67,48 @@ namespace SRL {
             long Time = -1;
             if (Seconds != -1)
                 Time = Seconds * 1000;
-            if (Time == -1) {
-                while (!Initialized) {
-                    try {
+            if (Time == -1)
+            {
+                while (!Initialized)
+                {
+                    try
+                    {
                         Render.DrawString(Text, F, B, Pos);
                         Render.Flush();
                         Application.DoEvents();
                         Thread.Sleep(1);
-                    } catch { }
+                    }
+                    catch { }
                 }
-            } else {
-                while (Time > 0) {
-                    try {
+            }
+            else
+            {
+                while (Time > 0)
+                {
+                    try
+                    {
                         Time--;
                         Render.DrawString(Text, F, B, Pos);
                         Render.Flush();
                         Application.DoEvents();
                         Thread.Sleep(1);
-                    } catch { }
+                    }
+                    catch { }
                 }
             }
             Render.Dispose();
             ForcePaint(GameHandler);
         }
 
-        internal static void CheckArguments() {
+        internal static void CheckArguments()
+        {
             if (CmdLineChecked)
                 return;
             CmdLineChecked = true;
             string[] Commands = Environment.GetCommandLineArgs();
 
-            if (Ini.GetConfigStatus(CfgName, "WorkingDir;WorkDir;DataDir", IniPath) == Ini.ConfigStatus.Ok) {
+            if (Ini.GetConfigStatus(CfgName, "WorkingDir;WorkDir;DataDir", IniPath) == Ini.ConfigStatus.Ok)
+            {
                 CustomDir = Ini.GetConfig(CfgName, "WorkingDir;WorkDir;DataDir", IniPath, true);
                 if (!CustomDir.EndsWith("\\"))
                     CustomDir += '\\';
@@ -120,7 +139,8 @@ namespace SRL {
                 return;
 
             foreach (string Command in Commands)
-                switch (Command.ToLower().TrimStart('-', '/', '\\', ' ')) {
+                switch (Command.ToLower().TrimStart('-', '/', '\\', ' '))
+                {
                     case "litemode":
                     case "fastmode":
                     case "compatibilitymode":
@@ -144,7 +164,8 @@ namespace SRL {
                     case "recoverytl":
                     case "dumptranslation":
                     case "dump":
-                        if (!File.Exists(TLMap)) {
+                        if (!File.Exists(TLMap))
+                        {
                             Log("How you want dump the string if you don't have one?");
                             continue;
                         }
@@ -155,7 +176,8 @@ namespace SRL {
                     case "retranslate":
                     case "dumptotl":
                     case "dumpretail":
-                        if (!File.Exists(TLMap)) {
+                        if (!File.Exists(TLMap))
+                        {
                             Log("How you want dump the string if you don't have one?");
                             continue;
                         }
@@ -222,7 +244,8 @@ namespace SRL {
                         break;
                 }
         }
-        static void PreserveStackTrace(Exception e) {
+        static void PreserveStackTrace(Exception e)
+        {
             var ctx = new StreamingContext(StreamingContextStates.CrossAppDomain);
             var si = new SerializationInfo(typeof(Exception), new FormatterConverter());
             var ctor = typeof(Exception).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, new Type[] { typeof(SerializationInfo), typeof(StreamingContext) }, null);
@@ -231,7 +254,8 @@ namespace SRL {
             ctor.Invoke(e, new object[] { si, ctx });
         }
         //Portable Executable Checksum Validator
-        internal static bool PECSVal(byte[] Data) {
+        internal static bool PECSVal(byte[] Data)
+        {
             int PEStart = BitConverter.ToInt32(Data, 0x3c);
             int PECoffStart = PEStart + 4;
             int PEOptionalStart = PECoffStart + 20;
@@ -240,13 +264,16 @@ namespace SRL {
             long checksum = 0;
             var top = Math.Pow(2, 32);
 
-            for (var i = 0; i < Data.Length / 4; i++) {
-                if (i == PECheckSum / 4) {
+            for (var i = 0; i < Data.Length / 4; i++)
+            {
+                if (i == PECheckSum / 4)
+                {
                     continue;
                 }
                 var dword = BitConverter.ToUInt32(Data, i * 4);
                 checksum = (checksum & 0xffffffff) + dword + (checksum >> 32);
-                if (checksum > top) {
+                if (checksum > top)
+                {
                     checksum = (checksum & 0xffffffff) + (checksum >> 32);
                 }
             }
@@ -290,19 +317,23 @@ namespace SRL {
             LogFile = BakLogFile;
         }
 
-        internal static void Log(string Message, bool Optional = false, params object[] Format) {
-            try {
+        internal static void Log(string Message, bool Optional = false, params object[] Format)
+        {
+            try
+            {
                 if (LiteMode)
                     return;
 
                 Message = string.Format(Message, Format);
-                
-                if (LogFile) {
+
+                if (LogFile)
+                {
                     LogWriter.WriteLine("{0}: {1}", DateTime.Now.ToShortTimeString(), Message.Replace("\r\n", "\n").Replace("\n", "\r\n"));
                     LogWriter.Flush();
                 }
 
-                if (!ConsoleShowed && (!Optional || Debugging)) {
+                if (!ConsoleShowed && (!Optional || Debugging))
+                {
                     IntPtr discard = GameHandler;//Initialize the handler before open the console
                     discard = IntPtr.Zero;
                     ConsoleShowed = true;
@@ -311,7 +342,8 @@ namespace SRL {
                     Console.OutputEncoding = WriteEncoding;
                     hConsole = GetConsoleWindow();
                 }
-                if (!ConsoleShowed && !Debugging && Optional) {
+                if (!ConsoleShowed && !Debugging && Optional)
+                {
                     return;
                 }
 
@@ -319,37 +351,46 @@ namespace SRL {
                 bool Stack = Message == LastOutput;
                 LastOutput = Message;
 
-                if (Stack) {
-                    try {
+                if (Stack)
+                {
+                    try
+                    {
                         Console.CursorLeft = CursorX;
                         Console.CursorTop = CursorY;
 
                         Console.WriteLine("{0}: {1} [x{2}]", DateTime.Now.ToShortTimeString(), Message, ++LogStack);
-                    } catch { LastOutput = null; }
+                    }
+                    catch { LastOutput = null; }
 
                     return;
                 }
 
-                try {
+                try
+                {
                     CursorX = Console.CursorLeft;
                     CursorY = Console.CursorTop;
                     LogStack = 1;
-                } catch { LastOutput = null; }
+                }
+                catch { LastOutput = null; }
 
                 ShowWindow(hConsole, SW_SHOW);
                 Console.WriteLine("{0}: {1}", DateTime.Now.ToShortTimeString(), Message);
-            } catch {
+            }
+            catch
+            {
 
             }
         }
 
-        public static void HideConsole() {
+        public static void HideConsole()
+        {
             ShowWindow(hConsole, SW_HIDE);
         }
 
-        public static void ForcePaint(IntPtr Handle) {
+        public static void ForcePaint(IntPtr Handle)
+        {
             RedrawWindow(Handle, IntPtr.Zero, IntPtr.Zero, (RDW_ERASE | RDW_INVALIDATE));
         }
-        
+
     }
 }

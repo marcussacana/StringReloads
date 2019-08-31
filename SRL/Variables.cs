@@ -6,8 +6,10 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading;
 
-namespace SRL {
-    partial class StringReloader {
+namespace SRL
+{
+    partial class StringReloader
+    {
 
         const string BreakLineFlag = "::BREAKLINE::";
         const string ReturnLineFlag = "::RETURNLINE::";
@@ -39,6 +41,7 @@ namespace SRL {
         static List<long> Ptrs = new List<long>();
         static List<Range> Ranges = null;
 
+        static Engine.IEngine AutoEngine = new Engine.Wrapper();
 
         static NamedPipeClientStream PipeClient = null;
 
@@ -112,6 +115,7 @@ namespace SRL {
         static bool HookSendMessage;
 #endif
         static bool ImportHook;
+        static bool LoadLibraryFix;
         static bool HookCreateFile;
         static bool HookMultiByteToWideChar;
         static bool HookSetWindowText;
@@ -149,7 +153,7 @@ namespace SRL {
         static string LastOutput = string.Empty;
         static string CustomDir = string.Empty;
         static string CustomCredits = string.Empty;
-        
+
         static System.Drawing.Font Font;
         static bool Monospaced;
         static bool FakeBreakLine;
@@ -161,7 +165,7 @@ namespace SRL {
         static DotNetVM Overlay = null;
 
         static bool DirectRequested = false;
-        
+
         static string[] Replaces = new string[0];
         static string TLMap => BaseDir + "Strings.srl";
         static string TLMapSrc => BaseDir + "Strings.lst";
@@ -172,7 +176,7 @@ namespace SRL {
         static string OEDP => BaseDir + "Overlay.dll";
         static string IniPath => AppDomain.CurrentDomain.BaseDirectory + "Srl.ini";
         static string MTLCache => BaseDir + "MTL.lst";
-        static string ReplLst =>  BaseDir + "Replaces.lst";
+        static string ReplLst => BaseDir + "Replaces.lst";
         static string SrlDll => System.Reflection.Assembly.GetCallingAssembly().Location;
 
         static string BaseDir => AppDomain.CurrentDomain.BaseDirectory + CustomDir;
@@ -232,7 +236,7 @@ namespace SRL {
             }
         }
 
-        
+
         private static IntPtr hConsole = IntPtr.Zero;
         private static bool _hdlFail = false;
         private static IntPtr _hdl = IntPtr.Zero;
@@ -241,18 +245,21 @@ namespace SRL {
                 if (_hdl != IntPtr.Zero || _hdlFail)
                     return _hdl;
 
-                Thread Work = new Thread(() => {
+                Thread Work = new Thread(() =>
+                {
                     _hdl = System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
                     string title = WindowTitle;
                 });
                 Work.Start();
 
-                try {
+                try
+                {
                     DateTime Begin = DateTime.Now;
                     while ((Work.IsAlive || Work.IsBackground) && (DateTime.Now - Begin).TotalSeconds <= 2)
                         continue;
                     Work?.Abort();
-                } catch { }
+                }
+                catch { }
 
                 //Optimization
                 if (_hdl == IntPtr.Zero)
@@ -262,7 +269,8 @@ namespace SRL {
             }
         }
 
-        private static float DPI { get {
+        private static float DPI {
+            get {
                 var g = System.Drawing.Graphics.FromHwnd(GameHandler);
                 return g.DpiX;
             }
@@ -272,7 +280,8 @@ namespace SRL {
         private static string _tlt = string.Empty;
         private static string WindowTitle {
             get {
-                if (_tlt == string.Empty) {
+                if (_tlt == string.Empty)
+                {
                     _tlt = System.Diagnostics.Process.GetCurrentProcess().MainWindowTitle;
                 }
                 return _tlt;
@@ -283,7 +292,8 @@ namespace SRL {
         private static TextWriter _LogWriter = null;
         private static TextWriter LogWriter {
             get {
-                if (_LogWriter == null) {
+                if (_LogWriter == null)
+                {
                     _LogWriter = File.AppendText(BaseDir + "SRL.log");
                 }
                 return _LogWriter;
@@ -296,7 +306,8 @@ namespace SRL {
             get {
                 if (_netstas == 1 || IsWine)
                     return true;
-                if (_netstas == -1 || (DateTime.Now - LastTry).TotalMinutes > 10) {
+                if (_netstas == -1 || (DateTime.Now - LastTry).TotalMinutes > 10)
+                {
                     Ping myPing = new Ping();
                     string host = "google.com";
                     byte[] buffer = new byte[32];
@@ -321,7 +332,8 @@ namespace SRL {
                 IntPtr hModule = GetModuleHandle(@"ntdll.dll");
                 if (hModule == IntPtr.Zero)
                     isWine = false;
-                else {
+                else
+                {
                     IntPtr fptr = GetProcAddress(hModule, @"wine_get_version");
                     isWine = fptr != IntPtr.Zero;
                 }
@@ -335,14 +347,18 @@ namespace SRL {
                 return Version.FileMajorPart + "." + Version.FileMinorPart;
             }
         }
-        private static bool GameStarted() {
-            try {
+        private static bool GameStarted()
+        {
+            try
+            {
                 return !string.IsNullOrWhiteSpace(System.Diagnostics.Process.GetCurrentProcess().MainWindowTitle);
-            } catch {
+            }
+            catch
+            {
                 return false;
             }
         }
-        
+
         static Thread SettingsWatcher = null;
 
         static string[] MatchDel = new string[] {

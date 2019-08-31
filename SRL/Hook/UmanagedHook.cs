@@ -39,7 +39,8 @@ namespace SRL
         public IntPtr FunctionAddress;
     }
 
-    public class UnmanagedHook : UnmanagedHook<Delegate> {
+    public class UnmanagedHook : UnmanagedHook<Delegate>
+    {
 
         /// <summary>
         /// Create a new hook to the function in given pointer
@@ -84,14 +85,15 @@ namespace SRL
             else
                 return new UnmanagedHook(Library, Function, Hook);
         }
-     
+
         public static ImportEntry? GetImport(string Module, string Function)
         {
             try
             {
                 return (from x in GetImports() where (x.Module.ToLower() == Module.ToLower() && Function == x.Function) select x).Single();
             }
-            catch {
+            catch
+            {
                 return null;
             }
         }
@@ -102,7 +104,8 @@ namespace SRL
             {
                 return (from x in GetImports() where (x.Module.ToLower() == Module.ToLower() && Ordinal == x.Ordinal) select x).Single();
             }
-            catch {
+            catch
+            {
                 return null;
             }
         }
@@ -110,7 +113,8 @@ namespace SRL
         public bool ImportHook => base.ImportHook;
     }
 
-    public class UnmanagedHook<T> : IDisposable, Hook where T : Delegate {
+    public class UnmanagedHook<T> : IDisposable, Hook where T : Delegate
+    {
 
         static int nBytes = IntPtr.Size == 8 ? 12 : 5;
 
@@ -120,11 +124,11 @@ namespace SRL
         byte[] src = new byte[nBytes];
         byte[] dst = new byte[nBytes];
         bool AutoHook = false;
-        public bool ImportHook { get; private set; }  = false;
+        public bool ImportHook { get; private set; } = false;
 
         List<dynamic> Followers = new List<dynamic>();
 
-        T RealDestination;       
+        T RealDestination;
         T HookDestination;
 
 
@@ -134,7 +138,8 @@ namespace SRL
         /// <param name="Original">The pointer of the unmanaged function to hook</param>
         /// <param name="Hook">The delegate with the hook function</param>
         /// <param name="AutoHook">When true the hook will be automatically uninstalled during he execution</param>
-        public UnmanagedHook(IntPtr Original, T Hook, bool AutoHook) {
+        public UnmanagedHook(IntPtr Original, T Hook, bool AutoHook)
+        {
             this.AutoHook = AutoHook;
             RealDestination = Hook;
 
@@ -145,12 +150,15 @@ namespace SRL
 
             VirtualProtect(Original, nBytes, Protection.PAGE_EXECUTE_READWRITE, out old);
             Marshal.Copy(Original, src, 0, nBytes);
-            if (IntPtr.Size == 8) {
+            if (IntPtr.Size == 8)
+            {
                 //x64
                 new byte[] { 0x48, 0xb8 }.CopyTo(dst, 0);
                 BitConverter.GetBytes(unchecked((ulong)destination.ToInt64())).CopyTo(dst, 2);
                 new byte[] { 0xFF, 0xE0 }.CopyTo(dst, 10);
-            } else {
+            }
+            else
+            {
                 //x86
                 dst[0] = 0xE9;
                 var Result = (int)(destination.ToInt64() - Original.ToInt64() - nBytes);
@@ -192,7 +200,8 @@ namespace SRL
         /// <param name="Library">The Library name, Ex: Kernel32.dll</param>
         /// <param name="Function">The Function name, Ex: CreateFile</param>
         /// <param name="Hook">The delegate wit the hook function</param>
-        public UnmanagedHook(string Library, string Function, T Hook) : this(GetProcAddress(LoadLibrary(Library), Function), Hook) {
+        public UnmanagedHook(string Library, string Function, T Hook) : this(GetProcAddress(LoadLibrary(Library), Function), Hook)
+        {
         }
 
 
@@ -202,11 +211,13 @@ namespace SRL
         /// <param name="Function">The Function name, Ex: CreateFile</param>
         /// <param name="Hook">The delegate wit the hook function</param>
         /// <param name="AutoHook">When true the hook will be automatically uninstalled during he execution</param>
-        public UnmanagedHook(string Library, string Function, T Hook, bool AutoHook) : this(GetProcAddress(LoadLibrary(Library), Function), Hook, AutoHook) {
+        public UnmanagedHook(string Library, string Function, T Hook, bool AutoHook) : this(GetProcAddress(LoadLibrary(Library), Function), Hook, AutoHook)
+        {
 
         }
 
-        void GenerateMethod() {            
+        void GenerateMethod()
+        {
             string ID = CurrentID++.ToString();
             SetInstance(ID, this);
 
@@ -219,7 +230,8 @@ namespace SRL
             IL.Add(new Instruction(OpCodes.Call, UninstallMI));
 
             //Invoke(Parameters);
-            switch (Parameters.Length + 1) {
+            switch (Parameters.Length + 1)
+            {
                 case 1:
                     IL.Add(new Instruction(OpCodes.Ldc_I4_1));
                     break;
@@ -254,14 +266,16 @@ namespace SRL
             }
             IL.Add(new Instruction(OpCodes.Newarr, typeof(object)));
 
-            for (int i = 0, ind = -1; i < Parameters.Length + 1; i++, ind++) {
+            for (int i = 0, ind = -1; i < Parameters.Length + 1; i++, ind++)
+            {
                 bool IsOut = ind >= 0 && ParametersInfo[ind].IsOut;
                 bool IsRef = ind >= 0 && ParametersInfo[ind].ParameterType.IsByRef & !IsOut;
                 if (IsOut)
                     continue;
 
                 IL.Add(new Instruction(OpCodes.Dup));
-                switch (i) {
+                switch (i)
+                {
                     case 0:
                         IL.Add(new Instruction(OpCodes.Ldc_I4_0));
                         break;
@@ -293,18 +307,22 @@ namespace SRL
                         if (i <= byte.MaxValue)
                             IL.Add(new Instruction(OpCodes.Ldc_I4_S, (byte)i));
                         else
-                            IL.Add(new Instruction(OpCodes.Ldc_I4, i));                        
+                            IL.Add(new Instruction(OpCodes.Ldc_I4, i));
                         break;
                 }
 
 
-                if (ind >= 0 && (ParametersInfo[ind].IsIn || ParametersInfo[ind].IsOut)) {
+                if (ind >= 0 && (ParametersInfo[ind].IsIn || ParametersInfo[ind].IsOut))
+                {
                     if (ind <= byte.MaxValue)
                         IL.Add(new Instruction(OpCodes.Ldarga_S, (byte)ind));
                     else
                         IL.Add(new Instruction(OpCodes.Ldarga, (short)ind));
-                } else {
-                    switch (i) {
+                }
+                else
+                {
+                    switch (i)
+                    {
                         case 0:
                             IL.Add(new Instruction(OpCodes.Ldstr, ID));
                             break;
@@ -331,15 +349,17 @@ namespace SRL
 
                 var Type = ind >= 0 ? Parameters[ind] : null;
                 if (Type != null && IsRef)
-                      Type = Parameters[ind].GetElementType();                
+                    Type = Parameters[ind].GetElementType();
 
                 bool Cast = true;
-                if (IsRef) {
+                if (IsRef)
+                {
                     var PType = Type;
                     if (PType.IsEnum && PType.IsValueType)
                         PType = Enum.GetUnderlyingType(PType);
 
-                    switch (PType.FullName) {
+                    switch (PType.FullName)
+                    {
                         case "System.SByte":
                             IL.Add(new Instruction(OpCodes.Ldind_I1));
                             break;
@@ -374,9 +394,12 @@ namespace SRL
                             IL.Add(new Instruction(OpCodes.Ldind_I));
                             break;
                         default:
-                            if ((PType.IsValueType && !PType.IsEnum) || PType.IsClass) {
+                            if ((PType.IsValueType && !PType.IsEnum) || PType.IsClass)
+                            {
                                 IL.Add(new Instruction(OpCodes.Ldobj, PType));
-                            } else {
+                            }
+                            else
+                            {
                                 IL.Add(new Instruction(OpCodes.Ldind_Ref));
                                 Cast = false;
                             }
@@ -384,9 +407,9 @@ namespace SRL
                     }
                 }
 
-                if (ind >= 0 && Cast )
+                if (ind >= 0 && Cast)
                     IL.Add(new Instruction(OpCodes.Box, Type));
-                
+
                 IL.Add(new Instruction(OpCodes.Stelem_Ref));
             }
 
@@ -398,11 +421,13 @@ namespace SRL
             var RetType = RealDestination.Method.ReturnType;
             if (RetType.IsInterface)
                 IL.Add(new Instruction(OpCodes.Castclass, RetType));
-            else { 
+            else
+            {
                 IL.Add(new Instruction(OpCodes.Unbox_Any, RetType));
             }
 
-            for (int i = 0, ind = -1; i < Parameters.Length + 1; i++, ind++) {
+            for (int i = 0, ind = -1; i < Parameters.Length + 1; i++, ind++)
+            {
                 bool IsOut = ind >= 0 && ParametersInfo[ind].IsOut;
                 bool IsRef = ind >= 0 && ParametersInfo[ind].ParameterType.IsByRef & !IsOut;
 
@@ -410,7 +435,8 @@ namespace SRL
                     continue;
 
 
-                switch (ind) {
+                switch (ind)
+                {
                     case 0:
                         IL.Add(new Instruction(OpCodes.Ldarg_0));
                         break;
@@ -433,7 +459,8 @@ namespace SRL
                 }
 
                 IL.Add(new Instruction(OpCodes.Ldloc_0));
-                switch (i) {
+                switch (i)
+                {
                     case 0:
                         IL.Add(new Instruction(OpCodes.Ldc_I4_0));
                         break;
@@ -475,16 +502,20 @@ namespace SRL
                 if (IsRef || IsOut)
                     Type = Type.GetElementType();
 
-                if (Type.IsInterface) {
+                if (Type.IsInterface)
+                {
                     IL.Add(new Instruction(OpCodes.Castclass, Type));
                     IL.Add(new Instruction(OpCodes.Stind_Ref));
-                } else {                 
+                }
+                else
+                {
                     IL.Add(new Instruction(OpCodes.Unbox_Any, Type));
 
                     if (Type.IsEnum && Type.IsValueType)
                         Type = Enum.GetUnderlyingType(Type);
 
-                    switch (Type.FullName) {
+                    switch (Type.FullName)
+                    {
                         case "System.Byte":
                         case "System.SByte":
                             IL.Add(new Instruction(OpCodes.Stind_I1));
@@ -513,9 +544,12 @@ namespace SRL
                             IL.Add(new Instruction(OpCodes.Stind_I));
                             break;
                         default:
-                            if (Type.IsValueType && !Type.IsEnum) {
+                            if (Type.IsValueType && !Type.IsEnum)
+                            {
                                 IL.Add(new Instruction(OpCodes.Stobj, Type));
-                            } else {
+                            }
+                            else
+                            {
                                 IL.Add(new Instruction(OpCodes.Stind_Ref));
                             }
                             break;
@@ -538,12 +572,13 @@ namespace SRL
 #else
             DynamicMethod Method = new DynamicMethod("UnmanagedHook", RealDestination.Method.ReturnType, Parameters, typeof(UnmanagedImports), true);
 
-            
+
 
             var ILGen = Method.GetILGenerator();
             ILGen.DeclareLocal(typeof(object[]));
 
-            foreach (var Pair in IL) {
+            foreach (var Pair in IL)
+            {
                 if (Pair.Value == null)
                     ILGen.Emit(Pair.Key);
                 else
@@ -562,7 +597,8 @@ namespace SRL
         /// <summary>
         /// Install the hook
         /// </summary>
-        public void Install() {
+        public void Install()
+        {
             Marshal.Copy(dst, 0, addr, ImportHook ? IntPtr.Size : nBytes);
         }
 
@@ -570,23 +606,27 @@ namespace SRL
         /// <summary>
         /// Uninstall the hook
         /// </summary>
-        public void Uninstall() {
+        public void Uninstall()
+        {
             Marshal.Copy(src, 0, addr, ImportHook ? IntPtr.Size : nBytes);
         }
 
-        Delegate Hook.GetDelegate() {
+        Delegate Hook.GetDelegate()
+        {
             return RealDestination;
         }
-        
+
         /// <summary>
         /// Adds a hook to be disabled during the execution of the this hook
         /// </summary>
         /// <param name="Follower">The hook to be disabled</param>
-        public void AddFollower(params object[] Followers) {
+        public void AddFollower(params object[] Followers)
+        {
             if (!AutoHook)
                 throw new Exception("The Auto Hook must be enabled");
 
-            foreach (object Follower in Followers) {
+            foreach (object Follower in Followers)
+            {
                 if (!(Follower is Hook))
                     throw new Exception(Follower.GetType().Name + " Isn't an UnmanagedHook Class");
 
@@ -598,11 +638,13 @@ namespace SRL
         /// Remove a hook from the Follower list
         /// </summary>
         /// <param name="Follower">The hook to be removed</param>
-        public void RemoveFollower(params object[] Followers) {
+        public void RemoveFollower(params object[] Followers)
+        {
             if (!AutoHook)
                 throw new Exception("The Auto Hook must be enabled");
 
-            foreach (object Follower in Followers) {
+            foreach (object Follower in Followers)
+            {
                 if (!(Follower is Hook))
                     throw new Exception(Follower.GetType().Name + " Isn't an UnmanagedHook Class");
 
@@ -610,11 +652,13 @@ namespace SRL
             }
         }
 
-        object[] Hook.GetFollowers() {
+        object[] Hook.GetFollowers()
+        {
             return Followers.ToArray();
         }
 
-        public void Dispose() {
+        public void Dispose()
+        {
             Uninstall();
             Protection x;
             VirtualProtect(addr, nBytes, old, out x);
@@ -622,24 +666,29 @@ namespace SRL
 
     }
 
-    static class UnmanagedImports { 
+    static class UnmanagedImports
+    {
 
         [DebuggerDisplay("{Key}      {Value}")]
-        internal struct Instruction {
+        internal struct Instruction
+        {
             public dynamic Key;
             public dynamic Value;
 
-            public Instruction(dynamic Key, dynamic Value) {
+            public Instruction(dynamic Key, dynamic Value)
+            {
                 this.Key = Key;
                 this.Value = Value;
             }
-            public Instruction(dynamic Key) {
+            public Instruction(dynamic Key)
+            {
                 this.Key = Key;
                 Value = null;
             }
         }
 
-        internal interface Hook {
+        internal interface Hook
+        {
             void Install();
             void Uninstall();
 
@@ -656,11 +705,13 @@ namespace SRL
         /// <summary>
         /// INTERNAL UNMANAGED HOOK USAGE, DON'T TOUCH ME
         /// </summary>
-        public static void Install(string ID) {
+        public static void Install(string ID)
+        {
             Hook Hook = (Hook)InstanceMap[ID];
             Hook.Install();
 
-            foreach (object dFollower in Hook.GetFollowers()) {
+            foreach (object dFollower in Hook.GetFollowers())
+            {
                 Hook Follower = (Hook)dFollower;
                 Follower.Install();
             }
@@ -669,11 +720,13 @@ namespace SRL
         /// <summary>
         /// INTERNAL UNMANAGED HOOK USAGE, DON'T TOUCH ME
         /// </summary>
-        public static void Uninstall(string ID) {
+        public static void Uninstall(string ID)
+        {
             Hook Hook = (Hook)InstanceMap[ID];
             Hook.Uninstall();
 
-            foreach (object dFollower in Hook.GetFollowers()) {
+            foreach (object dFollower in Hook.GetFollowers())
+            {
                 Hook Follower = (Hook)dFollower;
                 Follower.Uninstall();
             }
@@ -682,7 +735,8 @@ namespace SRL
         /// <summary>
         /// INTERNAL UNMANAGED HOOK USAGE, DON'T TOUCH ME
         /// </summary>
-        public static object Invoke(object[] Parameters) {
+        public static object Invoke(object[] Parameters)
+        {
             if (Parameters.Length == 0)
                 throw new Exception("No Arguments Found");
 
@@ -697,7 +751,8 @@ namespace SRL
         }
 
 
-        internal static void SetInstance(string ID, object Instance) {
+        internal static void SetInstance(string ID, object Instance)
+        {
             InstanceMap[ID] = Instance;
         }
         internal static ImportEntry[] GetModuleImports(IntPtr Module)
@@ -851,7 +906,8 @@ namespace SRL
 
         [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Ansi)]
         internal static extern IntPtr LoadLibrary([MarshalAs(UnmanagedType.LPStr)]string lpFileName);
-        internal enum Protection {
+        internal enum Protection
+        {
             PAGE_NOACCESS = 0x01,
             PAGE_READONLY = 0x02,
             PAGE_READWRITE = 0x04,

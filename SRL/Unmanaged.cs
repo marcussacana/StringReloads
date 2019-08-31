@@ -2,14 +2,16 @@
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace SRL {
-    partial class StringReloader {
+namespace SRL
+{
+    partial class StringReloader
+    {
         [DllImport("kernel32.dll", SetLastError = true)]
         static extern int MultiByteToWideChar(int CodePage, uint dwFlags, IntPtr lpMultiByteStr, int cbMultiByte, IntPtr lpWideCharStr, int cchWideChar);
 
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Ansi)]
         static extern IntPtr CreateWindowExA(WindowStylesEx dwExStyle, [MarshalAs(UnmanagedType.LPStr)] string lpClassName, [MarshalAs(UnmanagedType.LPStr)] string lpWindowName, WindowStyles dwStyle, int x, int y, int nWidth, int nHeight, IntPtr hWndParent, IntPtr hMenu, IntPtr hInstance, IntPtr lpParam);
-        
+
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         static extern IntPtr CreateWindowExW(WindowStylesEx dwExStyle, [MarshalAs(UnmanagedType.LPWStr)] string lpClassName, [MarshalAs(UnmanagedType.LPWStr)] string lpWindowName, WindowStyles dwStyle, int x, int y, int nWidth, int nHeight, IntPtr hWndParent, IntPtr hMenu, IntPtr hInstance, IntPtr lpParam);
 
@@ -18,7 +20,7 @@ namespace SRL {
 
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         static extern IntPtr CreateWindowW([MarshalAs(UnmanagedType.LPWStr)] string lpClassName, [MarshalAs(UnmanagedType.LPWStr)] string lpWindowName, uint dwStyle, int x, int y, int nWidth, int nHeight, IntPtr hWndParent, IntPtr hMenu, IntPtr hInstance, IntPtr lpParam);
-        
+
         [DllImport("user32.dll")]
         static extern Int32 SendMessageA(int hWnd, int Msg, int wParam, IntPtr lParam);
 
@@ -63,10 +65,10 @@ namespace SRL {
         static extern bool AllocConsole();
 
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Ansi)]
-        static extern bool SetWindowTextA(IntPtr hwnd,[MarshalAs(UnmanagedType.LPStr)] string lpString);
+        static extern bool SetWindowTextA(IntPtr hwnd, [MarshalAs(UnmanagedType.LPStr)] string lpString);
 
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        static extern bool SetWindowTextW(IntPtr hwnd,[MarshalAs(UnmanagedType.LPWStr)] string lpString);
+        static extern bool SetWindowTextW(IntPtr hwnd, [MarshalAs(UnmanagedType.LPWStr)] string lpString);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
@@ -144,7 +146,8 @@ namespace SRL {
 
         [StructLayout(LayoutKind.Sequential)]
 
-        public struct MSG {
+        public struct MSG
+        {
             public IntPtr hWnd;
             public uint Message;
             public UIntPtr wParam;
@@ -155,7 +158,8 @@ namespace SRL {
 
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
-        public struct MENUITEMINFO {
+        public struct MENUITEMINFO
+        {
             public uint cbSize;
             public uint fMask;
             public uint fType;
@@ -176,7 +180,8 @@ namespace SRL {
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct TTPOLYGONHEADER {
+        public struct TTPOLYGONHEADER
+        {
 
             public int cb;
             public int dwType;
@@ -184,19 +189,22 @@ namespace SRL {
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct TTPOLYCURVEHEADER {
+        public struct TTPOLYCURVEHEADER
+        {
             public short wType;
             public short cpfx;
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct FIXED {
+        public struct FIXED
+        {
             public short fract;
             public short value;
         }
 
 
-        public struct MAT2 {
+        public struct MAT2
+        {
             [MarshalAs(UnmanagedType.Struct)] public FIXED eM11;
             [MarshalAs(UnmanagedType.Struct)] public FIXED eM12;
             [MarshalAs(UnmanagedType.Struct)] public FIXED eM21;
@@ -204,19 +212,22 @@ namespace SRL {
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct POINT {
+        public struct POINT
+        {
             public int x;
             public int y;
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct POINTFX {
+        public struct POINTFX
+        {
             [MarshalAs(UnmanagedType.Struct)] public FIXED x;
             [MarshalAs(UnmanagedType.Struct)] public FIXED y;
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct GLYPHMETRICS {
+        public struct GLYPHMETRICS
+        {
             public int gmBlackBoxX;
             public int gmBlackBoxY;
             [MarshalAs(UnmanagedType.Struct)] public POINT gmptGlyphOrigin;
@@ -225,10 +236,12 @@ namespace SRL {
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct RECT {
+        public struct RECT
+        {
             public int Left, Top, Right, Bottom;
 
-            public RECT(int left, int top, int right, int bottom) {
+            public RECT(int left, int top, int right, int bottom)
+            {
                 Left = left;
                 Top = top;
                 Right = right;
@@ -267,27 +280,33 @@ namespace SRL {
                 set { Width = value.Width; Height = value.Height; }
             }
 
-            public static implicit operator System.Drawing.Rectangle(RECT r) {
+            public static implicit operator System.Drawing.Rectangle(RECT r)
+            {
                 return new System.Drawing.Rectangle(r.Left, r.Top, r.Width, r.Height);
             }
 
-            public static implicit operator RECT(System.Drawing.Rectangle r) {
+            public static implicit operator RECT(System.Drawing.Rectangle r)
+            {
                 return new RECT(r);
             }
 
-            public static bool operator ==(RECT r1, RECT r2) {
+            public static bool operator ==(RECT r1, RECT r2)
+            {
                 return r1.Equals(r2);
             }
 
-            public static bool operator !=(RECT r1, RECT r2) {
+            public static bool operator !=(RECT r1, RECT r2)
+            {
                 return !r1.Equals(r2);
             }
 
-            public bool Equals(RECT r) {
+            public bool Equals(RECT r)
+            {
                 return r.Left == Left && r.Top == Top && r.Right == Right && r.Bottom == Bottom;
             }
 
-            public override bool Equals(object obj) {
+            public override bool Equals(object obj)
+            {
                 if (obj is RECT)
                     return Equals((RECT)obj);
                 else if (obj is System.Drawing.Rectangle)
@@ -295,11 +314,13 @@ namespace SRL {
                 return false;
             }
 
-            public override int GetHashCode() {
+            public override int GetHashCode()
+            {
                 return ((System.Drawing.Rectangle)this).GetHashCode();
             }
 
-            public override string ToString() {
+            public override string ToString()
+            {
                 return string.Format(System.Globalization.CultureInfo.CurrentCulture, "{{Left={0},Top={1},Right={2},Bottom={3}}}", Left, Top, Right, Bottom);
             }
         }
@@ -318,13 +339,14 @@ namespace SRL {
         public const uint MIIM_SUBMENU = 0x00000004;
         public const int SW_HIDE = 0;
         public const int SW_SHOW = 5;
-        public const int SW_RESTORE = 9; 
+        public const int SW_RESTORE = 9;
         public const int RDW_INVALIDATE = 0x0001;
         public const int RDW_ERASE = 0x0004;
         public const int RDW_UPDATENOW = 0x0100;
 
         [Flags()]
-        private enum SetWindowPosFlags : uint {
+        private enum SetWindowPosFlags : uint
+        {
             /// <summary>If the calling thread and the thread that owns the window are attached to different input queues, 
             /// the system posts the request to the thread that owns the window. This prevents the calling thread from 
             /// blocking its execution while other threads process the request.</summary>
@@ -383,8 +405,9 @@ namespace SRL {
             ShowWindow = 0x0040
         }
 
-            [Flags]
-        public enum WindowStylesEx : uint {
+        [Flags]
+        public enum WindowStylesEx : uint
+        {
             /// <summary>Specifies a window that accepts drag-drop files.</summary>
             WS_EX_ACCEPTFILES = 0x00000010,
 
@@ -529,7 +552,8 @@ namespace SRL {
         /// The following styles can be specified wherever a window style is required. After the control has been created, these styles cannot be modified, except as noted.
         /// </summary>
         [Flags()]
-        private enum WindowStyles : uint {
+        private enum WindowStyles : uint
+        {
             /// <summary>The window has a thin-line border.</summary>
             WS_BORDER = 0x800000,
 

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace SRL {
-    static partial class StringReloader {
+namespace SRL
+{
+    static partial class StringReloader
+    {
 
         static GetGlyphOutlineDelegate dOutlineA = null;
         static GetGlyphOutlineDelegate dOutlineW = null;
@@ -50,7 +52,8 @@ namespace SRL {
 
         static UnmanagedHook hMultiByteToWideChar;
 
-        static void InstallGlyphHooks() {
+        static void InstallGlyphHooks()
+        {
             if (Managed)
                 return;
 
@@ -193,7 +196,8 @@ namespace SRL {
             hMultiByteToWideChar.Install();
         }
 
-        public static uint hGetGlyphOutlineA(IntPtr hdc, uint uChar, uint uFormat, out GLYPHMETRICS lpgm, uint cbBuffer, IntPtr lpvBuffer, ref MAT2 lpmat2) {
+        public static uint hGetGlyphOutlineA(IntPtr hdc, uint uChar, uint uFormat, out GLYPHMETRICS lpgm, uint cbBuffer, IntPtr lpvBuffer, ref MAT2 lpmat2)
+        {
             uChar = (uint)ParsePtr(ProcessReal(new IntPtr((int)uChar)));
 
 
@@ -209,7 +213,8 @@ namespace SRL {
             OutlineA.Install();
             return Ret;
         }
-        public static uint hGetGlyphOutlineW(IntPtr hdc, uint uChar, uint uFormat, out GLYPHMETRICS lpgm, uint cbBuffer, IntPtr lpvBuffer, ref MAT2 lpmat2) {
+        public static uint hGetGlyphOutlineW(IntPtr hdc, uint uChar, uint uFormat, out GLYPHMETRICS lpgm, uint cbBuffer, IntPtr lpvBuffer, ref MAT2 lpmat2)
+        {
             uChar = (uint)ParsePtr(ProcessReal(new IntPtr((int)uChar)));
 
 #if DEBUG
@@ -226,17 +231,23 @@ namespace SRL {
             return Ret;
         }
 
-        public static bool hTextOut(IntPtr hdc, int nXStart, int nYStart, string lpString, int cbString) {
+        public static bool hTextOut(IntPtr hdc, int nXStart, int nYStart, string lpString, int cbString)
+        {
             lpString = Process(lpString);
-            if (UndoChars) {
-                for (int i = 0; i < lpString.Length; i++) {
+            if (UndoChars)
+            {
+                for (int i = 0; i < lpString.Length; i++)
+                {
                     char C = lpString[i];
                     char OC = RestoreChar(C);
                     if (OC != C)
                         lpString = lpString.Replace(C, OC);
                 }
-            } else {
-                for (int i = 0; i < lpString.Length; i++) {
+            }
+            else
+            {
+                for (int i = 0; i < lpString.Length; i++)
+                {
                     char C = lpString[i];
                     char OC = ProcessChar(C);
                     if (OC != C)
@@ -256,17 +267,23 @@ namespace SRL {
             return Rst;
         }
 
-        public static bool hExtTextOut(IntPtr hdc, int X, int Y, uint fuOptions, ref RECT lprc, string lpString, uint cbCount, IntPtr lpDx) {
+        public static bool hExtTextOut(IntPtr hdc, int X, int Y, uint fuOptions, ref RECT lprc, string lpString, uint cbCount, IntPtr lpDx)
+        {
             lpString = Process(lpString);
-            if (UndoChars) {
-                for (int i = 0; i < lpString.Length; i++) {
+            if (UndoChars)
+            {
+                for (int i = 0; i < lpString.Length; i++)
+                {
                     char C = lpString[i];
                     char OC = RestoreChar(C);
                     if (OC != C)
                         lpString = lpString.Replace(C, OC);
                 }
-            } else {
-                for (int i = 0; i < lpString.Length; i++) {
+            }
+            else
+            {
+                for (int i = 0; i < lpString.Length; i++)
+                {
                     char C = lpString[i];
                     char OC = ProcessChar(C);
                     if (OC != C)
@@ -289,12 +306,17 @@ namespace SRL {
         }
 
 
-        static IntPtr hCreateFont(int nHeight, int nWidth, int nEscapement, int nOrientation, int fnWeight, uint fdwItalic, uint fdwUnderline, uint fdwStrikeOut, uint fdwCharSet, uint fdwOutputPrecision, uint fdwClipPrecision, uint fdwQuality, uint fdwPitchAndFamily, string lpszFace) {
-            if (RedirFontSize(lpszFace) != null) {
+        static IntPtr hCreateFont(int nHeight, int nWidth, int nEscapement, int nOrientation, int fnWeight, uint fdwItalic, uint fdwUnderline, uint fdwStrikeOut, uint fdwCharSet, uint fdwOutputPrecision, uint fdwClipPrecision, uint fdwQuality, uint fdwPitchAndFamily, string lpszFace)
+        {
+            if (RedirFontSize(lpszFace) != null)
+            {
                 string Change = RedirFontSize(lpszFace);
-                if (Change.StartsWith("+")) {
+                if (Change.StartsWith("+"))
+                {
                     nWidth += int.Parse(Change);
-                } else {
+                }
+                else
+                {
                     int Val = int.Parse(Change);
                     if (Val <= 0)
                         nWidth += Val;
@@ -321,12 +343,17 @@ namespace SRL {
             return Result;
         }
 
-        static IntPtr hCreateFontIndirectA(ref LOGFONTA FontInfo) {
-            if (RedirFontSize(FontInfo.lfFaceName) != null) {
+        static IntPtr hCreateFontIndirectA(ref LOGFONTA FontInfo)
+        {
+            if (RedirFontSize(FontInfo.lfFaceName) != null)
+            {
                 string Change = RedirFontSize(FontInfo.lfFaceName);
-                if (Change.StartsWith("+")) {
+                if (Change.StartsWith("+"))
+                {
                     FontInfo.lfWidth += int.Parse(Change);
-                } else {
+                }
+                else
+                {
                     int Val = int.Parse(Change);
                     if (Val <= 0)
                         FontInfo.lfWidth += Val;
@@ -352,12 +379,17 @@ namespace SRL {
 
             return Result;
         }
-        static IntPtr hCreateFontIndirectW(ref LOGFONTW FontInfo) {
-            if (RedirFontSize(FontInfo.lfFaceName) != null) {
+        static IntPtr hCreateFontIndirectW(ref LOGFONTW FontInfo)
+        {
+            if (RedirFontSize(FontInfo.lfFaceName) != null)
+            {
                 string Change = RedirFontSize(FontInfo.lfFaceName);
-                if (Change.StartsWith("+")) {
+                if (Change.StartsWith("+"))
+                {
                     FontInfo.lfWidth += int.Parse(Change);
-                } else {
+                }
+                else
+                {
                     int Val = int.Parse(Change);
                     if (Val <= 0)
                         FontInfo.lfWidth += Val;
@@ -456,7 +488,8 @@ namespace SRL {
             return Rst;
         }
 #endif
-        static bool SetWindowTextHook(IntPtr hwnd, string lpString) { 
+        static bool SetWindowTextHook(IntPtr hwnd, string lpString)
+        {
             lpString = StrMap(lpString, IntPtr.Zero, true);
 
             if (hSetWindowTextW.ImportHook)
@@ -468,12 +501,14 @@ namespace SRL {
             return Ret;
         }
 
-        static int MultiByteToWideCharHook(int Codepage, uint dwFlags, IntPtr Input, int cbMultiByte, IntPtr Output, int cchWideChar) {
+        static int MultiByteToWideCharHook(int Codepage, uint dwFlags, IntPtr Input, int cbMultiByte, IntPtr Output, int cchWideChar)
+        {
 
             if (!hMultiByteToWideChar.ImportHook)
                 hMultiByteToWideChar.Uninstall();
 
-            if (!Initialized || cbMultiByte == 0) {
+            if (!Initialized || cbMultiByte == 0)
+            {
                 int Rst = MultiByteToWideChar(Codepage, dwFlags, Input, cbMultiByte, Output, cchWideChar);
                 if (!hMultiByteToWideChar.ImportHook)
                     hMultiByteToWideChar.Install();
@@ -483,7 +518,8 @@ namespace SRL {
             string RStr = Str;
             RStr = StrMap(Str, Input, true);
 
-            if (RStr == Str) {
+            if (RStr == Str)
+            {
                 int Rst = MultiByteToWideChar(Codepage, dwFlags, Input, cbMultiByte, Output, cchWideChar);
                 if (!hMultiByteToWideChar.ImportHook)
                     hMultiByteToWideChar.Install();
@@ -502,7 +538,8 @@ namespace SRL {
         }
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-        struct LOGFONTA {
+        struct LOGFONTA
+        {
             public const int LF_FACESIZE = 32;
             public int lfHeight;
             public int lfWidth;
@@ -524,7 +561,8 @@ namespace SRL {
         }
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-        struct LOGFONTW {
+        struct LOGFONTW
+        {
             public const int LF_FACESIZE = 32;
             public int lfHeight;
             public int lfWidth;

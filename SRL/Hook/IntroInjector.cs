@@ -8,9 +8,11 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 
-namespace SRL {
+namespace SRL
+{
 
-    static partial class StringReloader {
+    static partial class StringReloader
+    {
 
 #if !DEBUG
         static CreateWindowExADelegate CreateWindowExADel;
@@ -25,7 +27,8 @@ namespace SRL {
         static UnmanagedHook SetWindowPosHook;
         static UnmanagedHook MoveWindowHook;
 
-        static void InstallIntroInjector() {
+        static void InstallIntroInjector()
+        {
             if (ShowWindowHook != null || Managed)
                 return;
 #if !DEBUG
@@ -116,22 +119,26 @@ namespace SRL {
             return Result;
         }
 #endif
-        static void ShowIntro(IntPtr hWnd) {
+        static void ShowIntro(IntPtr hWnd)
+        {
             if (IntroInitialized)
                 return;
             if (hWnd == hConsole)
                 return;
 
             IntroInitialized = true;
-            try {
+            try
+            {
 
                 var WindowSize = GetWindowSize(hWnd);
-                if (WindowSize.Height < MinSize || WindowSize.Width < MinSize) {
+                if (WindowSize.Height < MinSize || WindowSize.Width < MinSize)
+                {
                     IntroInitialized = false;
                     return;
                 }
 
-                if (CheckProportion && WindowSize.Width < WindowSize.Height) {
+                if (CheckProportion && WindowSize.Width < WindowSize.Height)
+                {
                     IntroInitialized = false;
                     return;
                 }
@@ -145,30 +152,37 @@ namespace SRL {
 
                 IntroHelper[] Intros = (from x in Introduction select LoadIntro(x, WindowSize)).ToArray();
 
-                using (Graphics Window = Graphics.FromHwnd(hWnd)) {
+                using (Graphics Window = Graphics.FromHwnd(hWnd))
+                {
                     var OriState = Window.Save();
                     Window.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
                     Window.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                     Window.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
                     Window.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
 
-                    foreach (var Intro in Intros) {
+                    foreach (var Intro in Intros)
+                    {
                         Window.Clear(Intro.Background);
 
                         bool Loaded = false;
                         bool Finished = false;
 
                         if (Intro.Sound != null)
-                            new Thread(() => {
-                                try {
+                            new Thread(() =>
+                            {
+                                try
+                                {
                                     using (var Stream = new MemoryStream(Intro.Sound))
-                                    using (var Audio = new SoundPlayer(Stream)) {
+                                    using (var Audio = new SoundPlayer(Stream))
+                                    {
                                         Audio.Load();
                                         Loaded = true;
                                         Audio.PlaySync();
                                         Finished = true;
                                     }
-                                } catch (Exception ex) {
+                                }
+                                catch (Exception ex)
+                                {
                                     Error("INTRO ERROR: {0}", ex);
                                 }
                             }).Start();
@@ -178,55 +192,70 @@ namespace SRL {
                             Thread.Sleep(5);
 
                         bool Switch = false;
-                        foreach (var Image in Intro.Fade) {
+                        foreach (var Image in Intro.Fade)
+                        {
                             if (Finished)
                                 break;
-                            
+
                             Window.DrawImage(Image, Intro.Position);
                             Window.Flush();
 
                             DoEvents(hWnd);
 
-                            if (Switch) {
+                            if (Switch)
+                            {
                                 Switch = false;
                                 Thread.Sleep(10);
-                            } else Switch = true;
+                            }
+                            else Switch = true;
                         }
 
-                        if (Seconds == 0) {
-                            while (!Finished) {
+                        if (Seconds == 0)
+                        {
+                            while (!Finished)
+                            {
                                 DoEvents(hWnd);
 
-                                if (Switch) {
+                                if (Switch)
+                                {
                                     Switch = false;
                                     Thread.Sleep(10);
-                                } else Switch = true;
+                                }
+                                else Switch = true;
                             }
-                        } else {
+                        }
+                        else
+                        {
                             int Interval = Seconds > 0 ? Seconds * 1000 : 3000;
                             DateTime Begin = DateTime.Now;
-                            while ((int)(DateTime.Now - Begin).TotalMilliseconds < Interval) {
+                            while ((int)(DateTime.Now - Begin).TotalMilliseconds < Interval)
+                            {
                                 DoEvents(hWnd);
 
-                                if (Switch) {
+                                if (Switch)
+                                {
                                     Switch = false;
                                     Thread.Sleep(10);
-                                } else Switch = true;
+                                }
+                                else Switch = true;
                             }
                         }
-                        
 
-                        foreach (var Image in Intro.Fade.Reverse()) {
+
+                        foreach (var Image in Intro.Fade.Reverse())
+                        {
                             Window.DrawImage(Image, Intro.Position);
                             Window.Flush();
 
                             DoEvents(hWnd);
 
                             Image.Dispose();
-                            if (Switch) {
+                            if (Switch)
+                            {
                                 Switch = false;
                                 Thread.Sleep(10);
-                            } else Switch = true;
+                            }
+                            else Switch = true;
                         }
 
                         Window.Restore(OriState);
@@ -236,23 +265,28 @@ namespace SRL {
                     Window.Dispose();
                 }
 
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 Error("INTRO ERROR: {0}", ex);
             }
         }
 
-        static void DoEvents(IntPtr hWnd) {
+        static void DoEvents(IntPtr hWnd)
+        {
             RedrawWindow(hWnd, IntPtr.Zero, IntPtr.Zero, RDW_UPDATENOW);
             Application.DoEvents();
         }
 
-        static IntroHelper LoadIntro(IntroContainer Intro, Size Size) {
+        static IntroHelper LoadIntro(IntroContainer Intro, Size Size)
+        {
             var Helper = new IntroHelper();
             int Steps = 100;
 
             Helper.Fade = new Bitmap[Steps];
 
-            using (var Texture = Intro.Texture) {
+            using (var Texture = Intro.Texture)
+            {
                 Color Pixel = Texture.GetPixel(0, 0);
                 Helper.Background = Color.FromArgb(255, Pixel);
 
@@ -260,11 +294,14 @@ namespace SRL {
             }
 
 
-            for (int Step = 0; Step < Steps; Step++) {
-                using (var Texture = Intro.Texture) {
+            for (int Step = 0; Step < Steps; Step++)
+            {
+                using (var Texture = Intro.Texture)
+                {
                     Bitmap Opacity = SetBitmapOpacity(Texture, ((float)Step) / Steps);
                     Bitmap Result = new Bitmap(Texture.Width, Texture.Height);
-                    using (Graphics Draw = Graphics.FromImage(Result)) {
+                    using (Graphics Draw = Graphics.FromImage(Result))
+                    {
                         Draw.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
                         Draw.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                         Draw.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
@@ -287,14 +324,16 @@ namespace SRL {
             return Helper;
         }
 
-        static Point GetCenterPoint(this Size Content, Size Background) {
+        static Point GetCenterPoint(this Size Content, Size Background)
+        {
             int X = (Background.Width / 2) - (Content.Width / 2);
             int Y = (Background.Height / 2) - (Content.Height / 2);
 
             return new Point(X, Y);
         }
 
-        static Size GetWindowSize(IntPtr hWnd) {
+        static Size GetWindowSize(IntPtr hWnd)
+        {
             if (!GetWindowRect(hWnd, out RECT Rectangle))
                 return new Size(1, 1);
 
@@ -302,13 +341,16 @@ namespace SRL {
         }
 
         //https://stackoverflow.com/questions/4779027/changing-the-opacity-of-a-bitmap-image
-        static Bitmap SetBitmapOpacity(Bitmap image, float opacity) {
-            try {
+        static Bitmap SetBitmapOpacity(Bitmap image, float opacity)
+        {
+            try
+            {
                 //create a Bitmap the size of the image provided  
                 Bitmap bmp = new Bitmap(image.Width, image.Height);
 
                 //create a graphics object from the image  
-                using (Graphics gfx = Graphics.FromImage(bmp)) {
+                using (Graphics gfx = Graphics.FromImage(bmp))
+                {
 
                     //create a color matrix object  
                     ColorMatrix matrix = new ColorMatrix();
@@ -326,7 +368,9 @@ namespace SRL {
                     gfx.DrawImage(image, new Rectangle(0, 0, bmp.Width, bmp.Height), 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, attributes);
                 }
                 return bmp;
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 return null;
             }
         }
@@ -339,7 +383,8 @@ namespace SRL {
             return GetProcAddress(hModule, Function) != IntPtr.Zero;
         }
 
-        struct IntroHelper {
+        struct IntroHelper
+        {
             public Bitmap[] Fade;
             public Color Background;
             public Point Position;

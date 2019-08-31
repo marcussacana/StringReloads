@@ -6,18 +6,23 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 
-namespace SRL {
-    partial class StringReloader {
+namespace SRL
+{
+    partial class StringReloader
+    {
 
-        static IntPtr ProcessChar(IntPtr CharInt) {
+        static IntPtr ProcessChar(IntPtr CharInt)
+        {
             ushort c = (ushort)ParsePtr(CharInt);
-            if (CharRld.ContainsKey(c)) {
+            if (CharRld.ContainsKey(c))
+            {
                 return new IntPtr(CharRld[c]);
             }
-            if (UnkRld.ContainsKey(c)) {
+            if (UnkRld.ContainsKey(c))
+            {
                 return new IntPtr(UnkRld[c]);
             }
-        
+
             if (!((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')) && Debugging)
                 Warning("Char Missed... l={0}|n=0x{1:X4}", (char)c, c);
 
@@ -25,7 +30,8 @@ namespace SRL {
         }
 
         static char ProcessChar(char Char) => (char)ProcessChar(new IntPtr(Char)).ToInt32();
-        static char RestoreChar(char Char) {
+        static char RestoreChar(char Char)
+        {
             if (CharRld.ContainsValue(Char))
                 return (char)CharRld.ReverseMatch(Char);
             if (UnkRld.ContainsValue(Char))
@@ -34,7 +40,8 @@ namespace SRL {
             return Char;
         }
 
-        static internal Key ReverseMatch<Key, Value>(this Dictionary<Key, Value> Dictionary, Value ValueToSearch) {
+        static internal Key ReverseMatch<Key, Value>(this Dictionary<Key, Value> Dictionary, Value ValueToSearch)
+        {
             if (!Dictionary.ContainsValue(ValueToSearch))
                 throw new Exception("Value not Present in the Dictionary");
 
@@ -44,19 +51,23 @@ namespace SRL {
             return Dictionary.Keys.ElementAt(Index);
         }
 
-        internal static dynamic ParsePtr(IntPtr IntPtr) {
-            
+        internal static dynamic ParsePtr(IntPtr IntPtr)
+        {
+
             if (Environment.Is64BitProcess)
                 return unchecked((ulong)IntPtr.ToInt64());
             else
                 return unchecked((uint)IntPtr.ToInt32());
         }
 
-        internal static string RedirFaceName(string FaceName) {
-            if (LogAll) {
+        internal static string RedirFaceName(string FaceName)
+        {
+            if (LogAll)
+            {
                 Log("Font Redirect Request: {0}", true, FaceName);
             }
-            if (!FontReplaces.ContainsKey(FaceName.Trim())) {
+            if (!FontReplaces.ContainsKey(FaceName.Trim()))
+            {
                 if (FontReplaces.ContainsKey("*"))
                     return FontReplaces["*"].To;
 
@@ -66,8 +77,10 @@ namespace SRL {
             }
             return FontReplaces[FaceName.Trim()].To;
         }
-        internal static string RedirFontSize(string FaceName) {
-            if (!FontReplaces.ContainsKey(FaceName.Trim())) {
+        internal static string RedirFontSize(string FaceName)
+        {
+            if (!FontReplaces.ContainsKey(FaceName.Trim()))
+            {
                 return null;
             }
             if (FontReplaces.ContainsKey("*"))
@@ -83,35 +96,40 @@ namespace SRL {
         /// <param name="InputPtr">Original String Pointer, Use IntPtr.Zero don't have one</param>
         /// <param name="Native">When true, will return the string without char reloads.</param>
         /// <returns></returns>
-        internal static string StrMap(string Input, IntPtr InputPtr, bool Native) {
+        internal static string StrMap(string Input, IntPtr InputPtr, bool Native)
+        {
             if (DecodeCharactersFromInput)
                 Input = ReplaceChars(Input, true);
 
             bool IsDialog = Input.IsDialog();
 
             if (!DialogFound && !IsDialog)
-                return Input;          
+                return Input;
 
             if (string.IsNullOrWhiteSpace(Input))
                 return Input;
 
             string Str = SimplfyMatch(Input);
 
-            if ((LogAll || LogInput) && (!DumpStrOnly || IsDialog)) {
-                if (!DumpStrOnly || !InCache("LOG: " + Str)) {
+            if ((LogAll || LogInput) && (!DumpStrOnly || IsDialog))
+            {
+                if (!DumpStrOnly || !InCache("LOG: " + Str))
+                {
                     Log("[{1}|{2}] Input: {0}", true, Input, IsDialog ? "D" : "S", GetCurrentDBIndex());
                     if (DumpStrOnly)
                         CacheReply("LOG: " + Str);
                 }
             }
 
-            if (InCache(Str) && DialogFound && NotCachedOnly) {
+            if (InCache(Str) && DialogFound && NotCachedOnly)
+            {
                 return Input;
             }
 
-            if (ContainsKey(Str)) {
+            if (ContainsKey(Str))
+            {
                 string Entry = GetEntry(Str);
-                
+
                 string Rst = EnableWordWrap ? WordWrap(Entry) : Entry;
                 if (Native)
                     return ReplaceChars(Rst, true);
@@ -120,17 +138,19 @@ namespace SRL {
                 return Rst;
             }
 
-            if (InputPtr != IntPtr.Zero) {
+            if (InputPtr != IntPtr.Zero)
+            {
                 Str = GetString(InputPtr, false);
 
                 if (DecodeCharactersFromInput)
                     Str = ReplaceChars(Str, true);
 
                 Str = SimplfyMatch(Str);
-                if (ContainsKey(Str)) {
+                if (ContainsKey(Str))
+                {
 
-                    string Entry = GetEntry(Str);  
-                    
+                    string Entry = GetEntry(Str);
+
                     string Rst = EnableWordWrap ? WordWrap(Entry) : Entry;
                     if (Native)
                         return ReplaceChars(Rst, true);
@@ -138,12 +158,15 @@ namespace SRL {
                 }
             }
 
-            if (!DisableMasks && ValidateMask(Input)) {
-                try {
+            if (!DisableMasks && ValidateMask(Input))
+            {
+                try
+                {
 
                     string Result = ProcessMask(Input);
 
-                    if (Result.StartsWith(MaskWordWrap)) {
+                    if (Result.StartsWith(MaskWordWrap))
+                    {
                         Result = Result.Substring(MaskWordWrap.Length, Result.Length - MaskWordWrap.Length);
                         Result = WordWrap(Result);
                     }
@@ -151,7 +174,9 @@ namespace SRL {
                     if (Native)
                         return ReplaceChars(Result, true);
                     return Result;
-                } catch (Exception ex) {
+                }
+                catch (Exception ex)
+                {
                     Warning(ex.ToString());
                 }
             }
@@ -160,17 +185,23 @@ namespace SRL {
             if (Debugging)
                 Missmatch(Input);
 
-            if (TLIB != null) {
+            if (TLIB != null)
+            {
                 Str = TrimString(Input);
-                if (Str.IsDialog()) {
+                if (Str.IsDialog())
+                {
                     string Ori = MergeLines(Str);
 
                     string TL = null;
-                    if (Online) {
-                        try {
+                    if (Online)
+                    {
+                        try
+                        {
                             Log("Translating: \"{0}\"", true, Str);
                             TL = TLIB.Call("TLIB.Google", "Translate", MassiveMode ? (object)new string[] { Ori } : Ori, SourceLang, TargetLang);
-                        } catch {
+                        }
+                        catch
+                        {
                             Log("Connection Failed, Disabling MTL for 30m", true);
                             Online = false;
                         }
@@ -234,15 +265,20 @@ namespace SRL {
             return Reloaded;
         }
 
-        internal static string UpdateOverlay(string Text) {
-            try {
-                if (Overlay != null && OverlayEnabled) {
-                    if (!OverlayInitialized) {
+        internal static string UpdateOverlay(string Text)
+        {
+            try
+            {
+                if (Overlay != null && OverlayEnabled)
+                {
+                    if (!OverlayInitialized)
+                    {
                         OverlayInitialized = true;
                         Overlay.Call("Overlay.Exports", "HookWindow", GameHandler);
                     }
 
-                    if (!PaddingSeted) {
+                    if (!PaddingSeted)
+                    {
                         PaddingSeted = true;
                         Overlay.Call("Overlay.Exports", "SetOverlayPadding", OPaddingTop, OPaddinBottom, OPaddinLeft, OPaddingRigth);
                     }
@@ -250,21 +286,28 @@ namespace SRL {
                     string ret = Overlay.Call("Overlay.Exports", "SetDialogue", ReplaceChars(Text, true).Replace(GameLineBreaker, "\n"));
                     ret = ReplaceChars(ret).Replace("\n", GameLineBreaker);
                     return ret;
-                } else if (Text.StartsWith("::EVENT")) {
+                }
+                else if (Text.StartsWith("::EVENT"))
+                {
                     Text = Text.Substring(Text.IndexOf("::", 2) + 2);
                 }
-            } catch { }
+            }
+            catch { }
             return Text;
         }
 
-        internal static void Init() {
-            try {
-                if (Initialized) {
+        internal static void Init()
+        {
+            try
+            {
+                if (Initialized)
+                {
                     Log("Ops, Initialization Requested... But, is already initialized...", true);
                     return;
                 }
 
-                if (!CloseEventAdded) {
+                if (!CloseEventAdded)
+                {
                     CloseEventAdded = true;
                     AppDomain.CurrentDomain.ProcessExit += ProcessOver;
                     new Thread(ShowLoading).Start();
@@ -283,30 +326,39 @@ namespace SRL {
                     Warning("You are using SRL through the old function, it is recommended to use GetDirectProcess");
 
 
-                if (File.Exists(BaseDir + "EncodingModifier.cs")) {
+                if (File.Exists(BaseDir + "EncodingModifier.cs"))
+                {
                     Log("Enabling Encoding Modifier...", true);
-                    try {
+                    try
+                    {
                         DotNetVM VM = new DotNetVM(File.ReadAllText(BaseDir + "EncodingModifier.cs", Encoding.UTF8));
                         EncodingModifier = VM;
                         Log("Encoding Modifier Compiled", true);
-                    } catch (Exception ex) {
+                    }
+                    catch (Exception ex)
+                    {
                         Error("Failed to compile the Encoding Modifier\n===========\n{0}\n===========\n{1}", ex.Message, ex.Source);
                     }
                 }
 
-                if (File.Exists(BaseDir + "StringModifier.cs")) {
+                if (File.Exists(BaseDir + "StringModifier.cs"))
+                {
                     Log("Enabling String Modifier...", true);
-                    try {
+                    try
+                    {
                         DotNetVM VM = new DotNetVM(File.ReadAllText(BaseDir + "StringModifier.cs", Encoding.UTF8));
                         StringModifier = VM;
                         Log("String Modifier Compiled", true);
-                    } catch (Exception ex) {
+                    }
+                    catch (Exception ex)
+                    {
                         Error("Failed to compile the String Modifier\n===========\n{0}\n===========\n{1}", ex.Message, ex.Source);
                     }
                 }
 
                 //I Implement This to prevent 
-                if (!PECSVal(File.ReadAllBytes(SrlDll))) {
+                if (!PECSVal(File.ReadAllBytes(SrlDll)))
+                {
 #if DEBUG
                     Warning("SRL Engine - Unauthenticated Debug Build");
 #else
@@ -315,14 +367,17 @@ namespace SRL {
 #endif
                 }
 
-                if (File.Exists(OEDP) && Overlay == null) {
+                if (File.Exists(OEDP) && Overlay == null)
+                {
                     Overlay = new DotNetVM(File.ReadAllBytes(OEDP));
                     Log("Overlay Enabled.", true);
                 }
 
-                if (File.Exists(TLDP) && TLIB == null) {
+                if (File.Exists(TLDP) && TLIB == null)
+                {
                     AdvancedIni.FastOpen(out MTLSettings Settings, IniPath);
-                    if (Settings.Enabled) {
+                    if (Settings.Enabled)
+                    {
                         SourceLang = Settings.SourceLang;
                         TargetLang = Settings.TargetLang;
                         MassiveMode = Settings.MassiveMode;
@@ -331,7 +386,8 @@ namespace SRL {
                     }
                 }
 
-                if (!File.Exists(TLMap) || Ini.GetConfig(CfgName, "Rebuild", IniPath, false).ToLower() == "true") {
+                if (!File.Exists(TLMap) || Ini.GetConfig(CfgName, "Rebuild", IniPath, false).ToLower() == "true")
+                {
                     Log("Unabled to load the {0}", true, TLMap);
                     bool ContainsSplitedList = Directory.GetFiles(BaseDir, Path.GetFileName(string.Format(TLMapSrcMsk, "*"))).Length != 0;
 
@@ -354,7 +410,8 @@ namespace SRL {
                     InstallIntroInjector();
                 }
 
-                if (Debugging && File.Exists(TLMapSrc)) {
+                if (Debugging && File.Exists(TLMapSrc))
+                {
                     Log("Loading Dumped Data...");
 
                     var Strs = new List<string>();
@@ -367,27 +424,32 @@ namespace SRL {
                     Log("Dumped Data Loaded, {0} Entries Loaded.", false, Strs.Count);
                 }
 
-                if (TLIB != null && File.Exists(MTLCache)) {
+                if (TLIB != null && File.Exists(MTLCache))
+                {
                     Log("Loading MTL Cache...", true);
                     List<string> Ori = new List<string>();
                     List<string> TL = new List<string>();
                     ReadDump(MTLCache, ref Ori, ref TL);
 
-                    for (int i = 0; i < Ori.Count; i++) {
+                    for (int i = 0; i < Ori.Count; i++)
+                    {
                         string Match = SimplfyMatch(Ori[i]);
                         if (AllowDuplicates || !ContainsKey(Match))
                             AddEntry(Match, ReplaceChars(TL[i]));
                     }
                 }
 
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 Error("Failed to Initialize...");
                 PreserveStackTrace(ex);
                 throw ex;
             }
         }
 
-        private static string GetDBNameById(long ID) {
+        private static string GetDBNameById(long ID)
+        {
             return DBNames[ID];
         }
 
@@ -396,18 +458,20 @@ namespace SRL {
             return DBNames.ReverseMatch(Name);
         }
 
-        private static void WindowHook() {
+        private static void WindowHook()
+        {
             if (WindowHookRunning)
                 return;
 
             WindowHookRunning = true;
             while (!Initialized)
-                Thread.Sleep(100);            
+                Thread.Sleep(100);
 
             while (GameHandler == IntPtr.Zero)
-                Thread.Sleep(1000);            
+                Thread.Sleep(1000);
 
-            while (true) {
+            while (true)
+            {
                 Thread.Sleep(100);
 
                 var CB = new CallBack(ProcessWindow);
@@ -415,10 +479,11 @@ namespace SRL {
 
                 IntPtr Handler = GetMenu(GameHandler);
                 ProcessMenu(Handler);
-            }            
+            }
         }
 
-        private static bool ProcessWindow(IntPtr Handler, int Parameters) {
+        private static bool ProcessWindow(IntPtr Handler, int Parameters)
+        {
             int Len = GetWindowTextLength(Handler);
             StringBuilder sb = new StringBuilder(Len + 1);
             GetWindowText(Handler, sb, sb.Capacity);
@@ -431,10 +496,12 @@ namespace SRL {
             uint HandlePID;
             GetWindowThreadProcessId(Handler, out HandlePID);
 
-            if (HandlePID == GamePID) {
+            if (HandlePID == GamePID)
+            {
                 var CB = new CallBack(ProcessWindow);
                 EnumChildWindows(Handler, CB, IntPtr.Zero);
-            } else
+            }
+            else
                 return true;
 
             string Reload = StrMap(Ori, IntPtr.Zero, true);
@@ -442,7 +509,7 @@ namespace SRL {
 
             if (Ori == Reload)
                 return true;
-            
+
 
             HandleRef href = new HandleRef(null, Handler);
             SendMessage(href, WM_SETTEXT, IntPtr.Zero, Reload);
@@ -452,13 +519,16 @@ namespace SRL {
 
             return true;
         }
-        private static void ProcessMenu(IntPtr Handler) {
+        private static void ProcessMenu(IntPtr Handler)
+        {
             int MenuCount = GetMenuItemCount(Handler);
             if (MenuCount == -1)
                 return;
             var MenuInfo = new MENUITEMINFO();
-            for (int i = 0; i < MenuCount; i++) {
-                MenuInfo = new MENUITEMINFO() {
+            for (int i = 0; i < MenuCount; i++)
+            {
+                MenuInfo = new MENUITEMINFO()
+                {
                     cbSize = MENUITEMINFO.SizeOf,
                     fMask = MIIM_STRING | MIIM_SUBMENU,
                     fType = MFT_STRING,
@@ -482,7 +552,8 @@ namespace SRL {
                 if (!Sucess)
                     continue;
 
-                if (Ori == Reload) {
+                if (Ori == Reload)
+                {
                     continue;
                 }
 
@@ -495,30 +566,38 @@ namespace SRL {
             }
         }
 
-        private static void ProcessOver(object sender, EventArgs e) {
+        private static void ProcessOver(object sender, EventArgs e)
+        {
             if (FreeOnExit)
-                try {
+                try
+                {
                     Log("Exiting Process...", true);
                     IntPtr[] Ptrs = GetPtrs();
-                    foreach (IntPtr Ptr in Ptrs) {
-                        try {
+                    foreach (IntPtr Ptr in Ptrs)
+                    {
+                        try
+                        {
                             Marshal.FreeHGlobal(Ptr);
-                        } catch { }
+                        }
+                        catch { }
                     }
-                } catch { }
+                }
+                catch { }
 
 
             EndPipe();
 
-            if (AntiCrash) {
+            if (AntiCrash)
+            {
                 System.Diagnostics.Process.GetCurrentProcess().Kill();
             }
         }
-        
-        private static IDictionary<string, string> CreateDictionary() {
-            return AllowDuplicates ? 
-                (IDictionary<string, string>) new DuplicableDictionary<string, string>() :
-                (IDictionary<string, string>) new Dictionary<string, string>();
+
+        private static IDictionary<string, string> CreateDictionary()
+        {
+            return AllowDuplicates ?
+                (IDictionary<string, string>)new DuplicableDictionary<string, string>() :
+                (IDictionary<string, string>)new Dictionary<string, string>();
         }
     }
 }
