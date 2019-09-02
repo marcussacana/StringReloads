@@ -1,10 +1,10 @@
 ﻿using System;
-//using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using System.Windows.Forms;
 
 namespace SRL.Wrapper
 {
@@ -124,12 +124,102 @@ namespace SRL.Wrapper
 
             RealDllPath = DllPath;
 
+            //System.Windows.Forms.MessageBox.Show("Mod: " + DllPath);
+
             IntPtr Handler = RealHandler = LoadLibraryW(DllPath);
 
             if (Handler == IntPtr.Zero)
                 Environment.Exit(0x505);//ERROR_DELAY_LOAD_FAILED
 
             return Handler;
+        }
+
+        internal static bool ApplyWrapperPatch() {
+            if (CurrentDllName == "srl.dll")
+                return true;
+
+            if (MessageBox.Show("The SRL need apply a patch in the game, apply now?\nIf yes the game will restart", "StringReloader", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                return false;
+
+            Retry:;
+            string EXEPath = Application.ExecutablePath;
+            byte[] Data = File.ReadAllBytes(EXEPath);
+
+            int Offset = IndexOf(Data, CurrentDllName);
+            if (Offset == -1)
+                Offset = IndexOf(Data, CurrentDllName.ToUpper());
+            if (Offset == -1)
+                Offset = IndexOf(Data, Path.GetFileName(CurrentDllPath));
+
+            if (Offset == -1)
+            {
+                var Rst = MessageBox.Show(string.Format("Failed to Patch, \"{0}\" occurrence not found in the game executable.", "StringReloader", MessageBoxButtons.RetryCancel, MessageBoxIcon.Error));
+                if (Rst == DialogResult.Retry)
+                    goto Retry;
+                else
+                    return false;
+            }
+
+            var Patch = Encoding.ASCII.GetBytes("SRL.dll\x0");
+            Array.Copy(Patch, 0, Data, Offset, Patch.Length);
+
+            string Output = EXEPath;
+
+            if (!TryRename(EXEPath, EXEPath + ".bak"))
+                Output = Path.Combine(Path.GetDirectoryName(EXEPath), Path.GetFileNameWithoutExtension(EXEPath) + "-Patched.exe");
+
+            File.WriteAllBytes(Output, Data);
+
+            if (!TryRename(CurrentDllName, "SRL.dll"))
+                File.Copy(CurrentDllName, "SRL.dll");
+
+            System.Diagnostics.Process.Start(Output);
+            Environment.Exit(0);
+            System.Diagnostics.Process.GetCurrentProcess().Kill();
+            return true;
+        }
+
+        internal static int IndexOf(byte[] Array, string String) => IndexOf(Array, Encoding.ASCII.GetBytes(String));
+
+        internal static int IndexOf(byte[] Array, byte[] SubArray)
+        {
+            if (SubArray.Length > Array.Length)
+                return -1;
+
+            for (int i = 0, x = 0; i < Array.Length; i++)
+            {
+                if (Array[i] == SubArray[x])
+                    x++;
+                else
+                    x = 0;
+                if (x == SubArray.Length)
+                    return i - x + 1;
+            }
+            return -1;
+        }
+
+        internal static bool TryRename(string FileName, string NewName)
+        {
+            int Tries = 20;
+            while (Tries > 0)
+            {
+                try
+                {
+                    var OutPath = Path.Combine(Path.GetDirectoryName(FileName), NewName);
+                    if (OutPath.ToLower() == FileName.ToLower())
+                        return false;
+                    if (File.Exists(OutPath))
+                        File.Delete(OutPath);
+                    File.Move(FileName, OutPath);
+                    return true;
+                }
+                catch
+                {
+                    Thread.Sleep(100);
+                    Tries--;
+                }
+            }
+            return false;
         }
 
         internal static T GetDelegate<T>(IntPtr Handler, string Function, bool Optional = true) where T : Delegate
@@ -193,12 +283,12 @@ namespace SRL.Wrapper
         }
 
 
-        static bool ChangeProtection(IntPtr Address, int Range, Protection Protection, out Protection OriginalProtection)
+        public static bool ChangeProtection(IntPtr Address, int Range, Protection Protection, out Protection OriginalProtection)
         {
             return VirtualProtect(Address, Range, Protection, out OriginalProtection);
         }
 
-        static bool ChangeProtection(IntPtr Address, int Range, Protection Protection)
+        public static bool ChangeProtection(IntPtr Address, int Range, Protection Protection)
         {
             return VirtualProtect(Address, Range, Protection, out Protection OriginalProtection);
         }
@@ -215,7 +305,7 @@ namespace SRL.Wrapper
         [DllImport("psapi.dll", SetLastError = true)]
         public static extern uint GetModuleFileNameEx(IntPtr hProcess, IntPtr hModule, [Out] StringBuilder lpBaseName, int nSize);
 
-        enum Protection
+        public enum Protection
         {
             PAGE_NOACCESS = 0x01,
             PAGE_READONLY = 0x02,

@@ -71,6 +71,22 @@ namespace SRL
         public static ImportEntry[] GetImports() => GetModuleImports(Process.GetCurrentProcess().MainModule.BaseAddress);
 
         /// <summary>
+        /// Get the Module Export Ordinal by the function name
+        /// </summary>
+        /// <param name="Module">The module name</param>
+        /// <param name="Function">The Exported Function Name</param>
+        /// <returns>The Ordinal</returns>
+        public static ushort GetExportOrdinal(string Module, string Function) => SearchFunctionOridinal(Module, Function);
+
+        /// <summary>
+        /// Get the Module Export Ordinal by the function name
+        /// </summary>
+        /// <param name="Module">The module handler</param>
+        /// <param name="Function">The Exported Function Name</param>
+        /// <returns>The Ordinal</returns>
+        public static ushort GetExportOrdinal(IntPtr Module, string Function) => SearchFunctionOridinal(Module, Function);
+
+        /// <summary>
         /// Create a hook by Import if possible
         /// </summary>
         /// <param name="Library"></param>
@@ -805,7 +821,7 @@ namespace SRL
                     bool ImportByOrdinal = false;
                     if ((EntryPtr.ToUInt64() & OrdinalFlag) == OrdinalFlag)
                     {
-                        EntryPtr = (EntryPtr.ToUInt64() ^ OrdinalFlag).ToIntPtr();
+                        EntryPtr = ((PtrSize == 8 ? EntryPtr.ToUInt64() : EntryPtr.ToUInt32()) ^ OrdinalFlag).ToIntPtr();
                         ImportByOrdinal = true;
                     }
                     else
@@ -864,6 +880,22 @@ namespace SRL
             return Unicode ? System.Text.Encoding.Unicode.GetString(Buffer.ToArray()) : System.Text.Encoding.Default.GetString(Buffer.ToArray());
         }
 
+        public static ushort SearchFunctionOridinal(string Module, string Function) => SearchFunctionOridinal(LoadLibrary(Module), Function);
+        public static ushort SearchFunctionOridinal(IntPtr Module, string Function)
+        {
+            IntPtr ProcAddr = GetProcAddress(Module, Function);
+            if (ProcAddr == IntPtr.Zero)
+                throw new KeyNotFoundException("DLL Export Not Found");
+
+            for (ushort i = 0; true; i++)
+            {
+                IntPtr Addr = GetProcAddress(Module, i);
+                if (Addr == ProcAddr)
+                    return i;
+            }
+
+            throw new KeyNotFoundException("DLL Export Ordignal Not Found");
+        }
 
         internal static ulong ToUInt64(this IntPtr Ptr) => unchecked((ulong)Ptr.ToInt64());
         internal static uint ToUInt32(this IntPtr Ptr) => unchecked((uint)(Ptr.ToInt64() & 0xFFFFFFFF));
@@ -903,6 +935,9 @@ namespace SRL
 
         [DllImport("kernel32", CharSet = CharSet.Ansi, ExactSpelling = true, SetLastError = true)]
         internal static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
+
+        [DllImport("kernel32", ExactSpelling = true, SetLastError = true)]
+        internal static extern IntPtr GetProcAddress(IntPtr hModule, ushort Ordinal);
 
         [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Ansi)]
         internal static extern IntPtr LoadLibrary([MarshalAs(UnmanagedType.LPStr)]string lpFileName);

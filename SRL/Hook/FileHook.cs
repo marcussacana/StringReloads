@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace SRL
@@ -43,24 +44,30 @@ namespace SRL
 
         static void InstallLoadLibraryHooks()
         {
-
             dLoadLibraryA = new LoadLibraryADelegate(LoadLibraryHook);
             dLoadLibraryW = new LoadLibraryWDelegate(LoadLibraryHook);
             dLoadLibraryExA = new LoadLibraryExADelegate(LoadLibraryEx);
             dLoadLibraryExW = new LoadLibraryExWDelegate(LoadLibraryEx);
+            dGetModuleHandleA = new GetModuleHandleADelegate(GetModuleHandleHook);
+            dGetModuleHandleW = new GetModuleHandleWDelegate(GetModuleHandleHook);
 
             hLoadLibraryA = new UnmanagedHook<LoadLibraryADelegate>("kernel32.dll", "LoadLibraryA", dLoadLibraryA, true);
             hLoadLibraryW = new UnmanagedHook<LoadLibraryWDelegate>("kernel32.dll", "LoadLibraryW", dLoadLibraryW, true);
             hLoadLibraryExA = new UnmanagedHook<LoadLibraryExADelegate>("kernel32.dll", "LoadLibraryExA", dLoadLibraryExA, true);
             hLoadLibraryExW = new UnmanagedHook<LoadLibraryExWDelegate>("kernel32.dll", "LoadLibraryExW", dLoadLibraryExW, true);
+            hGetModuleHandleA = new UnmanagedHook<GetModuleHandleADelegate>("kernel32.dll", "GetModuleHandleA", dGetModuleHandleA, true);
+            hGetModuleHandleW = new UnmanagedHook<GetModuleHandleWDelegate>("kernel32.dll", "GetModuleHandleW", dGetModuleHandleW, true);
 
             hLoadLibraryA.AddFollower(hLoadLibraryW);
             hLoadLibraryExA.AddFollower(hLoadLibraryExW);
+            hGetModuleHandleA.AddFollower(hGetModuleHandleW);
 
             hLoadLibraryA.Install();
             hLoadLibraryW.Install();
             hLoadLibraryExA.Install();
             hLoadLibraryExW.Install();
+            hGetModuleHandleA.Install();
+            hGetModuleHandleW.Install();
         }
 
         static bool GetFileAttributesEx(string FileName, IntPtr fInfoLevelId, IntPtr lpFileInformation)
@@ -103,9 +110,14 @@ namespace SRL
             if (LogAll)
                 Log("LoadLibrary: {0}", true, lpFileName);
 
-            if (lpFileName.ToLower() == Wrapper.Tools.CurrentDllPath.ToLower())
+
+            var FileName = lpFileName?.ToLower();
+
+            if (FileName == Wrapper.Tools.CurrentDllPath.ToLower())
                 return Wrapper.Tools.RealHandler;
-            if (lpFileName.ToLower() == Wrapper.Tools.CurrentDllName.ToLower())
+            if (FileName == Wrapper.Tools.CurrentDllName)
+                return Wrapper.Tools.RealHandler;
+            if (FileName == Path.GetFileNameWithoutExtension(Wrapper.Tools.CurrentDllName))
                 return Wrapper.Tools.RealHandler;
 
             return LoadLibraryW(lpFileName);
@@ -120,20 +132,41 @@ namespace SRL
             if (LogAll)
                 Log("LoadLibraryEx: {0}", true, lpFileName);
 
+            var FileName = lpFileName?.ToLower();
+
             if (!AsResource)
             {
-                if (lpFileName.ToLower() == Wrapper.Tools.CurrentDllPath)
+                if (FileName == Wrapper.Tools.CurrentDllPath.ToLower())
                     return Wrapper.Tools.RealHandler;
-                if (lpFileName.ToLower() == Wrapper.Tools.CurrentDllName)
+                if (FileName == Wrapper.Tools.CurrentDllName)
                     return Wrapper.Tools.RealHandler;
             }
 
-            if (lpFileName.ToLower() == Wrapper.Tools.CurrentDllPath)
+            if (FileName== Wrapper.Tools.CurrentDllPath.ToLower())
                 lpFileName = Wrapper.Tools.RealDllPath;
-            if (lpFileName.ToLower() == Wrapper.Tools.CurrentDllName)
+            if (FileName == Wrapper.Tools.CurrentDllName)
                 lpFileName = Wrapper.Tools.RealDllPath;
+            if (FileName == Path.GetFileNameWithoutExtension(Wrapper.Tools.CurrentDllName))
+                return Wrapper.Tools.RealHandler;
 
             return LoadLibraryExW(lpFileName, ReservedNull, Flags);
+        }
+
+        static IntPtr GetModuleHandleHook(string lpModuleName)
+        {
+            if (LogAll)
+                Log("GetModuleHandle: {0}", true, lpModuleName);
+
+            var ModuleName = lpModuleName?.ToLower();
+
+            if (ModuleName == Wrapper.Tools.CurrentDllPath.ToLower())
+                return Wrapper.Tools.RealHandler;
+            if (ModuleName == Wrapper.Tools.CurrentDllName)
+                return Wrapper.Tools.RealHandler;
+            if (ModuleName == Path.GetFileNameWithoutExtension(Wrapper.Tools.CurrentDllName))
+                return Wrapper.Tools.RealHandler;
+
+            return GetModuleHandleW(lpModuleName);
         }
 
         static string Base;
@@ -153,6 +186,10 @@ namespace SRL
         static LoadLibraryWDelegate dLoadLibraryW;
         static LoadLibraryExADelegate dLoadLibraryExA;
         static LoadLibraryExWDelegate dLoadLibraryExW;
+        static GetModuleHandleADelegate dGetModuleHandleA;
+        static GetModuleHandleWDelegate dGetModuleHandleW;
+        static GetModuleHandleExADelegate dGetModuleHandleExA;
+        static GetModuleHandleExWDelegate dGetModuleHandleExW;
 
         static UnmanagedHook hGetFileAttrA;
         static UnmanagedHook hGetFileAttrW;
@@ -165,6 +202,10 @@ namespace SRL
         static UnmanagedHook<LoadLibraryWDelegate> hLoadLibraryW;
         static UnmanagedHook<LoadLibraryExADelegate> hLoadLibraryExA;
         static UnmanagedHook<LoadLibraryExWDelegate> hLoadLibraryExW;
+        static UnmanagedHook<GetModuleHandleADelegate> hGetModuleHandleA;
+        static UnmanagedHook<GetModuleHandleWDelegate> hGetModuleHandleW;
+        static UnmanagedHook<GetModuleHandleExADelegate> hGetModuleHandleExA;
+        static UnmanagedHook<GetModuleHandleExWDelegate> hGetModuleHandleExW;
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Ansi, SetLastError = true)]
         delegate uint GetFileAttributesADelegate([MarshalAs(UnmanagedType.LPStr)] string Filepath);
@@ -198,6 +239,20 @@ namespace SRL
         [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
         delegate IntPtr LoadLibraryExWDelegate(string lpFileName, IntPtr hReservedNull, LoadLibraryFlags dwFlags);
 
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
+        delegate IntPtr GetModuleHandleADelegate(string lpModuleName);
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
+        delegate IntPtr GetModuleHandleWDelegate(string lpModuleName);
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
+        delegate IntPtr GetModuleHandleExADelegate(uint Flags, string lpModuleName, IntPtr hModule);
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
+        delegate IntPtr GetModuleHandleExWDelegate(uint Flags, string lpModuleName, IntPtr hModule);
+
+
         [DllImport("kernelbase.dll", CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]
         static extern bool GetFileAttributesExW(string lpFileName, IntPtr fInfoLevelId, IntPtr lpFileInformation);
 
@@ -214,6 +269,9 @@ namespace SRL
 
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         static extern IntPtr LoadLibraryExW(string lpFileName, IntPtr hReservedNull, LoadLibraryFlags dwFlags);
+
+        [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Unicode)]
+        static extern bool GetModuleHandleExW(uint Flags, string lpModuleName, IntPtr hModule);
 
         [Flags]
         enum LoadLibraryFlags : uint

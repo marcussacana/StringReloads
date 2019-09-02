@@ -102,8 +102,8 @@ namespace SRL
         [DllImport(@"kernel32.dll", CharSet = CharSet.Ansi, ExactSpelling = true, SetLastError = true)]
         internal static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
 
-        [DllImport(@"kernel32.dll", CharSet = CharSet.Auto)]
-        static extern IntPtr GetModuleHandle(string lpModuleName);
+        [DllImport(@"kernel32.dll", CharSet = CharSet.Unicode)]
+        static extern IntPtr GetModuleHandleW(string lpModuleName);
 
 
         [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]

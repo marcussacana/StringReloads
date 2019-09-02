@@ -329,7 +329,7 @@ namespace SRL
             get {
                 if (isWine.HasValue) return isWine.Value;
 
-                IntPtr hModule = GetModuleHandle(@"ntdll.dll");
+                IntPtr hModule = GetModuleHandleW(@"ntdll.dll");
                 if (hModule == IntPtr.Zero)
                     isWine = false;
                 else

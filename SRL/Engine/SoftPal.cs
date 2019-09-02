@@ -16,7 +16,7 @@ namespace SRL.Engine
         {
             foreach (var Import in UnmanagedHook.GetImports())
             {
-                if (Import.Function.ToLower() == "drawtext" && Import.Module.ToLower() == "pal.dll")
+                if (Import.Module.ToLower() == "pal.dll" && Import.Function?.ToLower() == "drawtext")
                 {
                     RealDelegate = (DrawText)Marshal.GetDelegateForFunctionPointer(Import.FunctionAddress, typeof(DrawText));
 

@@ -66,6 +66,7 @@
     <Compile Include="Config.cs" />
     <Compile Include="DuplicableDictionary.cs" />
     <Compile Include="DNVM.cs" />
+    <Compile Include="Engine\AdvHD.cs" />
     <Compile Include="Engine\SoftPal.cs" />
     <Compile Include="Engine\Wrapper.cs" />
     <Compile Include="FileWorker.cs" />

@@ -43,19 +43,6 @@ namespace SRL.Wrapper
             InitializeSRL();
         }
 
-        static T GetDelegate<T>(IntPtr Handler, string Function, bool Optional = true) where T : Delegate
-        {
-            IntPtr Address = GetProcAddress(Handler, Function);
-            if (Address == IntPtr.Zero)
-            {
-                if (Optional)
-                    return null;
-
-                Environment.Exit(0x505);//ERROR_DELAY_LOAD_FAILED
-            }
-            return (T)Marshal.GetDelegateForFunctionPointer(Address, typeof(T));
-        }
-
         [DllExport(CallingConvention = CallingConvention.Winapi)]
         public static IntPtr D3DPERF_BeginEvent(IntPtr Color, IntPtr WSName)
         {

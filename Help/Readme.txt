@@ -19,7 +19,6 @@ After this you just need include in your patch the String.srl, SRLx32.dll, SRL.i
 N: If you rename the SRLx32.dll to dinput8.dll or d3d9.dll the SRL will initialize very early, then
 if you have a problem of the game freezing after the new game/load game, try this.
 
-
 -A BIG DELAY EVERY FUCKING LINE
 R: Ehh... hm... Maybe your cpu is trash?
 N: Launch the game with "-debug -delay" to see the string search delay, if is bigger than 300ms, feel free to contact-me
@@ -41,13 +40,6 @@ R: SRLx32.dll is corrupted, maybe...
 R: Maybe you need modify the CreateFont function, break the CreateFont Calls and see the right place to change the font encoding
 N: Try enalbed the CreateFont Hook and set the Charset to 0x00 in the SRL.ini
 
--What in the hell is the "AutoEngineHook" feature?
-R: Now the SRL can be installed with the string reload feature working just by placing the SRL dll in the directory, 
-don't support any engine but maybe in the future I add support to more games.
-N: To use this feature you can just rename the SRLx32.dll to d3d9.dll, dinput8.dll, or any other supported wrapper,
-then when the game bootup the SRL will automatically install him-self in the game, If the game crash when you use
-the SRL as wrapper, try enable the "LoadLibraryFix"
-
 -About the SRL.ini
 I will explain only what looks needed, run the game with "-help" to se the others value...
 At StringsReloader
@@ -64,7 +56,7 @@ At StringsReloader
 -"LogInput" Log all strings that the game requested the SRL translation
 -"LogOutput" Log all strings that the SRL return to the game
 -"LogFile" Save the Log window output to the a file (SRL.log)
--"Unsafe" When false the SRL don't initialize while the game don't try load a string that is recognized game as dialogue.
+-"Unsafe" When false the SRL don't initialize while the game don't try load a string that is recognized as dialogue.
 -"Rebuild" Rebuild the Strings.srl every time that the game starts
 -"AntiCrash" True or False; Is the setting to games who crash on close, this can fix some cases terminating the process on you request to close it.
 -"FreeOnExit" A alternative to the AntiCrash
@@ -154,7 +146,7 @@ At Intro
 -"MoveWindow" Hook the MoveWindow to show the Intro
 
 At Hook
--"AutoEngineHook" Try Detect the game engine and Auto-Install the SRL Engine in the game (Supported Engines: SoftPal)
+-"AutoEngineHook" Try Detect the game engine and Auto-Install the SRL Engine in the game (Supported Engines: SoftPal; AdvHD)
 -"LoadLibraryFix" Hook the LoadLibrary to redirect the wrapper dll to the retail dll (Use if the game crash when using the SRL as wrapper)
 -"CreateFile" Hook the game file reading and allow he read files from the SRL worspace or a directory called "Patch"
 -"UndoChars" Undo the char reload in the MultiByteToWideChar, TextOut and ExtTextOut hooks

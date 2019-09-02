@@ -167,8 +167,9 @@ namespace SRL
         private static ProcDelegate DirectProc = new ProcDelegate(ProcessReal);
 
         [DllExport]
-        public static IntPtr GetDirectProcess()
-        {
+        public static IntPtr GetDirectProcess() => GetDirectProcessReal();
+
+        public static IntPtr GetDirectProcessReal() {
             try
             {
                 DirectRequested = true;
