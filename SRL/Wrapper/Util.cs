@@ -153,7 +153,7 @@ namespace SRL.Wrapper
 
             if (Offset == -1)
             {
-                var Rst = MessageBox.Show(string.Format("Failed to Patch, \"{0}\" occurrence not found in the game executable.", "StringReloader", MessageBoxButtons.RetryCancel, MessageBoxIcon.Error));
+                var Rst = MessageBox.Show($"Failed to Patch, \"{Path.GetFileName(CurrentDllPath)}\" occurrence not found in the game executable.", "StringReloader", MessageBoxButtons.RetryCancel, MessageBoxIcon.Error);
                 if (Rst == DialogResult.Retry)
                     goto Retry;
                 else
