@@ -106,9 +106,12 @@ namespace SRL
         static string[] DenyList;
         static string[] IgnoreList;
         static Quote[] QuoteList;
+        static string TagChars;
         static int Sensitivity;
         static bool UseDatabase;
         static bool ForceTrim;
+        static bool TagCleaner;
+        static bool IgnoreTag;
 
 #if DEBUG
         static bool HookCreateWindow;

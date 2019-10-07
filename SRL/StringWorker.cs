@@ -656,6 +656,9 @@ namespace SRL
                 Log("Trim Request:\nOri: {0}\nStr: {1}", true, Original, String);
             }
 
+            if (IgnoreTag || TagCleaner)
+                Original = RemoveTags(Original);
+
             String = TrimString(String);
 
             string Test = TrimStart(Original);
@@ -750,6 +753,9 @@ namespace SRL
         {
             if (LiteMode)
                 return Str;
+
+            if (IgnoreTag || TagCleaner)
+                Str = RemoveTags(Str);
 
             string Output = TrimString(MergeLines(Str));
             for (int i = 0; i < MatchDel.Length; i++)
@@ -883,6 +889,60 @@ namespace SRL
                 rst = TrimEnd(rst);
 
             return rst;
+        }
+
+        /// <summary>
+        /// Remove All Tags from the given Line
+        /// </summary>
+        /// <param name="Line">The Line with tags</param>
+        /// <returns>The line without tags</returns>
+        internal static string RemoveTags(string Line)
+        {
+            if (TagChars.Length < 2)
+                return Line;
+
+            char Open = TagChars[0];
+            char Close = TagChars[1];
+
+            if (!Line.Contains(Open) || !Line.Contains(Close))
+                return Line;
+
+            string Buff = Line;
+            Line = string.Empty;
+            bool InTag = false;
+            string Tag = string.Empty;
+
+            while (!string.IsNullOrEmpty(Buff))
+            {
+                char c = Buff[0];
+                Buff = Buff.Substring(1, Buff.Length - 1);
+                if (c == Open)
+                    InTag = true;
+                if (c == Close && InTag)
+                {
+                    InTag = false;
+                    bool Bypass = false;
+                    Tag += c;
+
+                    //foreach (string Allow in Allowed)
+                    //    Bypass |= Tag.Contains(Allow);
+
+                    if (Bypass)
+                        Line += Tag;
+
+                    Tag = string.Empty;
+                    continue;
+                }
+
+                if (InTag)
+                {
+                    Tag += c;
+                    continue;
+                }
+                Line += c;
+            }
+
+            return Line;
         }
 
         /// <summary>

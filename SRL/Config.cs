@@ -51,11 +51,15 @@ namespace SRL
             HookMoveWindow = false;
             CheckProportion = false;
 
+            TagCleaner = false;
+            IgnoreTag = false;
+
             Seconds = 0;
             MinSize = 0;
 
             DenyList = new string[0];
             IgnoreList = new string[0];
+            TagChars = string.Empty;
             RldPrefix = string.Empty;
             RldSufix = string.Empty;
 
@@ -462,10 +466,43 @@ namespace SRL
                 Sensitivity = FilterSettings.Sensitivity;
             }
 
+            if (!string.IsNullOrEmpty(FilterSettings.TagChars))
+            {
+                bool Set = true;
+                if (FilterSettings.TagChars.Length != 2)
+                {
+                    if (FilterSettings.TagChars.Length < 2)
+                    {
+                        Error("Invalid Tag Char List.");
+                        Set = false;
+                    }
+                    else {
+                        Warning("Bad Tag Char List");
+                    }
+                }
+                if (Set)
+                {
+                    TagChars = FilterSettings.TagChars;
+                    Log("Tag Chars Set to {0} and {1}", true, TagChars[0], TagChars[1]);
+                }
+            }
+
             if (FilterSettings.ForceTrim)
             {
                 Log("Dialogue Filter Trim Enforcement Enabled", true);
                 ForceTrim = true;
+            }
+
+            if (FilterSettings.TagCleaner)
+            {
+                Log("Tag Cleaner Enabled", true);
+                TagCleaner = true;
+            }
+
+            if (FilterSettings.IgnoreTag)
+            {
+                Log("Tag Ignore Mode Enabled", true);
+                IgnoreTag = true;
             }
 
             if (!string.IsNullOrWhiteSpace(Settings.WorkDirectory))

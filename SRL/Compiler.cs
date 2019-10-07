@@ -349,11 +349,16 @@ namespace SRL
                             string str = SimplfyMatch(Database.Original[i]);
                             if (AllowDuplicates || !ContainsKey(str, true))
                             {
+                                string Entry = ReplaceChars(Database.Replace[i]);
+                                if (TagCleaner)
+                                    Entry = RemoveTags(Entry);
+
                                 if (IsMask(Database.Original[i]))
                                 {
+
                                     if (LiteralMaskMatch)
                                     {
-                                        AddEntry(str, ReplaceChars(Database.Replace[i]));
+                                        AddEntry(str, Entry);
                                         ReloadEntries++;
                                     }
 
@@ -364,19 +369,22 @@ namespace SRL
                                     else
                                     {
                                         //Prevent Duplicates
-                                        if (!Temp.Contains(Database.Original[i]))
-                                            Temp.Add(Database.Original[i]);
-                                        else
-                                            continue;
+                                        if (AllowDuplicates)
+                                        {
+                                            if (!Temp.Contains(Database.Original[i]))
+                                                Temp.Add(Database.Original[i]);
+                                            else
+                                                continue;
+                                        }
 
-                                        AddMask(Database.Original[i], ReplaceChars(Database.Replace[i]));
+                                        AddMask(Database.Original[i], Entry);
                                         MaskEntries++;
                                         continue;
                                     }
                                 }
                                 else
                                 {
-                                    AddEntry(str, ReplaceChars(Database.Replace[i]));
+                                    AddEntry(str, Entry);
                                     ReloadEntries++;
                                 }
                             }

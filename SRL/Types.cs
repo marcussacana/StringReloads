@@ -373,10 +373,16 @@ namespace SRL
             public string QuoteList;
             [FieldParmaters(DefaultValue = "", Name = "TrimList")]
             public string TrimList;
+            [FieldParmaters(DefaultValue = "", Name = "TagChars")]
+            public string TagChars;
             [FieldParmaters(DefaultValue = false, Name = "UseDB")]
             public bool UseDB;
             [FieldParmaters(DefaultValue = false, Name = "ForceTrim")]
             public bool ForceTrim;
+            [FieldParmaters(DefaultValue = false, Name = "TagCleaner")]
+            public bool TagCleaner;
+            [FieldParmaters(DefaultValue = false, Name = "IgnoreTag")]
+            public bool IgnoreTag;
             [FieldParmaters(DefaultValue = 2, Name = "Sensitivity")]
             public int Sensitivity;
         }

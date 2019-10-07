@@ -135,6 +135,9 @@ At Filter (Dialogue Detection algorithm)
 -"Sensitivity" The dialogue sensitivity level, (can use negative values), bigger values are more 'permessive' than smaller values (5 is recommended)
 -"UseDB" If the string is present in the database is automatically accepted as dialogue
 -"ForceTrim" If you enable the "NoTrim" feature, can enable this to reenable the trim only to verify if is a dialogue
+-"TagCleaner" Remove all tags from the input and output text
+-"IgnoreTag" Ignore all tags when match a string in the database but don't remove it.
+-"TagChars" A sequence of 2 characters, the first one to 'open' and the second to 'close' the tag to be used in the "IgnoreTag" and "TagCleaner"
 
 At Intro
 -"MinSize" Minimal Window Width and Height to show the introduction
