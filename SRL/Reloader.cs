@@ -333,12 +333,24 @@ namespace SRL
                     {
                         DotNetVM VM = new DotNetVM(File.ReadAllText(BaseDir + "EncodingModifier.cs", Encoding.UTF8));
                         EncodingModifier = VM;
+
+                        if (File.Exists(BaseDir + "EMod.dll"))
+                            File.Delete(BaseDir + "EMod.dll");
+
+                        File.Copy(EncodingModifier.AssemblyPath, BaseDir + "EMod.dll");
+
                         Log("Encoding Modifier Compiled", true);
                     }
                     catch (Exception ex)
                     {
                         Error("Failed to compile the Encoding Modifier\n===========\n{0}\n===========\n{1}", ex.Message, ex.Source);
                     }
+                }
+                else if (File.Exists(BaseDir + "EMod.dll"))
+                {
+                    Log("Enabling Encoding Modifier...", true);
+                    EncodingModifier = new DotNetVM(File.ReadAllBytes(BaseDir + "EMod.dll"));
+                    Log("Encoding Modifier Initialized", true);
                 }
 
                 if (File.Exists(BaseDir + "StringModifier.cs"))
@@ -348,12 +360,24 @@ namespace SRL
                     {
                         DotNetVM VM = new DotNetVM(File.ReadAllText(BaseDir + "StringModifier.cs", Encoding.UTF8));
                         StringModifier = VM;
+
+                        if (File.Exists(BaseDir + "SMod.dll"))
+                            File.Delete(BaseDir + "SMod.dll");
+
+                        File.Copy(StringModifier.AssemblyPath, BaseDir + "SMod.dll");
+
                         Log("String Modifier Compiled", true);
                     }
                     catch (Exception ex)
                     {
                         Error("Failed to compile the String Modifier\n===========\n{0}\n===========\n{1}", ex.Message, ex.Source);
                     }
+                }
+                else if (File.Exists(BaseDir + "SMod.dll"))
+                {
+                    Log("Enabling String Modifier...", true);
+                    StringModifier = new DotNetVM(File.ReadAllBytes(BaseDir + "SMod.dll"));
+                    Log("String Modifier Initialized", true);
                 }
 
                 //I Implement This to prevent 

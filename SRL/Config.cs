@@ -776,7 +776,9 @@ namespace SRL
                         if (!Ranges.Contains(Range))
                         {
                             Ranges.Add(Range);
-                            Log("Range from {0} to {1} Added.", true, Range.Min, Range.Max);
+
+                            if (LogAll)
+                                Log("Range from {0} to {1} Added.", true, Range.Min, Range.Max);
                         }
                         else
                         {

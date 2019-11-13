@@ -23,6 +23,9 @@ namespace SRL
         const string ServiceMask = "StringReloaderPipeID-{0}";
         const string ServiceDuplicateFlag = "|Duplicate";
 
+        const string EncodingModifierFlag = "EncodingModifier";
+        const string StringModifierFlag = "StringModifier";
+
         const int CacheLength = 200;
 
         static int GamePID = System.Diagnostics.Process.GetCurrentProcess().Id;

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -116,14 +117,14 @@ namespace SRL
             SRLData3 Data = new SRLData3()
             {
                 Signature = "SRL3",
-                Version = 1,
+                Version = 2,
                 Databases = DBS,
                 OriLetters = COri.ToArray(),
                 MemoryLetters = Ilegals,
                 UnkChars = UErr.ToArray(),
                 UnkReps = UOri.ToArray(),
                 RepOri = ROri.ToArray(),
-                RepTrg = RNew.ToArray()
+                RepTrg = RNew.ToArray(),
             };
 
             List<IntroContainer> Container = new List<IntroContainer>();
@@ -151,6 +152,32 @@ namespace SRL
 
             Log("{0} Intro(s) Found", true, Intros.Intros.Length);
 
+
+            var Mods = new List<ModifierContainer>();
+
+            if (File.Exists(BaseDir + "EMod.dll"))
+                Mods.Add(new ModifierContainer()
+                {
+                    Name = EncodingModifierFlag,
+                    Data = File.ReadAllBytes(BaseDir + "EMod.dll")
+                });
+
+            if (File.Exists(BaseDir + "SMod.dll"))
+                Mods.Add(new ModifierContainer()
+                {
+                    Name = StringModifierFlag,
+                    Data = File.ReadAllBytes(BaseDir + "EMod.dll")
+                });
+
+            SRLModifier Modifiers = new SRLModifier
+            {
+                Modifiers = Mods.ToArray()
+            };
+
+
+            Log("{0} Modifier(s) Found", true, Mods.Count);
+
+
             if (File.Exists(TLMap))
                 File.Delete(TLMap);
 
@@ -158,6 +185,7 @@ namespace SRL
             {
                 Writer.WriteStruct(ref Data);
                 Writer.WriteStruct(ref Intros);
+                Writer.WriteStruct(ref Modifiers);
                 Writer.Close();
             }
             Log("Builded Successfully.");
@@ -215,7 +243,7 @@ namespace SRL
         {
             Log("Initializing String Reloads...", true);
             StartPipe();
-            var Data = new SRLData3();
+            SRLData3 Data = new SRLData3();
 
             try
             {
@@ -244,12 +272,16 @@ namespace SRL
                     }
 
                     Reader.Seek(4, 0);
-                    if (Reader.ReadUInt16() > 1)
+
+                    int Version = Reader.ReadUInt16();
+
+                    if (Version > 2)
                     {
                         Error("Unexpected SRL Database Format");
                         Thread.Sleep(5000);
                         Environment.Exit(2);
                     }
+
                     Reader.Seek(0, 0);
 
                     Reader.ReadStruct(ref Data);
@@ -393,8 +425,6 @@ namespace SRL
                         if (MultipleDatabases)
                             FinishDatabase();
                     }
-                    Log("String Reloads Initialized, {0} Databases Created, {1} Reload Entries, {2} Mask Entries", true, Databases.Count, ReloadEntries, MaskEntries);
-
 
                     Log("Registring Databases Name...", true);
                     DBNames = new Dictionary<long, string>();
@@ -414,6 +444,44 @@ namespace SRL
                     }
                     else
                         Warning("The SRL Data is outdated, try rebuild it.");
+
+
+                    if (Data.Version > 1)
+                    {
+                        Log("Loading Modifiers...", true);
+                        SRLModifier Modifiers = new SRLModifier();
+                        Reader.ReadStruct(ref Modifiers);
+                        foreach (var Modifier in Modifiers.Modifiers)
+                        {
+                            switch (Modifier.Name)
+                            {
+                                case StringModifierFlag:
+                                    if (StringModifier == null)
+                                    {
+                                        StringModifier = new DotNetVM(Modifier.Data);
+                                        Log("Built-in String Modifier loaded", true);
+                                    }
+                                    break;
+                                case EncodingModifierFlag:
+                                    if (EncodingModifier == null)
+                                    {
+                                        EncodingModifier = new DotNetVM(Modifier.Data);
+                                        Log("Built-in Encoding Modifier loaded", true);
+                                    }
+                                    break;
+
+                                default:
+                                    Error("The Unknown \"{0}\" Modifier is built into SRL.", Modifier.Name);
+                                    break;
+                            }
+                        }
+                    }
+                    else
+                        Warning("The SRL Data is outdated, try rebuild it.");
+
+
+                    Log("String Reloads Initialized, {0} Databases Created, {1} Reload Entries, {2} Mask Entries", true, Databases.Count, ReloadEntries, MaskEntries);
+
 
                     Reader.Close();
                 }

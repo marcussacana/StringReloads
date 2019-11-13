@@ -101,6 +101,21 @@ namespace SRL
             public string[] RepTrg;
         }
 
+        struct SRLModifier
+        {
+            [StructField, PArray(PrefixType = Const.UINT8)]
+            public ModifierContainer[] Modifiers;
+        }
+
+        struct ModifierContainer
+        {
+            [CString]
+            public string Name;
+
+            [PArray()]
+            public byte[] Data;
+        }
+
         struct SRLIntro
         {
             [StructField, PArray(PrefixType = Const.UINT8)]
