@@ -529,7 +529,7 @@ namespace SRL
             if (LogInput)
                 Log("MBTWC Hook: {0}", true, RStr);
 
-            Output = GenString(RStr, true, Output == IntPtr.Zero ? null : (IntPtr?)Output);
+            Output = GenString(RStr, Input, true, Output == IntPtr.Zero ? null : (IntPtr?)Output);
 
             if (!hMultiByteToWideChar.ImportHook)
                 hMultiByteToWideChar.Install();

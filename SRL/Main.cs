@@ -125,7 +125,7 @@ namespace SRL
                     }
 
                 }
-                IntPtr Output = GenString(Reloaded);
+                IntPtr Output = GenString(Reloaded, Target);
 
                 if (!LiteMode)
                 {

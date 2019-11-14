@@ -170,6 +170,8 @@ namespace SRL
         static DotNetVM StringModifier = null;
         static DotNetVM Overlay = null;
 
+        static bool? ModifierRewriteMode = null;
+
         static bool DirectRequested = false;
 
         static string[] Replaces = new string[0];

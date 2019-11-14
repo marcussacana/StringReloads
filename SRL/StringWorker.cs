@@ -500,7 +500,7 @@ namespace SRL
         /// </summary>
         /// <param name="String">The string</param>
         /// <returns>The Pointer to the new String</returns>
-        internal static IntPtr GenString(string String, bool ForceUnicode = false, IntPtr? ForcePointer = null)
+        internal static IntPtr GenString(string String, IntPtr OriPointer, bool ForceUnicode = false, IntPtr? ForcePointer = null)
         {
             byte[] buffer;
             if (ForceUnicode)
@@ -511,7 +511,29 @@ namespace SRL
             {
                 if (EncodingModifier != null)
                 {
-                    buffer = EncodingModifier.Call("Modifier", "GenString", String);
+                    if (ModifierRewriteMode == null)
+                    {
+                        var Method = EncodingModifier.SearchMethods("Modifier", "GenString").Single();
+                        ModifierRewriteMode = Method.GetParameters().Length == 2;
+
+                        if (ModifierRewriteMode.Value)
+                            Log("Encoding Modifier Rewrite Mode Enabled", true);
+                    }
+
+                    if (ModifierRewriteMode.Value)
+                    {
+                        buffer = EncodingModifier.Call("Modifier", "GenString", String, OriPointer);
+
+                        if (buffer == null)
+                        {
+                            Log("Rewrite Output: {0}", true, String);
+                            return OriPointer;
+                        }
+                    }
+                    else
+                    {
+                        buffer = EncodingModifier.Call("Modifier", "GenString", String);
+                    }
                 }
                 else
                 {
@@ -530,7 +552,7 @@ namespace SRL
                         Pointer = Marshal.ReAllocHGlobal(Pointer, new IntPtr(AllocLen));
                     }
                 }
-                LastGenerated = Pointer            
+                LastGenerated = Pointer;
 #endif
                 }
             }

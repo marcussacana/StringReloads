@@ -2,6 +2,7 @@
 using Microsoft.VisualBasic;
 using System;
 using System.CodeDom.Compiler;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -73,6 +74,12 @@ class DotNetVM
     {
         return exec(Arguments, ClassName, FunctionName, Assembly);
     }
+    internal MethodInfo[] SearchMethods(string ClassName, string FunctionName)
+    {
+        Type ClassType = Assembly.GetType(ClassName);
+
+        return ClassType.GetMethods().Where(x => x.Name == FunctionName).Select(x => x).ToArray();
+    }
     internal void StartInstance(string Class, params object[] Arguments)
     {
         Type fooType = Assembly.GetType(Class);
@@ -80,17 +87,36 @@ class DotNetVM
         LastClass = Class;
     }
 
+
     private string LastClass;
     private object Instance = null;
+    private Dictionary<string, MethodInfo> MethodCache = new Dictionary<string, MethodInfo>();
     private object exec(object[] Args, string Class, string Function, Assembly assembly)
     {
         if (LastClass != Class)
             Instance = null;
+
+        if (MethodCache.ContainsKey(Class + "." + Function))
+        {
+            try
+            {
+                var LastMethod = MethodCache[Class + "." + Function];
+                if (Instance == null && !LastMethod.IsStatic)
+                    Instance = assembly.CreateInstance(Class);
+
+                return LastMethod?.Invoke(Instance, BindingFlags.InvokeMethod, null, Args, CultureInfo.CurrentCulture);
+            }
+            catch
+            {
+
+            }
+        }
+
         LastClass = Class;
 
-        Type fooType = assembly.GetType(Class);
+        Type ClassType = assembly.GetType(Class);
 
-        MethodInfo[] Methods = fooType.GetMethods().Where(x => x.Name == Function).Select(x => x).ToArray();
+        MethodInfo[] Methods = ClassType.GetMethods().Where(x => x.Name == Function).Select(x => x).ToArray();
 
         foreach (MethodInfo Method in Methods)
         {
@@ -100,6 +126,8 @@ class DotNetVM
                 {
                     if (Instance == null && !Method.IsStatic)
                         Instance = assembly.CreateInstance(Class);
+
+                    MethodCache[Class + "." + Function] = Method;
 
                     return Method?.Invoke(Instance, BindingFlags.InvokeMethod, null, Args, CultureInfo.CurrentCulture);
                 }
