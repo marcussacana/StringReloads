@@ -771,6 +771,11 @@ namespace SRL
         {
             Ranges = new List<Range>();
             string RangeList = Ini.GetConfig(CfgName, "AcceptableRanges;AcceptableRange;ValidRange;ValidRanges", IniPath, true);
+            if (RangeList.Trim().ToUpper() == "DEFAULT")
+            {
+                RangeList = AsianInput ? DefaultAsiRange : DefaultLatRange;
+                Log("Using Default Acceptable Range List...", true);
+            }
             for (int i = 0; i < RangeList.Length;)
             {
                 char c = RangeList[i];

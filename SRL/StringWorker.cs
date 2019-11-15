@@ -541,19 +541,7 @@ namespace SRL
                     buffer = new byte[len];
                     WriteEncoding.GetBytes(String, 0, String.Length, buffer, 0);
 
-#if LEAKING //Less Memory Leak, but works only with some games
-                IntPtr Pointer = LastGenerated;
-                if (LastGenerated == IntPtr.Zero) {
-                    Pointer = Marshal.AllocHGlobal(buffer.Length);
-                } else {
-                    if (AllocLen < buffer.Length) {
-                        while (AllocLen < buffer.Length)
-                            AllocLen++;
-                        Pointer = Marshal.ReAllocHGlobal(Pointer, new IntPtr(AllocLen));
-                    }
-                }
-                LastGenerated = Pointer;
-#endif
+
                 }
             }
             IntPtr Pointer = ForcePointer ?? Marshal.AllocHGlobal(buffer.Length);
