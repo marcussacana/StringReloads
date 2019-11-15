@@ -71,6 +71,7 @@
     <Compile Include="Engine\Wrapper.cs" />
     <Compile Include="FileWorker.cs" />
     <Compile Include="Hook\FileHook.cs" />
+    <Compile Include="Hook\OthersHooks.cs" />
     <Compile Include="Hook\TextHook.cs" />
     <Compile Include="Hook\IntroInjector.cs" />
     <Compile Include="Hook\UmanagedHook.cs" />
@@ -87,6 +88,7 @@
     <Compile Include="Variables.cs" />
     <Compile Include="Wrapper\bink.cs" />
     <Compile Include="Wrapper\d3d9.cs" />
+    <Compile Include="Wrapper\dsound.cs" />
     <Compile Include="Wrapper\dinput8.cs" />
     <Compile Include="Wrapper\kirikiri.cs" />
     <Compile Include="Wrapper\Util.cs" />

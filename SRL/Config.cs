@@ -622,6 +622,18 @@ namespace SRL
             else if (LoadLibraryFix)
                 Warning("LoadLibrary Hook Settings Changed - Restart Required");
 
+
+            if (HookSettings.CoInitializeFix)
+            {
+                if (!HookCoInitialize)
+                    InstallCoInitializeHooks();
+                HookCoInitialize = true;
+                Log("CoInitialize Hook Enabled", true);
+            }
+            else if (HookCoInitialize)
+                Warning("CoInitialize Hook Settings Changed - Restart Required");
+
+
             new Thread(() =>
             {
                 while (!DialogFound)

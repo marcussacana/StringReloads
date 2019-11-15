@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Windows.Forms;
 
 namespace SRL
 {
@@ -56,6 +58,9 @@ namespace SRL
 
         [DllImport("gdi32.dll", CharSet = CharSet.Unicode)]
         static extern bool ExtTextOutW(IntPtr hdc, int X, int Y, uint fuOptions, [In] ref RECT lprc, [MarshalAs(UnmanagedType.LPWStr)] string lpString, uint cbCount, [In] IntPtr lpDx);
+
+        [DllImport("gdi32.dll", CharSet = CharSet.Unicode)]
+        static extern bool ExtTextOutW(IntPtr hdc, int X, int Y, uint fuOptions, IntPtr lprc, [MarshalAs(UnmanagedType.LPWStr)] string lpString, uint cbCount, [In] IntPtr lpDx);
 
         [DllImport("kernel32.dll")]
         static extern bool IsBadCodePtr(IntPtr Ptr);
@@ -249,6 +254,14 @@ namespace SRL
             }
 
             public RECT(System.Drawing.Rectangle r) : this(r.Left, r.Top, r.Right, r.Bottom) { }
+
+            public RECT(IntPtr Pointer)
+            {
+                Left = Marshal.ReadInt32(Pointer, sizeof(int) * 0);
+                Top = Marshal.ReadInt32(Pointer, sizeof(int) * 1);
+                Right = Marshal.ReadInt32(Pointer, sizeof(int) * 2);
+                Bottom = Marshal.ReadInt32(Pointer, sizeof(int) * 3);
+            }
 
             public int X {
                 get { return Left; }

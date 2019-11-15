@@ -577,6 +577,9 @@ namespace SRL
         /// <returns></returns>
         internal static string GetStringA(IntPtr Pointer, bool Decode = true, int? CP = null, int? Len = null)
         {
+            if (Pointer == IntPtr.Zero)
+                return null;
+
             int len = 0;
             if (Len == null)
             {
@@ -633,6 +636,9 @@ namespace SRL
         /// <returns></returns>
         internal static string GetStringW(IntPtr Pointer, bool Decode = true, bool ForceUnicode = false)
         {
+            if (Pointer == IntPtr.Zero)
+                return null;
+
             int len = 0;
             while (Marshal.ReadInt16(Pointer, len) != 0)
                 len += 2;

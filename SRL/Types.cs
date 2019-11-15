@@ -442,6 +442,8 @@ namespace SRL
             public bool AutoEngineHook;
             [FieldParmaters(Name = "LoadLibraryFix;LoadLibrary", DefaultValue = false)]
             public bool LoadLibraryFix;
+            [FieldParmaters(Name = "CoInitializeFix;CoInitialize", DefaultValue = false)]
+            public bool CoInitializeFix;
         }
 
         [FieldParmaters(Name = "Intro")]

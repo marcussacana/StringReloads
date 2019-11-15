@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Security.Policy;
 
 namespace SRL
 {
@@ -233,30 +234,35 @@ namespace SRL
 
         public static bool hTextOut(IntPtr hdc, int nXStart, int nYStart, string lpString, int cbString)
         {
-            lpString = Process(lpString);
-            if (UndoChars)
+            if (lpString != null)
             {
-                for (int i = 0; i < lpString.Length; i++)
+                lpString = Process(lpString);
+                if (UndoChars)
                 {
-                    char C = lpString[i];
-                    char OC = RestoreChar(C);
-                    if (OC != C)
-                        lpString = lpString.Replace(C, OC);
+                    for (int i = 0; i < lpString.Length; i++)
+                    {
+                        char C = lpString[i];
+                        char OC = RestoreChar(C);
+                        if (OC != C)
+                            lpString = lpString.Replace(C, OC);
+                    }
                 }
-            }
-            else
-            {
-                for (int i = 0; i < lpString.Length; i++)
+                else
                 {
-                    char C = lpString[i];
-                    char OC = ProcessChar(C);
-                    if (OC != C)
-                        lpString = lpString.Replace(C, OC);
+                    for (int i = 0; i < lpString.Length; i++)
+                    {
+                        char C = lpString[i];
+                        char OC = ProcessChar(C);
+                        if (OC != C)
+                            lpString = lpString.Replace(C, OC);
+                    }
                 }
+
             }
 
             if (LogInput)
-                Log("TextOut Hooked, {0}", true, lpString);
+                Log("TextOut Hooked, {0}", true, lpString ?? "NULL");
+
 
             if (hTextOutW.ImportHook)
                 return TextOutW(hdc, nXStart, nYStart, lpString, cbString);
@@ -269,31 +275,34 @@ namespace SRL
 
         public static bool hExtTextOut(IntPtr hdc, int X, int Y, uint fuOptions, ref RECT lprc, string lpString, uint cbCount, IntPtr lpDx)
         {
-            lpString = Process(lpString);
-            if (UndoChars)
+            if (lpString != null)
             {
-                for (int i = 0; i < lpString.Length; i++)
+                lpString = Process(lpString);
+                if (UndoChars)
                 {
-                    char C = lpString[i];
-                    char OC = RestoreChar(C);
-                    if (OC != C)
-                        lpString = lpString.Replace(C, OC);
+                    for (int i = 0; i < lpString.Length; i++)
+                    {
+                        char C = lpString[i];
+                        char OC = RestoreChar(C);
+                        if (OC != C)
+                            lpString = lpString.Replace(C, OC);
+                    }
                 }
-            }
-            else
-            {
-                for (int i = 0; i < lpString.Length; i++)
+                else
                 {
-                    char C = lpString[i];
-                    char OC = ProcessChar(C);
-                    if (OC != C)
-                        lpString = lpString.Replace(C, OC);
+                    for (int i = 0; i < lpString.Length; i++)
+                    {
+                        char C = lpString[i];
+                        char OC = ProcessChar(C);
+                        if (OC != C)
+                            lpString = lpString.Replace(C, OC);
+                    }
                 }
-            }
 
+            }
 
             if (LogInput)
-                Log("ExtTextOut Hooked, {0}", true, lpString);
+                Log("ExtTextOut Hooked, {0}", true, lpString ?? "NULL");
 
 
             if (hExtTextOutW.ImportHook)

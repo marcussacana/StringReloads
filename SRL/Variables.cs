@@ -130,6 +130,7 @@ namespace SRL
         static bool HookExtTextOut;
         static bool HookCreateFont;
         static bool HookCreateFontIndirect;
+        static bool HookCoInitialize;
         static byte FontCharset;
         static string FontFaceName;
         static bool UndoChars;
