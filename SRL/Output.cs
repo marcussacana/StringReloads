@@ -339,12 +339,18 @@ namespace SRL
                     ConsoleShowed = true;
                     AllocConsole();
                     Console.Title = "SRL Engine - Debug Output";
-                    Console.OutputEncoding = WriteEncoding;
                     hConsole = GetConsoleWindow();
                 }
+
                 if (!ConsoleShowed && !Debugging && Optional)
                 {
                     return;
+                }
+
+                if (SetConsoleEncoding)
+                {
+                    SetConsoleEncoding = false;
+                    Console.OutputEncoding = WriteEncoding;
                 }
 
 

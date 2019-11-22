@@ -263,6 +263,7 @@ namespace SRL
 
             if (Settings.SetOutputEncoding)
             {
+                SetConsoleEncoding = true;
                 Log("Console Output Encoding Changed", false);
                 if (!Debugging)
                 {

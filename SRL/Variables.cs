@@ -87,6 +87,7 @@ namespace SRL
         static bool NotCachedOnly = false;
         static bool AllowEmpty = false;
         static bool AllowDuplicates = false;
+        static bool SetConsoleEncoding = false;
 
         static bool OverlayEnabled = false;
         static bool OverlayInitialized = false;
