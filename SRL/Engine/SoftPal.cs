@@ -379,7 +379,7 @@ namespace SRL.Engine
                 if (BufferEquals(Buff, UnsupportedFuncPrefix))
                 {
                     SupportedFunc = false;
-                    Offset.Sum(2);
+                    Offset = Offset.Sum(2);
                     break;
                 }
             }
