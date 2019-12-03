@@ -290,7 +290,7 @@ namespace SRL
             [FieldParmaters(DefaultValue = true, Name = "AntiCrash;CrashHandler")]
             public bool AntiCrash;
 
-            [FieldParmaters(DefaultValue = null, Name = "BreakLine;GameBreakLine;")]
+            [FieldParmaters(DefaultValue = null, Name = "BreakLine;GameBreakLine")]
             public string GameLineBreaker;
 
             [FieldParmaters(DefaultValue = null, Name = "WorkingDir;WorkDir;DataDir")]
