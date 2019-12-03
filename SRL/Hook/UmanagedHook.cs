@@ -142,6 +142,8 @@ namespace SRL
         bool AutoHook = false;
         public bool ImportHook { get; private set; } = false;
 
+        public IntPtr HookFunctionAddress => destination;
+
         List<dynamic> Followers = new List<dynamic>();
 
         T RealDestination;
@@ -166,21 +168,7 @@ namespace SRL
 
             VirtualProtect(Original, nBytes, Protection.PAGE_EXECUTE_READWRITE, out old);
             Marshal.Copy(Original, src, 0, nBytes);
-            if (IntPtr.Size == 8)
-            {
-                //x64
-                new byte[] { 0x48, 0xb8 }.CopyTo(dst, 0);
-                BitConverter.GetBytes(unchecked((ulong)destination.ToInt64())).CopyTo(dst, 2);
-                new byte[] { 0xFF, 0xE0 }.CopyTo(dst, 10);
-            }
-            else
-            {
-                //x86
-                dst[0] = 0xE9;
-                var Result = (int)(destination.ToInt64() - Original.ToInt64() - nBytes);
-                var dx = BitConverter.GetBytes(Result);
-                Array.Copy(dx, 0, dst, 1, nBytes - 1);
-            }
+            dst = AssembleJump(Original, destination);
             addr = Original;
         }
 
@@ -682,7 +670,7 @@ namespace SRL
 
     }
 
-    static class UnmanagedImports
+    internal static class UnmanagedImports
     {
 
         [DebuggerDisplay("{Key}      {Value}")]
@@ -853,10 +841,29 @@ namespace SRL
         internal static byte[] Read(IntPtr Address, uint Length)
         {
             byte[] Buffer = new byte[Length];
-            ChangeProtection(Address, Buffer.Length, Protection.PAGE_READWRITE, out Protection Original);
+            if (!ChangeProtection(Address, Buffer.Length, Protection.PAGE_READWRITE, out Protection Original))
+                throw new Exception($"Falied to change the R/W memory permissions at {Address.ToUInt32():X8}");
             Marshal.Copy(Address, Buffer, 0, Buffer.Length);
-            ChangeProtection(Address, Buffer.Length, Original);
+            if (!ChangeProtection(Address, Buffer.Length, Original))
+                throw new Exception($"Falied to restore the memory permissions at {Address.ToUInt32():X8}");
             return Buffer;
+        }
+        internal static bool Write(IntPtr Address, byte[] Content, Protection? NewProtection = null)
+        {
+            ChangeProtection(Address, Content.Length, Protection.PAGE_READWRITE, out Protection Original);
+
+            uint Saved = (uint)Content.LongLength;
+            Marshal.Copy(Content, 0, Address, Content.Length);
+            
+            if (NewProtection.HasValue)
+                ChangeProtection(Address, Content.Length, NewProtection.Value);
+            else
+                ChangeProtection(Address, Content.Length, Original);
+
+            if (Saved != Content.Length)
+                return false;
+
+            return true;
         }
 
         internal static string ReadString(IntPtr Address, bool Unicode)
@@ -878,6 +885,28 @@ namespace SRL
             } while (true);
 
             return Unicode ? System.Text.Encoding.Unicode.GetString(Buffer.ToArray()) : System.Text.Encoding.Default.GetString(Buffer.ToArray());
+        }
+
+        public static int JmpSize { get; private set; } = IntPtr.Size == 8 ? 12 : 5;
+        public static byte[] AssembleJump(IntPtr From, IntPtr Destination)
+        {            
+            byte[] jmp = new byte[JmpSize];
+            if (IntPtr.Size == 8)
+            {
+                //x64
+                new byte[] { 0x48, 0xb8 }.CopyTo(jmp, 0);
+                BitConverter.GetBytes(unchecked((ulong)Destination.ToInt64())).CopyTo(jmp, 2);
+                new byte[] { 0xFF, 0xE0 }.CopyTo(jmp, 10);
+            }
+            else
+            {
+                //x86
+                jmp[0] = 0xE9;
+                int Result = (int)(Destination.ToInt64() - From.ToInt64() - JmpSize);
+                BitConverter.GetBytes(Result).CopyTo(jmp, 1);
+            }
+
+            return jmp;
         }
 
         public static ushort SearchFunctionOridinal(string Module, string Function) => SearchFunctionOridinal(LoadLibrary(Module), Function);
@@ -940,7 +969,17 @@ namespace SRL
         internal static extern IntPtr GetProcAddress(IntPtr hModule, ushort Ordinal);
 
         [DllImport("kernel32", SetLastError = true, CharSet = CharSet.Ansi)]
-        internal static extern IntPtr LoadLibrary([MarshalAs(UnmanagedType.LPStr)]string lpFileName);
+        internal static extern IntPtr LoadLibrary([MarshalAs(UnmanagedType.LPStr)] string lpFileName);
+
+        [DllImport("kernel32.dll")]
+        static extern bool FlushInstructionCache(IntPtr hProcess, IntPtr lpBaseAddress, uint dwSize);
+
+        internal static bool FlushInstructionCache(IntPtr Address, uint Size)
+        {            
+            IntPtr Handle = Process.GetCurrentProcess().Handle;
+            return FlushInstructionCache(Handle, Address, Size);
+        }
+
         internal enum Protection
         {
             PAGE_NOACCESS = 0x01,

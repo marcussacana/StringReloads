@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Windows.Forms;
 
 namespace SRL
 {
@@ -63,7 +61,7 @@ namespace SRL
         static extern bool ExtTextOutW(IntPtr hdc, int X, int Y, uint fuOptions, IntPtr lprc, [MarshalAs(UnmanagedType.LPWStr)] string lpString, uint cbCount, [In] IntPtr lpDx);
 
         [DllImport("kernel32.dll")]
-        static extern bool IsBadCodePtr(IntPtr Ptr);
+        internal static extern bool IsBadCodePtr(IntPtr Ptr);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -103,12 +101,14 @@ namespace SRL
         [DllImport("user32.dll")]
         static extern IntPtr GetMenu(IntPtr hWnd);
 
-
         [DllImport(@"kernel32.dll", CharSet = CharSet.Ansi, ExactSpelling = true, SetLastError = true)]
         internal static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
 
+        [DllImport(@"kernel32.dll", ExactSpelling = true, SetLastError = true)]
+        internal static extern IntPtr GetProcAddress(IntPtr hModule, ushort Ordinal);
+
         [DllImport(@"kernel32.dll", CharSet = CharSet.Unicode)]
-        static extern IntPtr GetModuleHandleW(string lpModuleName);
+        internal static extern IntPtr GetModuleHandleW(string lpModuleName);
 
 
         [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]

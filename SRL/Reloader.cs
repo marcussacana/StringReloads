@@ -62,7 +62,7 @@ namespace SRL
 
         internal static string RedirFaceName(string FaceName)
         {
-            if (LogAll)
+            if (Verbose)
             {
                 Log("Font Redirect Request: {0}", true, FaceName);
             }
@@ -111,7 +111,7 @@ namespace SRL
 
             string Str = SimplfyMatch(Input);
 
-            if ((LogAll || LogInput) && (!DumpStrOnly || IsDialog))
+            if ((Verbose || LogInput) && (!DumpStrOnly || IsDialog))
             {
                 if (!DumpStrOnly || !InCache("LOG: " + Str))
                 {
@@ -380,8 +380,7 @@ namespace SRL
                     Log("String Modifier Initialized", true);
                 }
 
-                //I Implement This to prevent 
-                if (!PECSVal(File.ReadAllBytes(SrlDll)))
+                if (!PECSVal(File.ReadAllBytes(SrlDll), out _))
                 {
 #if DEBUG
                     Warning("SRL Engine - Unauthenticated Debug Build");

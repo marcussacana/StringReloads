@@ -347,13 +347,14 @@ namespace SRL
 
             if (Settings.LiveSettings)
             {
+                LiveSettings = true;
                 if (SettingsWatcher == null)
                 {
                     Log("Enabling Live Settings....", true);
                     SettingsWatcher = new Thread(() =>
                     {
                         DateTime Before = new FileInfo(IniPath).LastWriteTime;
-                        while (true)
+                        while (LiveSettings)
                         {
                             DateTime Now = new FileInfo(IniPath).LastWriteTime;
                             if (Before != Now)
@@ -696,13 +697,7 @@ namespace SRL
             {
                 Warning("No Supported Engine Detected, Auto SRL Installer Disabled", AutoEngine.Name);
             }
-            else
-            {
-                if (AutoEngine.IsCompatible())
-                    Log("{0} Engine Detected, Auto SRL Installer Disabled", true, AutoEngine.Name);
 
-                AutoEngine.UninstallStrHook();
-            }
             if (IntroSettings.CreateWindowEx)
             {
                 HookCreateWindowEx = true;
@@ -795,13 +790,12 @@ namespace SRL
                         {
                             Ranges.Add(Range);
 
-                            if (LogAll)
+                            if (Verbose)
                                 Log("Range from {0} to {1} Added.", true, Range.Min, Range.Max);
                         }
                         else
-                        {
                             Warning("Range from {0} to {1} Conflited.", true, Range.Min, Range.Max);
-                        }
+                        
                     }
                     i += 3;
                 }
@@ -815,12 +809,12 @@ namespace SRL
                     if (!Ranges.Contains(Range))
                     {
                         Ranges.Add(Range);
-                        Log("Range from {0} to {1} Added.", true, Range.Min, Range.Max);
+                        if (Verbose)
+                            Log("Range from {0} to {1} Added.", true, Range.Min, Range.Max);
                     }
                     else
-                    {
-                        Log("Range from {0} to {1} Conflited.", true, Range.Min, Range.Max);
-                    }
+                        Warning("Range from {0} to {1} Conflited.", true, Range.Min, Range.Max);
+                    
                     i++;
                 }
             }

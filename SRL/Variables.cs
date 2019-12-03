@@ -11,20 +11,20 @@ namespace SRL
     partial class StringReloader
     {
 
-        const string BreakLineFlag = "::BREAKLINE::";
-        const string ReturnLineFlag = "::RETURNLINE::";
-        const string AntiWordWrapFlag = "::NOWORDWRAP::";
-        const string AntiMaskParser = "::NOMASK::";
-        const string AntiPrefixFlag = "::NOPREFIX::";
-        const string AntiSufixFlag = "::NOSUFIX::";
-        const string MaskWordWrap = "::FULLWORDWRAP::";
+        internal const string BreakLineFlag = "::BREAKLINE::";
+        internal const string ReturnLineFlag = "::RETURNLINE::";
+        internal const string AntiWordWrapFlag = "::NOWORDWRAP::";
+        internal const string AntiMaskParser = "::NOMASK::";
+        internal const string AntiPrefixFlag = "::NOPREFIX::";
+        internal const string AntiSufixFlag = "::NOSUFIX::";
+        internal const string MaskWordWrap = "::FULLWORDWRAP::";
 
-        const string CfgName = "StringReloader";
-        const string ServiceMask = "StringReloaderPipeID-{0}";
-        const string ServiceDuplicateFlag = "|Duplicate";
+        internal const string CfgName = "StringReloader";
+        internal const string ServiceMask = "StringReloaderPipeID-{0}";
+        internal const string ServiceDuplicateFlag = "|Duplicate";
 
-        const string EncodingModifierFlag = "EncodingModifier";
-        const string StringModifierFlag = "StringModifier";
+        internal const string EncodingModifierFlag = "EncodingModifier";
+        internal const string StringModifierFlag = "StringModifier";
 
         const int CacheLength = 200;
 
@@ -53,7 +53,6 @@ namespace SRL
         static bool ConsoleShowed = false;
         static bool DelayTest = false;
         static bool CmdLineChecked = false;
-        static bool LogAll = false;
         static bool LogInput = false;
         static bool LogOutput = false;
         static bool DumpStrOnly = false;
@@ -157,10 +156,10 @@ namespace SRL
 
         static string StrLstSufix = string.Empty;
         static string LastInput = string.Empty;
-        static string GameLineBreaker = "\n";
         static string LastOutput = string.Empty;
         static string CustomDir = string.Empty;
         static string CustomCredits = string.Empty;
+        internal static string GameLineBreaker = "\n";
 
         static System.Drawing.Font Font;
         static bool Monospaced;
@@ -184,15 +183,17 @@ namespace SRL
         static string IntroMsk => BaseDir + "Intro{0}.{1}";
         static string TLDP => BaseDir + "TLIB.dll";
         static string OEDP => BaseDir + "Overlay.dll";
-        static string IniPath => AppDomain.CurrentDomain.BaseDirectory + "Srl.ini";
         static string MTLCache => BaseDir + "MTL.lst";
         static string ReplLst => BaseDir + "Replaces.lst";
         static string SrlDll => System.Reflection.Assembly.GetCallingAssembly().Location;
+        internal static string IniPath => AppDomain.CurrentDomain.BaseDirectory + "Srl.ini";
+
+        internal static bool LiveSettings = false;
 
         static string BaseDir => AppDomain.CurrentDomain.BaseDirectory + CustomDir;
 
-        static Encoding ReadEncoding = Encoding.Default;
-        static Encoding WriteEncoding = Encoding.Default;
+        internal static Encoding ReadEncoding = Encoding.Default;
+        internal static Encoding WriteEncoding = Encoding.Default;
 
         static BinaryReader PipeReader = null;
         static BinaryWriter PipeWriter = null;
@@ -229,7 +230,7 @@ namespace SRL
 
         static bool? DbgFlg = null;
         static bool _FrcDbg = false;
-        static bool Debugging {
+        public static bool Debugging {
             get {
                 if (_FrcDbg)
                     return true;
@@ -245,8 +246,10 @@ namespace SRL
                 _FrcDbg = value;
             }
         }
+        public static bool Verbose { get; private set; } = false;
 
 
+        internal static uint GameBaseAddress => System.Diagnostics.Process.GetCurrentProcess().MainModule.BaseAddress.ToUInt32();
         private static IntPtr hConsole = IntPtr.Zero;
         private static bool _hdlFail = false;
         private static IntPtr _hdl = IntPtr.Zero;

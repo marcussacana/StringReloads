@@ -70,7 +70,7 @@
     <Compile Include="Engine\SoftPal.cs" />
     <Compile Include="Engine\Wrapper.cs" />
     <Compile Include="FileWorker.cs" />
-    <Compile Include="Hook\FileHook.cs" />
+    <Compile Include="Hook\LibraryHook.cs" />
     <Compile Include="Hook\OthersHooks.cs" />
     <Compile Include="Hook\TextHook.cs" />
     <Compile Include="Hook\IntroInjector.cs" />

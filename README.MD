@@ -1,4 +1,4 @@
-# StringsReloads v5.1
+# StringsReloads v5.2
 [![Build Status](https://ci.appveyor.com/api/projects/status/github/marcussacana/StringReloads?branch=master&retina=true)](https://ci.appveyor.com/project/marcussacana/StringReloads)
 
 

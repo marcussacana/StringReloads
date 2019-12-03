@@ -14,8 +14,10 @@ namespace SRL.Wrapper
         internal static string CurrentDllName = Path.GetFileName(Assembly.GetExecutingAssembly().Location).ToLower();
         internal static string CurrentDllPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-        internal static string RealDllPath = null;
-        internal static IntPtr RealHandler;
+        public static string RealDllPath { get; internal set; } = null;
+        public static IntPtr RealHandler { get; internal set; }
+        public static IntPtr WrapperHandler { get; internal set; } = StringReloader.GetModuleHandleW(Assembly.GetExecutingAssembly().Location);
+        
 
         static bool WOW64 => !Environment.Is64BitProcess && Environment.Is64BitOperatingSystem;
 
@@ -98,7 +100,6 @@ namespace SRL.Wrapper
 
         internal static IntPtr LoadLibrary(string lpFileName)
         {
-
             string DllPath = lpFileName;
             if (lpFileName.Length < 2 || lpFileName[1] != ':')
             {
@@ -149,11 +150,11 @@ namespace SRL.Wrapper
             if (Offset == -1)
                 Offset = IndexOf(Data, CurrentDllName.ToUpper());
             if (Offset == -1)
-                Offset = IndexOf(Data, Path.GetFileName(CurrentDllPath));
+                Offset = IndexOf(Data, Path.GetFileName(Assembly.GetExecutingAssembly().Location));
 
             if (Offset == -1)
             {
-                var Rst = MessageBox.Show($"Failed to Patch, \"{Path.GetFileName(CurrentDllPath)}\" occurrence not found in the game executable.", "StringReloader", MessageBoxButtons.RetryCancel, MessageBoxIcon.Error);
+                var Rst = MessageBox.Show($"Failed to Patch, \"{Path.GetFileName(CurrentDllName)}\" occurrence not found in the game executable.", "StringReloader", MessageBoxButtons.RetryCancel, MessageBoxIcon.Error);
                 if (Rst == DialogResult.Retry)
                     goto Retry;
                 else

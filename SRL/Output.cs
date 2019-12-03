@@ -118,7 +118,7 @@ namespace SRL
                 AppendArray(ref Commands, "-debug");
             if (Ini.GetConfig(CfgName, "Delay", IniPath, false).ToLower() == "true")
                 AppendArray(ref Commands, "-delay");
-            if (Ini.GetConfig(CfgName, "Log;LogAll", IniPath, false).ToLower() == "true")
+            if (Ini.GetConfig(CfgName, "Log;LogAll;Verbose", IniPath, false).ToLower() == "true")
                 AppendArray(ref Commands, "-log");
             if (Ini.GetConfig(CfgName, "LogInput;LogIn", IniPath, false).ToLower() == "true")
                 AppendArray(ref Commands, "-loginput");
@@ -204,8 +204,9 @@ namespace SRL
                     case "debugstring":
                     case "debugencoding":
                     case "encodingtest":
+                    case "verbose":
                         Log("String Deubugger Enabled", true);
-                        LogAll = true;
+                        Verbose = true;
                         break;
 
                     case "loginput":
@@ -253,8 +254,9 @@ namespace SRL
             e.GetObjectData(si, ctx);
             ctor.Invoke(e, new object[] { si, ctx });
         }
+
         //Portable Executable Checksum Validator
-        internal static bool PECSVal(byte[] Data)
+        internal static bool PECSVal(byte[] Data, out uint RealChecksum)
         {
             int PEStart = BitConverter.ToInt32(Data, 0x3c);
             int PECoffStart = PEStart + 4;
@@ -283,6 +285,7 @@ namespace SRL
             checksum = checksum & 0xffff;
 
             checksum += (uint)Data.LongLength;
+            RealChecksum = (uint)checksum;
             if (checkSumInHeader != checksum)
                 return false;
             return true;

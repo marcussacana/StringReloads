@@ -65,7 +65,7 @@ namespace SRL
 
                 if (IsBadCodePtr(Target) && Ptr >= char.MaxValue)
                 {
-                    if (LogAll)
+                    if (Verbose)
                     {
                         Log("BAD PTR: {0}", true, Ptr);
                     }
@@ -116,7 +116,7 @@ namespace SRL
                     if (NoReload)
                         return Target;
 
-                    if (LogAll || LogOutput)
+                    if (Verbose || LogOutput)
                     {
                         if (AllowDuplicates)
                             Log("Output: {0}\r\nDB Current Index: {1}", true, Reloaded);
@@ -157,7 +157,7 @@ namespace SRL
         public static IntPtr Service(IntPtr hWnd, IntPtr hInst, IntPtr hCmdLine, int nCmdShow)
         {
             hConsole = hCmdLine;
-            string Parameter = GetStringA(hCmdLine);
+            string Parameter = GetStringA(hCmdLine, Internal: true);
             ServiceCall(Parameter);
             return IntPtr.Zero;
         }
@@ -209,7 +209,7 @@ namespace SRL
             return (char)(Result.ToInt32() & 0xFFFF);
         }
 
-        //EntryPoint to the RemoteLoader
+        //EntryPoint to the RemoteControl
         public static int EntryPoint(string Argument)
         {
             try

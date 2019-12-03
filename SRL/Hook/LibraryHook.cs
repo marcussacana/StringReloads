@@ -33,23 +33,28 @@ namespace SRL
             hGetFileAttrExA.Install();
             hGetFileAttrExW.Install();
 
-            Base = BaseDir.TrimEnd('\\', '/');
-            if (Base == AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\', '/'))
-                Base += "\\Patch";
+            PatchBase = BaseDir.TrimEnd('\\', '/');
+            if (PatchBase == AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\', '/'))
+                PatchBase += "\\Patch";
 
-            Base += '\\';
+            PatchBase += '\\';
 
-            Log("CreateFile Hook Path: {0}", true, Base);
+            Log("CreateFile Hook Path: {0}", true, PatchBase);
         }
 
-        static void InstallLoadLibraryHooks()
+        public static void InstallLoadLibraryHooks()
         {
+            if (LoadLibHookInitialized)
+                return;
+
+            LoadLibHookInitialized = true;
             dLoadLibraryA = new LoadLibraryADelegate(LoadLibraryHook);
             dLoadLibraryW = new LoadLibraryWDelegate(LoadLibraryHook);
             dLoadLibraryExA = new LoadLibraryExADelegate(LoadLibraryEx);
             dLoadLibraryExW = new LoadLibraryExWDelegate(LoadLibraryEx);
             dGetModuleHandleA = new GetModuleHandleADelegate(GetModuleHandleHook);
             dGetModuleHandleW = new GetModuleHandleWDelegate(GetModuleHandleHook);
+            dGetProcAddress = new GetProcAddressDelegate(GetProcAddressHook);
 
             hLoadLibraryA = new UnmanagedHook<LoadLibraryADelegate>("kernel32.dll", "LoadLibraryA", dLoadLibraryA, true);
             hLoadLibraryW = new UnmanagedHook<LoadLibraryWDelegate>("kernel32.dll", "LoadLibraryW", dLoadLibraryW, true);
@@ -57,6 +62,7 @@ namespace SRL
             hLoadLibraryExW = new UnmanagedHook<LoadLibraryExWDelegate>("kernel32.dll", "LoadLibraryExW", dLoadLibraryExW, true);
             hGetModuleHandleA = new UnmanagedHook<GetModuleHandleADelegate>("kernel32.dll", "GetModuleHandleA", dGetModuleHandleA, true);
             hGetModuleHandleW = new UnmanagedHook<GetModuleHandleWDelegate>("kernel32.dll", "GetModuleHandleW", dGetModuleHandleW, true);
+            hGetProcAddress = new UnmanagedHook<GetProcAddressDelegate>("kernel32.dll", "GetProcAddress", dGetProcAddress, true);
 
             hLoadLibraryA.AddFollower(hLoadLibraryW);
             hLoadLibraryExA.AddFollower(hLoadLibraryExW);
@@ -68,6 +74,7 @@ namespace SRL
             hLoadLibraryExW.Install();
             hGetModuleHandleA.Install();
             hGetModuleHandleW.Install();
+            hGetProcAddress.Install();
         }
 
         static bool GetFileAttributesEx(string FileName, IntPtr fInfoLevelId, IntPtr lpFileInformation)
@@ -85,6 +92,10 @@ namespace SRL
         }
         static IntPtr CreateFile(string FileName, IntPtr Access, IntPtr Share, IntPtr Security, IntPtr Mode, IntPtr Flags, IntPtr TemplateFile)
         {
+            var Rst = OnCreateFile?.Invoke(FileName);
+            if (Rst != null)
+                return Rst.Value;
+
             FileName = ParsePath(FileName);
 
             return CreateFileW(FileName, Access, Share, Security, Mode, Flags, TemplateFile);
@@ -93,7 +104,7 @@ namespace SRL
         static string ParsePath(string Path)
         {
 
-            string PatchPath = Base + System.IO.Path.GetFileName(Path);
+            string PatchPath = PatchBase + System.IO.Path.GetFileName(Path);
 
             if (ValidPath(PatchPath))
             {
@@ -107,9 +118,12 @@ namespace SRL
         }
         static IntPtr LoadLibraryHook(string lpFileName)
         {
-            if (LogAll)
+            if (Verbose)
                 Log("LoadLibrary: {0}", true, lpFileName);
 
+            var Rst = OnLoadLibrary?.Invoke(lpFileName);
+            if (Rst != null)
+                return Rst.Value;
 
             var FileName = lpFileName?.ToLower();
 
@@ -122,6 +136,7 @@ namespace SRL
 
             return LoadLibraryW(lpFileName);
         }
+
         static IntPtr LoadLibraryEx(string lpFileName, IntPtr ReservedNull, LoadLibraryFlags Flags)
         {
             bool AsResource = false;
@@ -129,8 +144,12 @@ namespace SRL
             AsResource |= Flags.HasFlag(LoadLibraryFlags.LOAD_LIBRARY_AS_DATAFILE_EXCLUSIVE);
             AsResource |= Flags.HasFlag(LoadLibraryFlags.LOAD_LIBRARY_AS_IMAGE_RESOURCE);
 
-            if (LogAll)
+            if (Verbose)
                 Log("LoadLibraryEx: {0}", true, lpFileName);
+
+            var Rst = OnLoadLibrary?.Invoke(lpFileName);
+            if (Rst != null)
+                return Rst.Value;
 
             var FileName = lpFileName?.ToLower();
 
@@ -154,8 +173,12 @@ namespace SRL
 
         static IntPtr GetModuleHandleHook(string lpModuleName)
         {
-            if (LogAll)
+            if (Verbose)
                 Log("GetModuleHandle: {0}", true, lpModuleName);
+
+            var Rst = OnGetModuleHandler?.Invoke(lpModuleName);
+            if (Rst != null)
+                return Rst.Value;
 
             var ModuleName = lpModuleName?.ToLower();
 
@@ -166,12 +189,58 @@ namespace SRL
             if (ModuleName == Path.GetFileNameWithoutExtension(Wrapper.Tools.CurrentDllName))
                 return Wrapper.Tools.RealHandler;
 
+
             return GetModuleHandleW(lpModuleName);
         }
 
-        static string Base;
+        public static IntPtr GetProcAddressHook(IntPtr Module, IntPtr Function)
+        {
+            if (Module == Wrapper.Tools.WrapperHandler)
+                Module = Wrapper.Tools.RealHandler;
 
+            if (Function.ToUInt64() <= ushort.MaxValue)
+            {
+                ushort Ordinal = (ushort)Function.ToUInt64();
+
+                if (Verbose)
+                    Log("GetProcAddress: Ordinal#{0}", true, Ordinal);
+
+                var Rst = OnGetProcAddressOrdinal?.Invoke(Module, Ordinal);
+                if (Rst != null)
+                    return Rst.Value;
+
+                return GetProcAddress(Module, Ordinal);
+            }
+            else
+            {
+                string FuncName = GetStringA(Function, Internal: true);
+
+                if (Verbose)
+                    Log("GetProcAddress: {0}", true, FuncName);
+
+                var Rst = OnGetProcAddressName?.Invoke(Module, FuncName);
+                if (Rst != null)
+                    return Rst.Value;
+
+                return GetProcAddress(Module, FuncName);
+            }
+        }
+
+        static bool LoadLibHookInitialized = false;
         static bool ValidPath(string Path) => GetFileAttributesW(Path) != INVALID_FILE_ATTRIBUTES;
+
+        static string PatchBase;
+
+        public static event FileAccessDelegate OnLoadLibrary;
+        public static event FileAccessDelegate OnCreateFile;
+        public static event FileAccessDelegate OnGetModuleHandler;
+        public static event GetProcAddrOrdinalDelegate OnGetProcAddressOrdinal;
+        public static event GetProcAddrNameDelegate OnGetProcAddressName;
+
+        public delegate IntPtr? FileAccessDelegate(string Filename);
+        public delegate IntPtr? GetProcAddrOrdinalDelegate(IntPtr Module, ushort Ordinal);
+        public delegate IntPtr? GetProcAddrNameDelegate(IntPtr Module, string Name);
+
 
         const uint INVALID_FILE_ATTRIBUTES = 0xFFFFFFFF;
 
@@ -188,8 +257,9 @@ namespace SRL
         static LoadLibraryExWDelegate dLoadLibraryExW;
         static GetModuleHandleADelegate dGetModuleHandleA;
         static GetModuleHandleWDelegate dGetModuleHandleW;
-        static GetModuleHandleExADelegate dGetModuleHandleExA;
-        static GetModuleHandleExWDelegate dGetModuleHandleExW;
+        //static GetModuleHandleExADelegate dGetModuleHandleExA;
+        //static GetModuleHandleExWDelegate dGetModuleHandleExW;
+        static GetProcAddressDelegate dGetProcAddress;
 
         static UnmanagedHook hGetFileAttrA;
         static UnmanagedHook hGetFileAttrW;
@@ -204,8 +274,9 @@ namespace SRL
         static UnmanagedHook<LoadLibraryExWDelegate> hLoadLibraryExW;
         static UnmanagedHook<GetModuleHandleADelegate> hGetModuleHandleA;
         static UnmanagedHook<GetModuleHandleWDelegate> hGetModuleHandleW;
-        static UnmanagedHook<GetModuleHandleExADelegate> hGetModuleHandleExA;
-        static UnmanagedHook<GetModuleHandleExWDelegate> hGetModuleHandleExW;
+        //static UnmanagedHook<GetModuleHandleExADelegate> hGetModuleHandleExA;
+        //static UnmanagedHook<GetModuleHandleExWDelegate> hGetModuleHandleExW;
+        static UnmanagedHook<GetProcAddressDelegate> hGetProcAddress;
 
         [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Ansi, SetLastError = true)]
         delegate uint GetFileAttributesADelegate([MarshalAs(UnmanagedType.LPStr)] string Filepath);
@@ -251,6 +322,9 @@ namespace SRL
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode, SetLastError = true)]
         delegate IntPtr GetModuleHandleExWDelegate(uint Flags, string lpModuleName, IntPtr hModule);
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Ansi, SetLastError = true)]
+        delegate IntPtr GetProcAddressDelegate(IntPtr hModule, IntPtr Proc);
 
 
         [DllImport("kernelbase.dll", CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Unicode, SetLastError = true)]

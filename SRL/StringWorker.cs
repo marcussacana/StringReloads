@@ -484,15 +484,15 @@ namespace SRL
         /// <param name="Pointer">The pointer to the string</param>
         /// <param name="Decode">if False, return the hex of the string</param>
         /// <returns>The String</returns>
-        internal static string GetString(IntPtr Pointer, bool Decode = true, int? Len = null, int? CP = null)
+        internal static string GetString(IntPtr Pointer, bool Decode = true, int? Len = null, int? CP = null, int? MaxLen = null, bool Internal = false)
         {
             if (EncodingModifier != null)
                 return EncodingModifier.Call("Modifier", "GetString", Pointer, Decode);
 
             if (Unicode && CP == null && Len == null)
-                return GetStringW(Pointer, Decode);
+                return GetStringW(Pointer, Decode, false, MaxLen, Internal);
             else
-                return GetStringA(Pointer, Decode, CP, Len);
+                return GetStringA(Pointer, Decode, CP, Len, MaxLen, Internal);
         }
 
         /// <summary>
@@ -548,7 +548,7 @@ namespace SRL
 
             Marshal.Copy(buffer, 0, Pointer, buffer.Length);
 
-            if (LogAll)
+            if (Verbose)
             {
                 string New = GetString(Pointer);
                 Log("Old: {0}\nNew: {1}\nHex: {2}", false, String, New, ParseBytes(buffer));
@@ -563,24 +563,43 @@ namespace SRL
         /// <param name="Pointer">Pointer to the string</param>
         /// <param name="Decode">if False, return the hex of the string</param>
         /// <returns></returns>
-        internal static string GetStringA(IntPtr Pointer, bool Decode = true, int? CP = null, int? Len = null)
+        internal static string GetStringA(IntPtr Pointer, bool Decode = true, int? CP = null, int? Len = null, int? MaxLen = null, bool Internal = false)
         {
             if (Pointer == IntPtr.Zero)
                 return null;
 
-            int len = 0;
-            if (Len == null)
+            byte[] buffer = null;
+            if (MaxLen.HasValue)
             {
-                while (Marshal.ReadByte(Pointer, len) != 0)
-                    ++len;
+                int len = 0;
+                if (Len == null)
+                {
+                    while (Marshal.ReadByte(Pointer, len) != 0 && len <= MaxLen.Value)
+                        ++len;
+                }
+                else
+                    len = Len.Value;
+
+                buffer = new byte[len];
+                Marshal.Copy(Pointer, buffer, 0, buffer.Length);
             }
             else
-                len = Len.Value;
+            {
+                int len = 0;
+                if (Len == null)
+                {
+                    while (Marshal.ReadByte(Pointer, len) != 0)
+                        ++len;
+                }
+                else
+                    len = Len.Value;
 
-            byte[] buffer = new byte[len];
-            Marshal.Copy(Pointer, buffer, 0, buffer.Length);
+                buffer = new byte[len];
+                Marshal.Copy(Pointer, buffer, 0, buffer.Length);
 
-            if ((LogInput || LogAll) && !DumpStrOnly)
+            }
+
+            if ((LogInput || Verbose) && !DumpStrOnly && !Internal)
             {
                 Log("Input: {0}", true, ParseBytes(buffer));
             }
@@ -622,18 +641,30 @@ namespace SRL
         /// <param name="Pointer">Pointer to the string</param>
         /// <param name="Decode">if False, return the hex of the string</param>
         /// <returns></returns>
-        internal static string GetStringW(IntPtr Pointer, bool Decode = true, bool ForceUnicode = false)
+        internal static string GetStringW(IntPtr Pointer, bool Decode = true, bool ForceUnicode = false, int? MaxLen = null, bool Internal = false)
         {
             if (Pointer == IntPtr.Zero)
                 return null;
 
-            int len = 0;
-            while (Marshal.ReadInt16(Pointer, len) != 0)
-                len += 2;
-            byte[] buffer = new byte[len];
-            Marshal.Copy(Pointer, buffer, 0, buffer.Length);
+            byte[] buffer = null;
+            if (MaxLen.HasValue)
+            {
+                int len = 0;
+                while (Marshal.ReadInt16(Pointer, len) != 0 && len/2<=MaxLen.Value)
+                    len += 2;
+                buffer = new byte[len];
+                Marshal.Copy(Pointer, buffer, 0, buffer.Length);
+            }
+            else
+            {
+                int len = 0;
+                while (Marshal.ReadInt16(Pointer, len) != 0)
+                    len += 2;
+                buffer = new byte[len];
+                Marshal.Copy(Pointer, buffer, 0, buffer.Length);
+            }
 
-            if ((LogInput || LogAll) && !DumpStrOnly)
+            if ((LogInput || Verbose) && !DumpStrOnly && !Internal)
             {
                 Log("Input: {0}", true, ParseBytes(buffer));
             }
@@ -667,7 +698,7 @@ namespace SRL
             if (NoTrim)
                 return;
 
-            if (LogAll)
+            if (Verbose)
             {
                 Log("Trim Request:\nOri: {0}\nStr: {1}", true, Original, String);
             }
@@ -686,7 +717,7 @@ namespace SRL
             Diff = Original.Length - Test.Length;
             String += Original.Substring(Original.Length - Diff, Diff);
 
-            if (LogAll)
+            if (Verbose)
             {
                 Log("Trim Result: {0}", true, String);
             }

@@ -6,12 +6,12 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-class FieldParmaters : Attribute
+public class FieldParmaters : Attribute
 {
     public string Name;
     public object DefaultValue;
 }
-class AdvancedIni
+public class AdvancedIni
 {
     byte[] INI;
 
@@ -21,6 +21,12 @@ class AdvancedIni
     }
     public AdvancedIni(string[] Ini)
     {
+        if (Ini == null || Ini.Length == 0)
+        {
+            INI = new byte[0];
+            return;
+        }
+
         StringBuilder SB = new StringBuilder();
         foreach (string Line in Ini)
             SB.AppendLine(Line);
@@ -30,7 +36,10 @@ class AdvancedIni
 
     public AdvancedIni(string IniFile)
     {
-        INI = File.ReadAllBytes(IniFile);
+        if (File.Exists(IniFile))
+            INI = File.ReadAllBytes(IniFile);
+        else
+            INI = new byte[0];
     }
 
     public AdvancedIni(byte[] Data)
@@ -53,19 +62,19 @@ class AdvancedIni
         AdvancedIni Instance = new AdvancedIni(File);
         Instance.Open(out Struct);
     }
-    public static void FastSave<T>(T Struct, out byte[] Data)
+    public static void FastSave<T>(T Struct, ref byte[] Data)
     {
-        AdvancedIni Instance = new AdvancedIni();
+        AdvancedIni Instance = new AdvancedIni(Data);
         Instance.Save(Struct, out Data);
     }
-    public static void FastSave<T>(T Struct, out string[] Lines)
+    public static void FastSave<T>(T Struct, ref string[] Lines)
     {
-        AdvancedIni Instance = new AdvancedIni();
+        AdvancedIni Instance = new AdvancedIni(Lines);
         Instance.Save(Struct, out Lines);
     }
     public static void FastSave<T>(T Struct, string File)
     {
-        AdvancedIni Instance = new AdvancedIni();
+        AdvancedIni Instance = new AdvancedIni(File);
         Instance.Save(Struct, File);
     }
     public void Open<T>(out T Struct)
@@ -322,9 +331,9 @@ internal class Const
     public const string BOOLEAN = "System.Boolean";
 }
 
-class Ini
+public class Ini
 {
-    internal static string GetConfig(string Key, string Name, string Path, bool Required = true)
+    public static string GetConfig(string Key, string Name, string Path, bool Required = true)
     {
         if (GetConfigStatus(Key, Name, Path) == ConfigStatus.NoFile)
             return string.Empty;
@@ -332,7 +341,7 @@ class Ini
         byte[] CFG = File.ReadAllBytes(Path);
         return GetConfig(Key, Name, CFG, Required);
     }
-    internal static string GetConfig(string Key, string Name, byte[] File, bool Required = true)
+    public static string GetConfig(string Key, string Name, byte[] File, bool Required = true)
     {
         VerifyHeader(ref File);
 
@@ -357,7 +366,7 @@ class Ini
         throw new Exception(string.Format("Config Error:\n[{0}]\n{1}=...", Key, Name));
     }
 
-    internal static void VerifyHeader(ref byte[] Content)
+    public static void VerifyHeader(ref byte[] Content)
     {
         if (EqualsAt(Content, new byte[] { 0xEF, 0xBB, 0xBF }, 0))
         {
@@ -369,7 +378,7 @@ class Ini
         }
     }
 
-    internal static bool EqualsAt(byte[] Arr, byte[] Arr2, uint At)
+    public static bool EqualsAt(byte[] Arr, byte[] Arr2, uint At)
     {
         if (Arr2.LongLength + At >= Arr.LongLength)
             return false;
@@ -384,7 +393,7 @@ class Ini
     }
 
 
-    internal static void SetConfig(string Key, string Name, string Value, string CfgPath)
+    public static void SetConfig(string Key, string Name, string Value, string CfgPath)
     {
         if (GetConfigStatus(Key, Name, CfgPath) == ConfigStatus.NoFile)
         {
@@ -395,7 +404,7 @@ class Ini
             File.WriteAllBytes(CfgPath, SetConfig(Key, Name, Value, File.ReadAllBytes(CfgPath)));
         }
     }
-    internal static byte[] SetConfig(string Key, string Name, string Value, byte[] Data)
+    public static byte[] SetConfig(string Key, string Name, string Value, byte[] Data)
     {
         VerifyHeader(ref Data);
 
@@ -449,18 +458,18 @@ class Ini
         return Encoding.UTF8.GetBytes(SB.ToString().Trim('\r', '\n'));
     }
 
-    internal enum ConfigStatus
+    public enum ConfigStatus
     {
         NoFile, NoKey, NoName, Ok
     }
 
-    internal static ConfigStatus GetConfigStatus(string Key, string Name, string CfgPath)
+    public static ConfigStatus GetConfigStatus(string Key, string Name, string CfgPath)
     {
         if (!File.Exists(CfgPath))
             return ConfigStatus.NoFile;
         return GetConfigStatus(Key, Name, File.ReadAllBytes(CfgPath));
     }
-    internal static ConfigStatus GetConfigStatus(string Key, string Name, byte[] Data)
+    public static ConfigStatus GetConfigStatus(string Key, string Name, byte[] Data)
     {
         VerifyHeader(ref Data);
 
