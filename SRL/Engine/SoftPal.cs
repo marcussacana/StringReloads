@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -12,6 +11,8 @@ namespace SRL.Engine
         bool PostSetupMode = false;
         bool SetupMode = false;
         SoftPALSettings Settings;
+
+        CallInterceptor Interceptor;
 
         bool HookReady {
             get {
@@ -127,13 +128,15 @@ namespace SRL.Engine
                                     PalFontDrawTextHookDelegate = PalFontDrawTextHook;
                                     HookFunc = Marshal.GetFunctionPointerForDelegate(PalFontDrawTextHookDelegate);
 
-                                    if (!HookReady)
+                                    if (SetupMode)
                                     {
-                                        SetupFunc = Marshal.AllocHGlobal(SetupInfoBase.Length);
-                                        if (!UnmanagedImports.Write(SetupFunc, SetupInfo, UnmanagedImports.Protection.PAGE_EXECUTE_READWRITE))
-                                            Error("Failed to alloc the setup hook...");
-                                        else if (Debugging || Verbose)
-                                            Log($"{Name} Hook Setup" + (Verbose ? " Allocated at 0x{0:X8}" : ""), true, SetupFunc.ToUInt32());
+                                        if (Interceptor == null)
+                                        {
+                                            Interceptor = new CallInterceptor(RealFunc, true, true);
+                                            Interceptor.OnIntercepted += DrawTextInfoReciver;
+                                            SetupFunc = Interceptor.HookAddress;
+                                            Log($"{Name} Hook Setup Initialized", true);
+                                        }
                                     }
                                     else if (Debugging || Verbose)
                                         Log($"{Name} Hook Initialized", true);
@@ -158,9 +161,9 @@ namespace SRL.Engine
                 AdvancedIni.FastOpen(out Settings, IniPath);
 
                 InstallLoadLibraryHooks();
-                Method = byte.MaxValue - 1;
+                Method = 3;
 
-                if (!HookReady)
+                if (!HookReady && !SetupMode)
                 {
                     var Rst = MessageBox.Show("SRL is not configured to work with this game yet, do you want to configure it now?", "StringReloader", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                     if (Rst == DialogResult.No)
@@ -192,8 +195,8 @@ namespace SRL.Engine
                 }
                 else
                 {
-                    Method = 3;
-                    InstallDynamicHook();
+                    Interceptor = new CallInterceptor(new IntPtr(unchecked((int)(Settings.Offset + GameBaseAddress))), Settings.PersistentHook);
+                    Interceptor.OnIntercepted += TextDrawInterception;
                 }
 
                 return true;
@@ -212,9 +215,8 @@ namespace SRL.Engine
                 case 1:
                     PalFontDrawTextHookManager.Install();
                     break;
-                case byte.MaxValue - 1:
                 case 3:
-                    InstallDynamicHook();
+                    Interceptor?.Install();
                     break;
                 default:
                     throw new Exception("Hook ID Not Found");
@@ -232,50 +234,12 @@ namespace SRL.Engine
                 case 1:
                     PalFontDrawTextHookManager.Uninstall();
                     break;
-
-                case byte.MaxValue - 1:
                 case 3:
-                    UninstallDynamicHook();
+                    Interceptor?.Uninstall();
                     break;
                 default:
                     throw new Exception("Hook ID Not Found");
             }
-        }
-
-        IntPtr DynamicHookAddress;
-        IntPtr DynamicRealAddress;
-        byte[] DynamicHookData;
-        byte[] DynamicJmpData;
-        void InstallDynamicHook()
-        {
-            if (SetupMode)
-                return;
-
-            if (DynamicRealAddress == IntPtr.Zero)
-            {
-                if (Verbose)
-                    Log("Initializing Dynamic Hooks (BaseAddress: {0:X8} + Offset: {1:X8})", true, GameBaseAddress, Settings.Offset);
-
-                DynamicRealAddress = new IntPtr(unchecked((int)(GameBaseAddress + Settings.Offset)));
-                DynamicHookData = UnmanagedImports.Read(DynamicRealAddress, 5);
-
-                DynamicHookAddress = Marshal.AllocHGlobal(100);
-
-                byte[] Function = Settings.PersistentHook ? PersistentHook : NonPersistentHook;
-
-                UnmanagedImports.Write(DynamicHookAddress, Function, UnmanagedImports.Protection.PAGE_EXECUTE_READWRITE);
-            
-                DynamicJmpData = UnmanagedImports.AssembleJump(DynamicRealAddress, DynamicHookAddress);
-            }
-
-            UnmanagedImports.Write(DynamicRealAddress, DynamicJmpData);
-            UnmanagedImports.FlushInstructionCache(DynamicHookAddress, (uint)DynamicJmpData.Length);
-        }
-        
-        void UninstallDynamicHook()
-        {
-            UnmanagedImports.Write(DynamicRealAddress, DynamicHookData);
-            UnmanagedImports.FlushInstructionCache(DynamicHookAddress, (uint)DynamicHookData.Length);
         }
 
         public void DrawTextHook(IntPtr Text, IntPtr a2, IntPtr a3, IntPtr a4, IntPtr a5, IntPtr a6, IntPtr a7, IntPtr a8, IntPtr a9, IntPtr a10, IntPtr a11, IntPtr a12, IntPtr a13, IntPtr a14, IntPtr a15, IntPtr a16, IntPtr a17, IntPtr a18, IntPtr a19, IntPtr a20, IntPtr a21, IntPtr a22, IntPtr a23)
@@ -290,18 +254,11 @@ namespace SRL.Engine
             return PalFontDrawTextRealDelegate(a1, Text, a3, a4, a5, a6);
         }
 
-        void BeginHook(IntPtr Stack, IntPtr Return)
+        void TextDrawInterception(IntPtr Stack, IntPtr Return)
         {
-            HookReturnAddress = Return;
+            Stack = Stack.Sum(Settings.StackOffset * 4);
             IntPtr NewPtr = ProcessReal(Marshal.ReadIntPtr(Stack));
             Marshal.WriteIntPtr(Stack, NewPtr);
-            UninstallDynamicHook();
-        }
-
-        IntPtr EndHook()
-        {
-            InstallDynamicHook();
-            return HookReturnAddress;
         }
 
         //Engine v1.17
@@ -325,27 +282,11 @@ namespace SRL.Engine
             [FieldParmaters(DefaultValue = 0u, Name = "StackOffset")]
             public uint StackOffset;
 
-            [FieldParmaters(DefaultValue = 0u, Name = "PersistentHookSize")]
-            public uint PersistentHookSize;
-
             [FieldParmaters(DefaultValue = false, Name = "PersistentHook")]
             public bool PersistentHook;
         }
 
-
-        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        delegate void InfoCatcher(IntPtr ReturnAddress, IntPtr ESP);
-
-        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        delegate void HookBegin(IntPtr StackAddress, IntPtr ReturnAddress);
-
-        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
-        delegate IntPtr HookEnd();
-
-
-        InfoCatcher CallInfoDelegate;
-
-        void CallingInfoReciver(IntPtr Return, IntPtr Stack)
+        void DrawTextInfoReciver(IntPtr Stack, IntPtr Return)
         {
             if (Verbose)
                 Log("DrawText Called From {0:X8} (ESP: {1:X8})", true, Return.ToUInt32(), Stack.ToUInt32());
@@ -363,25 +304,8 @@ namespace SRL.Engine
             while (Sub < 0x900)
             {
                 Offset = Return.Sum(Sub++ * -1);
-                byte[] Buff = UnmanagedImports.Read(Offset, 100);
-                if (BufferEquals(Buff, SupportedFuncPrefixA))
-                {
-                    Settings.PersistentHookSize = 6;
-                    SupportedFunc = true;
-                    break;
-                }
-                if (BufferEquals(Buff, SupportedFuncPrefixB))
-                {
-                    Settings.PersistentHookSize = 6;
-                    SupportedFunc = true;
-                    break;
-                }
-                if (BufferEquals(Buff, UnsupportedFuncPrefix))
-                {
-                    SupportedFunc = false;
-                    Offset.Sum(2);
-                    break;
-                }
+                if (CallInterceptor.IsInterceptable(ref Offset, out SupportedFunc))                
+                    break;                
             }
 
             if (!SupportedFunc.HasValue) {
@@ -407,7 +331,10 @@ namespace SRL.Engine
 
             PostSetupMode = true;
 
-            InstallDynamicHook();
+            Interceptor = new CallInterceptor(Offset, false);
+            Interceptor.OnIntercepted += PostSetupInterception;
+            Interceptor.AfterInvoked += PostSetupAfterInvoke;
+            Interceptor.Install();
 
             MessageBox.Show($"Very well, looks like SRL can perform Auto-Install in this game, {(SupportedFunc.Value ? "optimally!" : ", albeit non-optimally.")} SRL now needs to gather more intricate information from the game. Please press OK and continue to the next in-game dialogue.", "StringReloader Setup Wizard", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
@@ -415,14 +342,10 @@ namespace SRL.Engine
         static bool WaitingConfirmation;
         static int LastOffset = -1;
         static bool PostSetupInstructionViewed;
-        void PostSetupBeginHook(IntPtr Stack, IntPtr Return)
+        void PostSetupInterception(IntPtr Stack, IntPtr Return)
         {
-            HookReturnAddress = Return;
-
             if (WaitingConfirmation)
             {
-                UninstallDynamicHook();
-
                 WaitingConfirmation = false;
                 var Rst = MessageBox.Show("And then, you saw the confirmation message?", "StringReloader Setup Wizard", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (Rst == DialogResult.Yes)                
@@ -433,8 +356,6 @@ namespace SRL.Engine
 
             if (!PostSetupMode)
                 return;
-
-            UninstallDynamicHook();
 
             if (Verbose)
                 Log("SoftPAL Recived Stack: 0x{0:X8} (Return to: 0x{1:X8})", true, Stack.ToUInt32(), Return.ToInt32());
@@ -498,115 +419,21 @@ namespace SRL.Engine
 
         }
 
-        IntPtr PostSetupEndHook()
+        void PostSetupAfterInvoke()
         {
             if (PostSetupMode)
-            {
-                InstallDynamicHook();
-                return HookReturnAddress;
-            }
+                return;
 
             if (WaitingConfirmation)
             {
-                InstallDynamicHook();
                 MessageBox.Show("Very well, SRL will now try translating the game text to test settings.\nIf you don't see a message in-game confirming what has been set, then continue on to the next in-game dialogue and press NO; otherwise, press YES.", "StringReloader Setup Wizard", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return HookReturnAddress;
+                return;
             }
 
             AdvancedIni.FastSave(Settings, IniPath);
             MessageBox.Show($"Perfect! SRL is now ready to use! Enjoy!", "StringReloader", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            System.Diagnostics.Process.Start(Application.ExecutablePath);
-            Environment.Exit(0);
-            return HookReturnAddress;
+
+            Restart();
         }
-
-        IntPtr HookReturnAddress;
-        HookBegin HookBeginDelegate;
-        HookEnd HookEndDelegate;
-
-        bool BufferEquals(byte[] Buffer, byte[] Data)
-        {
-            if (Buffer.Length < Data.Length)
-                return true;
-            for (int i = 0; i < Data.Length; i++)
-                if (Buffer[i] != Data[i])
-                    return false;
-            return true;
-        }
-
-        byte[] SetupInfo { 
-            get {
-                CallInfoDelegate = new InfoCatcher(CallingInfoReciver);
-                IntPtr Func = Marshal.GetFunctionPointerForDelegate(CallInfoDelegate);
-                
-                byte[] Buff = new byte[SetupInfoBase.Length];
-                SetupInfoBase.CopyTo(Buff, 0);
-
-                BitConverter.GetBytes(Func.ToUInt32()).CopyTo(Buff, 0x07);
-                BitConverter.GetBytes(RealFunc.ToUInt32()).CopyTo(Buff, 0x0F);
-
-                return Buff;
-            }        
-        }
-
-        //+7 = Info Catcher; +f = DrawText
-        byte[] SetupInfoBase = { 0x89, 0xE0, 0x60, 0x50, 0xFF, 0x30, 0xB8, 0x11, 0x11, 0x11, 0x11, 
-                                 0xFF, 0xD0, 0x61, 0xB8, 0x22, 0x22, 0x22, 0x22, 0xFF, 0xE0 };
-
-
-        byte[] NonPersistentHook { 
-            get {
-                HookBeginDelegate = PostSetupMode ? new HookBegin(PostSetupBeginHook) : new HookBegin(BeginHook);
-                HookEndDelegate = PostSetupMode ? new HookEnd(PostSetupEndHook) : new HookEnd(EndHook);
-
-                IntPtr BeginAddr = Marshal.GetFunctionPointerForDelegate(HookBeginDelegate);
-                IntPtr EndAddr = Marshal.GetFunctionPointerForDelegate(HookEndDelegate);
-
-                byte[] Buff = new byte[NonPersistentHookBase.Length];
-                NonPersistentHookBase.CopyTo(Buff, 0);
-
-                BitConverter.GetBytes(Settings.StackOffset * 4u).CopyTo(Buff, 0x07);
-
-                BitConverter.GetBytes(BeginAddr.ToUInt32()).CopyTo(Buff, 0x0D);
-                BitConverter.GetBytes(DynamicRealAddress.ToUInt32()).CopyTo(Buff, 0x16);
-                BitConverter.GetBytes(EndAddr.ToUInt32()).CopyTo(Buff, 0x20);
-
-                return Buff;
-            }
-        }
-
-
-        //+7 = Stack Offset; +D = Hook Begin Address; +16 = Real Func Address; +20 = Hook End Address
-        byte[] NonPersistentHookBase = { 0x60, 0x89, 0xE0, 0xFF, 0x70, 0x20, 0x05, 0x00, 0x01, 0x00, 0x00,
-                                         0x50, 0xB8, 0x11, 0x11, 0x11, 0x11, 0xFF, 0xD0, 0x61, 0x58, 0xB8,
-                                         0x22, 0x22, 0x22, 0x22, 0xFF, 0xD0, 0x6A, 0x00, 0x60, 0xB8, 0x33,
-                                         0x33, 0x33, 0x33, 0xFF, 0xD0, 0x89, 0x44, 0x24, 0x20, 0x61, 0xC3 };
-
-        byte[] PersistentHook {
-            get {
-                if (PostSetupMode)
-                    return NonPersistentHook;
-
-                List<byte> Buffer = new List<byte>();
-                Buffer.AddRange(PersistentHookBase);
-                Buffer.AddRange(UnmanagedImports.Read(DynamicRealAddress, Settings.PersistentHookSize));
-                Buffer.AddRange(UnmanagedImports.AssembleJump(DynamicHookAddress.Sum(Buffer.Count), DynamicRealAddress.Sum(Settings.PersistentHookSize)));
-
-                byte[] Buff = Buffer.ToArray();
-                BitConverter.GetBytes(Settings.StackOffset * 4u).CopyTo(Buff, 0x04);
-                BitConverter.GetBytes(GetDirectProcessReal().ToUInt32()).CopyTo(Buff, 0x0E);
-
-                return Buff;
-            }
-        }
-
-        //+4 = Stack Offset; +E = Process Address;
-        byte[] PersistentHookBase = { 0x60, 0x89, 0xE0, 0xBB, 0x23, 0x01, 0x00, 0x00, 0x01, 0xD8, 0x50, 0xFF,
-                                      0x30, 0xB8, 0x11, 0x11, 0x11, 0x11, 0xFF, 0xD0, 0x5B, 0x89, 0x03, 0x61 };
-
-
-        byte[] SupportedFuncPrefixA = { 0x55, 0x8B, 0xEC, 0x83, 0xEC };
-        byte[] SupportedFuncPrefixB = { 0x55, 0x8B, 0xEC, 0x83, 0xE4 };
-        byte[] UnsupportedFuncPrefix = { 0xCC, 0xCC, 0x55, 0x8B, 0xEC };
     }
 }

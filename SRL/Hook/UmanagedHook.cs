@@ -8,8 +8,256 @@ using static SRL.UnmanagedImports;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-namespace SRL
-{
+namespace SRL { 
+
+    public class CallInterceptor
+    {
+        const int AllocSize = 512;
+        uint PersistentHookSize = 6;
+
+        HookBegin dBeginHook;
+        HookEnd dEndHook;
+
+        bool PersistentMode;
+        bool ManualMode;
+
+        IntPtr FunctionAddress;
+        IntPtr ReturnAddress;
+
+        IntPtr InvokFuncAddress = IntPtr.Zero;
+
+        /// <summary>
+        /// The Address of the Interceptor Function
+        /// </summary>
+        public IntPtr HookAddress { get; private set; }
+
+        /// <summary>
+        /// Event that is triggered when the target is called
+        /// </summary>
+        public event HookBegin OnIntercepted;
+
+        /// <summary>
+        /// Event that is triggered after the real target is invoked
+        /// <para>Only works with Non Persistent Hooks</para>
+        /// </summary>
+        public event VoidDelegate AfterInvoked;
+
+
+        byte[] JmpData;
+        byte[] OriData;
+
+        /// <summary>
+        /// Intercept a function and catch xref info
+        /// </summary>
+        /// <param name="Address">Address of the function to be Intercepted</param>
+        /// <param name="Persistent">When true the interceptor will be never disabled.</param>
+        /// <param name="Manual">When true the interceptor generate a function to you manual install it.</param>
+
+        public CallInterceptor(IntPtr Address, bool Persistent, bool Manual = false)
+        {
+            if (Manual)
+                Persistent = true;
+
+            ManualMode = Manual;
+            FunctionAddress = Address;
+            PersistentMode = Persistent;
+
+            if (IntPtr.Size != 4)
+                throw new NotImplementedException("This Feature is x86 only yet.");
+
+            HookAddress = Marshal.AllocHGlobal(AllocSize);
+
+            byte[] HookData = Persistent ? PersistentHook : NonPersistentHook;
+            Write(HookAddress, HookData, Protection.PAGE_EXECUTE_READWRITE);
+
+            JmpData = AssembleJump(FunctionAddress, HookAddress);
+            OriData = Read(FunctionAddress, (uint)JmpData.Length);
+        }
+
+        /// <summary>
+        /// Intercept a function and catch xref info
+        /// </summary>
+        /// <param name="Address">Address of the function to be Intercepted</param>
+        /// <param name="InvokeAddress">Function to be invoked instead of the intercepted function</param>
+        /// <param name="Persistent">When true the hook never will be disabled.</param>
+        public CallInterceptor(IntPtr Address, IntPtr InvokeAddress, bool Persistent, bool Manual = false) : this(Address, Persistent, Manual)
+        {
+            InvokFuncAddress = InvokeAddress;
+        }
+
+        ~CallInterceptor()
+        {
+            if (!ManualMode)  
+                Uninstall();
+            Marshal.FreeHGlobal(HookAddress);
+        }
+
+        public void Install() => Write(FunctionAddress, JmpData, Protection.PAGE_EXECUTE_READWRITE);
+
+        public void Uninstall() => Write(FunctionAddress, OriData, Protection.PAGE_EXECUTE_READWRITE);
+        
+        public static bool IsInterceptable(ref IntPtr Address, out bool? PersistentSupport)
+        {
+            PersistentSupport = null;
+
+            byte[] Buff = Read(Address, 20);
+
+            if (BufferEquals(Buff, SupportedFuncPrefixA))
+            {
+                PersistentSupport = true;
+                return true;
+            }
+
+            if (BufferEquals(Buff, SupportedFuncPrefixB))
+            {
+                PersistentSupport = true;
+                return true;
+            }
+
+            if (BufferEquals(Buff, UnsupportedFuncPrefixA))
+            {
+                PersistentSupport = false;
+                Address = Address.Sum(2);
+                return true;
+            }
+
+            if (BufferEquals(Buff, UnsupportedFuncPrefixB))
+            {
+                PersistentSupport = false;
+                return true;
+            }
+
+            return false;
+        }
+        static bool BufferEquals(byte[] Buffer, byte[] Data)
+        {
+            if (Buffer.Length < Data.Length)
+                return true;
+            for (int i = 0; i < Data.Length; i++)
+                if (Buffer[i] != Data[i])
+                    return false;
+            return true;
+        }
+
+        void BeginHook(IntPtr Stack, IntPtr Return)
+        {
+            ReturnAddress = Return;
+            OnIntercepted?.Invoke(Stack, Return);
+
+            if (!PersistentMode && !ManualMode)
+                Uninstall();
+        }
+
+        IntPtr EndHook()
+        {
+            AfterInvoked?.Invoke();
+
+            if (!PersistentMode && !ManualMode)
+                Install();
+
+            return ReturnAddress;
+        }
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        public delegate void HookBegin(IntPtr StackAddress, IntPtr ReturnAddress);
+
+        public delegate void VoidDelegate();
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall)]
+        delegate IntPtr HookEnd();
+
+        byte[] NonPersistentHook {
+            get {
+                dBeginHook = new HookBegin(BeginHook);
+                dEndHook = new HookEnd(EndHook);
+
+                IntPtr BeginAddr = Marshal.GetFunctionPointerForDelegate(dBeginHook);
+                IntPtr EndAddr = Marshal.GetFunctionPointerForDelegate(dEndHook);
+                IntPtr FuncAddr = (InvokFuncAddress == IntPtr.Zero ? FunctionAddress : InvokFuncAddress);
+
+                byte[] Buff = new byte[NonPersistentHookBase.Length];
+                NonPersistentHookBase.CopyTo(Buff, 0);
+
+                BitConverter.GetBytes(BeginAddr.ToUInt32()).CopyTo(Buff, 0x08);
+                BitConverter.GetBytes(FuncAddr.ToInt32()).CopyTo(Buff, 0x11);
+                BitConverter.GetBytes(EndAddr.ToUInt32()).CopyTo(Buff, 0x1b);
+
+                return Buff;
+            }
+        }
+
+        /*
+         pusha
+         mov    eax,esp
+         push   DWORD PTR [eax+0x20]
+         push   eax
+         mov    eax,0x11111111
+         call   eax
+         popa
+
+         pop    eax
+         mov    eax,0x22222222
+         call   eax
+
+         push   0x0
+         pusha
+         mov    eax,0x33333333
+         call   eax
+         mov    DWORD PTR [esp+0x20],eax
+         popa
+         ret 
+        */
+
+        //+0x8 = Hook Begin Address; +0x11 = Real Func Address; +0x1b = Hook End Address
+        static byte[] NonPersistentHookBase = { 0x60, 0x89, 0xE0, 0xFF, 0x70, 0x20, 0x50, 0xB8, 0x11, 0x11, 
+                                                0x11, 0x11, 0xFF, 0xD0, 0x61, 0x58, 0xB8, 0x22, 0x22, 0x22, 
+                                                0x22, 0xFF, 0xD0, 0x6A, 0x00, 0x60, 0xB8, 0x33, 0x33, 0x33, 
+                                                0x33, 0xFF, 0xD0, 0x89, 0x44, 0x24, 0x20, 0x61, 0xC3 };
+
+        byte[] PersistentHook {
+            get {
+
+                dBeginHook = new HookBegin(BeginHook);
+                IntPtr BeginAddr = Marshal.GetFunctionPointerForDelegate(dBeginHook);
+
+                List<byte> Buffer = new List<byte>();
+                Buffer.AddRange(PersistentHookBase);
+
+                if (!ManualMode)
+                    Buffer.AddRange(Read(FunctionAddress, PersistentHookSize));
+
+                IntPtr InvokeFunc = (InvokFuncAddress == IntPtr.Zero ? FunctionAddress : InvokFuncAddress);
+                if (!ManualMode)
+                    InvokeFunc = InvokeFunc.Sum(PersistentHookSize);
+
+                Buffer.AddRange(AssembleJump(HookAddress.Sum(Buffer.Count), InvokeFunc));
+
+                byte[] Buff = Buffer.ToArray();
+                BitConverter.GetBytes(BeginAddr.ToInt32()).CopyTo(Buff, 0x08);
+
+                return Buff;
+            }
+        }
+
+        /*
+        pusha
+        mov    eax, esp
+        push   [eax+0x20]
+        push   eax
+        mov    eax,0x11111111
+        call   eax
+        popa  
+        */
+        //+0x8 = Begin Address;
+        static byte[] PersistentHookBase = { 0x60, 0x89, 0xE0, 0xFF, 0x70, 0x20, 0x50, 0xB8,
+                                             0x11, 0x11, 0x11, 0x11, 0xFF, 0xD0, 0x61 };
+
+
+        static byte[] SupportedFuncPrefixA = { 0x55, 0x8B, 0xEC, 0x83, 0xEC };
+        static byte[] SupportedFuncPrefixB = { 0x55, 0x8B, 0xEC, 0x83, 0xE4 };
+        static byte[] UnsupportedFuncPrefixA = { 0xCC, 0xCC, 0x55, 0x8B, 0xEC };
+        static byte[] UnsupportedFuncPrefixB = { 0x55, 0x8B, 0xEC };
+    }
     public struct ImportEntry
     {
 

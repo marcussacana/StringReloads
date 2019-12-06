@@ -174,9 +174,7 @@ namespace SRL.Wrapper
             if (!TryRename(CurrentDllName, "SRL.dll"))
                 File.Copy(CurrentDllName, "SRL.dll");
 
-            System.Diagnostics.Process.Start(Output);
-            Environment.Exit(0);
-            System.Diagnostics.Process.GetCurrentProcess().Kill();
+            StringReloader.Restart();
             return true;
         }
 
