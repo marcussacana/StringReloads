@@ -305,7 +305,7 @@ namespace SRL.Engine
             {
                 Offset = Return.Sum(Sub++ * -1);
                 if (CallInterceptor.IsInterceptable(ref Offset, out SupportedFunc))                
-                    break;                
+                    break;
             }
 
             if (!SupportedFunc.HasValue) {
