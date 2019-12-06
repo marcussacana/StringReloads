@@ -89,6 +89,8 @@ You don't give pass nothing to this method, just call and catch the EAX, the EAX
 The SRL have a feature to automatically install the SRL in the game engine without you need know how to patch the game, just rename the SRLx32.dll to d3d9.dll; dinput8.dll or any other supported wrapper [See Here what is supported](https://github.com/marcussacana/StringReloads/tree/master/SRL/Wrapper), then in the SRL.ini set the AutoEngineHook to true.    
 *Currently only the AdvHD and SoftPal engine is supported by this feature.*
 
+Some SoftPal games needs a manual setup with the help of the Auto-Installer, click below to see the example:
+[![SRL SoftPal Auto-Install Feature](http://img.youtube.com/vi/RAgZQBWqiJQ/0.jpg)](http://www.youtube.com/watch?v=RAgZQBWqiJQ "SRL SoftPal Auto-Install Feature")
 
 ### Build Dependencies:
 *	[vsSoluctionBuildEvents](https://github.com/3F/vsSolutionBuildEvent)
