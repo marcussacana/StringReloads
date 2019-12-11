@@ -841,6 +841,9 @@ namespace SRL
             if ((NoTrim || LiteMode) && !Force)
                 return Input;
 
+            if (Input.StartsWith(AntiTrimFlag))
+                return Input.Substring(AntiTrimFlag.Length);
+
             string Result = Input;
             Result = TrimStart(Result, Force);
             Result = TrimEnd(Result, Force);
@@ -855,14 +858,17 @@ namespace SRL
         /// <summary>
         /// Trim the Begin of the String
         /// </summary>
-        /// <param name="Txt">The String to Trim</param>
+        /// <param name="Input">The String to Trim</param>
         /// <returns>The Result</returns>
-        internal static string TrimStart(string Txt, bool Force = false)
+        internal static string TrimStart(string Input, bool Force = false)
         {
             if ((NoTrim || LiteMode) && !Force)
-                return Txt;
+                return Input;
 
-            string rst = Txt;
+            if (Input.StartsWith(AntiTrimFlag))
+                return Input.Substring(AntiTrimFlag.Length);
+
+            string rst = Input;
             foreach (string str in TrimChars)
             {
                 if (string.IsNullOrEmpty(str))
@@ -892,7 +898,7 @@ namespace SRL
                 }
             }
 
-            if (rst != Txt)
+            if (rst != Input)
                 rst = TrimStart(rst);
 
             return rst;
@@ -901,14 +907,17 @@ namespace SRL
         /// <summary>
         /// Trim the End of the String
         /// </summary>
-        /// <param name="Txt">The String to Trim</param>
+        /// <param name="Input">The String to Trim</param>
         /// <returns>The Result</returns>
-        internal static string TrimEnd(string Txt, bool Force = false)
+        internal static string TrimEnd(string Input, bool Force = false)
         {
             if ((NoTrim || LiteMode) && !Force)
-                return Txt;
+                return Input;
 
-            string rst = Txt;
+            if (Input.StartsWith(AntiTrimFlag))
+                return Input.Substring(AntiTrimFlag.Length);
+
+            string rst = Input;
             foreach (string str in TrimChars)
             {
                 if (string.IsNullOrEmpty(str))
@@ -938,7 +947,7 @@ namespace SRL
                 }
             }
 
-            if (rst != Txt)
+            if (rst != Input)
                 rst = TrimEnd(rst);
 
             return rst;
