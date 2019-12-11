@@ -698,6 +698,12 @@ namespace SRL
             if (NoTrim)
                 return;
 
+            if (String.StartsWith(AntiTrimFlag))
+            {
+                String = String.Substring(AntiTrimFlag.Length);
+                return;
+            }
+
             if (Verbose)
             {
                 Log("Trim Request:\nOri: {0}\nStr: {1}", true, Original, String);

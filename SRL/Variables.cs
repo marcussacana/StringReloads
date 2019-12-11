@@ -17,6 +17,7 @@ namespace SRL
         internal const string AntiMaskParser = "::NOMASK::";
         internal const string AntiPrefixFlag = "::NOPREFIX::";
         internal const string AntiSufixFlag = "::NOSUFIX::";
+        internal const string AntiTrimFlag = "::NOTRIM::";
         internal const string MaskWordWrap = "::FULLWORDWRAP::";
 
         internal const string CfgName = "StringReloader";

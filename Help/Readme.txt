@@ -222,6 +222,10 @@ This tag can be used only in the reload line.
 ::NOSUFIX::
 Like the ::NOPREFIX::, but don't append the "ReloadedSufix"
 
+::NOTRIM::
+Disable the Automatic Trim Restoration in the Translation Line.
+This tag can be used only in the reload line, and in the begin of the line.
+
 ::FULLWORDWRAP::
 This tag force the SRL do wordwrap in the sub-strings of all masks reloaded.
 This tag can be used only in the reload line, and in the begin of the line.
