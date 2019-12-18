@@ -516,8 +516,7 @@ namespace SRL
             if (Replys.Contains(SimplfyMatch(Ori)))
                 return true;
 
-            uint HandlePID;
-            GetWindowThreadProcessId(Handler, out HandlePID);
+            GetWindowThreadProcessId(Handler, out uint HandlePID);
 
             if (HandlePID == GamePID)
             {

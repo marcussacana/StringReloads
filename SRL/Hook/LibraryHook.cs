@@ -92,6 +92,9 @@ namespace SRL
         }
         static IntPtr CreateFile(string FileName, IntPtr Access, IntPtr Share, IntPtr Security, IntPtr Mode, IntPtr Flags, IntPtr TemplateFile)
         {
+            if (Verbose)
+                Log("CreateFile: {0}", true, FileName);
+
             var Rst = OnCreateFile?.Invoke(FileName);
             if (Rst != null)
                 return Rst.Value;
@@ -104,17 +107,17 @@ namespace SRL
         static string ParsePath(string Path)
         {
 
-            string PatchPath = PatchBase + System.IO.Path.GetFileName(Path);
+            string PatchPath = PatchBase + System.IO.Path.GetFileName(Path.Trim());
 
             if (ValidPath(PatchPath))
             {
-#if DEBUG
-                Log("File Path Converted from:\n{0}\nto:\n{1}", true, Path, PatchPath);
-#endif
+                if (Verbose)
+                    Log("File Path Converted from:\n{0}\nto:\n{1}", true, Path, PatchPath);
+
                 return PatchPath;
             }
 
-            return Path;
+            return Path.Trim();
         }
         static IntPtr LoadLibraryHook(string lpFileName)
         {
