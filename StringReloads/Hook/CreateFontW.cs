@@ -12,7 +12,7 @@
             Compile();
         }
 
-        void* CreateFontHook(uint nHeight, uint nWidth, int nEscapement, int nOrientation, int fnWeight, uint fdwItalic, uint fdwUnderline, uint fdwStrikeOut, uint fdwCharSet, uint fdwOutputPrecision, uint fdwClipPrecision, uint fdwQuality, uint fdwPitchAndFamily, string lpszFace) {
+        void* CreateFontHook(int nHeight, int nWidth, int nEscapement, int nOrientation, int fnWeight, int fdwItalic, int fdwUnderline, int fdwStrikeOut, uint fdwCharSet, int fdwOutputPrecision, int fdwClipPrecision, int fdwQuality, int fdwPitchAndFamily, string lpszFace) {
             var Remap = EntryPoint.SRL.GetFontRemap(lpszFace, nWidth, nHeight, fdwCharSet);
 
             if (Remap != null) {

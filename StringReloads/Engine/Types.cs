@@ -13,8 +13,8 @@ namespace StringReloads.Engine
     struct FontRemap {
         public string From;
         public string To;
-        public uint Width;
-        public uint Height;
+        public int Width;
+        public int Height;
         public uint Charset;
     }
 }

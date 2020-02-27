@@ -15,6 +15,9 @@ namespace StringReloads.Engine
             //Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);//.net core
             Engine.Settings = new Config();
 
+            if (Config.Default.Debug)
+                System.Diagnostics.Debugger.Launch();
+
             Log.Information($"SRL - StringReloads v{Engine.Settings.SRLVersion}");
             Log.Information($"Created by Marcussacana");
 

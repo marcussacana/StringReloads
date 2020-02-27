@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Text;
 
 namespace StringReloads.Engine
@@ -16,12 +15,14 @@ namespace StringReloads.Engine
         internal void* MainWindow => _MainWindow != null ? _MainWindow : (_MainWindow = Process.GetCurrentProcess().MainWindowHandle.ToPointer());
 
         bool? _AutoInstall = null;
-        internal bool AutoInstall => (_AutoInstall ?? (_AutoInstall = ToBoolean(GetValue("AutoInstall")))).Value;
+        internal bool AutoInstall => (_AutoInstall ?? (_AutoInstall = GetValue("AutoInstall").ToBoolean())).Value;
 
 
         string _ConfigPath = null;
         internal string ConfigPath => _ConfigPath ?? (_ConfigPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SRL.ini"));
 
+        bool? _Debug = null;
+        internal bool Debug => (_Debug ?? (_Debug = GetValue("Debug").ToBoolean())).Value;
 
         string[] _IniLines = null;
         internal string[] IniLines {
@@ -38,13 +39,13 @@ namespace StringReloads.Engine
 
 
         bool? _Log = null;
-        internal bool Log => (_Log ?? (_Log = ToBoolean(GetValue("Log")))).Value;
+        internal bool Log => (_Log ?? (_Log = GetValue("Log").ToBoolean())).Value;
 
         bool? _LogFile = null;
-        internal bool LogFile => (_LogFile ?? (_LogFile = ToBoolean(GetValue("LogFile")))).Value;
+        internal bool LogFile => (_LogFile ?? (_LogFile = GetValue("LogFile").ToBoolean())).Value;
 
         Log.LogLevel? _LogLevel = null;
-        internal Log.LogLevel LogLevel => (_LogLevel ?? (_LogLevel = ToLogLevel(GetValue("LogLevel")))).Value;
+        internal Log.LogLevel LogLevel => (_LogLevel ?? (_LogLevel = GetValue("LogLevel").ToLogLevel())).Value;
 
 
         string _Workspace = null;
@@ -85,7 +86,7 @@ namespace StringReloads.Engine
                 var GlobalEncoding = GetValue("Encoding");
                 var Encoding = GetValue("ReadEncoding");
 
-                return _REncoding = ToEncoding(Encoding ?? GlobalEncoding);
+                return _REncoding = (Encoding ?? GlobalEncoding).ToEncoding();
             }
         }
 
@@ -98,7 +99,7 @@ namespace StringReloads.Engine
                 var GlobalEncoding = GetValue("Encoding");
                 var Encoding = GetValue("WriteEncoding");
 
-                return _WEncoding = ToEncoding(Encoding ?? GlobalEncoding);
+                return _WEncoding = (Encoding ?? GlobalEncoding).ToEncoding();
             }
         }
 
@@ -110,12 +111,12 @@ namespace StringReloads.Engine
 
 
         string _Breakline = null;
-        internal string BreakLine => _Breakline ?? (_Breakline = ToUnescaped(GetValue("BreakLine")));
+        internal string BreakLine => _Breakline ?? (_Breakline = GetValue("BreakLine").Unescape());
         
 
 
         int? _Width = null;
-        internal int Width => (_Width ?? (_Width = ToInteger(GetValue("Width", "Wordwrap")))).Value;
+        internal int Width => (_Width ?? (_Width = GetValue("Width", "Wordwrap").ToInt32())).Value;
 
 
         Dictionary<string, string>[] _FontRemaps;
@@ -143,7 +144,7 @@ namespace StringReloads.Engine
                 Dictionary<string, bool> Mods = new Dictionary<string, bool>();
                 foreach (var Pair in Settings)
                 {
-                    Mods[Pair.Key] = ToBoolean(Pair.Value);
+                    Mods[Pair.Key] = Pair.Value.ToBoolean();
                 }
 
                 return Mods;
@@ -155,7 +156,7 @@ namespace StringReloads.Engine
                 Dictionary<string, bool> Hks = new Dictionary<string, bool>();
                 foreach (var Pair in Settings)
                 {
-                    Hks[Pair.Key] = ToBoolean(Pair.Value);
+                    Hks[Pair.Key] = Pair.Value.ToBoolean();
                 }
 
                 return Hks;
@@ -167,7 +168,7 @@ namespace StringReloads.Engine
                 Dictionary<string, bool> Mods = new Dictionary<string, bool>();
                 foreach (var Pair in Settings)
                 {
-                    Mods[Pair.Key] = ToBoolean(Pair.Value);
+                    Mods[Pair.Key] = Pair.Value.ToBoolean();
                 }
 
                 return Mods;
@@ -236,100 +237,6 @@ namespace StringReloads.Engine
                 return null;
 
             return Result;
-        }
-
-        #endregion
-
-        #region Convertions
-        private bool ToBoolean(string Value)
-        {
-            if (Value == null)
-                return false;
-
-            Value = Value.ToLowerInvariant();
-            switch (Value) {
-                case "1":
-                case "true":
-                case "yes":
-                case "on":
-                case "enable":
-                case "enabled":
-                    return true;
-            }
-            return false;
-        }
-
-        private Log.LogLevel ToLogLevel(string ValueStr)
-        {
-            switch (ValueStr.ToLowerInvariant()) {
-                case "t":
-                case "tra":
-                case "trc":
-                case "trace":
-                    return global::Log.LogLevel.Trace;
-                case "d":
-                case "deb":
-                case "dbg":
-                case "debug":
-                    return global::Log.LogLevel.Debug;
-                case "i":
-                case "inf":
-                case "info":
-                case "information":
-                    return global::Log.LogLevel.Information;
-                case "w":
-                case "war":
-                case "warn":
-                case "warning":
-                    return global::Log.LogLevel.Warning;
-                case "e":
-                case "err":
-                case "erro":
-                case "error":
-                    return global::Log.LogLevel.Error;
-                case "c":
-                case "cri":
-                case "crit":
-                case "critical":
-                    return global::Log.LogLevel.Critical;
-            }
-
-            return (Log.LogLevel)ToInteger(ValueStr);
-        }
-        private int ToInteger(string Value) {
-            if (Value == null)
-                return 0;
-
-            if (int.TryParse(Value, out int Val))
-                return Val;
-
-            return 0;
-        }
-
-        private Encoding ToEncoding(string Value) {
-            if (int.TryParse(Value, out int CP))
-                return Encoding.GetEncoding(CP);
-
-            return Value.ToLowerInvariant() switch
-            {
-                "sjis" => Encoding.GetEncoding(932),
-                "shiftjis" => Encoding.GetEncoding(932),
-                "shift-jis" => Encoding.GetEncoding(932),
-                "unicode" => Encoding.Unicode,
-                "utf16" => Encoding.Unicode,
-                "utf16be" => Encoding.BigEndianUnicode,
-                "utf16wb" => new UnicodeEncoding(false, true),
-                "utf16wbbe" => new UnicodeEncoding(true, true),
-                "utf16bewb" => new UnicodeEncoding(true, true),
-                "utf8" => Encoding.UTF8,
-                "utf8wb" => new UTF8Encoding(true),
-                "utf7" => Encoding.UTF7,
-                _ => Encoding.GetEncoding(Value)
-            };
-        }
-
-        private string ToUnescaped(string String) {
-            return Escape.Default.Restore(String);
         }
 
         #endregion

@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 
 static class Log
 {
@@ -67,10 +68,12 @@ static class Log
         if (Level < Config.Default.LogLevel)
             return;
 
-        if (Config.Default.MainWindow != null)
+        if (hConsole == null && Config.Default.LogLevel < LogLevel.Information)
         {
-            if (hConsole == null)
+            if (Config.Default.Debug || Config.Default.MainWindow != null)
             {
+                AllocConsole();
+                Console.OutputEncoding = Encoding.Unicode;
                 hConsole = GetConsoleWindow();
                 ShowWindow(hConsole, SW_SHOW);
             }
@@ -106,8 +109,11 @@ static class Log
     static unsafe void* hConsole = null;
 
     [DllImport("kernel32.dll")]
+    static unsafe extern bool AllocConsole();
+
+    [DllImport("kernel32.dll")]
     static unsafe extern void* GetConsoleWindow();
-    
+
     [DllImport("user32.dll")]
     static unsafe extern bool ShowWindow(void* hWnd, uint nCmdShow);
 

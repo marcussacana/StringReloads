@@ -8,11 +8,11 @@ namespace StringReloads.Hook
     public struct LOGFONTA
     {
         public const int LF_FACESIZE = 32;
-        public uint lfHeight;
-        public uint lfWidth;
-        public uint lfEscapement;
-        public uint lfOrientation;
-        public uint lfWeight;
+        public int lfHeight;
+        public int lfWidth;
+        public int lfEscapement;
+        public int lfOrientation;
+        public int lfWeight;
         public byte lfItalic;
         public byte lfUnderline;
         public byte lfStrikeOut;
@@ -30,11 +30,11 @@ namespace StringReloads.Hook
     public struct LOGFONTW
     {
         public const int LF_FACESIZE = 32;
-        public uint lfHeight;
-        public uint lfWidth;
-        public uint lfEscapement;
-        public uint lfOrientation;
-        public uint lfWeight;
+        public int lfHeight;
+        public int lfWidth;
+        public int lfEscapement;
+        public int lfOrientation;
+        public int lfWeight;
         public byte lfItalic;
         public byte lfUnderline;
         public byte lfStrikeOut;

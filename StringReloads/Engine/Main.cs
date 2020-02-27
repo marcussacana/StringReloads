@@ -120,11 +120,13 @@ namespace StringReloads.Engine
         }
 
 
-        public FontRemap? GetFontRemap(string Facename, uint Width, uint Height, uint Charset) {
+        public FontRemap? GetFontRemap(string Facename, int Width, int Height, uint Charset) {
             var Remap = (from x in Config.Default.FontRemaps where x["from"] == Facename select x).FirstOrDefault();
 
             if (Remap == null)
                 Remap = (from x in Config.Default.FontRemaps where x["from"] == "*" select x).FirstOrDefault();
+
+            Log.Trace($"Font \"{Facename}\", Width: {Width}, Height: {Height}, Charset: 0x{Charset:X2}");
 
             if (Remap == null)
                 return null;
@@ -137,17 +139,17 @@ namespace StringReloads.Engine
             else Rst.To = Facename;
 
             if (Remap.ContainsKey("charset"))
-                Rst.Charset = uint.Parse(Remap["charset"]);
+                Rst.Charset = Remap["charset"].ToUInt32();
             else Rst.Charset = Charset;
 
             if (Remap.ContainsKey("width"))
             {
                 var nWidth = Remap["width"];
                 if (nWidth.StartsWith("+"))
-                    Rst.Width = Width + uint.Parse(nWidth.Substring(1));
+                    Rst.Width = Width + nWidth.Substring(1).ToInt32();
                 if (nWidth.StartsWith("-"))
-                    Rst.Width = Width - uint.Parse(nWidth.Substring(1));
-                Rst.Width = uint.Parse(nWidth);
+                    Rst.Width = Width - nWidth.Substring(1).ToInt32();
+                Rst.Width = nWidth.ToInt32();
             }
             else
                 Rst.Width = Width;
@@ -156,13 +158,16 @@ namespace StringReloads.Engine
             {
                 var nHeight = Remap["height"];
                 if (nHeight.StartsWith("+"))
-                    Rst.Height = Height + uint.Parse(nHeight.Substring(1));
+                    Rst.Height = Height + nHeight.Substring(1).ToInt32();
                 if (nHeight.StartsWith("-"))
-                    Rst.Height = Height - uint.Parse(nHeight.Substring(1));
-                Rst.Height = uint.Parse(nHeight);
+                    Rst.Height = Height - nHeight.Substring(1).ToInt32();
+                Rst.Height = nHeight.ToInt32();
             }
             else
                 Rst.Height = Height;
+
+
+            Log.Debug($"Font Remaped to {Rst.To}, Width: {Rst.Width}, Height: {Rst.Height}, Charset: 0x{Rst.Charset:X2}");
 
             return Rst;
         }
