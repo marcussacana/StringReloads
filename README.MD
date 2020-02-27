@@ -1,4 +1,4 @@
-# StringsReloads v5.2
+# StringsReloads v6.0
 [![Build Status](https://ci.appveyor.com/api/projects/status/github/marcussacana/StringReloads?branch=master&retina=true)](https://ci.appveyor.com/project/marcussacana/StringReloads)
 
 
@@ -7,9 +7,6 @@ This is a tool created to inject strings using low level code
 * Help translate a game without discovery about he packget/encryption.
 * Help use Non-ASCII Characters.
 * Help with a customizable Auto-WordWrap.
-* Help translating text from native window controls.
-* Help translate strings with unpredictable content using masks
-* Allow put your group logo in the game startup
 * Can use with just a small assembly knowledge
 
 
@@ -25,16 +22,11 @@ Our strategy to inject the string is create a new section using tools like the S
 	push EAX		;The EAX is the string pointer or a unicode character
 	call GetProc		;Here the Srl.Process Pointer is catched
 	call EAX
-	;The next line is to the SRL.Process only
-	add ESP, 0x4		;Discard the last "Push EAX" (The SRL.Process is Cdecl)
 	pop EBX			;Restore EDX, ECX, EBX Registers from the "Backup"
 	pop ECX
 	pop EDX
 	jmp RetPnt		;Continue the Execution
 ```
-Keep in mind, the add ESP, 0x4 is required when you use the SRL.Process export, if you use the SRL.ProcessSTD or SRL.GetDirectProcess you can't put this line.
-
----
 
 We have various method to catch the Srl.Process Pointer, this one is to games who have a dynamic main module alocation, is possible use the sample bellow if you have injected the export in the game executable, you can use Stud_PE or CFF Explorer to do this, You need too create a new executable section to append our new code. 
 
@@ -48,9 +40,9 @@ If you wanna use the SRL to put Non-ASCII Characters you need call the Srl.Proce
 ### Sample Catch Srl.Process:
 ```Assembly
 @GetProc:
-	call @Nxt		;Call the label Nxt
-@Nxt:				;Declare the Nxt label
-	pop EAX 		;Catch the EIP :)
+	call @Nxt	    	;Call the label Nxt
+@Nxt:				    ;Declare the Nxt label
+	pop EAX 		    ;Catch the EIP :)
 	sub EAX, 0x204C		;Subtract the Difference from the EIP and Import Address
 	mov EAX, [EAX]		;Read the import table
 	ret
@@ -81,19 +73,18 @@ After some problems with games that reload string inside a loop I created the Ge
 	dd 0                ;Here is the @Nxt: + 0x21
 
 ```
-You don't give pass nothing to this method, just call and catch the EAX, the EAX is a pointer to the Process function, using this pointer will be more fast to call the function, Keep in mind, the pointer given by the GetDirectProcess, is a STDCall function, so, you don't need pop the pointer given to the Process before
+You don't give pass nothing to this method, just call and catch the EAX, the EAX is a pointer to the Process function, using this pointer will be more fast to call the function, Keep in mind, the pointer given by the GetDirectProcess
 
 ---
 
 ### Auto-Install Feature:
-The SRL have a feature to automatically install the SRL in the game engine without you need know how to patch the game, just rename the SRLx32.dll to d3d9.dll; dinput8.dll or any other supported wrapper [See Here what is supported](https://github.com/marcussacana/StringReloads/tree/master/SRL/Wrapper), then in the SRL.ini set the AutoEngineHook to true.    
+The SRL have a feature to automatically install the SRL in the game engine without you need know how to patch the game, just rename the SRLx32.dll to d3d9.dll; dinput8.dll or any other supported wrapper [See Here what is supported](https://github.com/marcussacana/StringReloads/tree/master/SRLWrapper/Wrapper), then in the SRL.ini set the AutoInstall to true.    
 *Currently only the AdvHD and SoftPal engine is supported by this feature.*
 
 Some SoftPal games needs a manual setup with the help of the Auto-Installer, click below to see the example:
 [![SRL SoftPal Auto-Install Feature](http://img.youtube.com/vi/RAgZQBWqiJQ/0.jpg)](http://www.youtube.com/watch?v=RAgZQBWqiJQ "SRL SoftPal Auto-Install Feature")
 
-### Build Dependencies:
-*	[vsSoluctionBuildEvents](https://github.com/3F/vsSolutionBuildEvent)
+### Dependencies:
 *	[DllExport](https://github.com/3F/DllExport) (Included)
 ---
 ### Useful:
