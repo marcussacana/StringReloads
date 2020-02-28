@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.InteropServices;
 
 using StringReloads.AutoInstall;
@@ -117,63 +116,6 @@ namespace StringReloads.Engine
                     Trigger(Flag, Cancel);
                 }
             }
-        }
-
-
-        public FontRemap? GetFontRemap(string Facename, int Width, int Height, uint Charset) {
-            var Remap = (from x in Config.Default.FontRemaps where x["from"] == Facename select x).FirstOrDefault();
-
-            if (Remap == null)
-                Remap = (from x in Config.Default.FontRemaps where x["from"] == "*" select x).FirstOrDefault();
-
-            Log.Trace($"Font \"{Facename}\", Width: {Width}, Height: {Height}, Charset: 0x{Charset:X2}");
-
-            if (Remap == null)
-                return null;
-
-            FontRemap Rst = new FontRemap();
-            Rst.From = Remap["from"];
-
-            if (Remap.ContainsKey("to"))
-                Rst.To = Remap["to"];
-            else Rst.To = Facename;
-
-            if (Remap.ContainsKey("charset"))
-                Rst.Charset = Remap["charset"].ToUInt32();
-            else Rst.Charset = Charset;
-
-            if (Remap.ContainsKey("width"))
-            {
-                var nWidth = Remap["width"];
-
-                if (nWidth.StartsWith("."))
-                    Rst.Width = nWidth.Substring(1).ToInt32();
-                else if (nWidth.StartsWith("+") || nWidth.StartsWith("-"))
-                    Rst.Width = Width + nWidth.ToInt32();
-                else
-                    Rst.Width = nWidth.ToInt32();
-            }
-            else
-                Rst.Width = Width;
-
-            if (Remap.ContainsKey("height"))
-            {
-                var nHeight = Remap["height"];
-
-                if (nHeight.StartsWith("."))
-                    Rst.Height = nHeight.Substring(1).ToInt32();
-                else if (nHeight.StartsWith("+") || nHeight.StartsWith("-"))
-                    Rst.Height = Width + nHeight.ToInt32();
-                else
-                    Rst.Height = nHeight.ToInt32();
-            }
-            else
-                Rst.Height = Height;
-
-
-            Log.Debug($"Font Remaped to {Rst.To}, Width: {Rst.Width}, Height: {Rst.Height}, Charset: 0x{Rst.Charset:X2}");
-
-            return Rst;
         }
 
         public void EnableHook(Hook.Base.Hook Hook) {

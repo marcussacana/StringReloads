@@ -13,7 +13,7 @@
         }
 
         public void* CreateFontIndirect(ref LOGFONTW Info) {
-            var Remap = EntryPoint.SRL.GetFontRemap(Info.lfFaceName, Info.lfWidth, Info.lfHeight, Info.lfCharSet);
+            var Remap = EntryPoint.SRL.Match.ResolveRemap(Info.lfFaceName, Info.lfWidth, Info.lfHeight, Info.lfCharSet);
 
             if (Remap != null) {
                 Info.lfHeight = Remap.Value.Height;

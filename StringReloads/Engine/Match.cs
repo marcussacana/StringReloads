@@ -40,6 +40,117 @@ namespace StringReloads.Engine
             }
 
             return null;
+        }   
+
+        public FontRemap? ResolveRemap(string Facename, int Width, int Height, uint Charset) {
+            var Remap = (from x in Config.Default.FontRemaps where 
+                         CheckFontValue(x, "From",        Facename,           false) &&
+                         CheckFontValue(x, "FromWidth",   Width.ToString(),   true ) &&
+                         CheckFontValue(x, "FromHeight",  Height.ToString(),  true ) &&
+                         CheckFontValue(x, "FromCharset", Charset.ToString(), false)
+                         select x).FirstOrDefault();
+
+            if (Remap == null)
+                Remap = (from x in Config.Default.FontRemaps where
+                         CheckFontValue(x, "From",        "*",                false) &&
+                         CheckFontValue(x, "FromWidth",   Width.ToString(),   true ) &&
+                         CheckFontValue(x, "FromHeight",  Height.ToString(),  true ) &&
+                         CheckFontValue(x, "FromCharset", Charset.ToString(), false)
+                         select x).FirstOrDefault();
+
+            Log.Trace($"CreateFont -> Width: {Width:+00;-00}, Height: {Height:+00;-00}, Charset: 0x{Charset:X2}, Name: \"{Facename}\"");
+
+            if (Remap == null)
+                return null;
+
+            FontRemap Rst = new FontRemap();
+            Rst.From = Remap["from"];
+
+            if (Remap.ContainsKey("to"))
+                Rst.To = Remap["to"];
+            else Rst.To = Facename;
+
+            if (Remap.ContainsKey("charset"))
+                Rst.Charset = Remap["charset"].ToUInt32();
+            else Rst.Charset = Charset;
+
+            if (Remap.ContainsKey("width"))
+            {
+                var nWidth = Remap["width"];
+
+                if (nWidth.StartsWith("."))
+                    Rst.Width = nWidth.Substring(1).ToInt32();
+                else if (nWidth.StartsWith("+") || nWidth.StartsWith("-"))
+                    Rst.Width = Width + nWidth.ToInt32();
+                else
+                    Rst.Width = nWidth.ToInt32();
+            }
+            else
+                Rst.Width = Width;
+
+            if (Remap.ContainsKey("height"))
+            {
+                var nHeight = Remap["height"];
+
+                if (nHeight.StartsWith("."))
+                    Rst.Height = nHeight.Substring(1).ToInt32();
+                else if (nHeight.StartsWith("+") || nHeight.StartsWith("-"))
+                    Rst.Height = Height + nHeight.ToInt32();
+                else
+                    Rst.Height = nHeight.ToInt32();
+            }
+            else
+                Rst.Height = Height;
+
+
+            Log.Debug($"Remaped    -> Width: {Rst.Width:+00;-00}, Height: {Rst.Height:+00;-00}, Charset: 0x{Rst.Charset:X2}, Name: \"{Rst.To}\"");
+
+            return Rst;
+        }
+
+        private bool CheckFontValue(Dictionary<string, string> Dic, string Entry, string Expected, bool Evalaute = false) {
+            if (!Dic.ContainsKey(Entry.ToLowerInvariant()))
+                return true;
+
+            string Value = Dic[Entry.ToLowerInvariant()];
+
+            if (Evalaute) {
+                var Mode = "=";
+
+                if (Value.StartsWith(">=")) {
+                    Mode = ">=";
+                    Value = Value.Substring(2);
+                } else if (Value.StartsWith("<=")) {
+                    Mode = "<=";
+                    Value = Value.Substring(2);
+                } else if (Value.StartsWith(">")) {
+                    Mode = ">";
+                    Value = Value.Substring(1);
+                } else if (Value.StartsWith("<")) {
+                    Mode = "<";
+                    Value = Value.Substring(1);
+                }
+
+                var Val = long.Parse(Value);
+                var Exp = long.Parse(Expected);
+
+                switch (Mode) {
+                    case "=":
+                        return Exp == Val;
+                    case ">":
+                        return Exp > Val;
+                    case "<": 
+                        return Exp < Val;
+                    case ">=":
+                        return Exp >= Val;
+                    case "<=":
+                        return Exp <= Val;
+                }
+
+            } else if (Value == Expected)
+                return true;
+
+            return false;
         }
     }
 
