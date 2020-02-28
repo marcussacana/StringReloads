@@ -206,7 +206,7 @@ namespace SRLWrapper.Wrapper.Base
             throw new Exception("Failed to get the module handle");
         }
 
-        static string GetSRLPath()
+        internal static string GetSRLPath()
         {
             var Modules = System.Diagnostics.Process.GetCurrentProcess().Modules.Cast<System.Diagnostics.ProcessModule>();
             foreach (var Module in Modules)
