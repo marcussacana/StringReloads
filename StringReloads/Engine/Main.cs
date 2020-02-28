@@ -145,11 +145,13 @@ namespace StringReloads.Engine
             if (Remap.ContainsKey("width"))
             {
                 var nWidth = Remap["width"];
-                if (nWidth.StartsWith("+"))
-                    Rst.Width = Width + nWidth.Substring(1).ToInt32();
-                if (nWidth.StartsWith("-"))
-                    Rst.Width = Width - nWidth.Substring(1).ToInt32();
-                Rst.Width = nWidth.ToInt32();
+
+                if (nWidth.StartsWith("."))
+                    Rst.Width = nWidth.Substring(1).ToInt32();
+                else if (nWidth.StartsWith("+") || nWidth.StartsWith("-"))
+                    Rst.Width = Width + nWidth.ToInt32();
+                else
+                    Rst.Width = nWidth.ToInt32();
             }
             else
                 Rst.Width = Width;
@@ -157,11 +159,13 @@ namespace StringReloads.Engine
             if (Remap.ContainsKey("height"))
             {
                 var nHeight = Remap["height"];
-                if (nHeight.StartsWith("+"))
-                    Rst.Height = Height + nHeight.Substring(1).ToInt32();
-                if (nHeight.StartsWith("-"))
-                    Rst.Height = Height - nHeight.Substring(1).ToInt32();
-                Rst.Height = nHeight.ToInt32();
+
+                if (nHeight.StartsWith("."))
+                    Rst.Height = nHeight.Substring(1).ToInt32();
+                else if (nHeight.StartsWith("+") || nHeight.StartsWith("-"))
+                    Rst.Height = Width + nHeight.ToInt32();
+                else
+                    Rst.Height = nHeight.ToInt32();
             }
             else
                 Rst.Height = Height;
