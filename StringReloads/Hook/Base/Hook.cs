@@ -3,6 +3,8 @@ using Iced.Intel;
 using System.Runtime.InteropServices;
 
 using static StringReloads.Hook.Base.Extensions;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace StringReloads.Hook.Base
 {
@@ -256,26 +258,16 @@ namespace StringReloads.Hook.Base
             return List;
         }
 
-        public unsafe static byte* ToPointer(this byte[] Buffer) {
-            fixed (void* pBuff = &Buffer[0])
-                return (byte*)pBuff;
-        }
-
         public unsafe static byte* AllocUnsafe(uint Bytes)
         {
             return VirtualAlloc(null, Bytes, AllocationType.Reserve | AllocationType.Commit, MemoryProtection.ExecuteReadWrite);;
         }
-        public unsafe static byte* AllocUnsafe(this byte[] Buffer) {
-            var Addr = VirtualAlloc(null, (uint)Buffer.Length, AllocationType.Reserve | AllocationType.Commit, MemoryProtection.ExecuteReadWrite);
-            for (int i = 0; i < Buffer.Length; i++)
-                *(Addr + i) = Buffer[i];
+        public unsafe static byte* AllocUnsafe(this IEnumerable<byte> Buffer) {
+            var tmp = Buffer.ToArray();
+            var Addr = VirtualAlloc(null, (uint)tmp.Length, AllocationType.Reserve | AllocationType.Commit, MemoryProtection.ExecuteReadWrite);
+            for (int i = 0; i < tmp.Length; i++)
+                *(Addr + i) = tmp[i];
             return Addr;
-        }
-
-        public unsafe static void DeprotectMemory(this byte[] Buffer, bool ExecutableOnly = false)
-        {
-            var pBuff = Buffer.ToPointer();
-            VirtualProtect(pBuff, (uint)Buffer.Length, ExecutableOnly ? MemoryProtection.ExecuteRead : MemoryProtection.ExecuteReadWrite, out _);
         }
 
         public unsafe static void DeprotectMemory(void* Buffer, uint Length, bool ExecutableOnly = false)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 
 using StringReloads.AutoInstall.Base;
@@ -14,6 +15,12 @@ namespace StringReloads.AutoInstall
 {
     unsafe class AdvHD : IAutoInstall
     {
+
+        ~AdvHD() {
+            if (Hook.HookFunction != null) 
+                Marshal.FreeHGlobal(new IntPtr(Hook.HookFunction));            
+        }
+
         Config Settings => EntryPoint.SRL.Settings;
 
         SysAllocString Hook;
@@ -41,16 +48,14 @@ namespace StringReloads.AutoInstall
 
         public void Uninstall() => Hook.Uninstall();
         
-        //+ 0x15 = SRL; + 0x29 = RealFunc
-        byte[] _HookData = null;
         private void Compile()
         {
-            if (_HookData != null)
+            if (Hook.HookFunction != null)
                 return;
 
             string[] SkipList = new string[] {
                     "st", "ev", "bg", "@", "text", "char", "timer", "effect", "movie"
-                };
+            };
 
             List<byte> Buffer = new List<byte>();
             Buffer.AddRange(HookDataBase);
@@ -59,22 +64,16 @@ namespace StringReloads.AutoInstall
                 Buffer.AddRange(Encoding.Unicode.GetBytes(Skip + "\x0"));
 
             Buffer.Add(0x00);
-            Buffer.Add(0x00);
+            Buffer.Add(0x00);           
 
-            _HookData = Buffer.ToArray();
-
-            Hook.HookFunction = _HookData.ToPointer();
+            Hook.HookFunction = Buffer.AllocUnsafe();
             Hook.Compile();
 
-            var pFunc = (uint)EntryPoint.GetDirectProcess();
-            BitConverter.GetBytes(pFunc).CopyTo(_HookData, 0x15);
+            *((uint*)Hook.HookFunction + 0x15) = (uint)EntryPoint.GetDirectProcess();
+            *((uint*)Hook.HookFunction + 0x29) = (uint)Hook.BypassFunction;
+        }
 
-            pFunc = (uint)Hook.BypassFunction;
-            BitConverter.GetBytes(pFunc).CopyTo(_HookData, 0x29);
-            
-            _HookData.DeprotectMemory();
-        }        
-
+        //+ 0x15 = SRL; + 0x29 = RealFunc
         static byte[] HookDataBase = new byte[] {
             0x58, 0x87, 0x04, 0x24, 0x60, 0x50, 0x50, 0xE8, 0x34, 0x00, 0x00, 0x00, 0x85, 0xC0,
             0x74, 0x15, 0x90, 0x90, 0x90, 0x90, 0xB8, 0xAA, 0xAA, 0xAA, 0xAA, 0xFF, 0xD0, 0x89,
