@@ -1,10 +1,6 @@
 ﻿using StringReloads.Hook.Base;
 using System;
 using static StringReloads.Hook.Base.Extensions;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StringReloads.Hook
 {

@@ -49,7 +49,9 @@ namespace StringReloads.Engine
         void DumpString(string String) {
             if (DefaultLST == null) {
                 string LSTPath = Path.Combine(Engine.Settings.WorkingDirectory, "Strings.lst");
-                DefaultLST = new StreamWriter(File.OpenWrite(LSTPath), Encoding.UTF8);
+                var Stream = File.OpenWrite(LSTPath);
+                Stream.Seek(0, SeekOrigin.End);
+                DefaultLST = new StreamWriter(Stream, Encoding.UTF8);
             }
             DefaultLST.WriteLine(String);
             DefaultLST.WriteLine(String);

@@ -2,8 +2,8 @@
   <PropertyGroup>
     <TargetFramework>net45</TargetFramework>
     <Platforms>x64;x86</Platforms>
-    <AssemblyVersion>6.0.0.0</AssemblyVersion>
-    <FileVersion>6.0.0.0</FileVersion>
+    <AssemblyVersion>6.1.0.0</AssemblyVersion>
+    <FileVersion>6.1.0.0</FileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Platform)'=='x86'">
     <RuntimeIdentifier>win-x86</RuntimeIdentifier>

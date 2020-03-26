@@ -1,26 +1,29 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace StringReloads.AutoInstall.Patcher
 {
     static class Tools
     {
+        static readonly string[] SupportedWrappers = new string[] {
+            "version.dll", "d3d9.dll", "d3d10.dll", "d3d11.dll",
+            "dinput.dll", "dinput8.dll", "dinput8.dll", "dsound.dll",
+            "dxgi.dll"
+        };
         static string CurrentDllName => Path.GetFileName(EntryPoint.CurrentDll);
         internal static bool ApplyWrapperPatch()
         {
             if (CurrentDllName.ToLower() == "srl.dll")
                 return true;
 
-            if (MessageBox.Show("The SRL need apply a patch in the game, apply now?\nIf yes the game will restart", "StringReloads", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.No)
+            if (MessageBox.Show("The SRL needs to apply a patch in the game, do you to want apply now?\nIf yes, the game will restart.", "StringReloads", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.No)
                 return false;
 
             Retry:;
+            string UsedWrapper = null;
             string EXEPath = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
             byte[] Data = File.ReadAllBytes(EXEPath);
 
@@ -30,9 +33,29 @@ namespace StringReloads.AutoInstall.Patcher
             if (Offset == -1)
                 Offset = IndexOf(Data, Path.GetFileName(EntryPoint.CurrentDll));
 
+            if (Offset == -1) {
+                var Rst = MessageBox.Show($"Looks like the \"{CurrentDllName}\" wrapper isn't avaliable right now.\nDo you want to try any other supported wrapper?", "StringReloads", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (Rst == DialogResult.Yes) {
+                    foreach (var Wrapper in SupportedWrappers) {
+                        UsedWrapper = Wrapper;
+                        Offset = IndexOf(Data, Wrapper);
+                        if (Offset != -1)
+                            break;
+
+                        Offset = IndexOf(Data, Wrapper.ToUpper());
+                        if (Offset != -1)
+                            break;
+
+                        Offset = IndexOf(Data, Wrapper.ToUpper().Replace(".DLL", ".dll"));
+                        if (Offset != -1)
+                            break;
+                    }
+                }
+            }
+
             if (Offset == -1)
             {
-                var Rst = MessageBox.Show($"Failed to Patch, \"{Path.GetFileName(CurrentDllName)}\" occurrence not found in the game executable.", "StringReloads", MessageBoxButtons.RetryCancel, MessageBoxIcon.Error);
+                var Rst = MessageBox.Show($"Failed to patch, \"{CurrentDllName}\" occurrence not found in the game executable.", "StringReloads", MessageBoxButtons.RetryCancel, MessageBoxIcon.Error);
                 if (Rst == DialogResult.Retry)
                     goto Retry;
                 else
@@ -51,6 +74,10 @@ namespace StringReloads.AutoInstall.Patcher
 
             if (!TryRename(CurrentDllName, "SRL.dll"))
                 File.Copy(CurrentDllName, "SRL.dll");
+
+            if (UsedWrapper != null) {
+                Log.Trace($"Wrapper to \"{UsedWrapper}\" detected as supported and enabled");
+            }
 
             Restart();
             return true;
