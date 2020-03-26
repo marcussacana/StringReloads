@@ -20,6 +20,8 @@ namespace StringReloads.Hook
     [UnmanagedFunctionPointer(CallingConvention.Winapi)]
     public unsafe delegate void* SysAllocStringDelegate(void* pStr);
 
+    [UnmanagedFunctionPointer(CallingConvention.Winapi)]
+    public unsafe delegate void* GetProcAddressDelegate(void* hModule, void* Proc);
 
     [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Ansi)]
     public unsafe delegate void* CreateFileADelegate(string FileName, EFileAccess Access, EFileShare Share, void* SecurityAttributes, ECreationDisposition CreationDisposition, EFileAttributes FlagsAndAttributes, void* TemplateFile);

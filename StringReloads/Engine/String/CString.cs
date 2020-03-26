@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace StringReloads.Engine.String
@@ -15,6 +15,18 @@ namespace StringReloads.Engine.String
 
         static byte[] _Termination;
         public static byte[] Termination => _Termination ?? (_Termination = Config.Default.ReadEncoding.GetBytes("\x0"));
+
+        public static implicit operator CString(string Str) {
+
+            byte[] Buffer = GetBytes(Str);
+            var Addr = Marshal.AllocHGlobal(Buffer.Length);
+            Marshal.Copy(Buffer, 0, Addr, Buffer.Length);
+
+            var CStr = new CString();
+            CStr.BasePtr = CStr.CurrentPtr = (byte*)Addr.ToPointer();
+
+            return CStr;
+        }
 
         public static implicit operator CString(byte* Ptr) {
             var UCS = new CString();
@@ -41,7 +53,7 @@ namespace StringReloads.Engine.String
         }
         public override bool MoveNext()
         {
-            if (IsEnd(CurrentPtr + 1))
+            if (IsEnd(CurrentPtr))
                 return false;
 
             CurrentPtr++;

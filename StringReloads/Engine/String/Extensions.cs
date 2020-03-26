@@ -96,6 +96,34 @@ namespace StringReloads
             return 0;
         }
 
+        public static ulong ToUInt64(this string Value)
+        {
+            if (Value == null)
+                return 0;
+
+            if (Value.StartsWith("0x") && ulong.TryParse(Value.Substring(2), NumberStyles.HexNumber, null, out ulong Val))
+                return Val;
+
+            if (ulong.TryParse(Value, out Val))
+                return Val;
+
+            return 0;
+        }
+
+        public static long ToInt64(this string Value)
+        {
+            if (Value == null)
+                return 0;
+
+            if (Value.StartsWith("0x") && long.TryParse(Value.Substring(2), NumberStyles.HexNumber, null, out long Val))
+                return Val;
+
+            if (long.TryParse(Value, out Val))
+                return Val;
+
+            return 0;
+        }
+
         public static Encoding ToEncoding(this string Value)
         {
             if (int.TryParse(Value, out int CP))

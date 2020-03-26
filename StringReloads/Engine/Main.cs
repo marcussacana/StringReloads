@@ -48,7 +48,8 @@ namespace StringReloads.Engine
 
         internal AutoInstall.Base.IAutoInstall[] _Installers = null;
         internal AutoInstall.Base.IAutoInstall[] Installers => _Installers ?? (_Installers = new AutoInstall.Base.IAutoInstall[] {
-            new AdvHD()
+            new AdvHD(),
+            new SoftPalMethodA()
         });
 
         internal int CurrentDatabaseIndex = 0;
@@ -94,14 +95,9 @@ namespace StringReloads.Engine
             foreach (var Modifier in ReloadModifiers)
                 Reloaded = Modifier.Apply(Reloaded); 
             
-            Log.Trace($"Reload from:\n{Matched?.OriginalLine}\nTo:\n{Reloaded}");
+            Log.Trace($"Reload from:\r\n{Matched?.OriginalLine}\r\nTo:\r\n{Reloaded}");
 
-            //Generate Output String
-            var Buffer = CString.GetBytes(Reloaded);
-            var pBuffer = Marshal.AllocHGlobal(Buffer.Length);
-            Marshal.Copy(Buffer, 0, pBuffer, Buffer.Length);
-
-            return (byte*)pBuffer;
+            return (CString)Reloaded;
         }
 
         public event Types.FlagTrigger OnFlagTriggered;

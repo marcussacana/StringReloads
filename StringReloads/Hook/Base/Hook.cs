@@ -67,10 +67,7 @@ namespace StringReloads.Hook.Base
 
         public void Compile()
         {
-            var hModule = GetModuleHandleW(Library);
-
-            if (hModule == null)
-                hModule = LoadLibraryW(Library);
+            var hModule = GetLibrary(Library);
 
             if (hModule == null)
                 throw new DllNotFoundException(Library);
@@ -205,18 +202,6 @@ namespace StringReloads.Hook.Base
         }
 
         public abstract void Initialize();
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
-        static extern void* LoadLibraryW(string Library);
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
-        static extern void* GetModuleHandleW(string Library);
-
-        [DllImport("kernel32.dll")]
-        static extern void* GetProcAddress(void* hModule, string ProcName);
-
-        [DllImport("kernel32.dll")]
-        static extern void* GetProcAddress(void* hModule, ushort ProcOrdinal);
     }
 
     public static partial class Extensions
@@ -274,13 +259,38 @@ namespace StringReloads.Hook.Base
         {
             VirtualProtect(Buffer, Length, ExecutableOnly ? MemoryProtection.ExecuteRead : MemoryProtection.ExecuteReadWrite, out _);
         }
+        public unsafe static void* GetLibrary(string Library) {
+            var hModule = GetModuleHandle(Library);
+            if (hModule != null)
+                return hModule;
+            return LoadLibrary(Library);
+        }
 
+        public unsafe static void* LoadLibrary(string Library) => LoadLibraryW(Library);
+        public unsafe static void* GetModuleHandle(string Library) => GetModuleHandleW(Library);
+        public unsafe static void* GetProcAddress(void* hModule, string ProcName) => GetProcAddressExt(hModule, ProcName);
+        public unsafe static void* GetProcAddress(void* hModule, ushort ProcOrd) => GetProcAddressExt(hModule, ProcOrd);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+        unsafe static extern void* LoadLibraryW(string Library);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+        unsafe static extern void* GetModuleHandleW(string Library);
+
+        [DllImport("kernel32.dll", EntryPoint = "GetProcAddress")]
+        unsafe static extern void* GetProcAddressExt(void* hModule, string ProcName);
+
+        [DllImport("kernel32.dll", EntryPoint = "GetProcAddress")]
+        unsafe static extern void* GetProcAddressExt(void* hModule, ushort ProcOrdinal);
 
         [DllImport("kernel32.dll")]
-        static unsafe extern bool VirtualProtect(void* lpAddress, uint dwSize, MemoryProtection flNewProtect, out AllocationType lpflOldProtect);
+        unsafe static extern bool VirtualProtect(void* lpAddress, uint dwSize, MemoryProtection flNewProtect, out AllocationType lpflOldProtect);
 
         [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
-        static unsafe extern byte* VirtualAlloc(void* lpAddress, uint dwSize, AllocationType flAllocationType, MemoryProtection flProtect);
+        unsafe static extern byte* VirtualAlloc(void* lpAddress, uint dwSize, AllocationType flAllocationType, MemoryProtection flProtect);
+
+        [DllImport("kernel32.dll")]
+        public unsafe static extern bool IsBadCodePtr(void* Ptr);
 
         [Flags]
         public enum AllocationType

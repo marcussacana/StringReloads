@@ -15,12 +15,6 @@ namespace StringReloads.AutoInstall
 {
     unsafe class AdvHD : IAutoInstall
     {
-
-        ~AdvHD() {
-            if (Hook.HookFunction != null) 
-                Marshal.FreeHGlobal(new IntPtr(Hook.HookFunction));            
-        }
-
         Config Settings => EntryPoint.SRL.Settings;
 
         SysAllocString Hook;

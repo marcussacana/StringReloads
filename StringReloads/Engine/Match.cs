@@ -1,7 +1,9 @@
 ﻿using StringReloads.StringModifier;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace StringReloads.Engine
 {
@@ -38,9 +40,21 @@ namespace StringReloads.Engine
                     return Engine.Databases[i][Minified];
                 }
             }
-
+            if (Engine.Settings.Dump)
+                DumpString(String);
             return null;
-        }   
+        }
+
+        TextWriter DefaultLST = null;
+        void DumpString(string String) {
+            if (DefaultLST == null) {
+                string LSTPath = Path.Combine(Engine.Settings.WorkingDirectory, "Strings.lst");
+                DefaultLST = new StreamWriter(File.OpenWrite(LSTPath), Encoding.UTF8);
+            }
+            DefaultLST.WriteLine(String);
+            DefaultLST.WriteLine(String);
+            DefaultLST.Flush();
+        }
 
         public FontRemap? ResolveRemap(string Facename, int Width, int Height, uint Charset) {
             var Remap = (from x in Config.Default.FontRemaps where 

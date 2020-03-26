@@ -6,24 +6,30 @@ namespace StringReloads.Hook.Base
 {
     public abstract unsafe class Intercept
     {
-        public Intercept() { Initialize(); }
+        public Intercept() { }
+
+        public Intercept(void* Address) {
+            this.Address = Address;
+            AssemblyHook();
+        }
 
         ~Intercept() {
             Uninstall();
         }
 
-        public abstract InterceptDelegate HookFunction { get; set; }
+        public void Compile(void* Address) {
+            this.Address = Address;
+            AssemblyHook();
+
+        }
+
+        public abstract InterceptDelegate HookFunction { get; }
 
         void* Address;
         void* HookAddress;
 
         public byte[] RealBuffer;
         public byte[] HookBuffer;
-
-        public void Compile(void* Address) {
-            this.Address = Address;
-            AssemblyHook();
-        }
 
 #if x64
         private void AssemblyHook()
@@ -55,21 +61,24 @@ namespace StringReloads.Hook.Base
             Marshal.Copy(new IntPtr(Address), RealBuffer, 0, RealBuffer.Length);
 
             //Assemble Interceptor
-            var IInstructions = new InstructionList
-                {
-                    Instruction.Create(Code.Pushad),
-                    Instruction.Create(Code.Pushd_ES, Register.ESP),
-                    Instruction.CreateBranch(Code.Call_rel32_32, (UnsafeDelegate)HookFunction),
-                    Instruction.Create(Code.Popad)
-                };
+            var IInstructions = new InstructionList{
+                Instruction.Create(Code.Pushad),
+                Instruction.Create(Code.Push_r32, Register.ESP),
+                Instruction.CreateBranch(Code.Call_rel32_32, (UnsafeDelegate)HookFunction),
+                Instruction.Create(Code.Popad)
+            };
 
-            Instructions.Add(Instruction.CreateBranch(Code.Jmp_rel32_32, RetAddr));
+            IInstructions.AddRange(Instructions);
+
+            IInstructions.Add(Instruction.CreateBranch(Code.Jmp_rel32_32, RetAddr));
 
             //Encode Interceptor
-            var phBuffer = Extensions.AllocUnsafe(new byte[IInstructions.GetEncodedSize(32)]);
+            uint BufferSize = (uint)IInstructions.GetEncodedSize(32);
+            var phBuffer = Extensions.AllocUnsafe(BufferSize);
+            Extensions.DeprotectMemory(phBuffer, BufferSize);
             HookAddress = phBuffer;
 
-            Compiler.Encode(Instructions, (ulong)phBuffer);
+            Compiler.Encode(IInstructions, (ulong)phBuffer);
 
             Writer.CopyTo(phBuffer, 0);
 
@@ -86,21 +95,15 @@ namespace StringReloads.Hook.Base
 #endif
 
         public void Install() {
-            VirtualProtect(Address, (uint)HookBuffer.Length, PAGE_EXECUTE_READWRITE, out _);
+            Extensions.DeprotectMemory(Address, (uint)HookBuffer.Length);
             Marshal.Copy(HookBuffer, 0, new IntPtr(Address), HookBuffer.Length);
         }
 
         public void Uninstall() {
-            VirtualProtect(Address, (uint)RealBuffer.Length, PAGE_EXECUTE_READWRITE, out _);
+            Extensions.DeprotectMemory(Address, (uint)RealBuffer.Length);
             Marshal.Copy(RealBuffer, 0, new IntPtr(Address), RealBuffer.Length);
         }
 
-        public abstract void Initialize();
-
-        const uint PAGE_EXECUTE_READWRITE = 0x40;
-
-        [DllImport("kernel32.dll")]
-        static extern bool VirtualProtect(void* lpAddress, uint dwSize, uint flNewProtect, out uint lpflOldProtect);
     }
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]

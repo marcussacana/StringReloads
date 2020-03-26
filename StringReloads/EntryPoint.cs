@@ -15,11 +15,6 @@ namespace StringReloads
         static ProcessDelegate ProcessInstance;
 
         public static void* Process(void* Value) {
-
-#if DEBUG
-            System.Diagnostics.Debugger.Launch();
-#endif
-
             int Retries = 0;
         Retry:;
             try

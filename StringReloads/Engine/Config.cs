@@ -1,8 +1,10 @@
 ﻿using StringReloads.StringModifier;
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace StringReloads.Engine
@@ -36,6 +38,9 @@ namespace StringReloads.Engine
                 return _IniLines = IniContent.Split('\n');
             }
         }
+
+        bool? _Dump = null;
+        internal bool Dump => (_Dump ?? (_Dump = GetValue("Dump").ToBoolean())).Value;
 
 
         bool? _Log = null;
@@ -104,6 +109,11 @@ namespace StringReloads.Engine
         }
 
 
+        void* _GameBaseAddress = null;
+        internal void* GameBaseAddress => _GameBaseAddress != null ? _GameBaseAddress : (_GameBaseAddress = Process.GetCurrentProcess().MainModule.BaseAddress.ToPointer());
+
+        string _GameExePath = null;
+        internal string GameExePath => _GameExePath ?? (_GameExePath = Process.GetCurrentProcess().MainModule.FileName);
 
         string _CachePath = null;
         internal string CachePath => _CachePath ?? (_CachePath = Path.Combine(WorkingDirectory, "Cache.srl"));
@@ -177,7 +187,7 @@ namespace StringReloads.Engine
 
         #region IniParser
 
-        private string GetValue(string Name, string Group = "StringReloads") {
+        public string GetValue(string Name, string Group = "StringReloads") {
             string CurrentGroup = null;
             foreach (string Line in IniLines) {
                 if (Line.StartsWith("//") || Line.StartsWith(";") || Line.StartsWith("!"))
@@ -206,7 +216,7 @@ namespace StringReloads.Engine
             return null;
         }
 
-        private Dictionary<string, string> GetValues(string Group)
+        public Dictionary<string, string> GetValues(string Group)
         {
             var Result = new Dictionary<string, string>();
             string CurrentGroup = null;
@@ -237,6 +247,70 @@ namespace StringReloads.Engine
                 return null;
 
             return Result;
+        }
+
+        public void SetValues(string Group, Dictionary<string, string> Entries) {
+            foreach (KeyValuePair<string, string> Entry in Entries) {
+                SetValue(Group, Entry.Key, Entry.Value);
+            }
+        }
+
+        public void SetValue(string Name, string Value) => SetValue("StringReloads", Name, Value);
+        public void SetValue(string Group, string Name, string Value)
+        {
+            int GroupBegin = -1;
+            int GroupEnd = IniLines.Length;
+
+            string CurrentGroup = null;
+            for (int i = 0; i < IniLines.Length; i++) {
+                string Line = IniLines[i];
+                if (Line.StartsWith("//") || Line.StartsWith(";") || Line.StartsWith("!"))
+                    continue;
+
+                if (Line.StartsWith("[") && Line.EndsWith("]"))
+                {
+                    CurrentGroup = Line.Substring(1, Line.Length - 2).Trim().ToLowerInvariant();
+                    if (CurrentGroup == Group.ToLowerInvariant()) {
+                        GroupBegin = i;
+                    }
+                    continue;
+                }
+
+                if (!Line.Contains("="))
+                    continue;
+
+                if (CurrentGroup != Group.Trim().ToLowerInvariant())
+                    continue;
+
+                string CurrentName = Line.Substring(0, Line.IndexOf('=')).Trim().ToLowerInvariant();
+
+                GroupEnd = i;
+
+                if (CurrentName != Name.Trim().ToLowerInvariant())
+                    continue;
+
+                IniLines[i] = $"{Name}={Value}";
+                return;
+            }
+
+            List<string> NewLines = new List<string>(IniLines);
+            if (GroupBegin >= 0) {
+                if (GroupEnd + 1 < IniLines.Length)
+                    NewLines.Insert(GroupEnd + 1, $"{Name}={Value}");
+                else
+                    NewLines.Add($"{Name}={Value}");
+            } else {
+                if (NewLines.Last().Trim() != string.Empty)
+                    NewLines.Add(string.Empty);
+
+                NewLines.Add($"[{Group}]");
+                NewLines.Add($"{Name}={Value}");
+            }
+            _IniLines = NewLines.ToArray();
+        }
+
+        public void SaveSettings() {
+            File.WriteAllLines(ConfigPath, IniLines);
         }
 
         #endregion
