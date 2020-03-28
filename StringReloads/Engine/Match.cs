@@ -19,6 +19,27 @@ namespace StringReloads.Engine
             return Engine.CharRemap.ReverseMatch(Char);
         }
 
+        public bool HasMatch(string String) {
+            string Minified = String;
+
+            foreach (var Modifier in Engine.ReloadModifiers)
+            {
+                if (Modifier.CanRestore)
+                    Minified = Modifier.Restore(Minified);
+            }
+
+            Minified = Minify.Default.Apply(String);
+
+            if (Engine.CurrentDatabase.HasKey(Minified))
+                return true;
+
+            for (int i = 0; i < Engine.Databases.Count; i++) {
+                if (Engine.Databases[i].HasKey(Minified))
+                    return true;
+            }
+
+            return false;
+        }
         public LSTParser.LSTEntry? MatchString(string String) {
 
             string Minified = String;
@@ -40,19 +61,32 @@ namespace StringReloads.Engine
                     return Engine.Databases[i][Minified];
                 }
             }
+
             if (Engine.Settings.Dump)
                 DumpString(String);
+
             return null;
         }
 
+        List<string> DumpCache = new List<string>();
         TextWriter DefaultLST = null;
         void DumpString(string String) {
+            if (Engine.Settings.DumpFilter && !String.IsDialogue())
+                return;
+
+            if (DumpCache.Contains(String))
+                return;
+
             if (DefaultLST == null) {
                 string LSTPath = Path.Combine(Engine.Settings.WorkingDirectory, "Strings.lst");
                 var Stream = File.OpenWrite(LSTPath);
                 Stream.Seek(0, SeekOrigin.End);
                 DefaultLST = new StreamWriter(Stream, Encoding.UTF8);
             }
+
+            String = String.Trim();
+
+            DumpCache.Add(String);
             DefaultLST.WriteLine(String);
             DefaultLST.WriteLine(String);
             DefaultLST.Flush();

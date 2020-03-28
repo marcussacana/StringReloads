@@ -43,6 +43,10 @@ namespace StringReloads.Engine
         internal bool Dump => (_Dump ?? (_Dump = GetValue("Dump").ToBoolean())).Value;
 
 
+        bool? _DumpFilter = null;
+        internal bool DumpFilter => (_DumpFilter ?? (_DumpFilter = GetValue("DumpFilter").ToBoolean())).Value;
+
+
         bool? _Log = null;
         internal bool Log => (_Log ?? (_Log = GetValue("Log").ToBoolean())).Value;
 
@@ -182,6 +186,25 @@ namespace StringReloads.Engine
                 }
 
                 return Mods;
+            }
+        }
+
+        internal Filter? _Filter = null;
+        internal Filter Filter {
+            get {
+                if (_Filter.HasValue)
+                    return _Filter.Value;
+
+                _Filter = new Filter() { 
+                    FromAsian = GetValue("FromAsian", "Filter").ToBoolean(),
+                    DenyList = GetValue("DenyList", "Filter"),
+                    IgnoreList = GetValue("IgnoreList", "Filter"),
+                    QuoteList = GetValue("QuoteList", "Filter"),
+                    Sensitivity = GetValue("Sensitivity", "Filter").ToInt32(),
+                    UseDB = GetValue("UseDB", "Filter").ToBoolean()
+                };
+
+                return _Filter.Value;
             }
         }
 

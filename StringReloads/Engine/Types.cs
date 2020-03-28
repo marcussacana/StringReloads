@@ -17,4 +17,20 @@ namespace StringReloads.Engine
         public int Height;
         public uint Charset;
     }
+
+
+    struct Filter
+    {
+        public string DenyList;
+        public string IgnoreList;
+        public string QuoteList;
+        public int Sensitivity;
+        public bool UseDB;
+        public bool FromAsian;
+    }
+    struct Quote
+    {
+        public char Start;
+        public char End;
+    }
 }
