@@ -17,7 +17,7 @@ namespace StringReloads.Engine
 
             const string NamePrefix = "strings-";
             if (this.Name.ToLowerInvariant().StartsWith(NamePrefix))
-                this.Name = this.Name.Substring(this.Name.IndexOf(NamePrefix) + NamePrefix.Length);
+                this.Name = this.Name.Substring(NamePrefix.Length);
             
         }
 
