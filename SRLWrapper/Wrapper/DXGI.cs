@@ -22,17 +22,17 @@ namespace SRLWrapper.Wrapper
             dCreateDXGIFactory1 = GetDelegate<RET_2>(RealHandler, "CreateDXGIFactory1", false);
             dCompatValue = GetDelegate<RET_2>(RealHandler, "CompatValue", false);
             dCompatString = GetDelegate<RET_4>(RealHandler, "CompatString", false);
-            dApplyCompatResolutionQuirking = GetDelegate<RET_3>(RealHandler, "ApplyCompatResolutionQuirking", false);
-            dCreateDXGIFactory2 = GetDelegate<RET_3>(RealHandler, "CreateDXGIFactory2", false);
+            dApplyCompatResolutionQuirking = GetDelegate<RET_3>(RealHandler, "ApplyCompatResolutionQuirking", true);
+            dCreateDXGIFactory2 = GetDelegate<RET_3>(RealHandler, "CreateDXGIFactory2", true);
             dDXGID3D10RegisterLayers = GetDelegate<RET_2>(RealHandler, "DXGID3D10RegisterLayers", false);
-            dPIXEndCapture = GetDelegate<RET_1>(RealHandler, "PIXEndCapture", false);
+            dPIXEndCapture = GetDelegate<RET_1>(RealHandler, "PIXEndCapture", true);
             dDXGID3D10GetLayeredDeviceSize = GetDelegate<RET_2>(RealHandler, "DXGID3D10GetLayeredDeviceSize", false);
             dDXGID3D10CreateLayeredDevice = GetDelegate<RET_5>(RealHandler, "DXGID3D10CreateLayeredDevice", false);
             dDXGID3D10CreateDevice = GetDelegate<RET_6>(RealHandler, "DXGID3D10CreateDevice", false);
             dDXGIReportAdapterConfiguration = GetDelegate<RET_1>(RealHandler, "DXGIReportAdapterConfiguration", false);
             dSetAppCompatStringPointer = GetDelegate<RET_2>(RealHandler, "SetAppCompatStringPointer", false);
-            dUpdateHMDEmulationStatus = GetDelegate<RET_2>(RealHandler, "UpdateHMDEmulationStatus", false);
-            dDXGIGetDebugInterface1 = GetDelegate<RET_3>(RealHandler, "DXGIGetDebugInterface1", false);
+            dUpdateHMDEmulationStatus = GetDelegate<RET_2>(RealHandler, "UpdateHMDEmulationStatus", true);
+            dDXGIGetDebugInterface1 = GetDelegate<RET_3>(RealHandler, "DXGIGetDebugInterface1", true);
 
             InitializeSRL();
         }

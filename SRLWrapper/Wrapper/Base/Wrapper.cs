@@ -51,7 +51,10 @@ namespace SRLWrapper.Wrapper.Base
             void* Handler = RealHandler = LoadLibraryW(DllPath);
 
             if (Handler == null)
+            {
+                MessageBoxW(null, "Library: " + DllPath, "SRL WRAPPER ERROR", 0x10);
                 Environment.Exit(0x505);//ERROR_DELAY_LOAD_FAILED
+            }
 
             return Handler;
         }
@@ -67,6 +70,7 @@ namespace SRLWrapper.Wrapper.Base
                     return null;
                 }
 
+                MessageBoxW(null, "Function: " + Function, "SRL WRAPPER ERROR", 0x10);
                 Environment.Exit(0x505);//ERROR_DELAY_LOAD_FAILED
             }
             return (T)Marshal.GetDelegateForFunctionPointer(new IntPtr(Address), typeof(T));

@@ -25,8 +25,8 @@ namespace SRLWrapper.Wrapper
             dD3D11CreateDeviceAndSwapChain = GetDelegate<RET_13>(RealHandler, "D3D11CreateDeviceAndSwapChain", false);
             dD3D11CreateDevice = GetDelegate<RET_11>(RealHandler, "D3D11CreateDevice", false);
             dD3DKMTWaitForVerticalBlankEvent = GetDelegate<RET_1>(RealHandler, "D3DKMTWaitForVerticalBlankEvent", false);
-            dD3D11CreateDeviceForD3D12 = GetDelegate<RET_10>(RealHandler, "D3D11CreateDeviceForD3D12", false);
-            dD3D11On12CreateDevice = GetDelegate<RET_11>(RealHandler, "D3D11On12CreateDevice", false);
+            dD3D11CreateDeviceForD3D12 = GetDelegate<RET_10>(RealHandler, "D3D11CreateDeviceForD3D12", true);
+            dD3D11On12CreateDevice = GetDelegate<RET_11>(RealHandler, "D3D11On12CreateDevice", true);
             dD3DPerformance_BeginEvent = GetDelegate<RET_2>(RealHandler, "D3DPerformance_BeginEvent", false);
             dD3DPerformance_EndEvent = GetDelegate<RET_1>(RealHandler, "D3DPerformance_EndEvent", false);
             dD3DPerformance_GetStatus = GetDelegate<RET_1>(RealHandler, "D3DPerformance_GetStatus", false);
@@ -38,8 +38,8 @@ namespace SRLWrapper.Wrapper
             dD3DKMTGetDeviceState = GetDelegate<RET_1>(RealHandler, "D3DKMTGetDeviceState", false);
             dD3DKMTOpenAdapterFromHdc = GetDelegate<RET_1>(RealHandler, "D3DKMTOpenAdapterFromHdc", false);
             dD3DKMTQueryResourceInfo = GetDelegate<RET_1>(RealHandler, "D3DKMTQueryResourceInfo", false);
-            dCreateDirect3D11DeviceFromDXGIDevice = GetDelegate<RET_2>(RealHandler, "CreateDirect3D11DeviceFromDXGIDevice", false);
-            dCreateDirect3D11SurfaceFromDXGISurface = GetDelegate<RET_2>(RealHandler, "CreateDirect3D11SurfaceFromDXGISurface", false);
+            dCreateDirect3D11DeviceFromDXGIDevice = GetDelegate<RET_2>(RealHandler, "CreateDirect3D11DeviceFromDXGIDevice", true);
+            dCreateDirect3D11SurfaceFromDXGISurface = GetDelegate<RET_2>(RealHandler, "CreateDirect3D11SurfaceFromDXGISurface", true);
 
             InitializeSRL();
         }

@@ -37,7 +37,8 @@ namespace StringReloads.Engine
             new CreateFontIndirectW(),
             new GetGlyphOutlineA(),
             new GetGlyphOutlineW(),
-            new SysAllocString()
+            new SysAllocString(),
+            new MultiByteToWideChar()
         });
 
         internal Mods.Base.IMod[] _Mods = null;

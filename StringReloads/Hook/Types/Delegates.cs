@@ -32,4 +32,6 @@ namespace StringReloads.Hook
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     public unsafe delegate void SoftPAL_DrawTextDelegate(byte* Text, void* a2, void* a3, void* a4, void* a5, void* a6, void* a7, void* a8, void* a9, void* a10, void* a11, void* a12, void* a13, void* a14, void* a15, void* a16, void* a17, void* a18, void* a19, void* a20, void* a21, void* a22, void* a23);
 
+    [UnmanagedFunctionPointer(CallingConvention.Winapi)]
+    public unsafe delegate int MultiByteToWideCharDelegate(uint CodePage, uint dwFlags, byte* lpMultiByteStr, int cbMultiByte, ushort* lpWideCharStr, int cchWideChar);
 }

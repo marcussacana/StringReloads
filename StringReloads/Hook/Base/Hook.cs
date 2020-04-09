@@ -1,10 +1,10 @@
 ﻿using System;
 using Iced.Intel;
 using System.Runtime.InteropServices;
-
 using static StringReloads.Hook.Base.Extensions;
 using System.Linq;
 using System.Collections.Generic;
+using System.Reflection.Emit;
 
 namespace StringReloads.Hook.Base
 {
@@ -89,7 +89,7 @@ namespace StringReloads.Hook.Base
         }
 
 #if x64
-        const int JmpSize = 12;
+        public const int JmpSize = 12;
         private void AssemblyHook()
         {
             //Copy Minimal Instructions Amount
@@ -107,10 +107,11 @@ namespace StringReloads.Hook.Base
             var Writer = new MemoryCodeWriter();
             var Compiler = Encoder.Create(64, Writer);
 
-            int HookSize = Instructions.GetEncodedSize(64);
+            int RHookSize = Instructions.GetEncodedSize(64, (ulong)Function);
+            int BypassSize = Instructions.GetAutoEncodedSize(64, (ulong)Function);
 
-            RealBuffer = new byte[HookSize];
-            BypassBuffer = new byte[HookSize + JmpSize];
+            RealBuffer = new byte[RHookSize];
+            BypassBuffer = new byte[BypassSize];
 
             DeprotectMemory(Function, (uint)BypassBuffer.LongLength);
             Marshal.Copy(new IntPtr(Function), RealBuffer, 0, RealBuffer.Length);
@@ -124,7 +125,7 @@ namespace StringReloads.Hook.Base
             Instructions.Add(Instruction.Create(Code.Mov_r64_imm64, Register.RAX, RetAddr));
             Instructions.Add(Instruction.Create(Code.Jmp_rm64, Register.RAX));
 
-            Compiler.Encode(Instructions, (ulong)phBuffer);
+            Compiler.AutoEncode(Instructions, (ulong)phBuffer);
 
             Writer.CopyTo(phBuffer, 0);
 
@@ -142,7 +143,7 @@ namespace StringReloads.Hook.Base
             HookBuffer = Writer.ToArray();
         }
 #else
-        const int JmpSize = 5;
+        public const int JmpSize = 5;
         private void AssemblyHook()
         {
             //Copy Minimal Instructions Amount
@@ -206,22 +207,39 @@ namespace StringReloads.Hook.Base
 
     public static partial class Extensions
     {
-        public static int GetEncodedSize(this InstructionList List, int bitness)
+        public static int GetEncodedSize(this InstructionList List, int bitness, ulong IP = 0)
         {
             var Writer = new MemoryCodeWriter();
             var Compiler = Encoder.Create(bitness, Writer);
             foreach (var Instruction in List)
             {
-                Compiler.Encode(Instruction, (ulong)Writer.Count);
+                Compiler.Encode(Instruction, (ulong)Writer.Count + IP);
             }
 
             return Writer.Count;
         }
-        public static int GetEncodedSize(this Instruction Instruction, int bitness)
+        public static int GetEncodedSize(this Instruction Instruction, int bitness, ulong IP = 0)
         {
             var Writer = new MemoryCodeWriter();
             var Compiler = Encoder.Create(bitness, Writer);
-            return (int)Compiler.Encode(Instruction, (ulong)Writer.Count);
+            return (int)Compiler.Encode(Instruction, (ulong)Writer.Count + IP);
+        }
+        public static int GetAutoEncodedSize(this InstructionList List, int bitness, ulong IP = 0)
+        {
+            var Writer = new MemoryCodeWriter();
+            var Compiler = Encoder.Create(bitness, Writer);
+            foreach (var Instruction in List)
+            {
+                Compiler.AutoEncode(Instruction, (ulong)Writer.Count + IP);
+            }
+
+            return Writer.Count;
+        }
+        public static int GetAutoEncodedSize(this Instruction Instruction, int bitness, ulong IP = 0)
+        {
+            var Writer = new MemoryCodeWriter();
+            var Compiler = Encoder.Create(bitness, Writer);
+            return (int)Compiler.AutoEncode(Instruction, (ulong)Writer.Count + IP);
         }
 
         public static uint Encode(this Encoder Encoder, InstructionList List, ulong IP)
@@ -229,6 +247,13 @@ namespace StringReloads.Hook.Base
             uint Len = 0;
             foreach (var Instruction in List)
                 Len += Encoder.Encode(Instruction, IP + Len);
+            return Len;
+        }
+        public static uint AutoEncode(this Encoder Encoder, InstructionList List, ulong IP)
+        {
+            uint Len = 0;
+            foreach (var Instruction in List)
+                Len += Encoder.AutoEncode(Instruction, IP + Len);
             return Len;
         }
 
@@ -242,6 +267,85 @@ namespace StringReloads.Hook.Base
             }
             return List;
         }
+
+        public static uint AutoEncode(this Encoder Encoder, Instruction Instruction, ulong IP) {
+            InstructionList List = new InstructionList();
+            if (Encoder.Bitness <= 32) {
+                List.Add(Instruction);
+            }
+            else {
+                if (Instruction.IsJmp() && !Instruction.IsCallFar && Instruction.Op0Kind != OpKind.Register) {
+
+                    if (!Instruction.IsANotJmp())
+                        Instruction.NegateConditionCode();
+
+                    var Jmp = Instruction.IPRelativeMemoryAddress.x64FarJmp();
+                    List.Add(Instruction.ConditionCode.ToShortJmp(14));
+                    List.AddRange(Jmp);
+                }
+                else
+                {
+                    switch (Instruction.Code)
+                    {
+                        case Code.Mov_r64_rm64:
+                            List.Add(Instruction.Create(Code.Mov_r64_imm64, Instruction.Op0Register, Instruction.IPRelativeMemoryAddress));
+                            List.Add(Instruction.Create(Code.Mov_r64_rm64, Instruction.Op0Register, new MemoryOperand(Instruction.Op0Register)));
+                            break;
+                        default:
+                            List.Add(Instruction);
+                            break;
+                    }
+                }
+            }
+            uint TotalSize = 0;
+            foreach (var Inst in List)
+                TotalSize += Encoder.Encode(Inst, IP + TotalSize);
+            return TotalSize;
+        }
+
+        public static bool IsANotJmp(this Instruction Instruction) => Instruction.ConditionCode switch {
+            ConditionCode.ne => true,
+            ConditionCode.no => true,
+            ConditionCode.np => true,
+            ConditionCode.ns => true,
+            _ => false
+        };
+
+        public static InstructionList x64FarJmp(this ulong Address) {
+            InstructionList List = new InstructionList();
+            List.Add(Instruction.Create(Code.Pushq_imm32, unchecked((int)(Address & uint.MaxValue))));
+            List.Add(Instruction.Create(Code.Mov_rm32_imm32, new MemoryOperand(Register.RSP), (uint)(Address >> 8 * 4)));
+            List.Add(Instruction.Create(Code.Retnq));
+            return List;
+        }
+
+        public static Instruction ToShortJmp(this ConditionCode Condition, ulong Address) {
+            return Condition switch {
+                ConditionCode.a  => Instruction.CreateBranch(Code.Jae_rel16,    Address),
+                ConditionCode.ae => Instruction.CreateBranch(Code.Jae_rel16,    Address),
+                ConditionCode.b  => Instruction.CreateBranch(Code.Jb_rel16,     Address),
+                ConditionCode.be => Instruction.CreateBranch(Code.Jbe_rel16,    Address),
+                ConditionCode.e  => Instruction.CreateBranch(Code.Je_rel16,     Address),
+                ConditionCode.g  => Instruction.CreateBranch(Code.Jg_rel16,     Address),
+                ConditionCode.ge => Instruction.CreateBranch(Code.Jge_rel16,    Address),
+                ConditionCode.l  => Instruction.CreateBranch(Code.Jl_rel16,     Address),
+                ConditionCode.ne => Instruction.CreateBranch(Code.Jne_rel16,    Address),
+                ConditionCode.no => Instruction.CreateBranch(Code.Jno_rel16,    Address),
+                ConditionCode.np => Instruction.CreateBranch(Code.Jnp_rel16,    Address),
+                ConditionCode.ns => Instruction.CreateBranch(Code.Jns_rel16,    Address),
+                ConditionCode.o  => Instruction.CreateBranch(Code.Jo_rel16,     Address),
+                ConditionCode.p  => Instruction.CreateBranch(Code.Jp_rel16,     Address),
+                ConditionCode.s  => Instruction.CreateBranch(Code.Js_rel16,     Address),
+                _                => Instruction.CreateBranch(Code.Jmp_rel16,    Address),
+            };
+        }
+
+        public static bool IsJmp(this Instruction Instruction) => 
+            Instruction.IsJmpNear        || Instruction.IsJmpNearIndirect || 
+            Instruction.IsJmpShort       || Instruction.IsJmpFar          || 
+            Instruction.IsJmpFarIndirect || Instruction.IsJmpShortOrNear  ||
+            Instruction.IsJccNear        || Instruction.IsJccShort        || 
+            Instruction.IsJccShortOrNear;
 
         public unsafe static byte* AllocUnsafe(uint Bytes)
         {
