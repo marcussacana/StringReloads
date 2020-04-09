@@ -9,7 +9,7 @@ namespace StringReloads.StringModifier
 
         public bool CanRestore => false;
 
-        public string Apply(string String)
+        public string Apply(string String, string Original)
         {
             var Rst = string.Empty;
             foreach (char Char in String) {

@@ -11,7 +11,7 @@ namespace StringReloads.StringModifier
 
         public bool CanRestore => true;
 
-        public string Apply(string String)
+        public string Apply(string String, string Original)
         {
             StringBuilder SB = new StringBuilder();
             foreach (char c in String)

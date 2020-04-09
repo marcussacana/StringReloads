@@ -42,7 +42,7 @@ namespace StringReloads.Engine
         }
 
         public void Add(LSTParser.LSTEntry Entry) {
-            var Key = Minify.Default.Apply(Entry.OriginalLine);
+            var Key = Minify.Default.Apply(Entry.OriginalLine, null);
             DB.Add(Key, Entry);
         }
 

@@ -27,45 +27,40 @@ namespace StringReloads.StringModifier
 
         public bool CanRestore => true;
 
-        public string Apply(string String)
+        public string Apply(string String, string Original)
         {
             int CurrentLength = 0;
             string Result = string.Empty;
-            string CurrentWord = string.Empty;
             string BreakLine = Config.Default.BreakLine;
+            int Width = this.Width;
 
+            if (Original != null)
+            {
+                string[] OriLines = Original.Replace(BreakLine, "\x0").Split('\x0');
+                if (Width <= 0)
+                {
+                    if (OriLines.Length == 1 && Width == 0)
+                        Width = OriLines.First().Length;
+                    else if (OriLines.Length > 1)
+                        Width = (from x in OriLines orderby x.Length descending select x.Length).First();
+                    else
+                        Width = Math.Abs(Width);
+                }
+            }
+            else Width = Math.Abs(Width);
 
-            for (int Index = 0; Index < String.Length; Index++) { 
-                char Char = String[Index];
-                if (Index + BreakLine.Length < String.Length && String.Substring(Index, BreakLine.Length) == BreakLine) {
-                    Char = '\n';
-                    Index += BreakLine.Length - 1;
+            if (!String.Contains(" "))
+                return String;
+
+            String = String.Replace(BreakLine, " ").Replace("  ", "");
+            foreach (var Word in String.Split(' ')) {
+                if (CurrentLength > 0 && CurrentLength + Word.Length > Width) {
+                    Result = Result.TrimEnd();
+                    Result += BreakLine;
+                    CurrentLength = 0;
                 }
-                switch (Char) {
-                    case '\n':
-                    case '\r':
-                        Result += CurrentWord;
-                        CurrentLength = 0;
-                        CurrentWord = string.Empty;
-                        goto default;
-                    case ' ':
-                        if (CurrentWord != string.Empty) {
-                            if (CurrentLength + CurrentWord.Length > Width) {
-                                Result += BreakLine;
-                                Result += CurrentWord;
-                                CurrentLength = CurrentWord.Length;
-                                CurrentWord = string.Empty;
-                            } else {
-                                Result += CurrentWord;
-                                CurrentLength += CurrentWord.Length;
-                            }
-                            break;
-                        }
-                        goto default;
-                    default:
-                        CurrentWord += Char;
-                        break;
-                }
+                Result += Word + " ";
+                CurrentLength += Word.Length + 1;
             }
 
             return Result;

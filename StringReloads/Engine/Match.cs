@@ -28,7 +28,7 @@ namespace StringReloads.Engine
                     Minified = Modifier.Restore(Minified);
             }
 
-            Minified = Minify.Default.Apply(String);
+            Minified = Minify.Default.Apply(String, null);
 
             if (Engine.CurrentDatabase.HasKey(Minified))
                 return true;
@@ -49,7 +49,7 @@ namespace StringReloads.Engine
                     Minified = Modifier.Restore(Minified);
             }
 
-            Minified = Minify.Default.Apply(String);
+            Minified = Minify.Default.Apply(String, null);
             
             if (Engine.CurrentDatabase.HasKey(Minified))
                 return Engine.CurrentDatabase[Minified];

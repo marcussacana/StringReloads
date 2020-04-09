@@ -36,7 +36,7 @@ namespace StringReloads.Engine
                 if (LineA.Contains("/*")) {
                     InComment = true;
                 }
-                if (LineA.Contains("*/")) {
+                if (LineA.Contains("*/") && InComment) {
                     int CommentPos = LineA.IndexOf("/*");
                     int DecommentPos = LineA.IndexOf("*/");
                     if (DecommentPos > CommentPos)

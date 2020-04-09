@@ -94,7 +94,7 @@ namespace StringReloads.Engine
             //Execute Reload Modifiers
             string Reloaded = Matched?.TranslationLine;
             foreach (var Modifier in ReloadModifiers)
-                Reloaded = Modifier.Apply(Reloaded); 
+                Reloaded = Modifier.Apply(Reloaded, Matched?.OriginalLine); 
             
             Log.Trace($"Reload from:\r\n{Matched?.OriginalLine}\r\nTo:\r\n{Reloaded}");
 
