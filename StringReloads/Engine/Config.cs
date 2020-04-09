@@ -46,6 +46,9 @@ namespace StringReloads.Engine
         bool? _DumpFilter = null;
         internal bool DumpFilter => (_DumpFilter ?? (_DumpFilter = GetValue("DumpFilter").ToBoolean())).Value;
 
+        bool? _ImportHook = null;
+        internal bool ImportHook => (_ImportHook ?? (_ImportHook = GetValue("ImportHook").ToBoolean())).Value;
+
 
         bool? _Log = null;
         internal bool Log => (_Log ?? (_Log = GetValue("Log").ToBoolean())).Value;

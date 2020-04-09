@@ -5,6 +5,10 @@ using static StringReloads.Hook.Base.Extensions;
 using System.Linq;
 using System.Collections.Generic;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
+using StringReloads.Engine.String;
+using StringReloads.Engine;
+using System.Diagnostics;
 
 namespace StringReloads.Hook.Base
 {
@@ -65,7 +69,7 @@ namespace StringReloads.Hook.Base
         public byte[] RealBuffer;
         public byte[] HookBuffer;
 
-        public void Compile()
+        public void Compile(bool ImportHook = false)
         {
             var hModule = GetLibrary(Library);
 
@@ -77,9 +81,15 @@ namespace StringReloads.Hook.Base
             else
                 Function = GetProcAddress(hModule, Ordinal);
 
-            AssemblyHook();
+            if (ImportHook)
+                SetupImportHook();
+            else
+                AssemblyHook();
 
-            Log.Debug("Hook \"{0}->{1}\" Compiled; Bypass: 0x{2}", new string[] { Library, Export ?? Ordinal.ToString(), ((ulong)BypassFunction).ToString("X16") });
+            if (Config.Default.LogLevel == Log.LogLevel.Trace)
+                Log.Trace("Hook \"{0}->{1}\" {2}; Bypass: 0x{3}", new string[] { Library, Export ?? Ordinal.ToString(), ImportHook ? "Ready" : "Compiled", ((ulong)BypassFunction).ToString("X16") });
+            else
+                Log.Debug("Hook \"{0}->{1}\" {2}", new string[] { Library, Export ?? Ordinal.ToString(), ImportHook ? "Ready" : "Compiled" });
         }
 
         public void Compile(void* Function)
@@ -189,6 +199,28 @@ namespace StringReloads.Hook.Base
         }
 
 #endif
+
+        private void SetupImportHook() {
+            var Imports = GetModuleImports((byte*)Process.GetCurrentProcess().MainModule.BaseAddress.ToPointer());
+
+            var Import = (from x in Imports where x.Function == Export && x.Module.ToLower() == Library.ToLower() select x).Single();
+            
+            BypassFunction = Function;
+            Function = Import.ImportAddress;
+
+
+#if x64
+            HookBuffer = new byte[8];
+            BitConverter.GetBytes((ulong)HookFunction).CopyTo(HookBuffer, 0);
+            RealBuffer = new byte[8];
+            BitConverter.GetBytes((ulong)BypassFunction).CopyTo(RealBuffer, 0);
+#else
+            HookBuffer = new byte[4];
+            BitConverter.GetBytes((uint)HookFunction).CopyTo(HookBuffer, 0);
+            RealBuffer = new byte[4];
+            BitConverter.GetBytes((uint)BypassFunction).CopyTo(HookBuffer, 0);
+#endif
+        }
 
         public void Install()
         {
@@ -386,7 +418,6 @@ namespace StringReloads.Hook.Base
             };
         }
 
-
         public static bool IsJmp(this Instruction Instruction) => 
             Instruction.IsJmpNear        || Instruction.IsJmpNearIndirect || 
             Instruction.IsJmpShort       || Instruction.IsJmpFar          || 
@@ -416,6 +447,113 @@ namespace StringReloads.Hook.Base
             if (hModule != null)
                 return hModule;
             return LoadLibrary(Library);
+        }
+        public unsafe static ImportEntry[] GetModuleImports(byte* Module)
+        {
+            if (Module == null)
+                throw new Exception("Invalid Module...");
+
+            uint PtrSize = Environment.Is64BitProcess ? 8u : 4u;
+
+            ulong OrdinalFlag = (1ul << (int)((8 * PtrSize) - 1));
+
+            ulong PEStart = *(uint*)(Module + 0x3C);
+            ulong OptionalHeader = PEStart + 0x18;
+
+            ulong ImageDataDirectoryPtr = OptionalHeader + (PtrSize == 8 ? 0x70u : 0x60u);
+
+            ulong ImportTableEntry = ImageDataDirectoryPtr + 0x8;
+
+            uint RVA = (uint)ImportTableEntry;
+
+            uint* ImportDesc = (uint*)(Module + *(uint*)(Module + RVA));
+
+            if (ImportDesc == Module)
+                return new ImportEntry[0];
+
+            List<ImportEntry> Entries = new List<ImportEntry>();
+
+            while (true)
+            {
+                uint OriginalFirstThunk = ImportDesc[0];
+                uint Name = ImportDesc[3];
+                uint FirstThunk = ImportDesc[4];
+
+                if (OriginalFirstThunk == 0x00)
+                    break;
+
+                string ModuleName = (CString)(Module + Name);
+
+                void** DataAddr = (void**)(Module + OriginalFirstThunk);
+                void** IATAddr = (void**)(Module + FirstThunk);
+                while (true)
+                {
+                    void* EntryPtr = *DataAddr;
+
+                    if (EntryPtr == null)
+                        break;
+
+                    bool ImportByOrdinal = false;
+                    if (((ulong)EntryPtr & OrdinalFlag) == OrdinalFlag)
+                    {
+                        EntryPtr = (void*)((ulong)EntryPtr ^ OrdinalFlag);
+                        ImportByOrdinal = true;
+                    }
+                    else
+                        EntryPtr = (void*)(Module + (ulong)EntryPtr);
+
+                    ushort Hint = ImportByOrdinal ? (ushort)EntryPtr : *(ushort*)EntryPtr;
+                    
+                    string ExportName = null;                    
+                    if (!ImportByOrdinal)
+                        ExportName = (CString)(void*)((ulong)EntryPtr + 2);
+
+                    Entries.Add(new ImportEntry()
+                    {
+                        Function = ExportName,
+                        Ordinal = Hint,
+                        Module = ModuleName,
+                        ImportAddress = IATAddr,
+                        FunctionAddress = *IATAddr
+                    });
+
+                    DataAddr++;
+                    IATAddr++;
+                }
+
+
+                ImportDesc += 5;//sizeof(_IMAGE_IMPORT_DESCRIPTOR)
+            }
+
+            return Entries.ToArray();
+        }
+        public unsafe struct ImportEntry
+        {
+
+            /// <summary>
+            /// The Imported Module Name
+            /// </summary>
+            public string Module;
+
+            /// <summary>
+            /// The Imported Function Name
+            /// </summary>
+            public string Function;
+
+            /// <summary>
+            /// The Import Ordinal Hint
+            /// </summary>
+            public ushort Ordinal;
+
+            /// <summary>
+            /// The Address of this Import in the IAT (Import Address Table)
+            /// </summary>
+            public void* ImportAddress;
+
+            /// <summary>
+            /// The Address of the Imported Function
+            /// </summary>
+            public void* FunctionAddress;
         }
 
         public unsafe static void* LoadLibrary(string Library) => LoadLibraryW(Library);

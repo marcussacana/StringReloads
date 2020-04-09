@@ -63,19 +63,21 @@ namespace StringReloads.Engine
             }
 
             if (Engine.Settings.Dump)
-                DumpString(String);
+                DumpString(String, Minified);
 
             return null;
         }
 
         List<string> DumpCache = new List<string>();
         TextWriter DefaultLST = null;
-        void DumpString(string String) {
+        void DumpString(string String, string Minified) {
             if (Engine.Settings.DumpFilter && !String.IsDialogue())
                 return;
 
-            if (DumpCache.Contains(String))
+            if (DumpCache.Contains(Minified))
                 return;
+
+            DumpCache.Add(Minified);
 
             if (DefaultLST == null) {
                 string LSTPath = Path.Combine(Engine.Settings.WorkingDirectory, "Strings.lst");
@@ -86,7 +88,6 @@ namespace StringReloads.Engine
 
             String = String.Trim();
 
-            DumpCache.Add(String);
             DefaultLST.WriteLine(String);
             DefaultLST.WriteLine(String);
             DefaultLST.Flush();
