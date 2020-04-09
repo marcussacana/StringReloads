@@ -77,9 +77,9 @@ namespace StringReloads.Hook.Base
             else
                 Function = GetProcAddress(hModule, Ordinal);
 
-            Log.Debug("Hook \"{0}->{1}\" Compiled.", new string[] { Library, Export ?? Ordinal.ToString() });
-
             AssemblyHook();
+
+            Log.Debug("Hook \"{0}->{1}\" Compiled; Bypass: 0x{2}", new string[] { Library, Export ?? Ordinal.ToString(), ((ulong)BypassFunction).ToString("X16") });
         }
 
         public void Compile(void* Function)
@@ -224,6 +224,27 @@ namespace StringReloads.Hook.Base
             var Compiler = Encoder.Create(bitness, Writer);
             return (int)Compiler.Encode(Instruction, (ulong)Writer.Count + IP);
         }
+
+        public static uint Encode(this Encoder Encoder, InstructionList List, ulong IP)
+        {
+            uint Len = 0;
+            foreach (var Instruction in List)
+                Len += Encoder.Encode(Instruction, IP + Len);
+            return Len;
+        }
+
+        public static InstructionList DecodeMany(this Decoder Decoder, uint MinLength)
+        {
+            var List = new InstructionList();
+            var Begin = Decoder.IP;
+            while (Decoder.IP < Begin + MinLength)
+            {
+                List.Add(Decoder.Decode());
+            }
+            return List;
+        }
+
+#if x64
         public static int GetAutoEncodedSize(this InstructionList List, int bitness, ulong IP = 0)
         {
             var Writer = new MemoryCodeWriter();
@@ -241,14 +262,6 @@ namespace StringReloads.Hook.Base
             var Compiler = Encoder.Create(bitness, Writer);
             return (int)Compiler.AutoEncode(Instruction, (ulong)Writer.Count + IP);
         }
-
-        public static uint Encode(this Encoder Encoder, InstructionList List, ulong IP)
-        {
-            uint Len = 0;
-            foreach (var Instruction in List)
-                Len += Encoder.Encode(Instruction, IP + Len);
-            return Len;
-        }
         public static uint AutoEncode(this Encoder Encoder, InstructionList List, ulong IP)
         {
             uint Len = 0;
@@ -256,18 +269,6 @@ namespace StringReloads.Hook.Base
                 Len += Encoder.AutoEncode(Instruction, IP + Len);
             return Len;
         }
-
-        public static InstructionList DecodeMany(this Decoder Decoder, uint MinLength)
-        {
-            var List = new InstructionList();
-            var Begin = Decoder.IP;
-            while (Decoder.IP < Begin + MinLength)
-            {
-                List.Add(Decoder.Decode());
-            }
-            return List;
-        }
-
         public static uint AutoEncode(this Encoder Encoder, Instruction Instruction, ulong IP) {
             InstructionList List = new InstructionList();
             if (Encoder.Bitness <= 32) {
@@ -280,7 +281,12 @@ namespace StringReloads.Hook.Base
                         Instruction.NegateConditionCode();
 
                     var Jmp = Instruction.IPRelativeMemoryAddress.x64FarJmp();
-                    List.Add(Instruction.ConditionCode.ToShortJmp(14));
+                    
+                    //Get Far Jmp Size + Short Conditional Jmp Size
+                    var JmpSize = (uint)Jmp.GetAutoEncodedSize(64, IP);
+                    JmpSize += (uint)Instruction.ConditionCode.ToShortJmp(IP + JmpSize, 64).GetEncodedSize(64, IP);
+                    
+                    List.Add(Instruction.ConditionCode.ToShortJmp(IP + JmpSize, 64));
                     List.AddRange(Jmp);
                 }
                 else
@@ -314,31 +320,72 @@ namespace StringReloads.Hook.Base
         public static InstructionList x64FarJmp(this ulong Address) {
             InstructionList List = new InstructionList();
             List.Add(Instruction.Create(Code.Pushq_imm32, unchecked((int)(Address & uint.MaxValue))));
-            List.Add(Instruction.Create(Code.Mov_rm32_imm32, new MemoryOperand(Register.RSP), (uint)(Address >> 8 * 4)));
+            List.Add(Instruction.Create(Code.Mov_rm32_imm32, new MemoryOperand(Register.RSP, 4), (uint)(Address >> 8 * 4)));
             List.Add(Instruction.Create(Code.Retnq));
             return List;
         }
+        public static Instruction ToShortJmp(this ConditionCode Condition, ulong Address, byte bitness) {          bool x64 = bitness == 64;
+            return (Condition, bitness) switch {
+                //x64
+                (ConditionCode.a,    64) => Instruction.CreateBranch(Code.Ja_rel32_64,  Address),
+                (ConditionCode.ae,   64) => Instruction.CreateBranch(Code.Jae_rel32_64, Address),
+                (ConditionCode.b,    64) => Instruction.CreateBranch(Code.Jb_rel32_64,  Address),
+                (ConditionCode.be,   64) => Instruction.CreateBranch(Code.Jbe_rel32_64, Address),
+                (ConditionCode.e,    64) => Instruction.CreateBranch(Code.Je_rel32_64,  Address),
+                (ConditionCode.g,    64) => Instruction.CreateBranch(Code.Jg_rel32_64,  Address),
+                (ConditionCode.ge,   64) => Instruction.CreateBranch(Code.Jge_rel32_64, Address),
+                (ConditionCode.l,    64) => Instruction.CreateBranch(Code.Jl_rel32_64,  Address),
+                (ConditionCode.ne,   64) => Instruction.CreateBranch(Code.Jne_rel32_64, Address),
+                (ConditionCode.no,   64) => Instruction.CreateBranch(Code.Jno_rel32_64, Address),
+                (ConditionCode.np,   64) => Instruction.CreateBranch(Code.Jnp_rel32_64, Address),
+                (ConditionCode.ns,   64) => Instruction.CreateBranch(Code.Jns_rel32_64, Address),
+                (ConditionCode.o,    64) => Instruction.CreateBranch(Code.Jo_rel32_64,  Address),
+                (ConditionCode.p,    64) => Instruction.CreateBranch(Code.Jp_rel32_64,  Address),
+                (ConditionCode.s,    64) => Instruction.CreateBranch(Code.Js_rel32_64,  Address),
 
-        public static Instruction ToShortJmp(this ConditionCode Condition, ulong Address) {
-            return Condition switch {
-                ConditionCode.a  => Instruction.CreateBranch(Code.Jae_rel16,    Address),
-                ConditionCode.ae => Instruction.CreateBranch(Code.Jae_rel16,    Address),
-                ConditionCode.b  => Instruction.CreateBranch(Code.Jb_rel16,     Address),
-                ConditionCode.be => Instruction.CreateBranch(Code.Jbe_rel16,    Address),
-                ConditionCode.e  => Instruction.CreateBranch(Code.Je_rel16,     Address),
-                ConditionCode.g  => Instruction.CreateBranch(Code.Jg_rel16,     Address),
-                ConditionCode.ge => Instruction.CreateBranch(Code.Jge_rel16,    Address),
-                ConditionCode.l  => Instruction.CreateBranch(Code.Jl_rel16,     Address),
-                ConditionCode.ne => Instruction.CreateBranch(Code.Jne_rel16,    Address),
-                ConditionCode.no => Instruction.CreateBranch(Code.Jno_rel16,    Address),
-                ConditionCode.np => Instruction.CreateBranch(Code.Jnp_rel16,    Address),
-                ConditionCode.ns => Instruction.CreateBranch(Code.Jns_rel16,    Address),
-                ConditionCode.o  => Instruction.CreateBranch(Code.Jo_rel16,     Address),
-                ConditionCode.p  => Instruction.CreateBranch(Code.Jp_rel16,     Address),
-                ConditionCode.s  => Instruction.CreateBranch(Code.Js_rel16,     Address),
-                _                => Instruction.CreateBranch(Code.Jmp_rel16,    Address),
+                //x32                
+                (ConditionCode.a,    32) => Instruction.CreateBranch(Code.Ja_rel32_32,  Address),
+                (ConditionCode.ae,   32) => Instruction.CreateBranch(Code.Jae_rel32_32, Address),
+                (ConditionCode.b,    32) => Instruction.CreateBranch(Code.Jb_rel32_32,  Address),
+                (ConditionCode.be,   32) => Instruction.CreateBranch(Code.Jbe_rel32_32, Address),
+                (ConditionCode.e,    32) => Instruction.CreateBranch(Code.Je_rel32_32,  Address),
+                (ConditionCode.g,    32) => Instruction.CreateBranch(Code.Jg_rel32_32,  Address),
+                (ConditionCode.ge,   32) => Instruction.CreateBranch(Code.Jge_rel32_32, Address),
+                (ConditionCode.l,    32) => Instruction.CreateBranch(Code.Jl_rel32_32,  Address),
+                (ConditionCode.ne,   32) => Instruction.CreateBranch(Code.Jne_rel32_32, Address),
+                (ConditionCode.no,   32) => Instruction.CreateBranch(Code.Jno_rel32_32, Address),
+                (ConditionCode.np,   32) => Instruction.CreateBranch(Code.Jnp_rel32_32, Address),
+                (ConditionCode.ns,   32) => Instruction.CreateBranch(Code.Jns_rel32_32, Address),
+                (ConditionCode.o,    32) => Instruction.CreateBranch(Code.Jo_rel32_32,  Address),
+                (ConditionCode.p,    32) => Instruction.CreateBranch(Code.Jp_rel32_32,  Address),
+                (ConditionCode.s,    32) => Instruction.CreateBranch(Code.Js_rel32_32,  Address),
+
+                //x16
+                (ConditionCode.a,    16) => Instruction.CreateBranch(Code.Jae_rel16,    Address),
+                (ConditionCode.ae,   16) => Instruction.CreateBranch(Code.Jae_rel16,    Address),
+                (ConditionCode.b,    16) => Instruction.CreateBranch(Code.Jb_rel16,     Address),
+                (ConditionCode.be,   16) => Instruction.CreateBranch(Code.Jbe_rel16,    Address),
+                (ConditionCode.e,    16) => Instruction.CreateBranch(Code.Je_rel16,     Address),
+                (ConditionCode.g,    16) => Instruction.CreateBranch(Code.Jg_rel16,     Address),
+                (ConditionCode.ge,   16) => Instruction.CreateBranch(Code.Jge_rel16,    Address),
+                (ConditionCode.l,    16) => Instruction.CreateBranch(Code.Jl_rel16,     Address),
+                (ConditionCode.ne,   16) => Instruction.CreateBranch(Code.Jne_rel16,    Address),
+                (ConditionCode.no,   16) => Instruction.CreateBranch(Code.Jno_rel16,    Address),
+                (ConditionCode.np,   16) => Instruction.CreateBranch(Code.Jnp_rel16,    Address),
+                (ConditionCode.ns,   16) => Instruction.CreateBranch(Code.Jns_rel16,    Address),
+                (ConditionCode.o,    16) => Instruction.CreateBranch(Code.Jo_rel16,     Address),
+                (ConditionCode.p,    16) => Instruction.CreateBranch(Code.Jp_rel16,     Address),
+                (ConditionCode.s,    16) => Instruction.CreateBranch(Code.Js_rel16,     Address),
+
+                //Uncoditionall
+                (ConditionCode.None, 64) => Instruction.CreateBranch(Code.Jmp_rel32_64, Address),
+                (ConditionCode.None, 32) => Instruction.CreateBranch(Code.Jmp_rel32_32, Address),
+                (ConditionCode.None, 16) => Instruction.CreateBranch(Code.Jmp_rel16,    Address),
+
+                _ => throw new InvalidOperationException()
             };
         }
+
 
         public static bool IsJmp(this Instruction Instruction) => 
             Instruction.IsJmpNear        || Instruction.IsJmpNearIndirect || 
@@ -346,6 +393,7 @@ namespace StringReloads.Hook.Base
             Instruction.IsJmpFarIndirect || Instruction.IsJmpShortOrNear  ||
             Instruction.IsJccNear        || Instruction.IsJccShort        || 
             Instruction.IsJccShortOrNear;
+#endif
 
         public unsafe static byte* AllocUnsafe(uint Bytes)
         {
