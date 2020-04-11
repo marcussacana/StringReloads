@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Text;
+﻿using System.ComponentModel;
 
 namespace StringReloads.Engine
 {
@@ -19,7 +16,7 @@ namespace StringReloads.Engine
     }
 
 
-    struct Filter
+    public struct Filter
     {
         public string DenyList;
         public string IgnoreList;
@@ -28,7 +25,7 @@ namespace StringReloads.Engine
         public bool UseDB;
         public bool FromAsian;
     }
-    struct Quote
+    public struct Quote
     {
         public char Start;
         public char End;

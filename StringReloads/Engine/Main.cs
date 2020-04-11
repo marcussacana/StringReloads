@@ -178,5 +178,9 @@ namespace StringReloads.Engine
             _Hooks[_Hooks.Length - 1] = Hook;
             _Hooks[_Hooks.Length - 1].Install();
         }
+
+        public string Minify(string String) {
+            return StringModifier.Minify.Default.Apply(String, null);
+        }
     }
 }

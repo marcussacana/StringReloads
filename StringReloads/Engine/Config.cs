@@ -12,20 +12,20 @@ namespace StringReloads.Engine
         public static Config Default => EntryPoint.SRL.Settings;
 
         internal void* _MainWindow = null;
-        internal void* MainWindow => _MainWindow != null ? _MainWindow : (_MainWindow = Process.GetCurrentProcess().MainWindowHandle.ToPointer());
+        public void* MainWindow => _MainWindow != null ? _MainWindow : (_MainWindow = Process.GetCurrentProcess().MainWindowHandle.ToPointer());
 
         bool? _AutoInstall = null;
-        internal bool AutoInstall => (_AutoInstall ?? (_AutoInstall = GetValue("AutoInstall").ToBoolean())).Value;
+        public bool AutoInstall => (_AutoInstall ?? (_AutoInstall = GetValue("AutoInstall").ToBoolean())).Value;
 
 
         string _ConfigPath = null;
-        internal string ConfigPath => _ConfigPath ?? (_ConfigPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SRL.ini"));
+        public string ConfigPath => _ConfigPath ?? (_ConfigPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SRL.ini"));
 
         bool? _Debug = null;
-        internal bool Debug => (_Debug ?? (_Debug = GetValue("Debug").ToBoolean())).Value;
+        public bool Debug => (_Debug ?? (_Debug = GetValue("Debug").ToBoolean())).Value;
 
         string[] _IniLines = null;
-        internal string[] IniLines {
+        public string[] IniLines {
             get {
                 if (_IniLines != null)
                     return _IniLines;
@@ -38,32 +38,32 @@ namespace StringReloads.Engine
         }
 
         bool? _Dump = null;
-        internal bool Dump => (_Dump ?? (_Dump = GetValue("Dump").ToBoolean())).Value;
+        public bool Dump => (_Dump ?? (_Dump = GetValue("Dump").ToBoolean())).Value;
 
 
         bool? _DumpFilter = null;
-        internal bool DumpFilter => (_DumpFilter ?? (_DumpFilter = GetValue("DumpFilter").ToBoolean())).Value;
+        public bool DumpFilter => (_DumpFilter ?? (_DumpFilter = GetValue("DumpFilter").ToBoolean())).Value;
 
         bool? _ImportHook = null;
-        internal bool ImportHook => (_ImportHook ?? (_ImportHook = GetValue("ImportHook").ToBoolean())).Value;
+        public bool ImportHook => (_ImportHook ?? (_ImportHook = GetValue("ImportHook").ToBoolean())).Value;
 
 
         bool? _Log = null;
-        internal bool Log => (_Log ?? (_Log = GetValue("Log").ToBoolean())).Value;
+        public bool Log => (_Log ?? (_Log = GetValue("Log").ToBoolean())).Value;
 
         bool? _LogFile = null;
-        internal bool LogFile => (_LogFile ?? (_LogFile = GetValue("LogFile").ToBoolean())).Value;
+        public bool LogFile => (_LogFile ?? (_LogFile = GetValue("LogFile").ToBoolean())).Value;
 
         Log.LogLevel? _LogLevel = null;
-        internal Log.LogLevel LogLevel => (_LogLevel ?? (_LogLevel = GetValue("LogLevel").ToLogLevel())).Value;
+        public Log.LogLevel LogLevel => (_LogLevel ?? (_LogLevel = GetValue("LogLevel").ToLogLevel())).Value;
 
 
         string _Workspace = null;
-        internal string Workspace => _Workspace ?? (_Workspace = GetValue("Workspace"));
+        public string Workspace => _Workspace ?? (_Workspace = GetValue("Workspace"));
 
 
         string _WorkingDirectory = null;
-        internal string WorkingDirectory {
+        public string WorkingDirectory {
             get {
                 if (_WorkingDirectory != null)
                     return _WorkingDirectory;
@@ -77,7 +77,7 @@ namespace StringReloads.Engine
         }
 
         Version _SRLVersion = null;
-        internal Version SRLVersion {
+        public Version SRLVersion {
             get {
                 if (_SRLVersion != null)
                     return _SRLVersion;
@@ -88,7 +88,7 @@ namespace StringReloads.Engine
         }
 
         Encoding _REncoding = null;
-        internal Encoding ReadEncoding {
+        public Encoding ReadEncoding {
             get {
                 if (_REncoding != null)
                     return _REncoding;
@@ -101,7 +101,7 @@ namespace StringReloads.Engine
         }
 
         Encoding _WEncoding = null;
-        internal Encoding WriteEncoding {
+        public Encoding WriteEncoding {
             get {
                 if (_WEncoding != null)
                     return _WEncoding;
@@ -115,28 +115,28 @@ namespace StringReloads.Engine
 
 
         void* _GameBaseAddress = null;
-        internal void* GameBaseAddress => _GameBaseAddress != null ? _GameBaseAddress : (_GameBaseAddress = Process.GetCurrentProcess().MainModule.BaseAddress.ToPointer());
+        public void* GameBaseAddress => _GameBaseAddress != null ? _GameBaseAddress : (_GameBaseAddress = Process.GetCurrentProcess().MainModule.BaseAddress.ToPointer());
 
         string _GameExePath = null;
-        internal string GameExePath => _GameExePath ?? (_GameExePath = Process.GetCurrentProcess().MainModule.FileName);
+        public string GameExePath => _GameExePath ?? (_GameExePath = Process.GetCurrentProcess().MainModule.FileName);
 
         string _CachePath = null;
-        internal string CachePath => _CachePath ?? (_CachePath = Path.Combine(WorkingDirectory, "Cache.srl"));
+        public string CachePath => _CachePath ?? (_CachePath = Path.Combine(WorkingDirectory, "Cache.srl"));
 
 
 
         string _Breakline = null;
-        internal string BreakLine => _Breakline ?? (_Breakline = GetValue("BreakLine").Unescape());
+        public string BreakLine => _Breakline ?? (_Breakline = GetValue("BreakLine").Unescape());
         
 
 
         int? _Width = null;
-        internal int Width => (_Width ?? (_Width = GetValue("Width", "Wordwrap").ToInt32())).Value;
+        public int Width => (_Width ?? (_Width = GetValue("Width", "Wordwrap").ToInt32())).Value;
 
 
         Dictionary<string, string>[] _FontRemaps;
 
-        internal Dictionary<string, string>[] FontRemaps { get {
+        public Dictionary<string, string>[] FontRemaps { get {
                 if (_FontRemaps != null)
                     return _FontRemaps;
 
@@ -153,7 +153,7 @@ namespace StringReloads.Engine
             }
         }
 
-        internal Dictionary<string, bool> Modifiers {
+        public Dictionary<string, bool> Modifiers {
             get {
                 var Settings = GetValues("Modifiers");
                 Dictionary<string, bool> Mods = new Dictionary<string, bool>();
@@ -165,7 +165,7 @@ namespace StringReloads.Engine
                 return Mods;
             }
         }
-        internal Dictionary<string, bool> Hooks {
+        public Dictionary<string, bool> Hooks {
             get {
                 var Settings = GetValues("Hooks");
                 Dictionary<string, bool> Hks = new Dictionary<string, bool>();
@@ -177,7 +177,7 @@ namespace StringReloads.Engine
                 return Hks;
             }
         }
-        internal Dictionary<string, bool> Mods {
+        public Dictionary<string, bool> Mods {
             get {
                 var Settings = GetValues("Mods");
                 Dictionary<string, bool> Mods = new Dictionary<string, bool>();
@@ -191,7 +191,7 @@ namespace StringReloads.Engine
         }
 
         internal Filter? _Filter = null;
-        internal Filter Filter {
+        public Filter Filter {
             get {
                 if (_Filter.HasValue)
                     return _Filter.Value;

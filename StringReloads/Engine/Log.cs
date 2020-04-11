@@ -128,7 +128,7 @@ public static class Log
         _ => throw new Exception("Invalid Log Level")
     };
 
-    internal enum LogLevel : int { 
+    public enum LogLevel : int { 
         Trace = 0,
         Debug = 1,
         Information = 2,

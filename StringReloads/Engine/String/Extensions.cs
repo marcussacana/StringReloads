@@ -1,11 +1,9 @@
 ﻿using StringReloads.Engine;
 using StringReloads.StringModifier;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace StringReloads
 {
