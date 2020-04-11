@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
-static class Log
+public static class Log
 {
     public static void Trace(string Line, string[] Format = null, [CallerMemberName] string CallerMethod = null, [CallerLineNumber] int CallerLine = 0, [CallerFilePath] string CallerFile = null)
     {

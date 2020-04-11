@@ -13,7 +13,7 @@
         }
 
         void* CreateFontHook(int nHeight, int nWidth, int nEscapement, int nOrientation, int fnWeight, int fdwItalic, int fdwUnderline, int fdwStrikeOut, uint fdwCharSet, int fdwOutputPrecision, int fdwClipPrecision, int fdwQuality, int fdwPitchAndFamily, string lpszFace) {
-            var Remap = EntryPoint.SRL.Match.ResolveRemap(lpszFace, nWidth, nHeight, fdwCharSet);
+            var Remap = EntryPoint.SRL.ResolveRemap(lpszFace, nWidth, nHeight, fdwCharSet);
 
             if (Remap != null) {
                 nHeight = Remap.Value.Height;

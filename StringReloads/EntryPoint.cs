@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace StringReloads
 {
+
     public static unsafe class EntryPoint
     {
 
@@ -21,7 +22,7 @@ namespace StringReloads
             {
                 if ((ulong)Value <= ushort.MaxValue)
                 {
-                    return (void*)(ushort)SRL.ProcessChar((char)(ushort)Value);
+                    return (void*)(ushort)SRL.ResolveRemap((char)(ushort)Value);
                 }
 
                 return (void*)SRL.ProcessString((byte*)Value);

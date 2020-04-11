@@ -1,11 +1,11 @@
 ﻿using StringReloads.AutoInstall.Base;
 using static StringReloads.Hook.Base.Extensions;
+using static StringReloads.Engine.User;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using StringReloads.Engine;
-using System.Windows.Forms;
 using StringReloads.Hook;
 using StringReloads.Hook.Base;
 using StringReloads.Engine.String;
@@ -34,7 +34,7 @@ namespace StringReloads.AutoInstall
                 Tracer = new CallerTracer(hPalFontDrawText);
                 Tracer.CallerCatched += SetupStepA;
                 Tracer.Install(); 
-                MessageBox.Show("Very well. SRL will now do the dirty work of setting up the game for you. Your input is still needed, however; please start up the game and make it display a piece of dialogue.", "StringReloads Setup Wizard", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                ShowMessageBox("Very well. SRL will now do the dirty work of setting up the game for you. Your input is still needed, however; please start up the game and make it display a piece of dialogue.", "StringReloads Setup Wizard", MBButtons.Ok, MBIcon.Information);
                 return;
             }
 
@@ -63,8 +63,8 @@ namespace StringReloads.AutoInstall
 
             if (SoftPalConfig == null || !SoftPalConfig.ContainsKey("enginesize") || SoftPalConfig["enginesize"].ToInt64() != new FileInfo(Config.GameExePath).Length)
             {
-                var Rst = MessageBox.Show("SRL is not configured to work with this game yet, do you want to configure it now?", "StringReloads Setup Wizard", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                if (Rst == DialogResult.No)
+                var Rst = ShowMessageBox("SRL is not configured to work with this game yet, do you want to configure it now?", "StringReloads Setup Wizard", MBButtons.YesNo, MBIcon.Question);
+                if (Rst == MBResult.No)
                     return false;
                 
                 Tools.ApplyWrapperPatch();
@@ -89,7 +89,7 @@ namespace StringReloads.AutoInstall
             if (!SetupMode)
                 return;
             
-            MessageBox.Show("Yes, you did well. Now press OK and wait for SRL to analyze the text rendering fuction of the game...", "StringReloads Setup Wizard", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            ShowMessageBox("Yes, you did well. Now press OK and wait for SRL to analyze the text rendering fuction of the game...", "StringReloads Setup Wizard", MBButtons.Ok, MBIcon.Information);
 
             var hFunc = Tracer.SearchFuntionAddress((byte*)Caller);
 
@@ -111,7 +111,7 @@ namespace StringReloads.AutoInstall
 
             Intercepter = new Interceptor(hFunc, new InterceptDelegate(SetupStepB));
             Intercepter.Install();
-            MessageBox.Show($"Very well, looks like SRL can perform Auto-Install in this game!\nSRL now needs to gather more intricate information from the game.\nPlease press OK and continue to the next in-game dialogue.", "StringReloads Setup Wizard", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            ShowMessageBox($"Very well, looks like SRL can perform Auto-Install in this game!\nSRL now needs to gather more intricate information from the game.\nPlease press OK and continue to the next in-game dialogue.", "StringReloads Setup Wizard", MBButtons.Ok, MBIcon.Information);
         }
 
         int LastOffset = 0;
@@ -119,13 +119,13 @@ namespace StringReloads.AutoInstall
         bool FirstTry = true;
         void SetupStepB(void* ESP) {
             if (FirstTry)
-                MessageBox.Show("SRL will now need your help to confirm if the dialogue has been found.\nThe program will display the game dialogue; when the correct dialogue is shown, press YES. If nothing is shown or if you see corrupted text, press NO.\nTake note that if you don't set the proper game encoding inside SRL.ini, the correct dialogue will most likely never be shown.\nPress OK if you have read and understood the above.", "StringReloads Setup Wizard", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                ShowMessageBox("SRL will now need your help to confirm if the dialogue has been found.\nThe program will display the game dialogue; when the correct dialogue is shown, press YES. If nothing is shown or if you see corrupted text, press NO.\nTake note that if you don't set the proper game encoding inside SRL.ini, the correct dialogue will most likely never be shown.\nPress OK if you have read and understood the above.", "StringReloads Setup Wizard", MBButtons.Ok, MBIcon.Information);
 
             if (WaitingConfirmation)
             {
                 WaitingConfirmation = false;
-                var Rst = MessageBox.Show("And then, you saw the confirmation message?", "StringReloads Setup Wizard", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                if (Rst == DialogResult.Yes) {
+                var Rst = ShowMessageBox("And then, you saw the confirmation message?", "StringReloads Setup Wizard", MBButtons.YesNo, MBIcon.Question);
+                if (Rst == MBResult.Yes) {
                     FinishSetup();
                 }
 
@@ -146,8 +146,8 @@ namespace StringReloads.AutoInstall
                 CString Str = (byte*)*RStack;
                 if (Str.Count() > 0 && Str.Count() < 500)
                 {
-                    var Reply = MessageBox.Show(Str, "Is this the dialogue?", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
-                    if (Reply == DialogResult.Yes)
+                    var Reply = ShowMessageBox(Str, "Is this the dialogue?", MBButtons.YesNo, MBIcon.Question);
+                    if (Reply == MBResult.Yes)
                     {
                         Str = "Looks Like everything is working,<br>Continue to the next game dialogue!";
                         *RStack = (uint)(void*)Str;
@@ -168,26 +168,26 @@ namespace StringReloads.AutoInstall
 
             if (FirstTry) {
                 FirstTry = false;
-                MessageBox.Show("Very well, SRL will now try translating the game text to test settings.\nIf you don't see a message in-game confirming what has been set, then continue on to the next in-game dialogue and press NO; otherwise, press YES.", "StringReloads Setup Wizard", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                ShowMessageBox("Very well, SRL will now try translating the game text to test settings.\nIf you don't see a message in-game confirming what has been set, then continue on to the next in-game dialogue and press NO; otherwise, press YES.", "StringReloads Setup Wizard", MBButtons.Ok, MBIcon.Information);
             }
         }
 
         private void FinishSetup() {
             SoftPalConfig["StackOffset"] = LastOffset.ToString();
             if (Config.BreakLine != "<br>") {
-                var Rst = MessageBox.Show("Looks like you aren't using the tag <br> as breakline rigth now, You want use it?", "StringReloader Setup Wizard", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                if (Rst == DialogResult.Yes)
+                var Rst = ShowMessageBox("Looks like you aren't using the tag <br> as breakline rigth now, You want use it?", "StringReloader Setup Wizard", MBButtons.YesNo, MBIcon.Question);
+                if (Rst == MBResult.Yes)
                     Config.SetValue("BreakLine", "<br>");
             }
 
             Config.SetValues("SoftPal", SoftPalConfig);
             Config.SaveSettings();
 
-            MessageBox.Show($"Perfect! SRL is now ready to use! Enjoy!", "StringReloads", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            ShowMessageBox($"Perfect! SRL is now ready to use! Enjoy!", "StringReloads", MBButtons.Ok, MBIcon.Information);
             Tools.Restart();
         }
         private void SetupFailed() {
-            MessageBox.Show("Hmm, looks like SRL can't perform Auto-Install in this game at the moment. Please report an issue in the GitHub repository.", "StringReloads Setup Wizard", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            ShowMessageBox("Hmm, looks like SRL can't perform Auto-Install in this game at the moment. Please report an issue in the GitHub repository.", "StringReloads Setup Wizard", MBButtons.Ok, MBIcon.Error);
             Tools.Restart();
         }
     }

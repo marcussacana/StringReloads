@@ -1,4 +1,5 @@
-﻿using StringReloads.StringModifier;
+﻿using StringReloads.Engine.Interface;
+using StringReloads.StringModifier;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,12 +8,12 @@ using System.Text;
 
 namespace StringReloads.Engine
 {
-    class Match
+    class Match : IMatch
     {
         Main Engine;
         public Match(Main Engine) => this.Engine = Engine;
 
-        public char ResolveRemap(char Char) {
+        public char? ResolveRemap(char Char) {
             if (!Engine.CharRemap.ContainsValue(Char))
                 return Char;
 

@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace StringReloads.Engine
 {
-    class LSTParser
+    public class LSTParser
     {
         public string Name { get; private set; }
         TextReader Reader;
@@ -62,6 +62,13 @@ namespace StringReloads.Engine
         }
 
         public struct LSTEntry {
+            public LSTEntry(string LineAB) : this(LineAB, LineAB) { }
+            public LSTEntry(string LineA, string LineB, LSTFlag[] FlagsA, LSTFlag[] FlagsB) {
+                OriginalLine = LineA;
+                TranslationLine = LineB;
+                OriginalFlags = FlagsA;
+                TranslationFlags = FlagsB;
+            }
             public LSTEntry(string LineA, string LineB) {
                 OriginalFlags = new LSTFlag[0];
                 while (LineA.StartsWith("::")) {

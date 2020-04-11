@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 
 namespace StringReloads.Engine
 {
@@ -34,16 +35,19 @@ namespace StringReloads.Engine
             Log.Debug($"{Engine.Databases.Count} Database(s) Loaded");
             Log.Debug($"{Engine.CharRemap.Count} Remap(s) Loaded");
 
+            PluginsInitializer(Engine);
+
             ModifiersInitializer(Engine);
             HooksInitializer(Engine);
             ModsInitializer(Engine);
 
             AutoInstall(Engine);
 
+
             Engine.Initialized = true;
             Log.Information("SRL Initialized");
         }
-        
+
         private void ModifiersInitializer(Main Engine) {
             var Mods = Engine.ReloadModifiers;
             var Settings = Engine.Settings.Modifiers;
@@ -127,6 +131,76 @@ namespace StringReloads.Engine
 
                 Log.Information($"{Engine.Installers[i].Name} Engine Detected.");
                 Engine.Installers[i].Install();
+            }
+        }
+
+        private void PluginsInitializer(Main Engine)
+        {
+            string PluginDir = Path.Combine(Path.GetDirectoryName(EntryPoint.CurrentDll), "Plugins");
+            if (Directory.Exists(PluginDir))
+            {
+                foreach (string PluginPath in Directory.EnumerateFiles(PluginDir, "*.dll", SearchOption.TopDirectoryOnly))
+                {
+                    try
+                    { 
+                        AppDomain.CurrentDomain.Load(File.ReadAllBytes(PluginPath));
+                    }
+                    catch { }
+                }
+            }
+
+            foreach (var Plugin in Engine.Plugins) {
+                try
+                {
+                    Plugin.Initialize(Engine);
+                    Log.Debug($"Plugin \"{Plugin.Name}\" Initialized.");
+
+                    try
+                    {
+                        AppendArray(ref Engine._ReloadModifiers, Plugin.GetModifiers(), true);
+                    }
+                    catch { }
+                    try
+                    {
+                        AppendArray(ref Engine._Installers, Plugin.GetAutoInstallers(), true);
+                    }
+                    catch { }
+                    try
+                    {
+                        AppendArray(ref Engine._Matchs, Plugin.GetMatchs(), true);
+                    }
+                    catch { }
+                    try
+                    {
+                        AppendArray(ref Engine._Hooks, Plugin.GetHooks(), true);
+                    }
+                    catch { }
+                    try
+                    {
+                        AppendArray(ref Engine._Mods, Plugin.GetMods(), true);
+                    }
+                    catch { }
+                }
+                catch (Exception ex) {
+                    Log.Error($"Failed to Load the Plugin \"{Plugin.Name}\".\n{ex.ToString()}");
+                }
+            }
+        }
+
+        private void AppendArray<T>(ref T[] Arr, T[] ArrAppend, bool InTop = false) {
+            if (ArrAppend == null)
+                return;
+
+            if (InTop) {
+                Array.Reverse(Arr);
+                Array.Reverse(ArrAppend);
+            }
+            Array.Resize(ref Arr, Arr.Length + ArrAppend.Length);
+            ArrAppend.CopyTo(Arr, Arr.Length - ArrAppend.Length);
+            
+            if (InTop) {
+                Array.Reverse(Arr);
+                Array.Reverse(ArrAppend);
             }
         }
 

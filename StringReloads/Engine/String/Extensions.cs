@@ -153,6 +153,13 @@ namespace StringReloads
             return Escape.Default.Restore(String);
         }
 
+
+
+        static string[] DenyList = Config.Default.Filter.DenyList.Unescape().Split('\n').Where(x => !string.IsNullOrEmpty(x)).ToArray();
+        static string[] IgnoreList = Config.Default.Filter.IgnoreList.Unescape().Split('\n').Where(x => !string.IsNullOrEmpty(x)).ToArray();
+        static Quote[] Quotes = Config.Default.Filter.QuoteList.Unescape().Split('\n')
+                    .Where(x => x.Length == 2)
+                    .Select(x => new Quote() { Start = x[0], End = x[1] }).ToArray();
         public static bool IsDialogue(this string String, int? Caution = null)
         {
             try
@@ -160,18 +167,8 @@ namespace StringReloads
                 if (string.IsNullOrWhiteSpace(String))
                     return false;
 
-                if (Config.Default.Filter.UseDB && EntryPoint.SRL.Match.HasMatch(String))
+                if (Config.Default.Filter.UseDB && EntryPoint.SRL.HasMatch(String))
                     return true;
-
-
-                string[] DenyList = Config.Default.Filter.DenyList.Unescape().Split('\n').Where(x => !string.IsNullOrEmpty(x)).ToArray();
-                string[] IgnoreList = Config.Default.Filter.IgnoreList.Unescape().Split('\n').Where(x => !string.IsNullOrEmpty(x)).ToArray();
-
-                Quote[] Quotes = Config.Default.Filter.QuoteList.Unescape().Split('\n')
-                    .Where(x => x.Length == 2)
-                    .Select(x => {
-                        return new Quote() { Start = x[0], End = x[1] };
-                    }).ToArray();
 
                 string Str = String.Trim();
                 foreach (string Ignore in IgnoreList)

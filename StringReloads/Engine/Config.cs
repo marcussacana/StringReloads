@@ -1,6 +1,4 @@
-﻿using StringReloads.StringModifier;
-using System;
-using System.CodeDom;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -9,9 +7,9 @@ using System.Text;
 
 namespace StringReloads.Engine
 {
-    unsafe class Config
+    public unsafe class Config
     {
-        internal static Config Default => EntryPoint.SRL.Settings;
+        public static Config Default => EntryPoint.SRL.Settings;
 
         internal void* _MainWindow = null;
         internal void* MainWindow => _MainWindow != null ? _MainWindow : (_MainWindow = Process.GetCurrentProcess().MainWindowHandle.ToPointer());

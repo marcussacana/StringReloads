@@ -3,12 +3,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace StringReloads.Engine
 {
-    internal class Database : IEnumerator<LSTParser.LSTEntry>, IEnumerable<LSTParser.LSTEntry>
+    public class Database : IEnumerator<LSTParser.LSTEntry>, IEnumerable<LSTParser.LSTEntry>
     {
         int CurrentIndex = -1;
 

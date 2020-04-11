@@ -2,7 +2,7 @@
 using System.IO;
 using System.Text;
 using System.Threading;
-using System.Windows.Forms;
+using static StringReloads.Engine.User;
 
 namespace StringReloads.AutoInstall.Patcher
 {
@@ -19,7 +19,7 @@ namespace StringReloads.AutoInstall.Patcher
             if (CurrentDllName.ToLower() == "srl.dll")
                 return true;
 
-            if (MessageBox.Show("The SRL needs to apply a patch in the game, do you to want apply now?\nIf yes, the game will restart.", "StringReloads", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.No)
+            if (ShowMessageBox("The SRL needs to apply a patch in the game, do you to want apply now?\nIf yes, the game will restart.", "StringReloads", MBButtons.YesNo, MBIcon.Warning) == MBResult.No)
                 return false;
 
             Retry:;
@@ -34,8 +34,8 @@ namespace StringReloads.AutoInstall.Patcher
                 Offset = IndexOf(Data, Path.GetFileName(EntryPoint.CurrentDll));
 
             if (Offset == -1) {
-                var Rst = MessageBox.Show($"Looks like the \"{CurrentDllName}\" wrapper isn't avaliable right now.\nDo you want to try any other supported wrapper?", "StringReloads", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                if (Rst == DialogResult.Yes) {
+                var Rst = ShowMessageBox($"Looks like the \"{CurrentDllName}\" wrapper isn't avaliable right now.\nDo you want to try any other supported wrapper?", "StringReloads", MBButtons.YesNo, MBIcon.Question);
+                if (Rst == MBResult.Yes) {
                     foreach (var Wrapper in SupportedWrappers) {
                         UsedWrapper = Wrapper;
                         Offset = IndexOf(Data, Wrapper);
@@ -55,8 +55,8 @@ namespace StringReloads.AutoInstall.Patcher
 
             if (Offset == -1)
             {
-                var Rst = MessageBox.Show($"Failed to patch, \"{CurrentDllName}\" occurrence not found in the game executable.", "StringReloads", MessageBoxButtons.RetryCancel, MessageBoxIcon.Error);
-                if (Rst == DialogResult.Retry)
+                var Rst = ShowMessageBox($"Failed to patch, \"{CurrentDllName}\" occurrence not found in the game executable.", "StringReloads", MBButtons.RetryCancel, MBIcon.Error);
+                if (Rst == MBResult.Retry)
                     goto Retry;
                 else
                     return false;
