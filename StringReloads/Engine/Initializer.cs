@@ -136,6 +136,12 @@ namespace StringReloads.Engine
 
         private void PluginsInitializer(Main Engine)
         {
+            _ = Engine.ReloadModifiers;
+            _ = Engine.Installers;
+            _ = Engine.Matchs;
+            _ = Engine.Hooks;
+            _ = Engine.Mods;
+
             string PluginDir = Path.Combine(Path.GetDirectoryName(EntryPoint.CurrentDll), "Plugins");
             if (Directory.Exists(PluginDir))
             {
