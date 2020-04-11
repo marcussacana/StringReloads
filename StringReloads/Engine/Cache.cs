@@ -55,7 +55,7 @@ namespace StringReloads.Engine
 
                 var DB = new Database(Name);
                 for (uint x = 0; x < LinesA.Length; x++)
-                    DB.Add(new LSTParser.LSTEntry(LinesA[x], LinesB[x]));
+                    DB.Add(new LSTEntry(LinesA[x], LinesB[x]));
 
                 yield return DB;
             }

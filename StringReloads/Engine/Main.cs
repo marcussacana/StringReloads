@@ -83,32 +83,28 @@ namespace StringReloads.Engine
             if (!Initialized)
                 Initializer.Initialize(this);
 
-            foreach (var Match in Matchs)
+            var Matched = MatchString(String);
+            if (Matched == null)
             {
-                var Matched = Match.MatchString(String);
-                if (Matched == null)
-                {
-                    Log.Trace($"Input: {(string)String}");
-                    return String;
-                }
-
-                TriggerFlags(Matched?.OriginalFlags);
-                TriggerFlags(Matched?.TranslationFlags);
-
-                //Execute Reload Modifiers
-                string Reloaded = Matched?.TranslationLine;
-                foreach (var Modifier in ReloadModifiers)
-                    Reloaded = Modifier.Apply(Reloaded, Matched?.OriginalLine);
-
-                Log.Trace($"Reload from:\r\n{Matched?.OriginalLine}\r\nTo:\r\n{Reloaded}");
-
-                return (CString)Reloaded;
+                Log.Trace($"Input: {(string)String}");
+                return String;
             }
-            return String;
+
+            TriggerFlags(Matched?.OriginalFlags);
+            TriggerFlags(Matched?.TranslationFlags);
+
+            //Execute Reload Modifiers
+            string Reloaded = Matched?.TranslationLine;
+            foreach (var Modifier in ReloadModifiers)
+                Reloaded = Modifier.Apply(Reloaded, Matched?.OriginalLine);
+
+            Log.Trace($"Reload from:\r\n{Matched?.OriginalLine}\r\nTo:\r\n{Reloaded}");
+
+            return (CString)Reloaded;
         }
 
         public event Types.FlagTrigger OnFlagTriggered;
-        private void TriggerFlags(LSTParser.LSTFlag[] Flags) {
+        private void TriggerFlags(LSTFlag[] Flags) {
             var Cancel = new CancelEventArgs();
             foreach (var Flag in Flags) {
                 Log.Trace($"Triggering Flag {Flag.Name}");
@@ -121,6 +117,19 @@ namespace StringReloads.Engine
             }
         }
 
+        public LSTEntry? MatchString(string String) => MatchString(null, String);
+        public LSTEntry? MatchString(IMatch This, string String)
+        {
+            foreach (var Match in Matchs) {
+                if (Match == This)
+                    continue;
+
+                var Rst = Match.MatchString(String);
+                if (Rst != null)
+                    return Rst;
+            }
+            return null;
+        }
         public char ResolveRemap(char Char) => ResolveRemap(null, Char);
         public char ResolveRemap(IMatch This, char Char)
         {

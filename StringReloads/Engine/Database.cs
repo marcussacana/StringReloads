@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace StringReloads.Engine
 {
-    public class Database : IEnumerator<LSTParser.LSTEntry>, IEnumerable<LSTParser.LSTEntry>
+    public class Database : IEnumerator<LSTEntry>, IEnumerable<LSTEntry>
     {
         int CurrentIndex = -1;
 
@@ -14,11 +14,11 @@ namespace StringReloads.Engine
 
         public Database(string Name) => this.Name = Name;
 
-        DuplicableDictionary<string, LSTParser.LSTEntry> DB = new DuplicableDictionary<string, LSTParser.LSTEntry>();
+        DuplicableDictionary<string, LSTEntry> DB = new DuplicableDictionary<string, LSTEntry>();
 
         public int Count => DB.Count;
 
-        public LSTParser.LSTEntry Current { 
+        public LSTEntry Current { 
             get {
                 if (CurrentIndex < 0)
                     CurrentIndex = 0;
@@ -39,12 +39,12 @@ namespace StringReloads.Engine
             }
         }
 
-        public void Add(LSTParser.LSTEntry Entry) {
+        public void Add(LSTEntry Entry) {
             var Key = Minify.Default.Apply(Entry.OriginalLine, null);
             DB.Add(Key, Entry);
         }
 
-        public void AddRange(IEnumerable<LSTParser.LSTEntry> Entries) {
+        public void AddRange(IEnumerable<LSTEntry> Entries) {
             foreach (var Entry in Entries) {
                 Add(Entry);
             }
@@ -70,7 +70,7 @@ namespace StringReloads.Engine
 
         public void Dispose() { }
 
-        public IEnumerator<LSTParser.LSTEntry> GetEnumerator()
+        public IEnumerator<LSTEntry> GetEnumerator()
         {
             CurrentIndex = -1;
             return this;
@@ -82,6 +82,6 @@ namespace StringReloads.Engine
             return this;
         }
 
-        public LSTParser.LSTEntry this[string Key] => DB[Key];
+        public LSTEntry this[string Key] => DB[Key];
     }
 }

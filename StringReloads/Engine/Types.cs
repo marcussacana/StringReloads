@@ -7,7 +7,7 @@ namespace StringReloads.Engine
 {
     public static class Types
     {
-        public delegate void FlagTrigger(LSTParser.LSTFlag Entry, CancelEventArgs Args);
+        public delegate void FlagTrigger(LSTFlag Entry, CancelEventArgs Args);
     }
 
     public struct FontRemap {

@@ -10,7 +10,7 @@ namespace StringReloads.Engine.Interface
     {
         public char? ResolveRemap(char Char);
         public bool HasMatch(string String);
-        public LSTParser.LSTEntry? MatchString(string String);
+        public LSTEntry? MatchString(string String);
         public FontRemap? ResolveRemap(string Facename, int Width, int Height, uint Charset);
     }
 }

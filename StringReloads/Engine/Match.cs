@@ -41,7 +41,7 @@ namespace StringReloads.Engine
 
             return false;
         }
-        public LSTParser.LSTEntry? MatchString(string String) {
+        public LSTEntry? MatchString(string String) {
 
             string Minified = String;
 

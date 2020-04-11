@@ -10,7 +10,8 @@ namespace StringReloads.Engine
         TextReader Reader;
         public LSTParser(string LSTPath) : this(File.OpenText(LSTPath), Path.GetFileName(LSTPath)) { }
 
-        public LSTParser(TextReader Reader, string Name) {
+        public LSTParser(TextReader Reader, string Name)
+        {
             this.Reader = Reader;
 
             this.Name = Name.Split('.').First();
@@ -18,25 +19,30 @@ namespace StringReloads.Engine
             const string NamePrefix = "strings-";
             if (this.Name.ToLowerInvariant().StartsWith(NamePrefix))
                 this.Name = this.Name.Substring(NamePrefix.Length);
-            
+
         }
 
-        ~LSTParser() {
+        ~LSTParser()
+        {
             Reader?.Close();
             Reader?.Dispose();
         }
 
-        public IEnumerable<LSTEntry> GetEntries() {
+        public IEnumerable<LSTEntry> GetEntries()
+        {
             ((StreamReader)Reader).BaseStream.Position = 0;
             long CurrentLine = -1;
             bool InComment = false;
-            while (Reader.Peek() != -1) {
+            while (Reader.Peek() != -1)
+            {
                 CurrentLine++;
                 string LineA = Reader.ReadLine();
-                if (LineA.Contains("/*")) {
+                if (LineA.Contains("/*"))
+                {
                     InComment = true;
                 }
-                if (LineA.Contains("*/") && InComment) {
+                if (LineA.Contains("*/") && InComment)
+                {
                     int CommentPos = LineA.IndexOf("/*");
                     int DecommentPos = LineA.IndexOf("*/");
                     if (DecommentPos > CommentPos)
@@ -60,22 +66,28 @@ namespace StringReloads.Engine
                 yield return Entry;
             }
         }
+    }
 
-        public struct LSTEntry {
+
+        public struct LSTEntry
+        {
             public LSTEntry(string LineAB) : this(LineAB, LineAB) { }
-            public LSTEntry(string LineA, string LineB, LSTFlag[] FlagsA, LSTFlag[] FlagsB) {
+            public LSTEntry(string LineA, string LineB, LSTFlag[] FlagsA, LSTFlag[] FlagsB)
+            {
                 OriginalLine = LineA;
                 TranslationLine = LineB;
                 OriginalFlags = FlagsA;
                 TranslationFlags = FlagsB;
             }
-            public LSTEntry(string LineA, string LineB) {
+            public LSTEntry(string LineA, string LineB)
+            {
                 OriginalFlags = new LSTFlag[0];
-                while (LineA.StartsWith("::")) {
+                while (LineA.StartsWith("::"))
+                {
                     string FlagContent = LineA.Substring(2, LineA.IndexOf("::", 2) - 2);
                     string Name = FlagContent.Split('-').First();
                     string Value = null;
-                    
+
                     if (FlagContent.Contains("-"))
                         Value = FlagContent.Substring(FlagContent.IndexOf("-") + 1);
 
@@ -110,14 +122,14 @@ namespace StringReloads.Engine
             public string TranslationLine;
         }
 
-        public struct LSTFlag {
+        public struct LSTFlag
+        {
             public string Name;
             public string Value;
         }
-    }
 
-    internal static partial class Extensions {
-        internal static bool HasFlag(this LSTParser.LSTFlag[] Flags, string Name) {
+        internal static partial class Extensions {
+        internal static bool HasFlag(this LSTFlag[] Flags, string Name) {
             foreach (var Flag in Flags) {
                 if (Flag.Name.ToLowerInvariant() == Name.ToLowerInvariant())
                     return true;
@@ -125,7 +137,7 @@ namespace StringReloads.Engine
             return false;
         }
 
-        internal static string GetFlags(this LSTParser.LSTFlag[] Flags) {
+        internal static string GetFlags(this LSTFlag[] Flags) {
             string Buffer = string.Empty;
             foreach (var Flag in Flags) {
                 if (Flag.Value != null) {
