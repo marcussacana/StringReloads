@@ -24,6 +24,9 @@ namespace StringReloads.Engine
         bool? _Debug = null;
         public bool Debug => (_Debug ?? (_Debug = GetValue("Debug").ToBoolean())).Value;
 
+        bool? _CacheOutput = null;
+        public bool CacheOutput => (_CacheOutput ?? (_CacheOutput = GetValue("CacheOutput").ToBoolean())).Value;
+
         string[] _IniLines = null;
         public string[] IniLines {
             get {

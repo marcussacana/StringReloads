@@ -15,6 +15,7 @@ namespace StringReloads.Engine
         public Database(string Name) => this.Name = Name;
 
         DuplicableDictionary<string, LSTEntry> DB = new DuplicableDictionary<string, LSTEntry>();
+        List<string> TLs = new List<string>();
 
         public int Count => DB.Count;
 
@@ -41,7 +42,11 @@ namespace StringReloads.Engine
 
         public void Add(LSTEntry Entry) {
             var Key = Minify.Default.Apply(Entry.OriginalLine, null);
+            var Value = Minify.Default.Apply(Entry.TranslationLine, null);
             DB.Add(Key, Entry);
+
+            if (!TLs.Contains(Value))
+                TLs.Add(Value);
         }
 
         public void AddRange(IEnumerable<LSTEntry> Entries) {
@@ -51,7 +56,10 @@ namespace StringReloads.Engine
         }
 
         public bool HasKey(string Key) {
-            return DB.ContainsKey(Key);
+            return DB.ContainsKey(Minify.Default.Apply(Key, null));
+        }
+        public bool HasValue(string Value) {
+            return TLs.Contains(Minify.Default.Apply(Value, null));
         }
 
         public bool MoveNext()
@@ -82,6 +90,6 @@ namespace StringReloads.Engine
             return this;
         }
 
-        public LSTEntry this[string Key] => DB[Key];
+        public LSTEntry this[string Key] => DB[Minify.Default.Apply(Key, null)];
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -14,14 +15,14 @@ namespace StringReloads.Engine
     public unsafe class Main
     {
         internal IPlugin[] _Plugins = null;
-        internal IPlugin[] Plugins => _Plugins ??=
+        public IPlugin[] Plugins => _Plugins ??=
             (from Asm in AppDomain.CurrentDomain.GetAssemblies()
              from Typ in Asm.GetTypes()
              where typeof(IPlugin).IsAssignableFrom(Typ) && !Typ.IsInterface
              select (IPlugin)Activator.CreateInstance(Typ)).OrderBy(x => x.Name).ToArray();
 
         internal IMatch[] _Matchs = null;
-        internal IMatch[] Matchs => _Matchs ??= new IMatch[] {
+        public IMatch[] Matchs => _Matchs ??= new IMatch[] {
             new Match(this)
         };
 
@@ -32,14 +33,14 @@ namespace StringReloads.Engine
         public List<Database> Databases = new List<Database>();
 
         internal IStringModifier[] _ReloadModifiers = null;
-        internal IStringModifier[] ReloadModifiers => _ReloadModifiers ?? (_ReloadModifiers = new IStringModifier[] {
+        public IStringModifier[] ReloadModifiers => _ReloadModifiers ?? (_ReloadModifiers = new IStringModifier[] {
             new MonoWordWrap(this),
             new Remaper(this),
             new Escape()
         });
 
         internal Hook.Base.Hook[] _Hooks = null;
-        internal Hook.Base.Hook[] Hooks => _Hooks ??= new Hook.Base.Hook[] {
+        public Hook.Base.Hook[] Hooks => _Hooks ??= new Hook.Base.Hook[] {
             new CreateFontA(),
             new CreateFontW(),
             new CreateFontIndirectA(),
@@ -51,7 +52,7 @@ namespace StringReloads.Engine
         };
 
         internal Mods.Base.IMod[] _Mods = null;
-        internal Mods.Base.IMod[] Mods => _Mods ??= new Mods.Base.IMod[] {
+        public Mods.Base.IMod[] Mods => _Mods ??= new Mods.Base.IMod[] {
             new PatchRedir()
         };
 
@@ -73,6 +74,8 @@ namespace StringReloads.Engine
             }
         }
 
+        public Queue<string> RecentOutput = new Queue<string>();
+
         internal Dictionary<char, char> CharRemap = new Dictionary<char, char>();
 
         internal bool Initialized;
@@ -82,6 +85,9 @@ namespace StringReloads.Engine
 
             if (!Initialized)
                 Initializer.Initialize(this);
+
+            if (Settings.CacheOutput && RecentOutput.Contains(String))
+                return String;
 
             var Matched = MatchString(String);
             if (Matched == null)
@@ -100,6 +106,12 @@ namespace StringReloads.Engine
 
             Log.Trace($"Reload from:\r\n{Matched?.OriginalLine}\r\nTo:\r\n{Reloaded}");
 
+            if (Settings.CacheOutput) {
+                if (RecentOutput.Count == 100)
+                    RecentOutput.Dequeue();
+                RecentOutput.Enqueue(Reloaded);
+            }
+
             return (CString)Reloaded;
         }
 
@@ -115,6 +127,35 @@ namespace StringReloads.Engine
                     Trigger(Flag, Cancel);
                 }
             }
+        }
+
+        public bool HasMatch(string String) => HasMatch(null, String);
+        public bool HasMatch(IMatch This, string String)
+        {
+            foreach (var Match in Matchs)
+            {
+                if (Match == This)
+                    continue;
+
+                var Rst = Match.HasMatch(String);
+                if (Rst)
+                    return true;
+            }
+            return false;
+        }
+        public bool HasValue(string String) => HasValue(null, String);
+        public bool HasValue(IMatch This, string String)
+        {
+            foreach (var Match in Matchs)
+            {
+                if (Match == This)
+                    continue;
+
+                var Rst = Match.HasValue(String);
+                if (Rst)
+                    return true;
+            }
+            return false;
         }
 
         public LSTEntry? MatchString(string String) => MatchString(null, String);
@@ -158,19 +199,6 @@ namespace StringReloads.Engine
                     return Rst.Value;
             }
             return null;
-        }
-
-        public bool HasMatch(string String) => HasMatch(null, String);
-        public bool HasMatch(IMatch This, string String) {
-            foreach (var Match in Matchs) {
-                if (Match == This)
-                    continue;
-
-                var Rst = Match.HasMatch(String);
-                if (Rst)
-                    return true;
-            }
-            return false;
         }
 
         public void EnableHook(Hook.Base.Hook Hook) {

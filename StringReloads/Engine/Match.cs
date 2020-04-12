@@ -41,6 +41,28 @@ namespace StringReloads.Engine
 
             return false;
         }
+        public bool HasValue(string String)
+        {
+            string Minified = String;
+
+            foreach (var Modifier in Engine.ReloadModifiers)
+            {
+                if (Modifier.CanRestore)
+                    Minified = Modifier.Restore(Minified);
+            }
+
+            Minified = Engine.Minify(String);
+
+            if (Engine.CurrentDatabase.HasValue(Minified))
+                return true;
+
+            for (int i = 0; i < Engine.Databases.Count; i++) {
+                if (Engine.Databases[i].HasValue(Minified))
+                    return true;
+            }
+
+            return false;
+        }
         public LSTEntry? MatchString(string String) {
 
             string Minified = String;
@@ -82,9 +104,7 @@ namespace StringReloads.Engine
 
             if (DefaultLST == null) {
                 string LSTPath = Path.Combine(Engine.Settings.WorkingDirectory, "Strings.lst");
-                var Stream = File.OpenWrite(LSTPath);
-                Stream.Seek(0, SeekOrigin.End);
-                DefaultLST = new StreamWriter(Stream, Encoding.UTF8);
+                DefaultLST = File.AppendText(LSTPath);
             }
 
             String = String.Trim();

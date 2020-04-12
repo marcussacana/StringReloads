@@ -3,7 +3,7 @@ namespace StringReloads.StringModifier
 {
     class Minify : IStringModifier
     {
-        public static Minify Default => new Minify();
+        public static Minify Default = new Minify();
 
         public string Name => "Minify";
 
@@ -20,11 +20,14 @@ namespace StringReloads.StringModifier
                     case '\t':
                         break;
                     default:
+                        if (char.IsWhiteSpace(Char))
+                            break;
+
                         Rst += char.ToLowerInvariant(Char);
                         break;
                 }
             }
-            return Rst;
+            return Rst.Trim();
         }
 
         public string Restore(string String)
