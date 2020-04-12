@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿using StringReloads.Engine.String;
+using System.Collections.Generic;
+using System.ComponentModel;
 
 namespace StringReloads.Engine
 {
@@ -24,6 +26,7 @@ namespace StringReloads.Engine
         public int Sensitivity;
         public bool UseDB;
         public bool FromAsian;
+        public List<CharacterRange> AcceptableRange;
     }
     public struct Quote
     {

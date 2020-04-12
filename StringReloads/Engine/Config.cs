@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using StringReloads.Engine.String;
 
 namespace StringReloads.Engine
 {
@@ -205,7 +206,8 @@ namespace StringReloads.Engine
                     IgnoreList = GetValue("IgnoreList", "Filter"),
                     QuoteList = GetValue("QuoteList", "Filter"),
                     Sensitivity = GetValue("Sensitivity", "Filter").ToInt32(),
-                    UseDB = GetValue("UseDB", "Filter").ToBoolean()
+                    UseDB = GetValue("UseDB", "Filter").ToBoolean(),
+                    AcceptableRange = CharacterRanges.GetRanges(GetValue("AcceptableRange", "Filter")).ToList()
                 };
 
                 return _Filter.Value;

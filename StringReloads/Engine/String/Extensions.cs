@@ -1,5 +1,7 @@
 ﻿using StringReloads.Engine;
+using StringReloads.Engine.String;
 using StringReloads.StringModifier;
+
 using System;
 using System.Globalization;
 using System.Linq;
@@ -172,8 +174,7 @@ namespace StringReloads
                 foreach (string Ignore in IgnoreList)
                     Str = Str.Replace(Ignore, "");
 
-                foreach (string Deny in DenyList)
-                {
+                foreach (string Deny in DenyList) {
                     if (Str.ToLower().Contains(Deny.ToLower()))
                         return false;
                 }
@@ -182,6 +183,9 @@ namespace StringReloads
 
 
                 if (string.IsNullOrWhiteSpace(Str))
+                    return false;
+
+                if (CharacterRanges.TotalMissmatch(Str, Config.Default.Filter.AcceptableRange) > 0)
                     return false;
 
                 string[] Words = Str.Split(' ');
