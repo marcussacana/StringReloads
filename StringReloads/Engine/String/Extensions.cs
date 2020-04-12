@@ -171,6 +171,8 @@ namespace StringReloads
                     return true;
 
                 string Str = String.Trim();
+                Str = Str.Replace(Config.Default.BreakLine, "\n");
+
                 foreach (string Ignore in IgnoreList)
                     Str = Str.Replace(Ignore, "");
 
@@ -178,9 +180,6 @@ namespace StringReloads
                     if (Str.ToLower().Contains(Deny.ToLower()))
                         return false;
                 }
-
-                Str = Str.Replace(Config.Default.BreakLine, "\n");
-
 
                 if (string.IsNullOrWhiteSpace(Str))
                     return false;

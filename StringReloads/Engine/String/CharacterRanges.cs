@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace StringReloads.Engine.String
 {
@@ -28,10 +29,15 @@ namespace StringReloads.Engine.String
         }
 
         public static int TotalMissmatch(string String, IEnumerable<CharacterRange> Ranges) {
+            if (Ranges.Count() == 0)
+                return 0;
+
             int Missmatch = 0;
             foreach (var Char in String)
-                if (!CharInRange(Char, Ranges))
+                if (!CharInRange(Char, Ranges)) {
+                    Log.Trace($"Char Missmatch: {Char} from \"{String}\"");
                     Missmatch++;
+                }
             return Missmatch;
         }
 
