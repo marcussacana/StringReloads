@@ -54,6 +54,7 @@
     <None Remove="packages\**" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="CoreCLR-NCalc" Version="2.2.70" />
     <PackageReference Include="Iced" Version="1.5.0" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>

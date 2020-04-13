@@ -136,11 +136,18 @@ namespace StringReloads.Engine
 
         string _Breakline = null;
         public string BreakLine => _Breakline ??= GetValue("BreakLine").Unescape();
-        
 
 
-        int? _Width = null;
-        public int Width => ((int?)(_Width ??= GetValue("Width", "Wordwrap").ToInt32())).Value;
+
+        string _RelativeWidth = null;
+        public string RelativeWidth => _RelativeWidth ??= GetValue("RelativeWidth", "Wordwrap");
+
+        int? _DefaultWidth = null;
+        public int DefaultWidth => ((int?)(_DefaultWidth ??= GetValue("DefaultWidth", "Wordwrap").ToInt32())).Value;
+
+        bool? _UseRelativeWidth = null;
+        public bool UseRelativeWidth => ((bool?)(_UseRelativeWidth  ??= GetValue("UseRelativeWidth", "Wordwrap").ToBoolean())).Value;
+
 
 
         int? _MultiByteToWideCharCodePage = null;

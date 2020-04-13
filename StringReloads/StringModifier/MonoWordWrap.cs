@@ -7,7 +7,10 @@ namespace StringReloads.StringModifier
     class MonoWordWrap : IStringModifier
     {
         int? Size = null;
-        int Width => (Size ?? Config.Default.Width);
+        int DefaultWidth => (Size ?? Config.Default.DefaultWidth);
+
+        bool UseRelative => Config.Default.UseRelativeWidth;
+
         public MonoWordWrap(Main Main) {
             Main.OnFlagTriggered += (Flag, Cancel) =>
             {
@@ -32,13 +35,25 @@ namespace StringReloads.StringModifier
             int CurrentLength = 0;
             string Result = string.Empty;
             string BreakLine = Config.Default.BreakLine;
-            int Width = this.Width;
+            int Width = DefaultWidth;
 
             if (Original != null)
             {
                 string[] OriLines = Original.Replace(BreakLine, "\x0").Split('\x0');
-                if (Width <= 0)
+                if (UseRelative)
                 {
+                    Width = Math.Abs(Width);
+
+                    int BaseWidth = 0;
+                    if (OriLines.Length == 1 && Width == 0)
+                        BaseWidth = OriLines.First().Length;
+                    else if (OriLines.Length > 1)
+                        BaseWidth = (from x in OriLines orderby x.Length descending select x.Length).First();
+                    else
+                        BaseWidth = Width;
+                    Width = (int)Config.Default.RelativeWidth.Evalaute("Width", BaseWidth);
+                }
+                else if (Width < 0) {
                     if (OriLines.Length == 1 && Width == 0)
                         Width = OriLines.First().Length;
                     else if (OriLines.Length > 1)

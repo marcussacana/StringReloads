@@ -3,8 +3,12 @@ using StringReloads.Engine.String;
 using StringReloads.StringModifier;
 
 using System;
+using System.CodeDom;
+using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 
 namespace StringReloads
@@ -153,7 +157,22 @@ namespace StringReloads
             return Escape.Default.Restore(String);
         }
 
-
+        public static dynamic Evalaute(this string Expression) => Expression.Evalaute(null);
+        public static dynamic Evalaute(this string Expression, string Key, object Value) => Expression.Evalaute(new[] { Key }, new[] { Value });
+        public static dynamic Evalaute(this string Expression, IEnumerable<string> Keys, IEnumerable<object> Values) {
+            if (Keys.Count() != Values.Count())
+                throw new InvalidOperationException("The Keys and Values needs to have the same amount of items");
+            Dictionary<string, object> Items = new Dictionary<string, object>();
+            for (int i = 0; i < Keys.Count(); i++)
+                Items.Add(Keys.ElementAt(i), Values.ElementAt(i));
+            return Expression.Evalaute(Items);
+        }
+        public static dynamic Evalaute(this string Expression, Dictionary<string, object> Paramters) {
+            var Exp = new NCalc.Expression(Expression);
+            if (Paramters != null)
+                Exp.Parameters = Paramters;
+            return Exp.Evaluate();
+        }
 
         static string[] DenyList = Config.Default.Filter.DenyList.Unescape().Split('\n').Where(x => !string.IsNullOrEmpty(x)).ToArray();
         static string[] IgnoreList = Config.Default.Filter.IgnoreList.Unescape().Split('\n').Where(x => !string.IsNullOrEmpty(x)).ToArray();
