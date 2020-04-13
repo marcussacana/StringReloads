@@ -94,7 +94,7 @@ namespace StringReloads.Engine
         List<string> DumpCache = new List<string>();
         TextWriter DefaultLST = null;
         void DumpString(string String, string Minified) {
-            if (Engine.Settings.DumpFilter && !String.IsDialogue())
+            if (Engine.Settings.Filter.DumpFilter && !String.IsDialogue(UseAcceptableRange: Engine.Settings.Filter.DumpAcceptableRange))
                 return;
 
             if (DumpCache.Contains(Minified))
@@ -104,6 +104,15 @@ namespace StringReloads.Engine
 
             if (DefaultLST == null) {
                 string LSTPath = Path.Combine(Engine.Settings.WorkingDirectory, "Strings.lst");
+                if (File.Exists(LSTPath)) {
+                    using (var Reader = File.OpenText(LSTPath)) {
+                        while (Reader.Peek() != -1) {
+                            DumpCache.Add(Engine.Minify(Reader.ReadLine()));
+                            Reader.ReadLine();
+                        }
+                        Reader.Close();
+                    }
+                }
                 DefaultLST = File.AppendText(LSTPath);
             }
 

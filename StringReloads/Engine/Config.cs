@@ -45,9 +45,6 @@ namespace StringReloads.Engine
         public bool Dump => ((bool?)(_Dump ??= GetValue("Dump").ToBoolean())).Value;
 
 
-        bool? _DumpFilter = null;
-        public bool DumpFilter => ((bool?)(_DumpFilter ??= GetValue("DumpFilter").ToBoolean())).Value;
-
         bool? _ImportHook = null;
         public bool ImportHook => ((bool?)(_ImportHook ??= GetValue("ImportHook").ToBoolean())).Value;
 
@@ -238,6 +235,8 @@ namespace StringReloads.Engine
                     QuoteList = GetValue("QuoteList", "Filter"),
                     Sensitivity = GetValue("Sensitivity", "Filter").ToInt32(),
                     UseDB = GetValue("UseDB", "Filter").ToBoolean(),
+                    DumpFilter = GetValue("DumpFilter", "Filter").ToBoolean(),
+                    DumpAcceptableRange = GetValue("DumpAcceptableRange", "Filter").ToBoolean(),
                     AcceptableRange = CharacterRanges.GetRanges(GetValue("AcceptableRange", "Filter")).ToList()
                 };
 

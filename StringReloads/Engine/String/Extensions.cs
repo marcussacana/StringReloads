@@ -179,7 +179,7 @@ namespace StringReloads
         static Quote[] Quotes = Config.Default.Filter.QuoteList.Unescape().Split('\n')
                     .Where(x => x.Length == 2)
                     .Select(x => new Quote() { Start = x[0], End = x[1] }).ToArray();
-        public static bool IsDialogue(this string String, int? Caution = null)
+        public static bool IsDialogue(this string String, int? Caution = null, bool UseAcceptableRange = true)
         {
             try
             {
@@ -203,7 +203,7 @@ namespace StringReloads
                 if (string.IsNullOrWhiteSpace(Str))
                     return false;
 
-                if (CharacterRanges.TotalMissmatch(Str, Config.Default.Filter.AcceptableRange) > 0)
+                if (UseAcceptableRange && CharacterRanges.TotalMissmatch(Str, Config.Default.Filter.AcceptableRange) > 0)
                     return false;
 
                 string[] Words = Str.Split(' ');
