@@ -34,8 +34,8 @@ namespace StringReloads.Engine.String
 
             int Missmatch = 0;
             foreach (var Char in String)
-                if (!CharInRange(Char, Ranges)) {
-                    Log.Trace($"Char Missmatch: {Char} from \"{String}\"");
+                if (!CharInRange(Char, Ranges) && !char.IsWhiteSpace(Char)) {
+                    Log.Trace($"Char Missmatch: '{Char}' from \"{String}\"");
                     Missmatch++;
                 }
             return Missmatch;

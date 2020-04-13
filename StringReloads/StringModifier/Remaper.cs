@@ -2,11 +2,13 @@
 
 namespace StringReloads.StringModifier
 {
-    class Remaper : IStringModifier
+    public class Remaper : IStringModifier
     {
-        Main Main;
 
-        public Remaper(Main Main) => this.Main = Main;
+        static Remaper _Default = null;
+        public static Remaper Default = _Default ?? new Remaper(EntryPoint.SRL);
+        Main Engine;
+        public Remaper(Main Main) => Engine = Main;
 
         public string Name => "Remaper";
 
@@ -17,8 +19,8 @@ namespace StringReloads.StringModifier
             string Result = string.Empty;
             foreach (var Char in String)
             {
-                if (Main.CharRemap.ContainsKey(Char))
-                    Result += Main.CharRemap[Char];
+                if (Engine.CharRemap.ContainsKey(Char))
+                    Result += Engine.CharRemap[Char];
                 else
                     Result += Char;
             }
@@ -31,8 +33,8 @@ namespace StringReloads.StringModifier
             string Result = string.Empty;
             foreach (var Char in String)
             {
-                if (Main.CharRemap.ContainsValue(Char))
-                    Result += Main.CharRemap.ReverseMatch(Char);
+                if (Engine.CharRemap.ContainsValue(Char))
+                    Result += Engine.CharRemap.ReverseMatch(Char);
                 else
                     Result += Char;
             }

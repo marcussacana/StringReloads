@@ -87,7 +87,7 @@ namespace StringReloads.Hook.Base
                 AssemblyHook();
 
             if (Config.Default.LogLevel == Log.LogLevel.Trace)
-                Log.Trace("Hook \"{0}->{1}\" {2}; Bypass: 0x{3}", new string[] { Library, Export ?? Ordinal.ToString(), ImportHook ? "Ready" : "Compiled", ((ulong)BypassFunction).ToString("X16") });
+                Log.Trace("Hook \"{0}->{1}\" {2}; Hook: 0x{3}; Bypass: 0x{4}", new string[] { Library, Export ?? Ordinal.ToString(), ImportHook ? "Ready" : "Compiled", ((ulong)HookFunction).ToString("X16"), ((ulong)BypassFunction).ToString("X16") });
             else
                 Log.Debug("Hook \"{0}->{1}\" {2}", new string[] { Library, Export ?? Ordinal.ToString(), ImportHook ? "Ready" : "Compiled" });
         }
@@ -201,7 +201,7 @@ namespace StringReloads.Hook.Base
 #endif
 
         private void SetupImportHook() {
-            var Imports = GetModuleImports((byte*)Process.GetCurrentProcess().MainModule.BaseAddress.ToPointer());
+            var Imports = GetModuleImports((byte*)Config.Default.GameBaseAddress);
 
             var Import = (from x in Imports where x.Function == Export && x.Module.ToLower() == Library.ToLower() select x).Single();
             
@@ -220,6 +220,9 @@ namespace StringReloads.Hook.Base
             RealBuffer = new byte[4];
             BitConverter.GetBytes((uint)BypassFunction).CopyTo(HookBuffer, 0);
 #endif
+
+            if (HookFunction == null)
+                Log.Critical($"\"{Name}\" Null Hook Function");
         }
 
         public void Install()

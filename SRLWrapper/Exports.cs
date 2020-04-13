@@ -15,5 +15,11 @@ namespace SRLWrapper
         [DllExport(CallingConvention.StdCall)]
         public static void* GetDirectProcess() => EntryPoint.GetDirectProcess();
 
+        [DllExport(CallingConvention.StdCall)]
+        public static void* ProcessW(void* Value) => EntryPoint.ProcessW(Value);
+
+        [DllExport(CallingConvention.StdCall)]
+        public static void* GetDirectProcessW() => EntryPoint.GetDirectProcessW();
+
     }
 }

@@ -3,8 +3,12 @@ using System.Runtime.InteropServices;
 
 namespace StringReloads.Hook.Base
 {
-    public unsafe class UnsafeDelegate<T> : IDisposable where T : Delegate { 
+    public unsafe class UnsafeDelegate<T> : IDisposable where T : Delegate {
         private UnsafeDelegate(void* Address) { this.Address = new IntPtr(Address); }
+
+        ~UnsafeDelegate() {
+            Dispose();
+        }
 
         IntPtr Address = IntPtr.Zero;
 
@@ -32,6 +36,10 @@ namespace StringReloads.Hook.Base
         Delegate Base;
 
         public UnsafeDelegate(Delegate Base) { this.Base = Base; }
+
+        ~UnsafeDelegate() {
+            Dispose();
+        }
 
         public void Dispose()
         {

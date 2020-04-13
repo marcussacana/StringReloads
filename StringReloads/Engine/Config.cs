@@ -16,17 +16,17 @@ namespace StringReloads.Engine
         public void* MainWindow => _MainWindow != null ? _MainWindow : (_MainWindow = Process.GetCurrentProcess().MainWindowHandle.ToPointer());
 
         bool? _AutoInstall = null;
-        public bool AutoInstall => (_AutoInstall ?? (_AutoInstall = GetValue("AutoInstall").ToBoolean())).Value;
+        public bool AutoInstall => ((bool?)(_AutoInstall ??= GetValue("AutoInstall").ToBoolean())).Value;
 
 
         string _ConfigPath = null;
-        public string ConfigPath => _ConfigPath ?? (_ConfigPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SRL.ini"));
+        public string ConfigPath => _ConfigPath ??= Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SRL.ini");
 
         bool? _Debug = null;
-        public bool Debug => (_Debug ?? (_Debug = GetValue("Debug").ToBoolean())).Value;
+        public bool Debug => ((bool?)(_Debug ??= GetValue("Debug").ToBoolean())).Value;
 
         bool? _CacheOutput = null;
-        public bool CacheOutput => (_CacheOutput ?? (_CacheOutput = GetValue("CacheOutput").ToBoolean())).Value;
+        public bool CacheOutput => ((bool?)(_CacheOutput ??= GetValue("CacheOutput").ToBoolean())).Value;
 
         string[] _IniLines = null;
         public string[] IniLines {
@@ -42,28 +42,28 @@ namespace StringReloads.Engine
         }
 
         bool? _Dump = null;
-        public bool Dump => (_Dump ?? (_Dump = GetValue("Dump").ToBoolean())).Value;
+        public bool Dump => ((bool?)(_Dump ??= GetValue("Dump").ToBoolean())).Value;
 
 
         bool? _DumpFilter = null;
-        public bool DumpFilter => (_DumpFilter ?? (_DumpFilter = GetValue("DumpFilter").ToBoolean())).Value;
+        public bool DumpFilter => ((bool?)(_DumpFilter ??= GetValue("DumpFilter").ToBoolean())).Value;
 
         bool? _ImportHook = null;
-        public bool ImportHook => (_ImportHook ?? (_ImportHook = GetValue("ImportHook").ToBoolean())).Value;
+        public bool ImportHook => ((bool?)(_ImportHook ??= GetValue("ImportHook").ToBoolean())).Value;
 
 
         bool? _Log = null;
-        public bool Log => (_Log ?? (_Log = GetValue("Log").ToBoolean())).Value;
+        public bool Log => ((bool?)(_Log ??= GetValue("Log").ToBoolean())).Value;
 
         bool? _LogFile = null;
-        public bool LogFile => (_LogFile ?? (_LogFile = GetValue("LogFile").ToBoolean())).Value;
+        public bool LogFile => ((bool?)(_LogFile ??= GetValue("LogFile").ToBoolean())).Value;
 
         Log.LogLevel? _LogLevel = null;
-        public Log.LogLevel LogLevel => (_LogLevel ?? (_LogLevel = GetValue("LogLevel").ToLogLevel())).Value;
+        public Log.LogLevel LogLevel => ((Log.LogLevel?)(_LogLevel ??= GetValue("LogLevel").ToLogLevel())).Value;
 
 
         string _Workspace = null;
-        public string Workspace => _Workspace ?? (_Workspace = GetValue("Workspace"));
+        public string Workspace => _Workspace ??= GetValue("Workspace");
 
 
         string _WorkingDirectory = null;
@@ -102,6 +102,9 @@ namespace StringReloads.Engine
 
                 return _REncoding = (Encoding ?? GlobalEncoding).ToEncoding();
             }
+            set {
+                _REncoding = value;
+            }
         }
 
         Encoding _WEncoding = null;
@@ -114,6 +117,8 @@ namespace StringReloads.Engine
                 var Encoding = GetValue("WriteEncoding");
 
                 return _WEncoding = (Encoding ?? GlobalEncoding).ToEncoding();
+            } set {
+                _WEncoding = value;
             }
         }
 
@@ -122,20 +127,39 @@ namespace StringReloads.Engine
         public void* GameBaseAddress => _GameBaseAddress != null ? _GameBaseAddress : (_GameBaseAddress = Process.GetCurrentProcess().MainModule.BaseAddress.ToPointer());
 
         string _GameExePath = null;
-        public string GameExePath => _GameExePath ?? (_GameExePath = Process.GetCurrentProcess().MainModule.FileName);
+        public string GameExePath => _GameExePath ??= Process.GetCurrentProcess().MainModule.FileName;
 
         string _CachePath = null;
-        public string CachePath => _CachePath ?? (_CachePath = Path.Combine(WorkingDirectory, "Cache.srl"));
+        public string CachePath => _CachePath ??= Path.Combine(WorkingDirectory, "Cache.srl");
 
 
 
         string _Breakline = null;
-        public string BreakLine => _Breakline ?? (_Breakline = GetValue("BreakLine").Unescape());
+        public string BreakLine => _Breakline ??= GetValue("BreakLine").Unescape();
         
 
 
         int? _Width = null;
-        public int Width => (_Width ?? (_Width = GetValue("Width", "Wordwrap").ToInt32())).Value;
+        public int Width => ((int?)(_Width ??= GetValue("Width", "Wordwrap").ToInt32())).Value;
+
+
+        int? _MultiByteToWideCharCodePage = null;
+        public int MultiByteToWideCharCodePage => ((int?)(_MultiByteToWideCharCodePage ??= GetValue("CodePage", "MultiByteToWideChar").ToInt32())).Value;
+
+        int? _WideCharToMultiByteCodePage = null;
+        public int WideCharToMultiByteCodePage => ((int?)(_WideCharToMultiByteCodePage ??= GetValue("CodePage", "WideCharToMultiByte").ToInt32())).Value;
+
+        bool? _MultiByteToWideCharUndoRemap = null;
+        public bool MultiByteToWideCharUndoRemap => ((bool?)(_MultiByteToWideCharUndoRemap ??= GetValue("UndoRemap", "MultiByteToWideChar").ToBoolean())).Value;
+
+        bool? _WideCharToMultiByteUndoRemap = null;
+        public bool WideCharToMultiByteUndoRemap => ((bool?)(_WideCharToMultiByteUndoRemap ??= GetValue("UndoRemap", "WideCharToMultiByte").ToBoolean())).Value;
+       
+        bool? _WideCharToMultiByteAutoEncoding = null;
+        public bool WideCharToMultiByteAutoEncoding => ((bool?)(_WideCharToMultiByteAutoEncoding ??= GetValue("AutoEncoding", "WideCharToMultiByte").ToBoolean())).Value;
+
+        bool? _MultiByteToWideCharAutoEncoding = null;
+        public bool MultiByteToWideCharAutoEncoding => ((bool?)(_MultiByteToWideCharAutoEncoding ??= GetValue("AutoEncoding", "MultiByteToWideChar").ToBoolean())).Value;
 
 
         Dictionary<string, string>[] _FontRemaps;

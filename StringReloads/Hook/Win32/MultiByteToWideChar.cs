@@ -1,4 +1,8 @@
 ﻿using StringReloads.Engine;
+using StringReloads.Engine.String;
+using StringReloads.StringModifier;
+using System.Linq;
+using System.Text;
 
 namespace StringReloads.Hook
 {
@@ -20,54 +24,66 @@ namespace StringReloads.Hook
             }
         }
 
-        private int hMultiByteToWideChar(uint CodePage, uint dwFlags, byte* lpMultiByteStr, int cbMultiByte, ushort* lpWideCharStr, int cchWideChar)
+        private int hMultiByteToWideChar(uint CodePage, uint dwFlags, byte* lpMultiByteStr, int cbMultiByte, char* lpWideCharStr, int cchWideChar)
         {
-            int Rst = 0;
-            if (cbMultiByte > 0)
-            {
-                byte[] Buffer = new byte[cbMultiByte];
-                for (int i = 0; i < Buffer.Length; i++)
-                {
-                    Buffer[i] = *(lpMultiByteStr + i);
-                }
-                fixed (void* pBuffer = &Buffer[0])
-                {
-                    Uninstall();
-                    lpMultiByteStr = (byte*)EntryPoint.Process(pBuffer);
-                    Install();
-                    Rst = Bypass(CodePage, dwFlags, lpMultiByteStr, cbMultiByte, lpWideCharStr, cchWideChar);
-                }
-
-            } else {
-                Uninstall();
-                lpMultiByteStr = (byte*)EntryPoint.Process((void*)lpMultiByteStr);
-                Install();
-                Rst = Bypass(CodePage, dwFlags, lpMultiByteStr, cbMultiByte, lpWideCharStr, cchWideChar);
-            }
+            Uninstall();
+            int Rst = PersistentMultiByteToWideChar(CodePage, dwFlags, lpMultiByteStr, cbMultiByte, lpWideCharStr, cchWideChar);
+            Install();
             return Rst;
         }
 
-        private int PersistentMultiByteToWideChar(uint CodePage, uint dwFlags, byte* lpMultiByteStr, int cbMultiByte, ushort* lpWideCharStr, int cchWideChar)
+        private int PersistentMultiByteToWideChar(uint CodePage, uint dwFlags, byte* lpMultiByteStr, int cbMultiByte, char* lpWideCharStr, int cchWideChar)
         {
-            int Rst = 0;
+            if (Config.Default.MultiByteToWideCharCodePage >= 0)
+                CodePage = (uint)Config.Default.MultiByteToWideCharCodePage;
+
+            Encoding ReadEncoding = null;
+            if (CodePage != 0 && Config.Default.MultiByteToWideCharAutoEncoding)
+            {
+                ReadEncoding = Config.Default.ReadEncoding;
+                Config.Default.ReadEncoding = Encoding.GetEncoding((int)CodePage);
+            }
+
             if (cbMultiByte > 0)
             {
                 byte[] Buffer = new byte[cbMultiByte];
-                for (int i = 0; i < Buffer.Length; i++)
+                for (int i = 0; i < cbMultiByte; i++)
                 {
                     Buffer[i] = *(lpMultiByteStr + i);
                 }
                 fixed (void* pBuffer = &Buffer[0])
                 {
-                    lpMultiByteStr = (byte*)EntryPoint.Process(pBuffer);
-                    Rst = Bypass(CodePage, dwFlags, lpMultiByteStr, cbMultiByte, lpWideCharStr, cchWideChar);
+                    var NewStr = (byte*)EntryPoint.Process((CString)pBuffer);
+                    if (NewStr != lpMultiByteStr)
+                    {
+                        lpMultiByteStr = NewStr;
+                        cchWideChar = ((CString)lpMultiByteStr).Count();
+                        CodePage = (uint)Config.Default.WriteEncoding.CodePage;
+                        if (Config.Default.MultiByteToWideCharAutoEncoding)
+                            Config.Default.ReadEncoding = Encoding.GetEncoding((int)CodePage);
+                    }
                 }
 
-            } else {
-                lpMultiByteStr = (byte*)EntryPoint.Process((void*)lpMultiByteStr);
-                Rst = Bypass(CodePage, dwFlags, lpMultiByteStr, cbMultiByte, lpWideCharStr, cchWideChar);
             }
-            return Rst;
+            else 
+            {
+                var NewStr = (byte*)EntryPoint.Process((CString)lpMultiByteStr);
+                if (NewStr != lpMultiByteStr)
+                {
+                    lpMultiByteStr = NewStr;
+                    CodePage = (uint)Config.Default.WriteEncoding.CodePage;
+                    if (Config.Default.MultiByteToWideCharAutoEncoding)
+                        Config.Default.ReadEncoding = Encoding.GetEncoding((int)CodePage);
+                }
+            }
+
+            if (Config.Default.MultiByteToWideCharUndoRemap)
+                lpMultiByteStr = (CString)Remaper.Default.Restore((CString)lpMultiByteStr);
+
+            if (ReadEncoding != null)
+                Config.Default.ReadEncoding = ReadEncoding;
+
+            return Bypass(CodePage, dwFlags, lpMultiByteStr, cbMultiByte, lpWideCharStr, cchWideChar);
         }
     }
 }

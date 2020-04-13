@@ -11,15 +11,28 @@ namespace StringReloads.Engine.String
         public virtual Encoding Encoding => Config.Default.ReadEncoding;
 
         public byte* BasePtr;
-        public byte* CurrentPtr; 
+        public byte* CurrentPtr;
+
+        public static implicit operator void*(UnsafeString Instance)
+        {
+            return Instance.BasePtr;
+        }
 
         public static implicit operator byte*(UnsafeString Instance)
         {
             return Instance.BasePtr;
         }
 
+        public static implicit operator char*(UnsafeString Instance)
+        {
+            return (char*)Instance.BasePtr;
+        }
+
         public static implicit operator string(UnsafeString Instance)
         {
+            if (Instance.BasePtr == null)
+                return null;
+
             return new string((sbyte*)Instance.BasePtr, 0, Instance.Count(), Instance.Encoding);
         }
 

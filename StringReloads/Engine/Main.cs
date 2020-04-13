@@ -33,11 +33,11 @@ namespace StringReloads.Engine
         public List<Database> Databases = new List<Database>();
 
         internal IStringModifier[] _ReloadModifiers = null;
-        public IStringModifier[] ReloadModifiers => _ReloadModifiers ?? (_ReloadModifiers = new IStringModifier[] {
+        public IStringModifier[] ReloadModifiers => _ReloadModifiers ??= new IStringModifier[] {
             new MonoWordWrap(this),
             new Remaper(this),
             new Escape()
-        });
+        };
 
         internal Hook.Base.Hook[] _Hooks = null;
         public Hook.Base.Hook[] Hooks => _Hooks ??= new Hook.Base.Hook[] {
@@ -48,7 +48,8 @@ namespace StringReloads.Engine
             new GetGlyphOutlineA(),
             new GetGlyphOutlineW(),
             new SysAllocString(),
-            new MultiByteToWideChar()
+            new MultiByteToWideChar(),
+            new WideCharToMultiByte()
         };
 
         internal Mods.Base.IMod[] _Mods = null;
@@ -80,20 +81,31 @@ namespace StringReloads.Engine
 
         internal bool Initialized;
 
-        internal byte* ProcessString(CString String)
+        internal byte* ProcessString(CString String) {
+            var Rst = ProcessString((string)String);
+            if (Rst == null)
+                return String;
+            return (CString)Rst;
+        }
+        internal byte* ProcessString(WCString String) {
+            var Rst = ProcessString((string)String);
+            if (Rst == null)
+                return String;
+            return (WCString)Rst;
+        }
+        public string ProcessString(string String)
         {
-
             if (!Initialized)
                 Initializer.Initialize(this);
 
             if (Settings.CacheOutput && RecentOutput.Contains(String))
-                return String;
+                return null;
 
             var Matched = MatchString(String);
             if (Matched == null)
             {
-                Log.Trace($"Input: {(string)String}");
-                return String;
+                Log.Trace($"Input: {String}");
+                return null;
             }
 
             TriggerFlags(Matched?.OriginalFlags);
@@ -106,13 +118,14 @@ namespace StringReloads.Engine
 
             Log.Trace($"Reload from:\r\n{Matched?.OriginalLine}\r\nTo:\r\n{Reloaded}");
 
-            if (Settings.CacheOutput) {
+            if (Settings.CacheOutput)
+            {
                 if (RecentOutput.Count == 100)
                     RecentOutput.Dequeue();
                 RecentOutput.Enqueue(Reloaded);
             }
 
-            return (CString)Reloaded;
+            return Reloaded;
         }
 
         public event Types.FlagTrigger OnFlagTriggered;

@@ -52,8 +52,14 @@ namespace StringReloads.StringModifier
             if (!String.Contains(" "))
                 return String;
 
-            String = String.Replace(BreakLine, " ").Replace("  ", "");
+            String = String.Replace(BreakLine, " ");
+            while (String.Contains("  "))
+                String = String.Replace("  ", " ");
+
             foreach (var Word in String.Split(' ')) {
+                if (string.IsNullOrWhiteSpace(Word))
+                    continue;
+
                 if (CurrentLength > 0 && CurrentLength + Word.Length > Width) {
                     Result = Result.TrimEnd();
                     Result += BreakLine;

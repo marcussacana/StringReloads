@@ -6,43 +6,51 @@ using System.Text;
 namespace StringReloads.Engine.String
 {
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
-    unsafe class CString : UnsafeString
+    unsafe class WCString : UnsafeString
     {
-        Encoding _Enco = null;
-        public override Encoding Encoding => _Enco ?? base.Encoding;
+        public override Encoding Encoding => Encoding.Unicode;
 
-        private CString() { }
+        private WCString() { }
 
-        static byte[] _Termination;
-        public static byte[] Termination => _Termination ?? (_Termination = Config.Default.ReadEncoding.GetBytes("\x0"));
+        public readonly static byte[] Termination = new byte[] { 0x00, 0x00 };
 
-        public static implicit operator CString(string Str) {
+        public static implicit operator WCString(string Str) {
 
             byte[] Buffer = GetBytes(Str);
             if (Buffer == null)
-                return new CString() { BasePtr = null };
+                return new WCString() { BasePtr = null }; 
 
             var Addr = Marshal.AllocHGlobal(Buffer.Length);
             Marshal.Copy(Buffer, 0, Addr, Buffer.Length);
 
-            var CStr = new CString();
+            var CStr = new WCString();
             CStr.BasePtr = CStr.CurrentPtr = (byte*)Addr.ToPointer();
 
             return CStr;
         }
 
-        public static implicit operator CString(byte* Ptr) {
-            var UCS = new CString();
-            UCS.BasePtr = Ptr;
-            UCS.CurrentPtr = Ptr;
+        public static implicit operator WCString(void* Ptr)
+        {
+            var UCS = new WCString();
+            UCS.BasePtr = (byte*)Ptr;
+            UCS.CurrentPtr = (byte*)Ptr;
 
             return UCS;
         }
 
-        public static implicit operator CString(void* Ptr) {
-            var UCS = new CString();
+        public static implicit operator WCString(char* Ptr)
+        {
+            var UCS = new WCString();
             UCS.BasePtr = (byte*)Ptr;
             UCS.CurrentPtr = (byte*)Ptr;
+
+            return UCS;
+        }
+
+        public static implicit operator WCString(byte* Ptr) {
+            var UCS = new WCString();
+            UCS.BasePtr = Ptr;
+            UCS.CurrentPtr = Ptr;
 
             return UCS;
         }
@@ -76,7 +84,7 @@ namespace StringReloads.Engine.String
             if (Content == null)
                 return null;
 
-            byte[] Buffer = Config.Default.WriteEncoding.GetBytes(Content);
+            byte[] Buffer = Encoding.Unicode.GetBytes(Content);
             return Buffer.Concat(Termination).ToArray();
         }
 
