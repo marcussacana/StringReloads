@@ -179,14 +179,14 @@ namespace StringReloads
         static Quote[] Quotes = Config.Default.Filter.QuoteList.Unescape().Split('\n')
                     .Where(x => x.Length == 2)
                     .Select(x => new Quote() { Start = x[0], End = x[1] }).ToArray();
-        public static bool IsDialogue(this string String, int? Caution = null, bool UseAcceptableRange = true)
+        public static bool IsDialogue(this string String, int? Caution = null, bool UseAcceptableRange = true, bool? UseDB = null)
         {
             try
             {
                 if (string.IsNullOrWhiteSpace(String))
                     return false;
 
-                if (Config.Default.Filter.UseDB && EntryPoint.SRL.HasMatch(String))
+                if ((UseDB ?? Config.Default.Filter.UseDB) && EntryPoint.SRL.HasMatch(String))
                     return true;
 
                 string Str = String.Trim();
