@@ -27,6 +27,7 @@ namespace StringReloads.Engine
         public bool UseDB;
         public bool FromAsian;
         public bool DumpFilter;
+        public bool DumpRegexFilter;
         public bool DumpAcceptableRange;
         public List<CharacterRange> AcceptableRange;
     }

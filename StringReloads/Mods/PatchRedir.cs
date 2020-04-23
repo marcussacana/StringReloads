@@ -42,5 +42,10 @@ namespace StringReloads.Mods
             Hook.CreateFileA.OnCreateFile -= Redirect;
             Hook.CreateFileW.OnCreateFile -= Redirect;
         }
+
+        public bool IsCompatible()
+        {
+            return true;
+        }
     }
 }

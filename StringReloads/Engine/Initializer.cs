@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 
 namespace StringReloads.Engine
 {
@@ -14,7 +13,6 @@ namespace StringReloads.Engine
                 return;
 
             //Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);//.net core
-            Engine.Settings = new Config();
 
             if (Config.Default.Debug)
                 System.Diagnostics.Debugger.Launch();
@@ -42,7 +40,6 @@ namespace StringReloads.Engine
             ModsInitializer(Engine);
 
             AutoInstall(Engine);
-
 
             Engine.Initialized = true;
             Log.Information("SRL Initialized");
@@ -115,6 +112,9 @@ namespace StringReloads.Engine
 
             for (int i = 0; i < Mods.Length; i++)
             {
+                if (!Engine.Mods[i].IsCompatible())
+                    continue;
+
                 Mods[i].Install();
 
                 Log.Debug($"Mod \"{Mods[i].Name}\" Enabled.");
@@ -219,11 +219,13 @@ namespace StringReloads.Engine
             if (!Directory.Exists(Engine.Settings.WorkingDirectory))
                 Directory.CreateDirectory(Engine.Settings.WorkingDirectory);
 
+            string[] SpecialLSTs = new string[] { "chars", "regex", "mtl" };
+
             foreach (string Lst in Directory.GetFiles(Engine.Settings.WorkingDirectory, "*.lst"))
             {
                 var Parser = new LSTParser(Lst);
 
-                if (Parser.Name.ToLowerInvariant() == "chars")
+                if (SpecialLSTs.Contains(Parser.Name.ToLowerInvariant()))
                     continue;
 
                 Database DB = new Database(Parser.Name);

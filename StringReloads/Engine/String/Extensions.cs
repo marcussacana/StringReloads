@@ -151,12 +151,6 @@ namespace StringReloads
                 _ => Encoding.GetEncoding(Value)
             };
         }
-
-        public static string Unescape(this string String)
-        {
-            return Escape.Default.Restore(String);
-        }
-
         public static dynamic Evalaute(this string Expression) => Expression.Evalaute(null);
         public static dynamic Evalaute(this string Expression, string Key, object Value) => Expression.Evalaute(new[] { Key }, new[] { Value });
         public static dynamic Evalaute(this string Expression, IEnumerable<string> Keys, IEnumerable<object> Values) {
@@ -174,9 +168,9 @@ namespace StringReloads
             return Exp.Evaluate();
         }
 
-        static string[] DenyList = Config.Default.Filter.DenyList.Unescape().Split('\n').Where(x => !string.IsNullOrEmpty(x)).ToArray();
-        static string[] IgnoreList = Config.Default.Filter.IgnoreList.Unescape().Split('\n').Where(x => !string.IsNullOrEmpty(x)).ToArray();
-        static Quote[] Quotes = Config.Default.Filter.QuoteList.Unescape().Split('\n')
+        public static string[] DenyList = Config.Default.Filter.DenyList.Unescape().Split('\n').Where(x => !string.IsNullOrEmpty(x)).ToArray();
+        public static string[] IgnoreList = Config.Default.Filter.IgnoreList.Unescape().Split('\n').Where(x => !string.IsNullOrEmpty(x)).ToArray();
+        public static Quote[] Quotes = Config.Default.Filter.QuoteList.Unescape().Split('\n')
                     .Where(x => x.Length == 2)
                     .Select(x => new Quote() { Start = x[0], End = x[1] }).ToArray();
         public static bool IsDialogue(this string String, int? Caution = null, bool UseAcceptableRange = true, bool? UseDB = null)
@@ -385,6 +379,9 @@ namespace StringReloads
 #endif
             }
         }
+
+        internal static string Escape(this string String) => StringModifier.Escape.Default.Apply(String, null);
+        internal static string Unescape(this string String) => StringModifier.Escape.Default.Restore(String);
 
         internal static double PercentOf(this string String, int Value)
         {

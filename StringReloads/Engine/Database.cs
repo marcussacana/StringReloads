@@ -10,7 +10,11 @@ namespace StringReloads.Engine
     {
         int CurrentIndex = -1;
 
+        bool Minifier = true;
+
         public string Name;
+
+        public Database(string Name, bool Minifier) : this(Name) => this.Minifier = Minifier;
 
         public Database(string Name) => this.Name = Name;
 
@@ -41,8 +45,8 @@ namespace StringReloads.Engine
         }
 
         public void Add(LSTEntry Entry) {
-            var Key = Minify.Default.Apply(Entry.OriginalLine, null);
-            var Value = Minify.Default.Apply(Entry.TranslationLine, null);
+            var Key = Minify(Entry.OriginalLine);
+            var Value = Minify(Entry.TranslationLine);
             DB.Add(Key, Entry);
 
             if (!TLs.Contains(Value))
@@ -56,10 +60,16 @@ namespace StringReloads.Engine
         }
 
         public bool HasKey(string Key) {
-            return DB.ContainsKey(Minify.Default.Apply(Key, null));
+            return DB.ContainsKey(Minify(Key));
         }
         public bool HasValue(string Value) {
-            return TLs.Contains(Minify.Default.Apply(Value, null));
+            return TLs.Contains(Minify(Value));
+        }
+
+        private string Minify(string String) {
+            if (!Minifier)
+                return String;
+            return StringModifier.Minify.Default.Apply(String, null);
         }
 
         public bool MoveNext()
@@ -90,6 +100,6 @@ namespace StringReloads.Engine
             return this;
         }
 
-        public LSTEntry this[string Key] => DB[Minify.Default.Apply(Key, null)];
+        public LSTEntry this[string Key] => DB[Minify(Key)];
     }
 }

@@ -278,6 +278,26 @@ namespace StringReloads.Hook.Base
             }
             return List;
         }
+        public static InstructionList DecodeAmount(this Decoder Decoder, uint Count)
+        {
+            var List = new InstructionList();
+            while (List.Count < Count) {
+                List.Add(Decoder.Decode());
+            }
+            return List;
+        }
+
+        public unsafe static InstructionList AssembleToList(this Assembler Assembler, ulong RIP) {
+            var CWBuffer = new MemoryCodeWriter();
+            Assembler.Assemble(CWBuffer, RIP);
+            var Buffer = CWBuffer.ToArray();
+            fixed (void* pBuffer = &Buffer[0]) {
+                using (var Reader = new MemoryCodeReader(pBuffer, (uint)Buffer.Length)) {
+                    var AsmDecoder = Decoder.Create(Assembler.Bitness, Reader);
+                    return AsmDecoder.DecodeAmount((uint)Assembler.Instructions.Count);
+                } 
+            }
+        }
 
 #if x64
         public static int GetAutoEncodedSize(this InstructionList List, int bitness, ulong IP = 0)

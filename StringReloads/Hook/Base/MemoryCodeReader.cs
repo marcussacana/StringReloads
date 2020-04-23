@@ -6,6 +6,7 @@ namespace StringReloads.Hook.Base
 {
     unsafe class MemoryCodeReader : CodeReader, IDisposable
     {
+        byte* Begin;
         byte* Address;
         void* End;
 
@@ -16,6 +17,7 @@ namespace StringReloads.Hook.Base
         public MemoryCodeReader(void* Address, uint Length) : this((byte*)Address, Length) { }
         public MemoryCodeReader(byte* Address, uint Length)
         {
+            this.Begin = Address;
             this.Address = Address;
             End = null;
             this.Length = Length;
@@ -43,6 +45,10 @@ namespace StringReloads.Hook.Base
                 return -1;
 
             return *Address++;
+        }
+
+        public void Reset() {
+            Address = Begin;
         }
 
         uint OldProtection = 0;

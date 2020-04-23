@@ -49,6 +49,10 @@ namespace StringReloads.Engine
         public bool ImportHook => ((bool?)(_ImportHook ??= GetValue("ImportHook").ToBoolean())).Value;
 
 
+        bool? _ReloadRegexCaptures = null;
+        public bool ReloadRegexCaptures => ((bool?)(_ReloadRegexCaptures ??= GetValue("ReloadRegexCaptures").ToBoolean())).Value;
+
+
         bool? _Log = null;
         public bool Log => ((bool?)(_Log ??= GetValue("Log").ToBoolean())).Value;
 
@@ -57,7 +61,6 @@ namespace StringReloads.Engine
 
         Log.LogLevel? _LogLevel = null;
         public Log.LogLevel LogLevel => ((Log.LogLevel?)(_LogLevel ??= GetValue("LogLevel").ToLogLevel())).Value;
-
 
         string _Workspace = null;
         public string Workspace => _Workspace ??= GetValue("Workspace");
@@ -236,6 +239,7 @@ namespace StringReloads.Engine
                     Sensitivity = GetValue("Sensitivity", "Filter").ToInt32(),
                     UseDB = GetValue("UseDB", "Filter").ToBoolean(),
                     DumpFilter = GetValue("DumpFilter", "Filter").ToBoolean(),
+                    DumpRegexFilter = GetValue("DumpRegexFilter", "Filter").ToBoolean(),
                     DumpAcceptableRange = GetValue("DumpAcceptableRange", "Filter").ToBoolean(),
                     AcceptableRange = CharacterRanges.GetRanges(GetValue("AcceptableRange", "Filter")).ToList()
                 };
@@ -359,7 +363,7 @@ namespace StringReloads.Engine
                 else
                     NewLines.Add($"{Name}={Value}");
             } else {
-                if (NewLines.Last().Trim() != string.Empty)
+                if (NewLines.Count > 0 && NewLines.Last().Trim() != string.Empty)
                     NewLines.Add(string.Empty);
 
                 NewLines.Add($"[{Group}]");

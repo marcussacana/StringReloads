@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StringReloads.Engine.String;
+using System;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -8,16 +9,11 @@ namespace SRLDebugger
     {
         static void Main(string[] args)
         {
-            byte[] Data = Encoding.UTF8.GetBytes("Hello World!\x0");
-            fixed (void* pStr = &Data[0])
-            {
-                var NewPtr = StringReloads.EntryPoint.Process(pStr);
-                for (int i = 0; i < 100000; i++)
-                {
-                    Console.Title = "DBG - " + i;
-                    Console.WriteLine(System.IO.File.ReadAllText("SRLDebugger.exe.config"));
-                }
-            }   
+            CString DataA = "You got Caw (x645115454)";
+            CString DataB = "You got Bone (x16545615)";
+            string OutputA = (CString)StringReloads.EntryPoint.Process(DataA);
+            string OutputB = (CString)StringReloads.EntryPoint.Process(DataB);
+            System.Threading.Thread.Sleep(10000);
         }
     }
 }

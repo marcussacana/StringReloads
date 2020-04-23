@@ -6,7 +6,7 @@ using System.Text;
 namespace StringReloads.Engine.String
 {
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
-    unsafe class CString : UnsafeString
+    public unsafe class CString : UnsafeString
     {
         Encoding _Enco = null;
         public override Encoding Encoding => _Enco ?? base.Encoding;

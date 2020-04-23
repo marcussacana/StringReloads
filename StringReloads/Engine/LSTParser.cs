@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 namespace StringReloads.Engine
 {
-    public class LSTParser
+    public class LSTParser : IDisposable
     {
         public string Name { get; private set; }
         TextReader Reader;
@@ -22,10 +23,8 @@ namespace StringReloads.Engine
 
         }
 
-        ~LSTParser()
-        {
-            Reader?.Close();
-            Reader?.Dispose();
+        ~LSTParser() {
+            Dispose();
         }
 
         public IEnumerable<LSTEntry> GetEntries()
@@ -65,6 +64,11 @@ namespace StringReloads.Engine
 
                 yield return Entry;
             }
+        }
+
+        public void Dispose() {
+            Reader?.Close();
+            Reader?.Dispose();
         }
     }
 

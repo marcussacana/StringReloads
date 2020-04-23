@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -23,12 +22,13 @@ namespace StringReloads.Engine
 
         internal IMatch[] _Matchs = null;
         public IMatch[] Matchs => _Matchs ??= new IMatch[] {
+            new RegexMatch(this),
             new Match(this)
         };
 
         internal Initializer Initializer = new Initializer();
 
-        internal Config Settings;
+        internal Config Settings = new Config();
 
         public List<Database> Databases = new List<Database>();
 

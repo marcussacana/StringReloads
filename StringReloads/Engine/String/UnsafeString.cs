@@ -6,7 +6,7 @@ using System.Text;
 
 namespace StringReloads.Engine.String
 {
-    internal unsafe abstract class UnsafeString : IEnumerable<byte>, IEnumerator<byte>
+    public unsafe abstract class UnsafeString : IEnumerable<byte>, IEnumerator<byte>
     {
         public virtual Encoding Encoding => Config.Default.ReadEncoding;
 
