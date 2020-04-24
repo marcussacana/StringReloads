@@ -44,6 +44,9 @@ namespace StringReloads.Engine
         bool? _Dump = null;
         public bool Dump => ((bool?)(_Dump ??= GetValue("Dump").ToBoolean())).Value;
 
+        bool? _DumpRegex = null;
+        public bool DumpRegex => ((bool?)(_DumpRegex ??= GetValue("DumpRegex").ToBoolean())).Value;
+
 
         bool? _ImportHook = null;
         public bool ImportHook => ((bool?)(_ImportHook ??= GetValue("ImportHook").ToBoolean())).Value;

@@ -91,7 +91,7 @@ namespace StringReloads.Engine
 		TextWriter RegexLST = null;
 		Queue<string> NewDumps = new Queue<string>();
         private void Dump() {
-            if (!Config.Default.Dump)
+            if (!Config.Default.DumpRegex)
                 return;
 
 			 if (RegexLST == null) {
@@ -188,6 +188,12 @@ namespace StringReloads.Engine
 						DiffVal = DiffVal.Substring(0, DiffVal.Length - 1);
 						BeginA--;
 					}
+				}
+
+				if (DiffVal.Trim().Contains(" ")) {
+					Pattern = null;
+					Replace = null;
+					return false;
 				}
 
 				bool HasSpace = DiffVal.Contains(' ');
