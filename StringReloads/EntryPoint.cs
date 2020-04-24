@@ -1,6 +1,7 @@
 ﻿using StringReloads.Engine;
 using StringReloads.Engine.String;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.InteropServices;
 
@@ -33,6 +34,7 @@ namespace StringReloads
                 return (void*)SRL.ProcessString((CString)Value);
             }
             catch (Exception ex) {
+                SRL.Locks = new List<object>();
                 Log.Error(ex.ToString());
                 if (Retries++ < 5)
                     goto Retry;
@@ -55,8 +57,8 @@ namespace StringReloads
 
                 return (void*)SRL.ProcessString((WCString)Value);
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex) {
+                SRL.Locks = new List<object>();
                 Log.Error(ex.ToString());
                 if (Retries++ < 5)
                     goto Retry;

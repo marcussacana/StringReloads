@@ -13,6 +13,8 @@ namespace StringReloads.Engine
 {
     public unsafe class Main
     {
+        internal List<object> Locks = new List<object>();
+
         internal IPlugin[] _Plugins = null;
         public IPlugin[] Plugins => _Plugins ??=
             (from Asm in AppDomain.CurrentDomain.GetAssemblies()
@@ -54,6 +56,7 @@ namespace StringReloads.Engine
 
         internal Mods.Base.IMod[] _Mods = null;
         public Mods.Base.IMod[] Mods => _Mods ??= new Mods.Base.IMod[] {
+            new ForceExit(),
             new PatchRedir()
         };
 
@@ -145,43 +148,74 @@ namespace StringReloads.Engine
         public bool HasMatch(string String) => HasMatch(null, String);
         public bool HasMatch(IMatch This, string String)
         {
+            if (This != null && !Locks.Contains(This))
+                Locks.Add(This);
+
             foreach (var Match in Matchs)
             {
-                if (Match == This)
+                if (Locks.Contains(Match))
                     continue;
 
                 var Rst = Match.HasMatch(String);
-                if (Rst)
+                if (Rst) {
+                    if (Locks.Contains(This))
+                        Locks.Remove(This);
                     return true;
+                }
             }
+
+            if (Locks.Contains(This))
+                Locks.Remove(This);
+
             return false;
         }
         public bool HasValue(string String) => HasValue(null, String);
         public bool HasValue(IMatch This, string String)
         {
+            if (This != null && !Locks.Contains(This))
+                Locks.Add(This);
+
             foreach (var Match in Matchs)
             {
-                if (Match == This)
+                if (Locks.Contains(Match))
                     continue;
 
                 var Rst = Match.HasValue(String);
-                if (Rst)
+                if (Rst) {
+                    if (Locks.Contains(This)) 
+                        Locks.Remove(This);
                     return true;
+                }
             }
+
+            if (Locks.Contains(This))
+                Locks.Remove(This);
+
             return false;
         }
 
         public LSTEntry? MatchString(string String) => MatchString(null, String);
         public LSTEntry? MatchString(IMatch This, string String)
         {
-            foreach (var Match in Matchs) {
-                if (Match == This)
+            if (This != null && !Locks.Contains(This))
+                Locks.Add(This);
+
+            foreach (var Match in Matchs)
+            {
+                if (Locks.Contains(Match))
                     continue;
 
                 var Rst = Match.MatchString(String);
-                if (Rst != null)
+                if (Rst != null) {
+                    if (Locks.Contains(This)) 
+                        Locks.Remove(This);
                     return Rst;
+                }
             }
+
+            if (Locks.Contains(This))
+                Locks.Remove(This);
+
             return null;
         }
         public char ResolveRemap(char Char) => ResolveRemap(null, Char);
@@ -190,27 +224,49 @@ namespace StringReloads.Engine
             if (!Initialized)
                 Initializer.Initialize(this);
 
-            foreach (var Match in Matchs) {
-                if (Match == This)
+            if (This != null && !Locks.Contains(This))
+                Locks.Add(This);
+
+            foreach (var Match in Matchs)
+            {
+                if (Locks.Contains(Match))
                     continue;
 
                 var Rst = Match.ResolveRemap(Char);
-                if (Rst != null)
+                if (Rst != null) {
+                    if (Locks.Contains(This)) 
+                        Locks.Remove(This);
                     return Rst.Value;
+                }
             }
+
+            if (Locks.Contains(This)) 
+                Locks.Remove(This);
+
             return Char;
         }
 
         public FontRemap? ResolveRemap(string Face, int Width, int Height, uint Charset) => ResolveRemap(null, Face, Width, Height, Charset);
         public FontRemap? ResolveRemap(IMatch This, string Face, int Width, int Height, uint Charset) {
-            foreach (var Match in Matchs) {
-                if (Match == This)
+            if (This != null && !Locks.Contains(This))
+                Locks.Add(This);
+
+            foreach (var Match in Matchs)
+            {
+                if (Locks.Contains(Match))
                     continue;
 
                 var Rst = Match.ResolveRemap(Face, Width, Height, Charset);
-                if (Rst != null)
+                if (Rst != null) {
+                    if (Locks.Contains(This)) 
+                        Locks.Remove(This);
                     return Rst.Value;
+                }
             }
+
+            if (Locks.Contains(This)) 
+                Locks.Remove(This);
+
             return null;
         }
 

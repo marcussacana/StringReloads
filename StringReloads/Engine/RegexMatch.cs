@@ -38,6 +38,10 @@ namespace StringReloads.Engine
         public bool HasMatch(string String) => FindMatch(String, out _);
 
         private bool FindMatch(string String, out Regex Pattern) {
+			if (Config.Default.Filter.RegexFilter && !String.IsDialogue(UseDB: false)) {
+				Pattern = null;
+				return false;
+			}
             foreach (var Regex in RDB) {
                 if (Regex.Key.IsMatch(String)) {
                     Pattern = Regex.Key;
@@ -56,9 +60,7 @@ namespace StringReloads.Engine
         public LSTEntry? MatchString(string String)
         {
             if (!FindMatch(String, out Regex Pattern)) {
-                lock (NewDumps) {
-                    NewDumps.Enqueue(String);
-                }
+				NewDumps.Enqueue(String);
                 return null;
             }
 			var Result = string.Empty;
@@ -107,26 +109,25 @@ namespace StringReloads.Engine
             }
 
             while (true) {
-                lock (NewDumps)
-                {
-                    while (NewDumps.Count > 0)
-                    {
-                        var Str = NewDumps.Dequeue();
-                        if (Config.Default.Filter.DumpRegexFilter && !Str.IsDialogue())
-                            continue;
-                        if (DumpCache.Contains(Str))
-                            continue;
-                        foreach (var Dump in DumpCache) {
-							if (BuildPattern(Str, Dump, out string Pattern, out string Replace) || BuildPatternB(Str, Dump, out Pattern, out Replace)) {
-								RegexLST.WriteLine(Pattern);
-								RegexLST.WriteLine(Replace);
-								RegexLST.Flush();
-								break;
-							}
-                        }
-						DumpCache.Add(Str);
-                    }
-                }
+				while (NewDumps.Count > 0)
+				{
+					var Str = NewDumps.Dequeue();
+					if (Config.Default.Filter.DumpRegexFilter && !Str.IsDialogue(UseDB: false))
+						continue;
+					if (DumpCache.Contains(Str))
+						continue;
+					foreach (var Dump in DumpCache)
+					{
+						if (BuildPattern(Str, Dump, out string Pattern, out string Replace) || BuildPatternB(Str, Dump, out Pattern, out Replace))
+						{
+							RegexLST.WriteLine(Pattern);
+							RegexLST.WriteLine(Replace);
+							RegexLST.Flush();
+							break;
+						}
+					}
+					DumpCache.Add(Str);
+				}
                 Thread.Sleep(100);
             }
         }

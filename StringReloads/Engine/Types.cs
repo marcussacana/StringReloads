@@ -26,6 +26,8 @@ namespace StringReloads.Engine
         public int Sensitivity;
         public bool UseDB;
         public bool FromAsian;
+        public bool AllowNumbers;
+        public bool RegexFilter;
         public bool DumpFilter;
         public bool DumpRegexFilter;
         public bool DumpAcceptableRange;

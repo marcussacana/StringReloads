@@ -331,13 +331,13 @@ namespace StringReloads
                 if (!IsJap && Spaces == 0)
                     Points += 2;
 
-                if (WordCount <= 2 && Numbers != 0)
+                if (WordCount <= 2 && Numbers != 0 && !Config.Default.Filter.AllowNumbers)
                     Points += (int)(Str.PercentOf(Numbers) / 10);
 
                 if (Str.Length <= 3 && !IsJap)
                     Points++;
 
-                if (Numbers >= Str.Length)
+                if (Numbers >= (IsJap ? Kanjis + JapChars : Latim))
                     Points += 3;
 
                 if (IsJap && Kanjis / 2 > JapChars)

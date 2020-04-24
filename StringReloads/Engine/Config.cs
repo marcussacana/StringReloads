@@ -238,6 +238,8 @@ namespace StringReloads.Engine
                     QuoteList = GetValue("QuoteList", "Filter"),
                     Sensitivity = GetValue("Sensitivity", "Filter").ToInt32(),
                     UseDB = GetValue("UseDB", "Filter").ToBoolean(),
+                    AllowNumbers = GetValue("AllowNumbers", "Filter").ToBoolean(),
+                    RegexFilter = GetValue("RegexFilter", "Filter").ToBoolean(),
                     DumpFilter = GetValue("DumpFilter", "Filter").ToBoolean(),
                     DumpRegexFilter = GetValue("DumpRegexFilter", "Filter").ToBoolean(),
                     DumpAcceptableRange = GetValue("DumpAcceptableRange", "Filter").ToBoolean(),
