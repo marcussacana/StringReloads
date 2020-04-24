@@ -13,8 +13,6 @@ namespace StringReloads.Engine
 {
     public unsafe class Main
     {
-        internal List<object> Locks = new List<object>();
-
         internal IPlugin[] _Plugins = null;
         public IPlugin[] Plugins => _Plugins ??=
             (from Asm in AppDomain.CurrentDomain.GetAssemblies()
@@ -145,127 +143,132 @@ namespace StringReloads.Engine
             }
         }
 
+        internal List<object> HasMatchLocks = new List<object>();
         public bool HasMatch(string String) => HasMatch(null, String);
         public bool HasMatch(IMatch This, string String)
         {
-            if (This != null && !Locks.Contains(This))
-                Locks.Add(This);
+            if (This != null && !HasMatchLocks.Contains(This))
+                HasMatchLocks.Add(This);
 
             foreach (var Match in Matchs)
             {
-                if (Locks.Contains(Match))
+                if (HasMatchLocks.Contains(Match))
                     continue;
 
                 var Rst = Match.HasMatch(String);
                 if (Rst) {
-                    if (Locks.Contains(This))
-                        Locks.Remove(This);
+                    if (HasMatchLocks.Contains(This))
+                        HasMatchLocks.Remove(This);
                     return true;
                 }
             }
 
-            if (Locks.Contains(This))
-                Locks.Remove(This);
+            if (HasMatchLocks.Contains(This))
+                HasMatchLocks.Remove(This);
 
             return false;
         }
+
+        internal List<object> HasValueLocks = new List<object>();
         public bool HasValue(string String) => HasValue(null, String);
         public bool HasValue(IMatch This, string String)
         {
-            if (This != null && !Locks.Contains(This))
-                Locks.Add(This);
+            if (This != null && !HasValueLocks.Contains(This))
+                HasValueLocks.Add(This);
 
             foreach (var Match in Matchs)
             {
-                if (Locks.Contains(Match))
+                if (HasValueLocks.Contains(Match))
                     continue;
 
                 var Rst = Match.HasValue(String);
                 if (Rst) {
-                    if (Locks.Contains(This)) 
-                        Locks.Remove(This);
+                    if (HasValueLocks.Contains(This))
+                        HasValueLocks.Remove(This);
                     return true;
                 }
             }
 
-            if (Locks.Contains(This))
-                Locks.Remove(This);
+            if (HasValueLocks.Contains(This))
+                HasValueLocks.Remove(This);
 
             return false;
         }
 
+        internal List<object> MatchStringLocks = new List<object>();
         public LSTEntry? MatchString(string String) => MatchString(null, String);
         public LSTEntry? MatchString(IMatch This, string String)
         {
-            if (This != null && !Locks.Contains(This))
-                Locks.Add(This);
+            if (This != null && !MatchStringLocks.Contains(This))
+                MatchStringLocks.Add(This);
 
             foreach (var Match in Matchs)
             {
-                if (Locks.Contains(Match))
+                if (MatchStringLocks.Contains(Match))
                     continue;
 
                 var Rst = Match.MatchString(String);
                 if (Rst != null) {
-                    if (Locks.Contains(This)) 
-                        Locks.Remove(This);
+                    if (MatchStringLocks.Contains(This))
+                        MatchStringLocks.Remove(This);
                     return Rst;
                 }
             }
 
-            if (Locks.Contains(This))
-                Locks.Remove(This);
+            if (MatchStringLocks.Contains(This))
+                MatchStringLocks.Remove(This);
 
             return null;
         }
+        internal List<object> ResolveRemapLocks = new List<object>();
         public char ResolveRemap(char Char) => ResolveRemap(null, Char);
         public char ResolveRemap(IMatch This, char Char)
         {
             if (!Initialized)
                 Initializer.Initialize(this);
 
-            if (This != null && !Locks.Contains(This))
-                Locks.Add(This);
+            if (This != null && !ResolveRemapLocks.Contains(This))
+                ResolveRemapLocks.Add(This);
 
             foreach (var Match in Matchs)
             {
-                if (Locks.Contains(Match))
+                if (ResolveRemapLocks.Contains(Match))
                     continue;
 
                 var Rst = Match.ResolveRemap(Char);
                 if (Rst != null) {
-                    if (Locks.Contains(This)) 
-                        Locks.Remove(This);
+                    if (ResolveRemapLocks.Contains(This))
+                        ResolveRemapLocks.Remove(This);
                     return Rst.Value;
                 }
             }
 
-            if (Locks.Contains(This)) 
-                Locks.Remove(This);
+            if (ResolveRemapLocks.Contains(This))
+                ResolveRemapLocks.Remove(This);
 
             return Char;
         }
 
         public FontRemap? ResolveRemap(string Face, int Width, int Height, uint Charset) => ResolveRemap(null, Face, Width, Height, Charset);
         public FontRemap? ResolveRemap(IMatch This, string Face, int Width, int Height, uint Charset) {
-            if (This != null && !Locks.Contains(This))
-                Locks.Add(This);
+            if (This != null && !ResolveRemapLocks.Contains(This))
+                ResolveRemapLocks.Add(This);
 
             foreach (var Match in Matchs)
             {
-                if (Locks.Contains(Match))
+                if (ResolveRemapLocks.Contains(Match))
                     continue;
 
                 var Rst = Match.ResolveRemap(Face, Width, Height, Charset);
                 if (Rst != null) {
-                    if (Locks.Contains(This)) 
-                        Locks.Remove(This);
+                    if (ResolveRemapLocks.Contains(This))
+                        ResolveRemapLocks.Remove(This);
                     return Rst.Value;
                 }
             }
 
-            if (Locks.Contains(This)) 
-                Locks.Remove(This);
+            if (ResolveRemapLocks.Contains(This))
+                ResolveRemapLocks.Remove(This);
 
             return null;
         }

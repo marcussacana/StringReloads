@@ -34,7 +34,10 @@ namespace StringReloads
                 return (void*)SRL.ProcessString((CString)Value);
             }
             catch (Exception ex) {
-                SRL.Locks = new List<object>();
+                SRL.HasMatchLocks = new List<object>();
+                SRL.HasValueLocks = new List<object>();
+                SRL.MatchStringLocks = new List<object>();
+                SRL.ResolveRemapLocks = new List<object>();
                 Log.Error(ex.ToString());
                 if (Retries++ < 5)
                     goto Retry;
@@ -58,7 +61,10 @@ namespace StringReloads
                 return (void*)SRL.ProcessString((WCString)Value);
             }
             catch (Exception ex) {
-                SRL.Locks = new List<object>();
+                SRL.HasMatchLocks = new List<object>();
+                SRL.HasValueLocks = new List<object>();
+                SRL.MatchStringLocks = new List<object>();
+                SRL.ResolveRemapLocks = new List<object>();
                 Log.Error(ex.ToString());
                 if (Retries++ < 5)
                     goto Retry;
