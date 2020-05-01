@@ -72,7 +72,7 @@ namespace StringReloads.Engine
                     Minified = Modifier.Restore(Minified);
             }
 
-            Minified = Engine.Minify(String);
+            Minified = Engine.Minify(Minified);
             
             if (Engine.CurrentDatabase.HasKey(Minified))
                 return Engine.CurrentDatabase[Minified];

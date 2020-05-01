@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Linq;
+using System.Net.Configuration;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -78,6 +79,22 @@ namespace StringReloads.Engine.String
 
             byte[] Buffer = Config.Default.WriteEncoding.GetBytes(Content);
             return Buffer.Concat(Termination).ToArray();
+        }
+
+        public void CopyTo(void* NewAddress)
+        {
+            ((CString)NewAddress).SetString(this);
+        }
+
+        public void SetString(CString Content) => SetString((string)Content);
+        public void SetString(string Content) {
+            byte[] Buffer = Config.Default.WriteEncoding.GetBytes(Content + "\x0");
+            SetBytes(Buffer);
+        }
+        public void SetBytes(byte[] Data) {
+            for (int i = 0; i < Data.Length; i++) {
+               BasePtr[i] = Data[i];
+            }
         }
 
         private string DebuggerDisplay { get {

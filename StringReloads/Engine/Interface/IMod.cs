@@ -1,4 +1,4 @@
-﻿namespace StringReloads.Mods.Base
+﻿namespace StringReloads.Engine.Interface
 {
     public interface IMod
     {

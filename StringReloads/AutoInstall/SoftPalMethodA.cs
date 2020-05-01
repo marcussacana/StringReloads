@@ -1,5 +1,4 @@
-﻿using StringReloads.AutoInstall.Base;
-using static StringReloads.Hook.Base.Extensions;
+﻿using static StringReloads.Hook.Base.Extensions;
 using static StringReloads.Engine.User;
 using System;
 using System.Collections.Generic;
@@ -10,6 +9,7 @@ using StringReloads.Hook;
 using StringReloads.Hook.Base;
 using StringReloads.Engine.String;
 using StringReloads.AutoInstall.Patcher;
+using StringReloads.Engine.Interface;
 
 namespace StringReloads.AutoInstall
 {

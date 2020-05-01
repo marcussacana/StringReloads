@@ -1,5 +1,5 @@
 ﻿using StringReloads.Engine;
-using StringReloads.Mods.Base;
+using StringReloads.Engine.Interface;
 using System;
 using System.IO;
 

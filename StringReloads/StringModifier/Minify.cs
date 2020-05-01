@@ -1,4 +1,6 @@
 ﻿using System;
+using StringReloads.Engine.Interface;
+
 namespace StringReloads.StringModifier
 {
     class Minify : IStringModifier

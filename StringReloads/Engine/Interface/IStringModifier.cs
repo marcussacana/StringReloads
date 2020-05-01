@@ -1,4 +1,4 @@
-﻿namespace StringReloads.StringModifier
+﻿namespace StringReloads.Engine.Interface
 {
     public interface IStringModifier
     {

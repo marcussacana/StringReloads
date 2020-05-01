@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Text;
 
-using StringReloads.AutoInstall.Base;
 using StringReloads.Engine;
+using StringReloads.Engine.Interface;
 using StringReloads.Hook;
 
 using static StringReloads.Hook.Base.Extensions;

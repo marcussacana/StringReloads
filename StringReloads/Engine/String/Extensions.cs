@@ -1,15 +1,11 @@
-﻿using StringReloads.Engine;
-using StringReloads.Engine.String;
-using StringReloads.StringModifier;
-
-using System;
-using System.CodeDom;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
 using System.Text;
+
+using StringReloads.Engine;
+using StringReloads.Engine.String;
 
 namespace StringReloads
 {
@@ -151,6 +147,17 @@ namespace StringReloads
                 _ => Encoding.GetEncoding(Value)
             };
         }
+
+        public static string GetStartTrimmed(this string Str) {
+            int Len = Str.Length - Str.TrimStart().Length;
+            return Str.Substring(0, Len);
+        }
+        public static string GetEndTrimmed(this string Str) {
+            int Len = Str.TrimEnd().Length;
+            return Str.Substring(Len);
+        }
+
+
         public static dynamic Evalaute(this string Expression) => Expression.Evalaute(null);
         public static dynamic Evalaute(this string Expression, string Key, object Value) => Expression.Evalaute(new[] { Key }, new[] { Value });
         public static dynamic Evalaute(this string Expression, IEnumerable<string> Keys, IEnumerable<object> Values) {

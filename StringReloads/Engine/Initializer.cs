@@ -138,6 +138,7 @@ namespace StringReloads.Engine
         {
             _ = Engine.ReloadModifiers;
             _ = Engine.Installers;
+            _ = Engine.Reloads;
             _ = Engine.Matchs;
             _ = Engine.Hooks;
             _ = Engine.Mods;
@@ -186,9 +187,14 @@ namespace StringReloads.Engine
                         AppendArray(ref Engine._Mods, Plugin.GetMods(), true);
                     }
                     catch { }
+                    try
+                    {
+                        AppendArray(ref Engine._Reloads, Plugin.GetReloaders(), true);
+                    }
+                    catch { }
                 }
                 catch (Exception ex) {
-                    Log.Error($"Failed to Load the Plugin \"{Plugin.Name}\".\n{ex.ToString()}");
+                    Log.Error($"Failed to Load the Plugin \"{Plugin.Name}\".\n{ex}");
                 }
             }
         }

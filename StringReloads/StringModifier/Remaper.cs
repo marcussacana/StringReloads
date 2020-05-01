@@ -1,4 +1,5 @@
 ﻿using StringReloads.Engine;
+using StringReloads.Engine.Interface;
 
 namespace StringReloads.StringModifier
 {

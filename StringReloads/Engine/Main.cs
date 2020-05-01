@@ -52,15 +52,18 @@ namespace StringReloads.Engine
             new WideCharToMultiByte()
         };
 
-        internal Mods.Base.IMod[] _Mods = null;
-        public Mods.Base.IMod[] Mods => _Mods ??= new Mods.Base.IMod[] {
+        internal IMod[] _Mods = null;
+        public IMod[] Mods => _Mods ??= new IMod[] {
             new ForceExit(),
             new PatchRedir()
         };
 
+        internal IReloader[] _Reloads = null;
+        public IReloader[] Reloads => _Reloads ??= new IReloader[] { };
 
-        internal AutoInstall.Base.IAutoInstall[] _Installers = null;
-        internal AutoInstall.Base.IAutoInstall[] Installers => _Installers ??= new AutoInstall.Base.IAutoInstall[] {
+
+        internal IAutoInstall[] _Installers = null;
+        internal IAutoInstall[] Installers => _Installers ??= new IAutoInstall[] {
             new AdvHD(),
             new SoftPalMethodA()
         };
@@ -82,29 +85,64 @@ namespace StringReloads.Engine
 
         internal bool Initialized;
 
-        internal byte* ProcessString(CString String) {
-            var Rst = ProcessString((string)String);
-            if (Rst == null)
-                return String;
-            return (CString)Rst;
-        }
-        internal byte* ProcessString(WCString String) {
-            var Rst = ProcessString((string)String);
-            if (Rst == null)
-                return String;
-            return (WCString)Rst;
-        }
-        public string ProcessString(string String)
-        {
+        internal byte* ProcessString(CString pString) {
             if (!Initialized)
                 Initializer.Initialize(this);
 
+            var String = pString;
+            foreach (var Rld in Reloads)
+            {
+                var New = Rld.BeforeReload(String, false);
+                if (New != null)
+                    String = New;
+            }
+
+            var Rst = ProcessString((string)String);
+            if (Rst == null)
+                return String;
+            var Output = (CString)Rst;
+
+            foreach (var Rld in Reloads)
+            {
+                var New = Rld.AfterReload(pString, Output, false);
+                if (New != null)
+                    Output = New;
+            }
+
+            return Output;
+        }
+        internal byte* ProcessString(WCString pString) {
+            if (!Initialized)
+                Initializer.Initialize(this);
+
+            var String = pString;
+            foreach (var Rld in Reloads) {
+                var New = Rld.BeforeReload(String, true);
+                if (New != null)
+                    String = New;
+            }
+
+            var Rst = ProcessString((string)String);
+            if (Rst == null)
+                return String;
+            var Output = (WCString)Rst;
+
+            foreach (var Rld in Reloads)
+            {
+                var New = Rld.AfterReload(pString, Output, true);
+                if (New != null)
+                    Output = New;
+            }
+
+            return Output;
+        }
+        public string ProcessString(string String)
+        {
             if (Settings.CacheOutput && RecentOutput.Contains(String))
                 return null;
 
             var Matched = MatchString(String);
-            if (Matched == null)
-            {
+            if (Matched == null) {
                 Log.Trace($"Input: {String}");
                 return null;
             }
@@ -114,10 +152,16 @@ namespace StringReloads.Engine
 
             //Execute Reload Modifiers
             string Reloaded = Matched?.TranslationLine;
+
+            string Prefix = String.GetStartTrimmed();
+            string Sufix = String.GetEndTrimmed();
+
+            Reloaded = Prefix + Reloaded + Sufix;
+
             foreach (var Modifier in ReloadModifiers)
                 Reloaded = Modifier.Apply(Reloaded, Matched?.OriginalLine);
 
-            Log.Trace($"Reload from:\r\n{Matched?.OriginalLine}\r\nTo:\r\n{Reloaded}");
+            Log.Debug($"Reload from:\r\n{Matched?.OriginalLine}\r\nTo:\r\n{Reloaded}");
 
             if (Settings.CacheOutput)
             {
@@ -199,6 +243,9 @@ namespace StringReloads.Engine
         public LSTEntry? MatchString(string String) => MatchString(null, String);
         public LSTEntry? MatchString(IMatch This, string String)
         {
+            if (string.IsNullOrWhiteSpace(String))
+                return null;
+
             if (This != null && !MatchStringLocks.Contains(This))
                 MatchStringLocks.Add(This);
 
@@ -279,7 +326,8 @@ namespace StringReloads.Engine
             _Hooks[_Hooks.Length - 1].Install();
         }
 
-        public string Minify(string String) {
+        public string Minify(string String) => MinifyString(String);
+        public static string MinifyString(string String) {
             return StringModifier.Minify.Default.Apply(String, null);
         }
     }

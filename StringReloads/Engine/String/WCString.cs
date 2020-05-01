@@ -88,6 +88,25 @@ namespace StringReloads.Engine.String
             return Buffer.Concat(Termination).ToArray();
         }
 
+        public void CopyTo(void* NewAddress)
+        {
+            ((WCString)NewAddress).SetString(this);
+        }
+
+        public void SetString(WCString Content) => SetString((string)Content);
+        public void SetString(string Content)
+        {
+            byte[] Buffer = Encoding.Unicode.GetBytes(Content + "\x0");
+            SetBytes(Buffer);
+        }
+        public void SetBytes(byte[] Data)
+        {
+            for (int i = 0; i < Data.Length; i++)
+            {
+                BasePtr[i] = Data[i];
+            }
+        }
+
         private string DebuggerDisplay { get {
                 if (System.IntPtr.Size == 4)
                     return $"[0x{(ulong)BasePtr:X8}] {(string)this}";

@@ -1,4 +1,4 @@
-﻿namespace StringReloads.AutoInstall.Base
+﻿namespace StringReloads.Engine.Interface
 {
     public interface IAutoInstall
     {

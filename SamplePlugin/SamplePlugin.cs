@@ -1,11 +1,8 @@
 ﻿using System;
 using StringReloads;
-using StringReloads.AutoInstall.Base;
 using StringReloads.Engine;
 using StringReloads.Engine.Interface;
 using StringReloads.Hook.Base;
-using StringReloads.Mods.Base;
-using StringReloads.StringModifier;
 using static StringReloads.Engine.User;
 
 namespace SamplePlugin
@@ -23,6 +20,8 @@ namespace SamplePlugin
         public IStringModifier[] GetModifiers() => new[] { new SampleModifier() };
 
         public IMod[] GetMods() => null;
+
+        public IReloader[] GetReloaders() => null;
 
         public void Initialize(Main Engine)
         {          

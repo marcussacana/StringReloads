@@ -1,9 +1,9 @@
-﻿using StringReloads.AutoInstall.Base;
-using System;
-using static StringReloads.Hook.Base.Extensions;
-using StringReloads.Hook;
+﻿using System;
 using System.IO;
+using StringReloads.Hook;
+using StringReloads.Engine.Interface;
 using StringReloads.AutoInstall.Patcher;
+using static StringReloads.Hook.Base.Extensions;
 
 namespace StringReloads.AutoInstall
 {

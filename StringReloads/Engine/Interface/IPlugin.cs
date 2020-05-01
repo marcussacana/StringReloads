@@ -1,8 +1,4 @@
-﻿using StringReloads.AutoInstall.Base;
-using StringReloads.Mods.Base;
-using StringReloads.StringModifier;
-
-namespace StringReloads.Engine.Interface
+﻿namespace StringReloads.Engine.Interface
 {
     public interface IPlugin
     {
@@ -13,5 +9,6 @@ namespace StringReloads.Engine.Interface
         public IMatch[] GetMatchs();
         public IMod[] GetMods();
         public IStringModifier[] GetModifiers();
+        public IReloader[] GetReloaders();
     }
 }
