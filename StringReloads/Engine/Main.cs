@@ -5,6 +5,7 @@ using System.Linq;
 using StringReloads.AutoInstall;
 using StringReloads.Engine.Interface;
 using StringReloads.Engine.String;
+using StringReloads.Engine.Unmanaged;
 using StringReloads.Hook;
 using StringReloads.Mods;
 using StringReloads.StringModifier;
@@ -89,6 +90,9 @@ namespace StringReloads.Engine
             if (!Initialized)
                 Initializer.Initialize(this);
 
+            if (SanityChecks.IsBadCodePtr(pString))
+                return pString;
+
             var String = pString;
             foreach (var Rld in Reloads)
             {
@@ -109,11 +113,20 @@ namespace StringReloads.Engine
                     Output = New;
             }
 
+            if (Settings.HeapAlloc && Output != null && ((string)Output) == null)
+                return (CString)Alloc.Overwrite(Output.ToArray(), pString);
+
+            if (Settings.HeapAlloc && Output != null && ((string)Output) == null)
+                return (CString)Alloc.CreateHeap(Output.ToArray());
+
             return Output;
         }
         internal byte* ProcessString(WCString pString) {
             if (!Initialized)
                 Initializer.Initialize(this);
+
+            if (SanityChecks.IsBadCodePtr(pString))
+                return pString;
 
             var String = pString;
             foreach (var Rld in Reloads) {
@@ -133,6 +146,12 @@ namespace StringReloads.Engine
                 if (New != null)
                     Output = New;
             }
+
+            if (Settings.HeapAlloc && Output != null && ((string)Output) == null)
+                return (WCString)Alloc.Overwrite(Output.ToArray(), pString);
+
+            if (Settings.HeapAlloc && Output != null && ((string)Output) == null)
+                return (WCString)Alloc.CreateHeap(Output.ToArray());
 
             return Output;
         }
