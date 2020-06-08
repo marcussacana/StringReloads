@@ -6,6 +6,7 @@ using System.Linq;
 using System.Collections.Generic;
 using StringReloads.Engine.String;
 using StringReloads.Engine;
+using System.Runtime.CompilerServices;
 
 namespace StringReloads.Hook.Base
 {

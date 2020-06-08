@@ -1,6 +1,7 @@
 using System;
 using Iced.Intel;
 using System.Runtime.InteropServices;
+using static StringReloads.Hook.Base.Extensions;
 
 namespace StringReloads.Hook.Base
 {
@@ -8,16 +9,21 @@ namespace StringReloads.Hook.Base
     {
         public Intercept() { }
 
-        public Intercept(void* Address) {
+        public Intercept(void* Address)
+        {
             this.Address = Address;
             AssemblyHook();
         }
 
-        ~Intercept() {
+        public Intercept(string Module, string Export) : this(GetProcAddress(LoadLibrary(Module), Export)) { }
+
+        ~Intercept()
+        {
             Uninstall();
         }
 
-        public void Compile(void* Address) {
+        public void Compile(void* Address)
+        {
             this.Address = Address;
             AssemblyHook();
 
@@ -57,7 +63,7 @@ namespace StringReloads.Hook.Base
             RealBuffer = new byte[InterceptSize];
             HookBuffer = new byte[InterceptSize + JmpSize];
 
-            Extensions.DeprotectMemory(Address, (uint)RealBuffer.Length);
+            DeprotectMemory(Address, (uint)RealBuffer.Length);
             Marshal.Copy(new IntPtr(Address), RealBuffer, 0, RealBuffer.Length);
 
             //Assemble Interceptor
@@ -74,8 +80,8 @@ namespace StringReloads.Hook.Base
 
             //Encode Interceptor
             uint BufferSize = (uint)IInstructions.GetEncodedSize(32);
-            var phBuffer = Extensions.AllocUnsafe(BufferSize);
-            Extensions.DeprotectMemory(phBuffer, BufferSize);
+            var phBuffer = AllocUnsafe(BufferSize);
+            DeprotectMemory(phBuffer, BufferSize);
             HookAddress = phBuffer;
 
             Compiler.Encode(IInstructions, (ulong)phBuffer);
@@ -94,13 +100,15 @@ namespace StringReloads.Hook.Base
 
 #endif
 
-        public void Install() {
-            Extensions.DeprotectMemory(Address, (uint)HookBuffer.Length);
+        public void Install()
+        {
+            DeprotectMemory(Address, (uint)HookBuffer.Length);
             Marshal.Copy(HookBuffer, 0, new IntPtr(Address), HookBuffer.Length);
         }
 
-        public void Uninstall() {
-            Extensions.DeprotectMemory(Address, (uint)RealBuffer.Length);
+        public void Uninstall()
+        {
+            DeprotectMemory(Address, (uint)RealBuffer.Length);
             Marshal.Copy(RealBuffer, 0, new IntPtr(Address), RealBuffer.Length);
         }
 

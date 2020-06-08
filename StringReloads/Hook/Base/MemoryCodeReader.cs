@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace StringReloads.Hook.Base
 {
-    unsafe class MemoryCodeReader : CodeReader, IDisposable
+    public unsafe class MemoryCodeReader : CodeReader, IDisposable
     {
         byte* Begin;
         byte* Address;

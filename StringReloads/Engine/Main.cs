@@ -90,7 +90,7 @@ namespace StringReloads.Engine
             if (!Initialized)
                 Initializer.Initialize(this);
 
-            if (SanityChecks.IsBadCodePtr(pString))
+            if (Settings.SanityCheck && SanityChecks.IsBadCodePtr(pString))
                 return pString;
 
             var String = pString;
@@ -125,7 +125,7 @@ namespace StringReloads.Engine
             if (!Initialized)
                 Initializer.Initialize(this);
 
-            if (SanityChecks.IsBadCodePtr(pString))
+            if (Settings.SanityCheck && SanityChecks.IsBadCodePtr(pString))
                 return pString;
 
             var String = pString;

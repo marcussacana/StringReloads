@@ -28,6 +28,9 @@ namespace StringReloads.Engine
         bool? _CacheOutput = null;
         public bool CacheOutput => ((bool?)(_CacheOutput ??= GetValue("CacheOutput").ToBoolean())).Value;
 
+        bool? _SanityCheck = null;
+        public bool SanityCheck => ((bool?)(_SanityCheck ??= GetValue("SanityCheck").ToBoolean())).Value;
+
         string[] _IniLines = null;
         public string[] IniLines {
             get {
