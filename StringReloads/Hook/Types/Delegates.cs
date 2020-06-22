@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StringReloads.Engine.String;
+using System;
 using System.Runtime.InteropServices;
 
 namespace StringReloads.Hook
@@ -37,4 +38,10 @@ namespace StringReloads.Hook
     
     [UnmanagedFunctionPointer(CallingConvention.Winapi)]
     public unsafe delegate int WideCharToMultiByteDelegate(uint CodePage, uint dwFlags, byte* lpWideCharStr, int cchWideChar, byte* lpMultiByteStr, int cbMultiByte, byte* lpDefaultChar, out bool lpUsedDefaultChar);
+
+    [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Ansi)]
+    public unsafe delegate bool TextOutADelegate(void* dc, int xStart, int yStart, byte* pStr, int strLen);
+
+    [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode)]
+    public unsafe delegate bool TextOutWDelegate(void* dc, int xStart, int yStart, byte* pStr, int strLen);
 }

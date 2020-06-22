@@ -10,6 +10,10 @@ namespace StringReloads.Engine.String
     {
         public virtual Encoding Encoding => Config.Default.ReadEncoding;
 
+        public abstract long? FixedLength { get; set; }
+
+        public long Length => FixedLength ?? this.Count();
+        
         public byte* BasePtr;
         public byte* CurrentPtr;
 

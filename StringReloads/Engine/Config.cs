@@ -179,6 +179,12 @@ namespace StringReloads.Engine
 
         bool? _MultiByteToWideCharAutoEncoding = null;
         public bool MultiByteToWideCharAutoEncoding => ((bool?)(_MultiByteToWideCharAutoEncoding ??= GetValue("AutoEncoding", "MultiByteToWideChar").ToBoolean())).Value;
+        
+        bool? _TextOutAUndoRemap = null;
+        public bool TextOutAUndoRemap => ((bool?)(_TextOutAUndoRemap ??= GetValue("UndoRemap", "TextOutA").ToBoolean())).Value;
+
+        bool? _TextOutWUndoRemap = null;
+        public bool TextOutWUndoRemap => ((bool?)(_TextOutWUndoRemap ??= GetValue("UndoRemap", "TextOutW").ToBoolean())).Value;
 
 
         Dictionary<string, string>[] _FontRemaps;

@@ -17,6 +17,8 @@ namespace StringReloads.Engine.String
         static byte[] _Termination;
         public static byte[] Termination => _Termination ?? (_Termination = Config.Default.ReadEncoding.GetBytes("\x0"));
 
+        public override long? FixedLength { get; set; }
+
         public static implicit operator CString(string Str) {
 
             byte[] Buffer = GetBytes(Str);
@@ -57,6 +59,9 @@ namespace StringReloads.Engine.String
         }
 
         private bool IsEnd(byte* Address) {
+            if (FixedLength.HasValue)
+                return (Address - BasePtr) >= FixedLength.Value;
+
             for (int i = 0; i < Termination.Length; i++) {
                 if (*(Address + i) != Termination[i])
                     return false;
@@ -95,6 +100,9 @@ namespace StringReloads.Engine.String
             for (int i = 0; i < Data.Length; i++) {
                BasePtr[i] = Data[i];
             }
+
+            if (FixedLength.HasValue)
+                FixedLength = Data.Length;
         }
 
         private string DebuggerDisplay { get {

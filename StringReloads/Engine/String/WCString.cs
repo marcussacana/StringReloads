@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -14,11 +15,14 @@ namespace StringReloads.Engine.String
 
         public readonly static byte[] Termination = new byte[] { 0x00, 0x00 };
 
-        public static implicit operator WCString(string Str) {
+        public override long? FixedLength { get; set;}
+
+        public static implicit operator WCString(string Str)
+        {
 
             byte[] Buffer = GetBytes(Str);
             if (Buffer == null)
-                return new WCString() { BasePtr = null }; 
+                return new WCString() { BasePtr = null };
 
             var Addr = Marshal.AllocHGlobal(Buffer.Length);
             Marshal.Copy(Buffer, 0, Addr, Buffer.Length);
@@ -47,7 +51,8 @@ namespace StringReloads.Engine.String
             return UCS;
         }
 
-        public static implicit operator WCString(byte* Ptr) {
+        public static implicit operator WCString(byte* Ptr)
+        {
             var UCS = new WCString();
             UCS.BasePtr = Ptr;
             UCS.CurrentPtr = Ptr;
@@ -55,7 +60,20 @@ namespace StringReloads.Engine.String
             return UCS;
         }
 
-        public override byte? GetCurrent() {
+
+        public static implicit operator string(WCString Instance)
+        {
+            if (Instance.BasePtr == null)
+                return null;
+
+            byte[] Buffer = new byte[Instance.FixedLength ?? (Instance.Count() * 2)];
+            Marshal.Copy(new IntPtr(Instance.BasePtr), Buffer, 0, Buffer.Length);
+
+            return Instance.Encoding.GetString(Buffer);
+        }
+
+        public override byte? GetCurrent()
+        {
             if (IsEnd(CurrentPtr))
             {
                 return null;
@@ -63,8 +81,13 @@ namespace StringReloads.Engine.String
             return *CurrentPtr;
         }
 
-        private bool IsEnd(byte* Address) {
-            for (int i = 0; i < Termination.Length; i++) {
+        private bool IsEnd(byte* Address)
+        {
+            if (FixedLength.HasValue)
+                return (Address - BasePtr) >= FixedLength.Value;
+
+            for (int i = 0; i < Termination.Length; i++)
+            {
                 if (*(Address + i) != Termination[i])
                     return false;
             }
@@ -75,7 +98,7 @@ namespace StringReloads.Engine.String
             if (IsEnd(CurrentPtr))
                 return false;
 
-            CurrentPtr++;
+            CurrentPtr += 2;
             return true;
         }
 
@@ -105,9 +128,20 @@ namespace StringReloads.Engine.String
             {
                 BasePtr[i] = Data[i];
             }
+
+            if (FixedLength.HasValue)
+                FixedLength = Data.Length / 2;
         }
 
-        private string DebuggerDisplay { get {
+        public override string ToString()
+        {
+            return this;
+        }
+
+        private string DebuggerDisplay
+        {
+            get
+            {
                 if (System.IntPtr.Size == 4)
                     return $"[0x{(ulong)BasePtr:X8}] {(string)this}";
                 return $"[0x{(ulong)BasePtr:X16}] {(string)this}";

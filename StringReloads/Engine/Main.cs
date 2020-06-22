@@ -7,6 +7,7 @@ using StringReloads.Engine.Interface;
 using StringReloads.Engine.String;
 using StringReloads.Engine.Unmanaged;
 using StringReloads.Hook;
+using StringReloads.Hook.Win32;
 using StringReloads.Mods;
 using StringReloads.StringModifier;
 
@@ -50,7 +51,9 @@ namespace StringReloads.Engine
             new GetGlyphOutlineW(),
             new SysAllocString(),
             new MultiByteToWideChar(),
-            new WideCharToMultiByte()
+            new WideCharToMultiByte(),
+            new TextOutA(),
+            new TextOutW()
         };
 
         internal IMod[] _Mods = null;
