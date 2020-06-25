@@ -2,8 +2,6 @@
 using StringReloads.Engine.String;
 using StringReloads.Hook.Base;
 using StringReloads.StringModifier;
-using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 
@@ -14,6 +12,10 @@ namespace StringReloads.Hook.Win32
         public override string Library => "gdi32.dll";
 
         public override string Export => "TextOutA";
+
+#if x64
+        public override bool ProtectRAX => true;
+#endif
 
         public override void Initialize()
         {

@@ -6,6 +6,10 @@
 
         public override string Export => "CreateFileW";
 
+#if x64
+        public override bool ProtectRAX => false;
+#endif
+
         public override void Initialize()
         {
             HookDelegate = new CreateFileWDelegate(CreateFileHook);

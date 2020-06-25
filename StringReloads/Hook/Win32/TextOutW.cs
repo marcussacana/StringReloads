@@ -1,10 +1,7 @@
-﻿using Antlr.Runtime;
-using StringReloads.Engine;
+﻿using StringReloads.Engine;
 using StringReloads.Engine.String;
 using StringReloads.Hook.Base;
 using StringReloads.StringModifier;
-using System.IO;
-using System.Linq;
 
 namespace StringReloads.Hook.Win32
 {
@@ -13,6 +10,10 @@ namespace StringReloads.Hook.Win32
         public override string Library => "gdi32.dll";
 
         public override string Export => "TextOutW";
+
+#if x64
+        public override bool ProtectRAX => true;
+#endif
 
         public override void Initialize()
         {
