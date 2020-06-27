@@ -116,7 +116,7 @@ namespace StringReloads.Engine
                 DefaultLST = File.AppendText(LSTPath);
             }
 
-            String = String.Trim();
+            String = String.Trim().Replace("\n", LSTParser.BreakLine).Replace("\r", LSTParser.ReturnLine);
 
             DefaultLST.WriteLine(String);
             DefaultLST.WriteLine(String);

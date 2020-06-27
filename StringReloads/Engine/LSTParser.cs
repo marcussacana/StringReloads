@@ -7,6 +7,9 @@ namespace StringReloads.Engine
 {
     public class LSTParser : IDisposable
     {
+        public const string BreakLine = "::BREAKLINE::";
+        public const string ReturnLine = "::RETURNLINE::";
+
         public string Name { get; private set; }
         TextReader Reader;
         public LSTParser(string LSTPath) : this(File.OpenText(LSTPath), Path.GetFileName(LSTPath)) { }
@@ -123,8 +126,8 @@ namespace StringReloads.Engine
                 LineB = LineB.Substring(LineB.IndexOf("::", 2) + 2);
             }
 
-            OriginalLine = LineA;
-            TranslationLine = LineB;
+            OriginalLine = LineA.Replace(LSTParser.BreakLine, "\n");
+            TranslationLine = LineB.Replace(LSTParser.ReturnLine, "\r");
         }
 
         public LSTFlag[] Flags => OriginalFlags.Union(TranslationFlags).ToArray();
