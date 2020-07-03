@@ -9,10 +9,13 @@ namespace SamplePlugin
 {
     public class SamplePlugin : IPlugin
     {
-        Main Engine;
+        SRL Engine;
         public string Name => "Sample";
 
         public IAutoInstall[] GetAutoInstallers() => null;
+
+        public IEncoding[] GetEncodings() => null;
+
         public Hook[] GetHooks() => null;
 
         public IMatch[] GetMatchs() => null;
@@ -23,7 +26,7 @@ namespace SamplePlugin
 
         public IReloader[] GetReloaders() => null;
 
-        public void Initialize(Main Engine)
+        public void Initialize(SRL Engine)
         {          
             this.Engine = Engine; 
             if (!Config.Default.GetValue("SampleModifier", "Modifiers").ToBoolean())

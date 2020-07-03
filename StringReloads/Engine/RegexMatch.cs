@@ -10,9 +10,9 @@ namespace StringReloads.Engine
 {
     class RegexMatch : IMatch
     {
-		Main Engine;
+		SRL Engine;
         Thread DumpThread = null;
-        public RegexMatch(Main Engine) {
+        public RegexMatch(SRL Engine) {
 			this.Engine = Engine;
 			string LSTPath = Path.Combine(Config.Default.WorkingDirectory, "Regex.lst");
 			if (File.Exists(LSTPath))

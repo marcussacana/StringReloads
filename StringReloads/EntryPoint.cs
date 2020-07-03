@@ -14,7 +14,7 @@ namespace StringReloads
         public static string _CurrentDLL = null;
         public static string CurrentDll => _CurrentDLL ?? Assembly.GetExecutingAssembly().Location;
 
-        internal static Main SRL = new Main();
+        internal static SRL SRL = new SRL();
         static ProcessDelegate ProcessInstance;
         static ProcessDelegate ProcessWInstance;
 

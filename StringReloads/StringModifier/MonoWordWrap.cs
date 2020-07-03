@@ -12,7 +12,7 @@ namespace StringReloads.StringModifier
 
         bool UseRelative => Config.Default.UseRelativeWidth;
 
-        public MonoWordWrap(Main Main) {
+        public MonoWordWrap(SRL Main) {
             Main.OnFlagTriggered += (Flag, Cancel) =>
             {
                 string Name = Flag.Name.ToUpperInvariant();

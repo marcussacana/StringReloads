@@ -127,6 +127,13 @@ namespace StringReloads
 
         public static Encoding ToEncoding(this string Value)
         {
+            if (EntryPoint.SRL != null)
+            {
+                if (EntryPoint.SRL.CustomEncodings.ContainsKey(Value.ToLowerInvariant()))
+                {
+                    return EntryPoint.SRL.CustomEncodings[Value.ToLowerInvariant()];
+                }
+            }
             if (int.TryParse(Value, out int CP))
                 return Encoding.GetEncoding(CP);
 
@@ -148,11 +155,13 @@ namespace StringReloads
             };
         }
 
-        public static string GetStartTrimmed(this string Str) {
+        public static string GetStartTrimmed(this string Str)
+        {
             int Len = Str.Length - Str.TrimStart().Length;
             return Str.Substring(0, Len);
         }
-        public static string GetEndTrimmed(this string Str) {
+        public static string GetEndTrimmed(this string Str)
+        {
             int Len = Str.TrimEnd().Length;
             return Str.Substring(Len);
         }
@@ -160,7 +169,8 @@ namespace StringReloads
 
         public static dynamic Evalaute(this string Expression) => Expression.Evalaute(null);
         public static dynamic Evalaute(this string Expression, string Key, object Value) => Expression.Evalaute(new[] { Key }, new[] { Value });
-        public static dynamic Evalaute(this string Expression, IEnumerable<string> Keys, IEnumerable<object> Values) {
+        public static dynamic Evalaute(this string Expression, IEnumerable<string> Keys, IEnumerable<object> Values)
+        {
             if (Keys.Count() != Values.Count())
                 throw new InvalidOperationException("The Keys and Values needs to have the same amount of items");
             Dictionary<string, object> Items = new Dictionary<string, object>();
@@ -168,7 +178,8 @@ namespace StringReloads
                 Items.Add(Keys.ElementAt(i), Values.ElementAt(i));
             return Expression.Evalaute(Items);
         }
-        public static dynamic Evalaute(this string Expression, Dictionary<string, object> Paramters) {
+        public static dynamic Evalaute(this string Expression, Dictionary<string, object> Paramters)
+        {
             var Exp = new NCalc.Expression(Expression);
             if (Paramters != null)
                 Exp.Parameters = Paramters;
@@ -196,7 +207,8 @@ namespace StringReloads
                 foreach (string Ignore in IgnoreList)
                     Str = Str.Replace(Ignore, "");
 
-                foreach (string Deny in DenyList) {
+                foreach (string Deny in DenyList)
+                {
                     if (Str.ToLower().Contains(Deny.ToLower()))
                         return false;
                 }

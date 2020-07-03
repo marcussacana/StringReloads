@@ -8,8 +8,8 @@ namespace StringReloads.StringModifier
 
         static Remaper _Default = null;
         public static Remaper Default = _Default ?? new Remaper(EntryPoint.SRL);
-        Main Engine;
-        public Remaper(Main Main) => Engine = Main;
+        SRL Engine;
+        public Remaper(SRL Main) => Engine = Main;
 
         public string Name => "Remaper";
 

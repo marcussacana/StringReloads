@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Text;
 using StringReloads.AutoInstall;
 using StringReloads.Engine.Interface;
 using StringReloads.Engine.String;
@@ -13,7 +14,7 @@ using StringReloads.StringModifier;
 
 namespace StringReloads.Engine
 {
-    public unsafe class Main
+    public unsafe class SRL
     {
         internal IPlugin[] _Plugins = null;
         public IPlugin[] Plugins => _Plugins ??=
@@ -71,6 +72,8 @@ namespace StringReloads.Engine
             new AdvHD(),
             new SoftPalMethodA()
         };
+
+        internal Dictionary<string,Encoding> CustomEncodings = new Dictionary<string, Encoding>();
 
         internal int CurrentDatabaseIndex = 0;
         

@@ -55,13 +55,13 @@ namespace SRLDebugger
             var LST = File.ReadAllLines(FileA);
             for (int i = 0; i < LST.Length; i += 2)
             {
-                LSTA.Add(StringReloads.Engine.Main.MinifyString(LST[i]));
+                LSTA.Add(StringReloads.Engine.SRL.MinifyString(LST[i]));
             }
             LST = File.ReadAllLines(FileB);
             List<string> NewB = new List<string>();
             for (int i = 0; i < LST.Length; i += 2)
             {
-                string LineA = StringReloads.Engine.Main.MinifyString(LST[i]);
+                string LineA = StringReloads.Engine.SRL.MinifyString(LST[i]);
                 string LineB = LST[i + 1];
                 if (LSTA.Contains(LineA))
                     continue;

@@ -10,8 +10,8 @@ namespace StringReloads.Engine
 {
     class Match : IMatch
     {
-        Main Engine;
-        public Match(Main Engine) => this.Engine = Engine;
+        SRL Engine;
+        public Match(SRL Engine) => this.Engine = Engine;
 
         public char? ResolveRemap(char Char) {
             if (!Engine.CharRemap.ContainsValue(Char))
