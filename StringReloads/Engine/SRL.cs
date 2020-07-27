@@ -73,7 +73,7 @@ namespace StringReloads.Engine
             new SoftPalMethodA()
         };
 
-        internal Dictionary<string,Encoding> CustomEncodings = new Dictionary<string, Encoding>();
+        internal IEncoding[] Encodings = new IEncoding[0];
 
         internal int CurrentDatabaseIndex = 0;
         

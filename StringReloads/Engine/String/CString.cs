@@ -14,8 +14,8 @@ namespace StringReloads.Engine.String
 
         private CString() { }
 
-        static byte[] _Termination;
-        public static byte[] Termination => _Termination ?? (_Termination = Config.Default.ReadEncoding.GetBytes("\x0"));
+        public static byte[] _Termination;
+        public static byte[] Termination => _Termination ??= Config.Default.ReadEncoding.GetTermination();
 
         public override long? FixedLength { get; set; }
 

@@ -208,8 +208,7 @@ namespace StringReloads.Engine
                     catch { }
                     try
                     {
-                        foreach (var Encoding in Plugin.GetEncodings())
-                            Engine.CustomEncodings.Add(Encoding.Name.ToLowerInvariant(), Encoding.Encoding);
+                        AppendArray(ref Engine.Encodings, Plugin.GetEncodings(), true);
                     }
                     catch { }
                 }
@@ -274,8 +273,14 @@ namespace StringReloads.Engine
                 {
                     if (!Line.Contains("=") || string.IsNullOrWhiteSpace(Line))
                         continue;
-                    string PartA = Line.Substring(0, Line.IndexOf("=")).Trim();
-                    string PartB = Line.Substring(Line.IndexOf("=") + 1).Trim();
+
+                    string PartA = Line.Substring(0, Line.IndexOf("="));
+                    string PartB = Line.Substring(Line.IndexOf("=") + 1);
+
+                    if (PartA.Length > 1)
+                        PartA = PartA.Trim();
+                    if (PartB.Length > 1)
+                        PartB = PartB.Trim();
 
                     char A, B;
 

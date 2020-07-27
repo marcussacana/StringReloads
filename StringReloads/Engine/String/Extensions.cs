@@ -125,15 +125,31 @@ namespace StringReloads
             return 0;
         }
 
+        public static byte[] GetTermination(this Encoding Encoding)
+        {
+            if (EntryPoint.SRL != null)
+            {
+                var Customs = (from x in EntryPoint.SRL.Encodings where x.Encoding.EncodingName == Encoding.EncodingName select x);
+                if (Customs.Any())
+                {
+                    var Termination = Customs.First().Termination;
+                    if (Termination != null && Termination.Length != 0)
+                        return Termination;
+                }
+            }
+
+            return Encoding.GetBytes("\x0");
+        }
+
         public static Encoding ToEncoding(this string Value)
         {
             if (EntryPoint.SRL != null)
             {
-                if (EntryPoint.SRL.CustomEncodings.ContainsKey(Value.ToLowerInvariant()))
-                {
-                    return EntryPoint.SRL.CustomEncodings[Value.ToLowerInvariant()];
-                }
+                var Customs = (from x in EntryPoint.SRL.Encodings where x.Name.ToLowerInvariant() == Value.ToLowerInvariant() select x);
+                if (Customs.Any())                
+                    return Customs.First().Encoding;
             }
+
             if (int.TryParse(Value, out int CP))
                 return Encoding.GetEncoding(CP);
 
