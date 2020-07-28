@@ -13,14 +13,16 @@ namespace StringReloads.Engine
         SRL Engine;
         public Match(SRL Engine) => this.Engine = Engine;
 
-        public char? ResolveRemap(char Char) {
+        public char? ResolveRemap(char Char)
+        {
             if (!Engine.CharRemap.ContainsValue(Char))
                 return Char;
 
             return Engine.CharRemap.ReverseMatch(Char);
         }
 
-        public bool HasMatch(string String) {
+        public bool HasMatch(string String)
+        {
             string Minified = String;
 
             foreach (var Modifier in Engine.ReloadModifiers)
@@ -34,7 +36,8 @@ namespace StringReloads.Engine
             if (Engine.CurrentDatabase.HasKey(Minified))
                 return true;
 
-            for (int i = 0; i < Engine.Databases.Count; i++) {
+            for (int i = 0; i < Engine.Databases.Count; i++)
+            {
                 if (Engine.Databases[i].HasKey(Minified))
                     return true;
             }
@@ -56,29 +59,34 @@ namespace StringReloads.Engine
             if (Engine.CurrentDatabase.HasValue(Minified))
                 return true;
 
-            for (int i = 0; i < Engine.Databases.Count; i++) {
+            for (int i = 0; i < Engine.Databases.Count; i++)
+            {
                 if (Engine.Databases[i].HasValue(Minified))
                     return true;
             }
 
             return false;
         }
-        public LSTEntry? MatchString(string String) {
+        public LSTEntry? MatchString(string String)
+        {
 
             string Minified = String;
 
-            foreach (var Modifier in Engine.ReloadModifiers) {
+            foreach (var Modifier in Engine.ReloadModifiers)
+            {
                 if (Modifier.CanRestore)
                     Minified = Modifier.Restore(Minified);
             }
 
             Minified = Engine.Minify(Minified);
-            
+
             if (Engine.CurrentDatabase.HasKey(Minified))
                 return Engine.CurrentDatabase[Minified];
 
-            for (int i = 0; i < Engine.Databases.Count; i++) {
-                if (Engine.Databases[i].HasKey(Minified)) {
+            for (int i = 0; i < Engine.Databases.Count; i++)
+            {
+                if (Engine.Databases[i].HasKey(Minified))
+                {
                     Engine.CurrentDatabaseIndex = i;
                     Log.Trace($"Database Changed to {Engine.Databases[i].Name} (ID: {i})");
                     return Engine.Databases[i][Minified];
@@ -93,7 +101,8 @@ namespace StringReloads.Engine
 
         List<string> DumpCache = new List<string>();
         TextWriter DefaultLST = null;
-        void DumpString(string String, string Minified) {
+        void DumpString(string String, string Minified)
+        {
             if (Engine.Settings.Filter.DumpFilter && !String.IsDialogue(UseAcceptableRange: Engine.Settings.Filter.DumpAcceptableRange))
                 return;
 
@@ -102,11 +111,15 @@ namespace StringReloads.Engine
 
             DumpCache.Add(Minified);
 
-            if (DefaultLST == null) {
+            if (DefaultLST == null)
+            {
                 string LSTPath = Path.Combine(Engine.Settings.WorkingDirectory, "Strings.lst");
-                if (File.Exists(LSTPath)) {
-                    using (var Reader = File.OpenText(LSTPath)) {
-                        while (Reader.Peek() != -1) {
+                if (File.Exists(LSTPath))
+                {
+                    using (var Reader = File.OpenText(LSTPath))
+                    {
+                        while (Reader.Peek() != -1)
+                        {
                             DumpCache.Add(Engine.Minify(Reader.ReadLine()));
                             Reader.ReadLine();
                         }
@@ -123,20 +136,21 @@ namespace StringReloads.Engine
             DefaultLST.Flush();
         }
 
-        public FontRemap? ResolveRemap(string Facename, int Width, int Height, uint Charset) {
-            var Remap = (from x in Config.Default.FontRemaps where 
-                         CheckFontValue(x, "From",        Facename,           false) &&
-                         CheckFontValue(x, "FromWidth",   Width.ToString(),   true ) &&
-                         CheckFontValue(x, "FromHeight",  Height.ToString(),  true ) &&
-                         CheckFontValue(x, "FromCharset", Charset.ToString(), false)
+        public FontRemap? ResolveRemap(string Facename, int Width, int Height, uint Charset)
+        {
+            var Remap = (from x in Config.Default.FontRemaps where
+                                CheckFontValue(x, "From", Facename, false) &&
+                                CheckFontValue(x, "FromWidth", Width.ToString(), true) &&
+                                CheckFontValue(x, "FromHeight", Height.ToString(), true) &&
+                                CheckFontValue(x, "FromCharset", Charset.ToString(), false)
                          select x).FirstOrDefault();
 
             if (Remap == null)
                 Remap = (from x in Config.Default.FontRemaps where
-                         CheckFontValue(x, "From",        "*",                false) &&
-                         CheckFontValue(x, "FromWidth",   Width.ToString(),   true ) &&
-                         CheckFontValue(x, "FromHeight",  Height.ToString(),  true ) &&
-                         CheckFontValue(x, "FromCharset", Charset.ToString(), false)
+                                CheckFontValue(x, "From", "*", false) &&
+                                CheckFontValue(x, "FromWidth", Width.ToString(), true) &&
+                                CheckFontValue(x, "FromHeight", Height.ToString(), true) &&
+                                CheckFontValue(x, "FromCharset", Charset.ToString(), false)
                          select x).FirstOrDefault();
 
             Log.Trace($"CreateFont -> Width: {Width:+00;-00}, Height: {Height:+00;-00}, Charset: 0x{Charset:X2}, Name: \"{Facename}\"");
@@ -155,16 +169,31 @@ namespace StringReloads.Engine
                 Rst.Charset = Remap["charset"].ToUInt32();
             else Rst.Charset = Charset;
 
+            var EvalKeys = new string[] { "Width", "Height", "Charset", "Name",   "Facename" };
+            var EvalVals = new object[] {  Width,   Height,   Charset,  Facename,  Facename  };
+
             if (Remap.ContainsKey("width"))
             {
                 var nWidth = Remap["width"];
 
-                if (nWidth.StartsWith("."))
-                    Rst.Width = nWidth.Substring(1).ToInt32();
-                else if (nWidth.StartsWith("+") || nWidth.StartsWith("-"))
-                    Rst.Width = Width + nWidth.ToInt32();
-                else
-                    Rst.Width = nWidth.ToInt32();
+                bool ForceAbsolute = nWidth.StartsWith(".");
+
+                if (ForceAbsolute)
+                    nWidth = nWidth.Substring(1);
+
+                if (nWidth != "0")
+                {
+                    bool Relative = !ForceAbsolute && (nWidth.StartsWith("+") || nWidth.StartsWith("-"));
+                    int Value = nWidth.ToInt32();
+                    if (Value == 0)
+                        Value = (int)nWidth.Evalaute(EvalKeys, EvalVals);
+                  
+                    if (Relative)
+                        Rst.Width = Width + Value;
+                    else
+                        Rst.Width = Value;
+                } else
+                    Rst.Width = 0;
             }
             else
                 Rst.Width = Width;
@@ -173,12 +202,25 @@ namespace StringReloads.Engine
             {
                 var nHeight = Remap["height"];
 
-                if (nHeight.StartsWith("."))
-                    Rst.Height = nHeight.Substring(1).ToInt32();
-                else if (nHeight.StartsWith("+") || nHeight.StartsWith("-"))
-                    Rst.Height = Height + nHeight.ToInt32();
+                bool ForceAbsolute = nHeight.StartsWith(".");
+
+                if (ForceAbsolute)
+                    nHeight = nHeight.Substring(1);
+
+                if (nHeight != "0")
+                {
+                    bool Relative = !ForceAbsolute && (nHeight.StartsWith("+") || nHeight.StartsWith("-"));
+                    int Value = nHeight.ToInt32();
+                    if (Value == 0)
+                        Value = (int)nHeight.Evalaute(EvalKeys, EvalVals);
+
+                    if (Relative)
+                        Rst.Height = Width + Value;
+                    else
+                        Rst.Height = Value;
+                }
                 else
-                    Rst.Height = nHeight.ToInt32();
+                    Rst.Height = 0;
             }
             else
                 Rst.Height = Height;
@@ -189,25 +231,34 @@ namespace StringReloads.Engine
             return Rst;
         }
 
-        private bool CheckFontValue(Dictionary<string, string> Dic, string Entry, string Expected, bool Evalaute = false) {
+        private bool CheckFontValue(Dictionary<string, string> Dic, string Entry, string Expected, bool Evalaute = false)
+        {
             if (!Dic.ContainsKey(Entry.ToLowerInvariant()))
                 return true;
 
             string Value = Dic[Entry.ToLowerInvariant()];
 
-            if (Evalaute) {
+            if (Evalaute)
+            {
                 var Mode = "=";
 
-                if (Value.StartsWith(">=")) {
+                if (Value.StartsWith(">="))
+                {
                     Mode = ">=";
                     Value = Value.Substring(2);
-                } else if (Value.StartsWith("<=")) {
+                }
+                else if (Value.StartsWith("<="))
+                {
                     Mode = "<=";
                     Value = Value.Substring(2);
-                } else if (Value.StartsWith(">")) {
+                }
+                else if (Value.StartsWith(">"))
+                {
                     Mode = ">";
                     Value = Value.Substring(1);
-                } else if (Value.StartsWith("<")) {
+                }
+                else if (Value.StartsWith("<"))
+                {
                     Mode = "<";
                     Value = Value.Substring(1);
                 }
@@ -215,12 +266,13 @@ namespace StringReloads.Engine
                 var Val = long.Parse(Value);
                 var Exp = long.Parse(Expected);
 
-                switch (Mode) {
+                switch (Mode)
+                {
                     case "=":
                         return Exp == Val;
                     case ">":
                         return Exp > Val;
-                    case "<": 
+                    case "<":
                         return Exp < Val;
                     case ">=":
                         return Exp >= Val;
@@ -228,14 +280,16 @@ namespace StringReloads.Engine
                         return Exp <= Val;
                 }
 
-            } else if (Value == Expected)
+            }
+            else if (Value == Expected)
                 return true;
 
             return false;
         }
     }
 
-    internal static partial class Extensions {
+    internal static partial class Extensions
+    {
         static internal Key ReverseMatch<Key, Value>(this Dictionary<Key, Value> Dictionary, Value ValueToSearch)
         {
             if (!Dictionary.ContainsValue(ValueToSearch))

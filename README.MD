@@ -7,6 +7,7 @@ This is a tool created to inject strings using low level code
 * Help translate a game without discovery about he packget/encryption.
 * Help use Non-ASCII Characters.
 * Help with a customizable Auto-WordWrap.
+* Help change the game font size (when possible)
 * Can use with just a small assembly knowledge
 
 

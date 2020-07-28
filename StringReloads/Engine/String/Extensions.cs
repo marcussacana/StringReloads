@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 using StringReloads.Engine;
@@ -146,7 +147,7 @@ namespace StringReloads
             if (EntryPoint.SRL != null)
             {
                 var Customs = (from x in EntryPoint.SRL.Encodings where x.Name.ToLowerInvariant() == Value.ToLowerInvariant() select x);
-                if (Customs.Any())                
+                if (Customs.Any())
                     return Customs.First().Encoding;
             }
 
@@ -192,14 +193,22 @@ namespace StringReloads
             Dictionary<string, object> Items = new Dictionary<string, object>();
             for (int i = 0; i < Keys.Count(); i++)
                 Items.Add(Keys.ElementAt(i), Values.ElementAt(i));
-            return Expression.Evalaute(Items);
+                return Expression.Evalaute(Items);
         }
         public static dynamic Evalaute(this string Expression, Dictionary<string, object> Paramters)
         {
             var Exp = new NCalc.Expression(Expression);
             if (Paramters != null)
                 Exp.Parameters = Paramters;
-            return Exp.Evaluate();
+            try
+            {
+                return Exp.Evaluate();
+            }
+            catch
+            {
+                Log.Error("Expression Failed: " + Expression + "\nParameters: " + string.Join("; ", Paramters.Keys));
+                throw;
+            }
         }
 
         public static string[] DenyList = Config.Default.Filter.DenyList.Unescape().Split('\n').Where(x => !string.IsNullOrEmpty(x)).ToArray();
