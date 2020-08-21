@@ -66,7 +66,7 @@ namespace StringReloads.Engine.String
             if (Instance.BasePtr == null)
                 return null;
 
-            byte[] Buffer = new byte[Instance.FixedLength ?? (Instance.Count() * 2)];
+            byte[] Buffer = new byte[(Instance.FixedLength ?? Instance.Count())*2];
             Marshal.Copy(new IntPtr(Instance.BasePtr), Buffer, 0, Buffer.Length);
 
             return Instance.Encoding.GetString(Buffer);
@@ -142,7 +142,7 @@ namespace StringReloads.Engine.String
         {
             get
             {
-                if (System.IntPtr.Size == 4)
+                if (IntPtr.Size == 4)
                     return $"[0x{(ulong)BasePtr:X8}] {(string)this}";
                 return $"[0x{(ulong)BasePtr:X16}] {(string)this}";
             }
