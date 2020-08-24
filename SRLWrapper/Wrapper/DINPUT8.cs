@@ -20,7 +20,7 @@ namespace SRLWrapper.Wrapper
 
 
             Create = GetDelegate<RET_5>(RealHandler, "DirectInput8Create", false);
-            GetJoystick = GetDelegate<RET_0>(RealHandler, "GetdfDIJoystick", false);
+            GetJoystick = GetDelegate<RET_0>(RealHandler, "GetdfDIJoystick");
 
             CanUnload = GetDelegate<RET_0>(RealHandler, "DllCanUnloadNow");
             GetClassObj = GetDelegate<RET_3>(RealHandler, "DllGetClassObject");

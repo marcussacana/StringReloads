@@ -2,6 +2,8 @@ using System;
 using Iced.Intel;
 using System.Runtime.InteropServices;
 using static StringReloads.Hook.Base.Extensions;
+using StringReloads.Engine;
+using System.Runtime.Remoting.Contexts;
 
 namespace StringReloads.Hook.Base
 {
@@ -29,7 +31,8 @@ namespace StringReloads.Hook.Base
 
         }
 
-        public abstract InterceptDelegate HookFunction { get; }
+        public virtual InterceptDelegate HookFunction { get => InterceptManager; }
+        public virtual ManagedInterceptDelegate ManagedHookFunction { get => null; }
 
         void* Address;
         void* HookAddress;
@@ -84,6 +87,8 @@ namespace StringReloads.Hook.Base
             DeprotectMemory(phBuffer, BufferSize);
             HookAddress = phBuffer;
 
+            Log.Trace($"Intercept 0x{(ulong)Address:X8} With 0x{(ulong)phBuffer:X8}");
+
             Compiler.Encode(IInstructions, (ulong)phBuffer);
 
             Writer.CopyTo(phBuffer, 0);
@@ -112,8 +117,38 @@ namespace StringReloads.Hook.Base
             Marshal.Copy(RealBuffer, 0, new IntPtr(Address), RealBuffer.Length);
         }
 
+        void InterceptManager(void* ESP)
+        {
+            uint* Stack = (uint*)ESP;
+
+            ulong EDI = Stack[0];
+            ulong ESI = Stack[1];
+            ulong EBP = Stack[2];
+            ulong EBX = Stack[4];
+            ulong EDX = Stack[5];
+            ulong ECX = Stack[6];
+            ulong EAX = Stack[7];
+
+            var OriESP = (void**)Stack[3];
+
+            ManagedHookFunction(ref OriESP, ref EAX, ref ECX, ref EDX, ref EBX, ref EBP, ref ESI, ref EDI);
+
+            Stack[0] = (uint)EDI;
+            Stack[1] = (uint)ESI;
+            Stack[2] = (uint)EBP;
+            Stack[4] = (uint)EBX;
+            Stack[5] = (uint)EDX;
+            Stack[6] = (uint)ECX;
+            Stack[7] = (uint)EAX;
+
+            Stack[3] = (uint)OriESP;
+        }
+
     }
 
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
     public unsafe delegate void InterceptDelegate(void* ESP);
+
+    public unsafe delegate void ManagedInterceptDelegate(ref void** ESP, ref ulong EAX, ref ulong ECX, ref ulong EDX, ref ulong EBX, ref ulong EBP, ref ulong ESI, ref ulong EDI);
+
 }
