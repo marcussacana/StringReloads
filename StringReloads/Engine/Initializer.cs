@@ -271,11 +271,11 @@ namespace StringReloads.Engine
             {
                 foreach (string Line in File.ReadAllLines(CharsFile))
                 {
-                    if (!Line.Contains("=") || string.IsNullOrWhiteSpace(Line))
+                    if (!Line.Contains('=') || string.IsNullOrWhiteSpace(Line))
                         continue;
 
-                    string PartA = Line.Substring(0, Line.IndexOf("="));
-                    string PartB = Line.Substring(Line.IndexOf("=") + 1);
+                    string PartA = Line.Substring(0, Line.IndexOf('='));
+                    string PartB = Line.Substring(Line.IndexOf('=') + 1);
 
                     if (PartA.Length > 1)
                         PartA = PartA.Trim();
