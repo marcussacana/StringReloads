@@ -70,7 +70,9 @@ namespace StringReloads.Engine
         internal IAutoInstall[] _Installers = null;
         internal IAutoInstall[] Installers => _Installers ??= new IAutoInstall[] {
             new AdvHD(),
-            new SoftPalMethodA()
+            new SoftPalMethodA(),
+            new SoftPalMethodB(),
+            new CMVS32()
         };
 
         internal IEncoding[] Encodings = new IEncoding[0];

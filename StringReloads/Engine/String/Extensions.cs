@@ -172,6 +172,9 @@ namespace StringReloads
             };
         }
 
+        public static string GetFilename(this string Path) => System.IO.Path.GetFileName(Path);
+        public static string GetFilenameNoExt(this string Path) => System.IO.Path.GetFileNameWithoutExtension(Path);
+
         public static string GetStartTrimmed(this string Str)
         {
             int Len = Str.Length - Str.TrimStart().Length;

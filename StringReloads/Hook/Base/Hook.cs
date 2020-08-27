@@ -4,14 +4,16 @@ using System.Runtime.InteropServices;
 using static StringReloads.Hook.Base.Extensions;
 using System.Linq;
 using System.Collections.Generic;
-using StringReloads.Engine.String;
 using StringReloads.Engine;
-using System.Runtime.CompilerServices;
+using StringReloads.Engine.Unmanaged;
 
 namespace StringReloads.Hook.Base
 {
     public abstract unsafe class Hook<T> : Hook where T : Delegate
     {
+        public Hook() : base() { }
+        public Hook(void* Function) : base(Function) { }
+
         private UnsafeDelegate HookInstance;
         private UnsafeDelegate<T> BypassInstance;
 
@@ -39,6 +41,12 @@ namespace StringReloads.Hook.Base
     public abstract unsafe class Hook
     {
         public Hook() { Initialize(); }
+
+        public Hook(void* Function)
+        {
+            this.Function = Function;
+            Initialize();
+        }
 
         ~Hook()
         {
@@ -226,7 +234,7 @@ namespace StringReloads.Hook.Base
 
         private void SetupImportHook()
         {
-            var Imports = GetModuleImports((byte*)Config.Default.GameBaseAddress);
+            var Imports = ModuleInfo.GetModuleImports((byte*)Config.Default.GameBaseAddress);
 
             var Import = (from x in Imports where x.Function == Export && x.Module.ToLower() == Library.ToLower() select x).Single();
 
@@ -510,113 +518,6 @@ namespace StringReloads.Hook.Base
             if (hModule != null)
                 return hModule;
             return LoadLibrary(Library);
-        }
-        public unsafe static ImportEntry[] GetModuleImports(byte* Module)
-        {
-            if (Module == null)
-                throw new Exception("Invalid Module...");
-
-            uint PtrSize = Environment.Is64BitProcess ? 8u : 4u;
-
-            ulong OrdinalFlag = (1ul << (int)((8 * PtrSize) - 1));
-
-            ulong PEStart = *(uint*)(Module + 0x3C);
-            ulong OptionalHeader = PEStart + 0x18;
-
-            ulong ImageDataDirectoryPtr = OptionalHeader + (PtrSize == 8 ? 0x70u : 0x60u);
-
-            ulong ImportTableEntry = ImageDataDirectoryPtr + 0x8;
-
-            uint RVA = (uint)ImportTableEntry;
-
-            uint* ImportDesc = (uint*)(Module + *(uint*)(Module + RVA));
-
-            if (ImportDesc == Module)
-                return new ImportEntry[0];
-
-            List<ImportEntry> Entries = new List<ImportEntry>();
-
-            while (true)
-            {
-                uint OriginalFirstThunk = ImportDesc[0];
-                uint Name = ImportDesc[3];
-                uint FirstThunk = ImportDesc[4];
-
-                if (OriginalFirstThunk == 0x00)
-                    break;
-
-                string ModuleName = (CString)(Module + Name);
-
-                void** DataAddr = (void**)(Module + OriginalFirstThunk);
-                void** IATAddr = (void**)(Module + FirstThunk);
-                while (true)
-                {
-                    void* EntryPtr = *DataAddr;
-
-                    if (EntryPtr == null)
-                        break;
-
-                    bool ImportByOrdinal = false;
-                    if (((ulong)EntryPtr & OrdinalFlag) == OrdinalFlag)
-                    {
-                        EntryPtr = (void*)((ulong)EntryPtr ^ OrdinalFlag);
-                        ImportByOrdinal = true;
-                    }
-                    else
-                        EntryPtr = (void*)(Module + (ulong)EntryPtr);
-
-                    ushort Hint = ImportByOrdinal ? (ushort)EntryPtr : *(ushort*)EntryPtr;
-
-                    string ExportName = null;
-                    if (!ImportByOrdinal)
-                        ExportName = (CString)(void*)((ulong)EntryPtr + 2);
-
-                    Entries.Add(new ImportEntry()
-                    {
-                        Function = ExportName,
-                        Ordinal = Hint,
-                        Module = ModuleName,
-                        ImportAddress = IATAddr,
-                        FunctionAddress = *IATAddr
-                    });
-
-                    DataAddr++;
-                    IATAddr++;
-                }
-
-
-                ImportDesc += 5;//sizeof(_IMAGE_IMPORT_DESCRIPTOR)
-            }
-
-            return Entries.ToArray();
-        }
-        public unsafe struct ImportEntry
-        {
-
-            /// <summary>
-            /// The Imported Module Name
-            /// </summary>
-            public string Module;
-
-            /// <summary>
-            /// The Imported Function Name
-            /// </summary>
-            public string Function;
-
-            /// <summary>
-            /// The Import Ordinal Hint
-            /// </summary>
-            public ushort Ordinal;
-
-            /// <summary>
-            /// The Address of this Import in the IAT (Import Address Table)
-            /// </summary>
-            public void* ImportAddress;
-
-            /// <summary>
-            /// The Address of the Imported Function
-            /// </summary>
-            public void* FunctionAddress;
         }
 
         public unsafe static void* LoadLibrary(string Library) => LoadLibraryW(Library);
