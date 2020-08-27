@@ -60,7 +60,6 @@ namespace StringReloads.Engine
         bool? _Overwrite = null;
         public bool Overwrite => ((bool?)(_Overwrite ??= GetValue("Overwrite").ToBoolean())).Value;
 
-
         bool? _ReloadRegexCaptures = null;
         public bool ReloadRegexCaptures => ((bool?)(_ReloadRegexCaptures ??= GetValue("ReloadRegexCaptures").ToBoolean())).Value;
 
