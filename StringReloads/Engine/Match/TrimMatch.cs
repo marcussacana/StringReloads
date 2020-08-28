@@ -12,6 +12,13 @@ namespace StringReloads.Engine.Match
         {
             this.Engine = Engine;
             var Dic = Engine.Settings.GetValues("Trim");
+
+            if (Dic == null)
+            {
+                Prefixes = Sufixes = new string[0];
+                return;
+            }
+
             Prefixes = Dic["prefixes"].Unescape().Split('\n');
             Sufixes = Dic["sufixes"].Unescape().Split('\n');
         }
@@ -34,7 +41,7 @@ namespace StringReloads.Engine.Match
 
             LSTEntry Result = Match.Value;
 
-            Result.OriginalLine    = $"{Prefix}{Result.OriginalLine}{Sufix}";
+            Result.OriginalLine = $"{Prefix}{Result.OriginalLine}{Sufix}";
             Result.TranslationLine = $"{Prefix}{Result.TranslationLine}{Sufix}";
 
             return Result;
