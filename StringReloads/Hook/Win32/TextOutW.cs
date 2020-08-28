@@ -2,6 +2,7 @@
 using StringReloads.Engine.String;
 using StringReloads.Hook.Base;
 using StringReloads.StringModifier;
+using System.Linq;
 
 namespace StringReloads.Hook.Win32
 {
@@ -20,14 +21,14 @@ namespace StringReloads.Hook.Win32
         bool TextOut(void* dc, int xStart, int yStart, byte* pStr, int strLen)
         {
             WCString InStr = pStr;
-            InStr.FixedLength = strLen;
+            InStr.FixedLength = (uint)strLen;
 
             InStr = EntryPoint.Process((WCString)(string)InStr);//Ensure Null-Terminated
 
             if (Config.Default.TextOutWUndoRemap)
                 InStr = Remaper.Default.Restore(InStr);
 
-            return Bypass(dc, xStart, yStart, InStr, (int)InStr.Length);
+            return Bypass(dc, xStart, yStart, InStr, InStr.Count());
         }
     }
 }

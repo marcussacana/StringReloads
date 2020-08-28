@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text;
 
 namespace SRLDebugger
 {
@@ -17,9 +15,11 @@ namespace SRLDebugger
             if (args == null || args.Length == 0)
                 args = new[] { "-help" };
 
-            for (int i = 0; i < args.Length; i++) {
+            for (int i = 0; i < args.Length; i++)
+            {
                 string Arg = args[i].TrimStart('-', '/', '\\', ' ').ToLowerInvariant();
-                switch (Arg) {
+                switch (Arg)
+                {
                     case "filter":
                         DbgFilter(args[++i]);
                         break;
@@ -33,11 +33,15 @@ namespace SRLDebugger
                         Console.ReadKey();
                         Console.WriteLine();
                         break;
+                    case "process":
+                        Console.WriteLine((WCString)EntryPoint.ProcessW((WCString)args[++i]));
+                        break;
                 }
             }
         }
 
-        static void DbgFilter(string FileName) {
+        static void DbgFilter(string FileName)
+        {
             if (!File.Exists(FileName))
                 return;
 

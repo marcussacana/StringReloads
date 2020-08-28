@@ -22,7 +22,7 @@ namespace StringReloads.Hook.Win32
         bool TextOut(void* dc, int xStart, int yStart, byte* pStr, int strLen)
         {
             CString OriStr = pStr;
-            OriStr.FixedLength = strLen;
+            OriStr.FixedLength = (uint)strLen;
 
             WCString Str = EntryPoint.ProcessW((WCString)(string)OriStr);
 
