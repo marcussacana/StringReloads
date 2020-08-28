@@ -1,5 +1,6 @@
 ﻿using StringReloads.Engine;
 using StringReloads.Engine.Interface;
+using StringReloads.Engine.Match;
 
 namespace StringReloads.StringModifier
 {

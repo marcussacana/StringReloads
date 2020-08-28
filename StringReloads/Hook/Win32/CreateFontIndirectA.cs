@@ -5,10 +5,6 @@
         public override string Library => "gdi32.dll";
 
         public override string Export => "CreateFontIndirectA";
-            
-#if x64
-        public override bool ProtectRAX => true;
-#endif
 
         public override void Initialize()
         {

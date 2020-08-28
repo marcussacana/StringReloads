@@ -1,4 +1,4 @@
-# StringsReloads v7.1
+# StringsReloads v7.2
 [![Build Status](https://ci.appveyor.com/api/projects/status/github/marcussacana/StringReloads?branch=master&retina=true)](https://ci.appveyor.com/project/marcussacana/StringReloads)
 
 
@@ -12,7 +12,7 @@ This is a tool created to inject strings using low level code
 
 
 ---
-Our strategy to inject the string is create a new section using tools like the Stud_PE or CFF Explorer to have space in the executable to append the new code, a commom method is replace a original command and jump to your code, generally a jump have 5 bytes of length, sometimes you need replace more than one command and don't forget to place original commands like CMP and TEST after the execution of your code, of course, if have one.
+Our strategy to inject the string is create a new section using tools like the Stud_PE or CFF Explorer to have space in the executable to append the new code, a commom method is replace a original instruction and jump to your code, generally a jump have 5 bytes of length, sometimes you need replace more than one instruction and don't forget to place original instructions like CMP and TEST after the execution of your code, of course, if have one.
 
 ### Sample Call Algorithm:
 ```Assembly
@@ -74,13 +74,17 @@ After some problems with games that reload string inside a loop I created the Ge
 	dd 0                ;Here is the @Nxt: + 0x21
 
 ```
-You don't give pass nothing to this method, just call and catch the EAX, the EAX is a pointer to the Process function, using this pointer will be more fast to call the function, Keep in mind, the pointer given by the GetDirectProcess
+You don't give nothing to this method, just call and catch the EAX, the EAX is a pointer to the Process function, using this pointer will be more fast to call the function, Keep in mind, the pointer given by the GetDirectProcess
 
 ---
 
 ### Auto-Install Feature:
 The SRL have a feature to automatically install the SRL in the game engine without you need know how to patch the game, just rename the SRLx32.dll to d3d9.dll; dinput8.dll or any other supported wrapper [See Here what is supported](https://github.com/marcussacana/StringReloads/tree/master/SRLWrapper/Wrapper), then in the SRL.ini set the AutoInstall to true.    
-*Currently only the AdvHD and SoftPal engine is supported by this feature.*
+
+#### Supported By:
+- AdvHD
+- SoftPal
+- CMVS32 and CMVS64
 
 Some SoftPal games needs a manual setup with the help of the Auto-Installer, click below to see the example:
 [![SRL SoftPal Auto-Install Feature](http://img.youtube.com/vi/RAgZQBWqiJQ/0.jpg)](http://www.youtube.com/watch?v=RAgZQBWqiJQ "SRL SoftPal Auto-Install Feature")

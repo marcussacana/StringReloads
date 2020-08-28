@@ -2,9 +2,9 @@
 
 namespace StringReloads.Hook.Others
 {
-    unsafe class CMVS32_GetText : Hook<CMVS32_GetTextDelegate>
+    unsafe class CMVS_GetText : Hook<CMVS_GetTextDelegate>
     {
-        public CMVS32_GetText(void* Address) : base(Address) { }
+        public CMVS_GetText(void* Address) : base(Address) { }
 
         public override string Library => throw new System.NotImplementedException();
 
@@ -12,7 +12,7 @@ namespace StringReloads.Hook.Others
 
         public override void Initialize()
         {
-            HookDelegate = new CMVS32_GetTextDelegate(GetStrHook);
+            HookDelegate = new CMVS_GetTextDelegate(GetStrHook);
             Compile(Function);
         }
 

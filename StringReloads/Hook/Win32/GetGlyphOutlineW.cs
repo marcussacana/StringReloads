@@ -6,10 +6,6 @@
 
         public override string Export => "GetGlyphOutlineW";
 
-#if x64
-        public override bool ProtectRAX => true;
-#endif
-
         public override void Initialize()
         {
             HookDelegate = new GetGlyphOutlineWDelegate(GetGlyphOutline);

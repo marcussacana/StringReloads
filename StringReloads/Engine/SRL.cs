@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using StringReloads.AutoInstall;
 using StringReloads.Engine.Interface;
+using StringReloads.Engine.Match;
 using StringReloads.Engine.String;
 using StringReloads.Engine.Unmanaged;
 using StringReloads.Hook;
@@ -26,7 +27,8 @@ namespace StringReloads.Engine
         internal IMatch[] _Matchs = null;
         public IMatch[] Matchs => _Matchs ??= new IMatch[] {
             new RegexMatch(this),
-            new Match(this)
+            new BasicMatch(this),
+            new TrimMatch(this)
         };
 
         internal Initializer Initializer = new Initializer();
@@ -72,7 +74,7 @@ namespace StringReloads.Engine
             new AdvHD(),
             new SoftPalMethodA(),
             new SoftPalMethodB(),
-            new CMVS32()
+            new CMVS()
         };
 
         internal IEncoding[] Encodings = new IEncoding[0];
@@ -121,10 +123,10 @@ namespace StringReloads.Engine
                     Output = New;
             }
 
-            if (Settings.Overwrite && Output != null && ((string)Output) == null)
+            if (Settings.Overwrite && Output != null && ((string)Output) != null)
                 return (CString)Alloc.Overwrite(Output.ToArray(), pString);
 
-            if (Settings.HeapAlloc && Output != null && ((string)Output) == null)
+            if (Settings.HeapAlloc && Output != null && ((string)Output) != null)
                 return (CString)Alloc.CreateHeap(Output.ToArray());
 
             return Output;
@@ -155,10 +157,10 @@ namespace StringReloads.Engine
                     Output = New;
             }
 
-            if (Settings.Overwrite && Output != null && ((string)Output) == null)
+            if (Settings.Overwrite && Output != null && ((string)Output) != null)
                 return (WCString)Alloc.Overwrite(Output.ToArray(), pString);
 
-            if (Settings.HeapAlloc && Output != null && ((string)Output) == null)
+            if (Settings.HeapAlloc && Output != null && ((string)Output) != null)
                 return (WCString)Alloc.CreateHeap(Output.ToArray());
 
             return Output;

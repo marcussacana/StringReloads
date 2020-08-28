@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 
-namespace StringReloads.Engine
+namespace StringReloads.Engine.Match
 {
     class RegexMatch : IMatch
     {

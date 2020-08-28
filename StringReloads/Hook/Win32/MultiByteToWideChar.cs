@@ -12,10 +12,6 @@ namespace StringReloads.Hook
 
         public override string Export => "MultiByteToWideChar";
 
-#if x64
-        public override bool ProtectRAX => true;
-#endif
-
         public override void Initialize()
         {
             if (Config.Default.ImportHook) {

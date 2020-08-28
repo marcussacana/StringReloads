@@ -63,6 +63,8 @@ namespace StringReloads.Engine
         bool? _ReloadRegexCaptures = null;
         public bool ReloadRegexCaptures => ((bool?)(_ReloadRegexCaptures ??= GetValue("ReloadRegexCaptures").ToBoolean())).Value;
 
+        bool? _TrimMatch = null;
+        public bool TrimMatch => ((bool?)(_TrimMatch ??= GetValue("TrimMatch").ToBoolean())).Value;
 
         bool? _Log = null;
         public bool Log => ((bool?)(_Log ??= GetValue("Log").ToBoolean())).Value;

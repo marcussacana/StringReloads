@@ -53,13 +53,6 @@ namespace StringReloads.Hook.Base
             Uninstall();
         }
 
-#if x64
-        /// <summary>
-        /// Protect the RAX register of changes by the hook
-        /// </summary>
-        public abstract bool ProtectRAX { get; }
-#endif
-
         public abstract string Library { get; }
         public abstract string Export { get; }
         public virtual ushort Ordinal => 0;
@@ -112,21 +105,32 @@ namespace StringReloads.Hook.Base
         {
             this.Function = Function;
             AssemblyHook();
+
+            if (Config.Default.LogLevel == Log.LogLevel.Trace)
+                Log.Trace($"Anonymous Hook (0x{(ulong)Function:X16}) Compiled; Hook: 0x{(ulong)HookFunction:X16}; Bypass: 0x{(ulong)BypassFunction:X16}");
+            else
+                Log.Debug($"Anonymous Hook (0x{(ulong)Function:X16}) Compiled");
         }
 
 #if x64
         uint? _JmpSize = null;
-        public uint JmpSize => (_JmpSize ?? (_JmpSize = (uint)AssemblyJmp(ulong.MaxValue).GetEncodedSize(64))).Value;
+        public uint JmpSize => (_JmpSize ?? (_JmpSize = (uint)ulong.MaxValue.AssemblyJmp().GetEncodedSize(64))).Value;
         private void AssemblyHook()
         {
             //Copy Minimal Instructions Amount
             var Reader = new MemoryCodeReader(this.Function, 100);
             var Decoder = Iced.Intel.Decoder.Create(64, Reader);
-
             Decoder.IP = (ulong)Function;
+
             var Instructions = Decoder.DecodeMany(JmpSize);
 
             var RetAddr = Decoder.IP;
+
+            //If the next instruction is a conditional jmp,
+            //Will be more safe if we copy it to the bypass as well
+            var NextInstruction = Decoder.PeekDecode();
+            if (NextInstruction.IsCondJmp())
+                Instructions.Add(NextInstruction);
 
 
             //Allocate Memory
@@ -143,46 +147,25 @@ namespace StringReloads.Hook.Base
             Marshal.Copy(new IntPtr(Function), RealBuffer, 0, RealBuffer.Length);
 
 
-
             //Assemble Bypass
             var phBuffer = BypassBuffer.AllocUnsafe();
             BypassFunction = phBuffer;
 
-            Instructions.AddRange(AssemblyJmp(RetAddr));
+            Instructions.AddRange(RetAddr.AssemblyJmp());
 
             Compiler.AutoEncode(Instructions, (ulong)phBuffer);
 
             Writer.CopyTo(phBuffer, 0);
 
-
-
             //Assemble the Hook
             Writer = new MemoryCodeWriter();
             Compiler = Encoder.Create(64, Writer);
 
-            Instructions = AssemblyJmp((ulong)HookFunction);
+            Instructions = ((ulong)HookFunction).AssemblyJmp();
 
             Compiler.Encode(Instructions, (ulong)Function);
 
             HookBuffer = Writer.ToArray();
-        }
-
-        InstructionList AssemblyJmp(ulong Target)
-        {
-            var Instructions = new InstructionList();
-            if (ProtectRAX)
-            {
-                Instructions.Add(Instruction.Create(Code.Push_r64, Register.RAX));
-                Instructions.Add(Instruction.Create(Code.Mov_r64_imm64, Register.RAX, Target));
-                Instructions.Add(Instruction.Create(Code.Xchg_rm64_r64, new MemoryOperand(Register.RSP), Register.RAX));
-                Instructions.Add(Instruction.Create(Code.Retnq));
-            }
-            else
-            {
-                Instructions.Add(Instruction.Create(Code.Mov_r64_imm64, Register.RAX, Target));
-                Instructions.Add(Instruction.Create(Code.Jmp_rm64, Register.RAX));
-            }
-            return Instructions;
         }
 #else
         public const int JmpSize = 5;
@@ -320,7 +303,13 @@ namespace StringReloads.Hook.Base
             }
             return List;
         }
-
+        public unsafe static Instruction PeekDecode(this Decoder RefDecoder)
+        {
+            var NewMem = new MemoryCodeReader((void*)RefDecoder.IP);
+            var NewDecoder = Decoder.Create(RefDecoder.Bitness, NewMem);
+            NewDecoder.IP = RefDecoder.IP;
+            return NewDecoder.Decode();
+        }
         public unsafe static InstructionList AssembleToList(this Assembler Assembler, ulong RIP)
         {
             var CWBuffer = new MemoryCodeWriter();
@@ -341,27 +330,32 @@ namespace StringReloads.Hook.Base
         {
             var Writer = new MemoryCodeWriter();
             var Compiler = Encoder.Create(bitness, Writer);
-            foreach (var Instruction in List)
-            {
-                Compiler.AutoEncode(Instruction, (ulong)Writer.Count + IP);
-            }
-
-            return Writer.Count;
+            return (int)Compiler.AutoEncode(List, IP);
         }
         public static int GetAutoEncodedSize(this Instruction Instruction, int bitness, ulong IP = 0)
         {
             var Writer = new MemoryCodeWriter();
             var Compiler = Encoder.Create(bitness, Writer);
-            return (int)Compiler.AutoEncode(Instruction, (ulong)Writer.Count + IP);
+            return Compiler.AutoEncode(Instruction, (ulong)Writer.Count + IP).GetEncodedSize(64);
         }
         public static uint AutoEncode(this Encoder Encoder, InstructionList List, ulong IP)
         {
             uint Len = 0;
+            InstructionList NewList = new InstructionList();
             foreach (var Instruction in List)
-                Len += Encoder.AutoEncode(Instruction, IP + Len);
+            {
+                var NewInstruction = Encoder.AutoEncode(Instruction, IP + Len);
+                NewList.AddRange(NewInstruction);
+                Len += (uint)NewInstruction.GetEncodedSize(64, IP + Len);
+            }
+
+            Len = 0;
+            foreach (var Instruction in NewList)
+                Len += Encoder.Encode(Instruction, IP + Len);
+
             return Len;
         }
-        public static uint AutoEncode(this Encoder Encoder, Instruction Instruction, ulong IP)
+        public static InstructionList AutoEncode(this Encoder Encoder, Instruction Instruction, ulong IP)
         {
             InstructionList List = new InstructionList();
             if (Encoder.Bitness <= 32)
@@ -376,7 +370,7 @@ namespace StringReloads.Hook.Base
                     if (!Instruction.IsANotJmp())
                         Instruction.NegateConditionCode();
 
-                    var Jmp = Instruction.IPRelativeMemoryAddress.x64FarJmp();
+                    var Jmp = Instruction.Immediate64.AssemblyJmp();
 
                     //Get Far Jmp Size + Short Conditional Jmp Size
                     var JmpSize = (uint)Jmp.GetAutoEncodedSize(64, IP);
@@ -390,6 +384,8 @@ namespace StringReloads.Hook.Base
                     switch (Instruction.Code)
                     {
                         case Code.Mov_r64_rm64:
+                            if (Instruction.Op1Kind != OpKind.Memory || Instruction.MemoryBase != Register.RIP)
+                                goto default;
                             List.Add(Instruction.Create(Code.Mov_r64_imm64, Instruction.Op0Register, Instruction.IPRelativeMemoryAddress));
                             List.Add(Instruction.Create(Code.Mov_r64_rm64, Instruction.Op0Register, new MemoryOperand(Instruction.Op0Register)));
                             break;
@@ -399,12 +395,14 @@ namespace StringReloads.Hook.Base
                     }
                 }
             }
-            uint TotalSize = 0;
-            foreach (var Inst in List)
-                TotalSize += Encoder.Encode(Inst, IP + TotalSize);
-            return TotalSize;
+            return List;
         }
 
+        public static bool IsCondJmp(this Instruction Instruction) => Instruction.ConditionCode switch
+        {
+            ConditionCode.None => false,
+            _ => true
+        };
         public static bool IsANotJmp(this Instruction Instruction) => Instruction.ConditionCode switch
         {
             ConditionCode.ne => true,
@@ -413,15 +411,6 @@ namespace StringReloads.Hook.Base
             ConditionCode.ns => true,
             _ => false
         };
-
-        public static InstructionList x64FarJmp(this ulong Address)
-        {
-            InstructionList List = new InstructionList();
-            List.Add(Instruction.Create(Code.Pushq_imm32, unchecked((int)(Address & uint.MaxValue))));
-            List.Add(Instruction.Create(Code.Mov_rm32_imm32, new MemoryOperand(Register.RSP, 4), (uint)(Address >> 8 * 4)));
-            List.Add(Instruction.Create(Code.Retnq));
-            return List;
-        }
         public static Instruction ToShortJmp(this ConditionCode Condition, ulong Address, byte bitness)
         {
             bool x64 = bitness == 64;
@@ -493,6 +482,31 @@ namespace StringReloads.Hook.Base
             Instruction.IsJmpFarIndirect || Instruction.IsJmpShortOrNear ||
             Instruction.IsJccNear || Instruction.IsJccShort ||
             Instruction.IsJccShortOrNear;
+
+        public static bool IsRet(this Instruction Instruction) => Instruction.Code switch
+        {
+            Code.Retfd => true,
+            Code.Retfd_imm16 => true,
+            Code.Retfq => true,
+            Code.Retfq_imm16 => true,
+            Code.Retfw => true,
+            Code.Retfw_imm16 => true,
+            Code.Retnd => true,
+            Code.Retnd_imm16 => true,
+            Code.Retnq => true,
+            Code.Retnq_imm16 => true,
+            Code.Retnw => true,
+            Code.Retnw_imm16 => true,
+            _ => false
+        };
+        public static InstructionList AssemblyJmp(this ulong Target)
+        {
+            var Instructions = new InstructionList();
+            Instructions.Add(Instruction.Create(Code.Pushq_imm32, unchecked((int)(Target & uint.MaxValue))));
+            Instructions.Add(Instruction.Create(Code.Mov_rm32_imm32, new MemoryOperand(Register.RSP, 4), (uint)(Target >> 8 * 4)));
+            Instructions.Add(Instruction.Create(Code.Retnq));
+            return Instructions;
+        }
 #endif
 
         public unsafe static byte* AllocUnsafe(uint Bytes)

@@ -6,10 +6,6 @@
 
         public override string Export => "CreateFontIndirectW";
 
-#if x64
-        public override bool ProtectRAX => true;
-#endif
-
         public override void Initialize()
         {
             HookDelegate = new CreateFontIndirectWDelegate(CreateFontIndirect);

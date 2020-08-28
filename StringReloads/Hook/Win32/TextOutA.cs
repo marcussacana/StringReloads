@@ -13,10 +13,6 @@ namespace StringReloads.Hook.Win32
 
         public override string Export => "TextOutA";
 
-#if x64
-        public override bool ProtectRAX => true;
-#endif
-
         public override void Initialize()
         {
             HookDelegate = new TextOutADelegate(TextOut);

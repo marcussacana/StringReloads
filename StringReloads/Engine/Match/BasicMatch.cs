@@ -6,12 +6,12 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace StringReloads.Engine
+namespace StringReloads.Engine.Match
 {
-    class Match : IMatch
+    class BasicMatch : IMatch
     {
         SRL Engine;
-        public Match(SRL Engine) => this.Engine = Engine;
+        public BasicMatch(SRL Engine) => this.Engine = Engine;
 
         public char? ResolveRemap(char Char)
         {
@@ -185,7 +185,7 @@ namespace StringReloads.Engine
                 {
                     bool Relative = !ForceAbsolute && (nWidth.StartsWith("+") || nWidth.StartsWith("-"));
                     int Value = nWidth.ToInt32();
-                    if (Value == 0)
+                    if (Value == 0 && !Relative)
                         Value = (int)nWidth.Evalaute(EvalKeys, EvalVals);
                   
                     if (Relative)
@@ -211,7 +211,7 @@ namespace StringReloads.Engine
                 {
                     bool Relative = !ForceAbsolute && (nHeight.StartsWith("+") || nHeight.StartsWith("-"));
                     int Value = nHeight.ToInt32();
-                    if (Value == 0)
+                    if (Value == 0 && !Relative)
                         Value = (int)nHeight.Evalaute(EvalKeys, EvalVals);
 
                     if (Relative)
