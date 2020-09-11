@@ -43,6 +43,8 @@ namespace StringReloads.Engine
 
             AutoInstall(Engine);
 
+            EnableExceptionHandler(Engine);
+
             Engine.Initialized = true;
             Log.Information("SRL Initialized");
         }
@@ -307,6 +309,21 @@ namespace StringReloads.Engine
 
             Cache Builder = new Cache(Engine.Settings.CachePath);
             Builder.BuildDatabase(Engine.Databases.ToArray(), Engine.CharRemap.ToArray());
+        }
+
+        private void EnableExceptionHandler(SRL Engine)
+        {
+            if (Engine.Settings.Debug)
+            {
+                AppDomain.CurrentDomain.FirstChanceException += (sender, Args) => Log.Error(Args.Exception.ToString());
+                AppDomain.CurrentDomain.UnhandledException += (sender, Args) =>
+                {
+                    if (Args.IsTerminating)
+                        Log.Critical(Args.ExceptionObject.ToString());
+                    else
+                        Log.Error(Args.ExceptionObject.ToString());
+                };
+            }
         }
     }
 
