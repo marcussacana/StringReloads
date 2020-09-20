@@ -18,26 +18,26 @@ namespace SRLWrapper.Wrapper
             if (RealHandler == null)
                 Environment.Exit(0x505);//ERROR_DELAY_LOAD_FAILED     
 
-            dD3D11CoreRegisterLayers = GetDelegate<RET_3>(RealHandler, "D3D11CoreRegisterLayers", false);
-            dD3D11CoreGetLayeredDeviceSize = GetDelegate<RET_3>(RealHandler, "D3D11CoreGetLayeredDeviceSize", false);
-            dD3D11CoreCreateLayeredDevice = GetDelegate<RET_5>(RealHandler, "D3D11CoreCreateLayeredDevice", false);
+            dD3D11CoreRegisterLayers = GetDelegate<RET_3>(RealHandler, "D3D11CoreRegisterLayers", true);
+            dD3D11CoreGetLayeredDeviceSize = GetDelegate<RET_3>(RealHandler, "D3D11CoreGetLayeredDeviceSize", true);
+            dD3D11CoreCreateLayeredDevice = GetDelegate<RET_5>(RealHandler, "D3D11CoreCreateLayeredDevice", true);
             dD3D11CoreCreateDevice = GetDelegate<RET_10>(RealHandler, "D3D11CoreCreateDevice", false);
             dD3D11CreateDeviceAndSwapChain = GetDelegate<RET_13>(RealHandler, "D3D11CreateDeviceAndSwapChain", false);
             dD3D11CreateDevice = GetDelegate<RET_11>(RealHandler, "D3D11CreateDevice", false);
-            dD3DKMTWaitForVerticalBlankEvent = GetDelegate<RET_1>(RealHandler, "D3DKMTWaitForVerticalBlankEvent", false);
+            dD3DKMTWaitForVerticalBlankEvent = GetDelegate<RET_1>(RealHandler, "D3DKMTWaitForVerticalBlankEvent", true);
             dD3D11CreateDeviceForD3D12 = GetDelegate<RET_10>(RealHandler, "D3D11CreateDeviceForD3D12", true);
             dD3D11On12CreateDevice = GetDelegate<RET_11>(RealHandler, "D3D11On12CreateDevice", true);
-            dD3DPerformance_BeginEvent = GetDelegate<RET_2>(RealHandler, "D3DPerformance_BeginEvent", false);
-            dD3DPerformance_EndEvent = GetDelegate<RET_1>(RealHandler, "D3DPerformance_EndEvent", false);
-            dD3DPerformance_GetStatus = GetDelegate<RET_1>(RealHandler, "D3DPerformance_GetStatus", false);
-            dD3DPerformance_SetMarker = GetDelegate<RET_2>(RealHandler, "D3DPerformance_SetMarker", false);
-            dD3DKMTQueryAdapterInfo = GetDelegate<RET_1>(RealHandler, "D3DKMTQueryAdapterInfo", false);
-            dOpenAdapter10 = GetDelegate<RET_1>(RealHandler, "OpenAdapter10", false);
-            dOpenAdapter10_2 = GetDelegate<RET_1>(RealHandler, "OpenAdapter10_2", false);
-            dD3DKMTEscape = GetDelegate<RET_1>(RealHandler, "D3DKMTEscape", false);
-            dD3DKMTGetDeviceState = GetDelegate<RET_1>(RealHandler, "D3DKMTGetDeviceState", false);
-            dD3DKMTOpenAdapterFromHdc = GetDelegate<RET_1>(RealHandler, "D3DKMTOpenAdapterFromHdc", false);
-            dD3DKMTQueryResourceInfo = GetDelegate<RET_1>(RealHandler, "D3DKMTQueryResourceInfo", false);
+            dD3DPerformance_BeginEvent = GetDelegate<RET_2>(RealHandler, "D3DPerformance_BeginEvent", true);
+            dD3DPerformance_EndEvent = GetDelegate<RET_1>(RealHandler, "D3DPerformance_EndEvent", true);
+            dD3DPerformance_GetStatus = GetDelegate<RET_1>(RealHandler, "D3DPerformance_GetStatus", true);
+            dD3DPerformance_SetMarker = GetDelegate<RET_2>(RealHandler, "D3DPerformance_SetMarker", true);
+            dD3DKMTQueryAdapterInfo = GetDelegate<RET_1>(RealHandler, "D3DKMTQueryAdapterInfo", true);
+            dOpenAdapter10 = GetDelegate<RET_1>(RealHandler, "OpenAdapter10", true);
+            dOpenAdapter10_2 = GetDelegate<RET_1>(RealHandler, "OpenAdapter10_2", true);
+            dD3DKMTEscape = GetDelegate<RET_1>(RealHandler, "D3DKMTEscape", true);
+            dD3DKMTGetDeviceState = GetDelegate<RET_1>(RealHandler, "D3DKMTGetDeviceState", true);
+            dD3DKMTOpenAdapterFromHdc = GetDelegate<RET_1>(RealHandler, "D3DKMTOpenAdapterFromHdc", true);
+            dD3DKMTQueryResourceInfo = GetDelegate<RET_1>(RealHandler, "D3DKMTQueryResourceInfo", true);
             dCreateDirect3D11DeviceFromDXGIDevice = GetDelegate<RET_2>(RealHandler, "CreateDirect3D11DeviceFromDXGIDevice", true);
             dCreateDirect3D11SurfaceFromDXGISurface = GetDelegate<RET_2>(RealHandler, "CreateDirect3D11SurfaceFromDXGISurface", true);
 

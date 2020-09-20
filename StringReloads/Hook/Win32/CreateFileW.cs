@@ -2,12 +2,17 @@
 {
     public unsafe class CreateFileW : Base.Hook<CreateFileWDelegate>
     {
+        public static CreateFileW Instance;
         public override string Library => "kernel32.dll";
 
         public override string Export => "CreateFileW";
 
         public override void Initialize()
         {
+            if (Instance != null)
+                return;
+
+            Instance = this;
             HookDelegate = new CreateFileWDelegate(CreateFileHook);
             Compile();
         }

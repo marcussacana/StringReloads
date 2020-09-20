@@ -9,6 +9,7 @@ using StringReloads.Engine.Match;
 using StringReloads.Engine.String;
 using StringReloads.Engine.Unmanaged;
 using StringReloads.Hook;
+using StringReloads.Hook.Base;
 using StringReloads.Hook.Win32;
 using StringReloads.Mods;
 using StringReloads.StringModifier;
@@ -61,6 +62,7 @@ namespace StringReloads.Engine
 
         internal IMod[] _Mods = null;
         public IMod[] Mods => _Mods ??= new IMod[] {
+            new CoInitializeFix(),
             new ForceExit(),
             new PatchRedir()
         };
@@ -349,7 +351,15 @@ namespace StringReloads.Engine
             return null;
         }
 
-        public void EnableHook(Hook.Base.Hook Hook) {
+        public void EnableHook<T>(T NewHook) where T : Hook.Base.Hook {
+            foreach (var ReadyHook in _Hooks)
+                if (ReadyHook.Name == NewHook.Name)
+                    return;
+
+            EnableHook((Hook.Base.Hook)NewHook);
+        }
+
+        void EnableHook(Hook.Base.Hook Hook) {
             Array.Resize(ref _Hooks, _Hooks.Length + 1);
             _Hooks[_Hooks.Length - 1] = Hook;
             _Hooks[_Hooks.Length - 1].Install();
