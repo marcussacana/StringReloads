@@ -49,5 +49,5 @@ namespace StringReloads.Hook
     public unsafe delegate bool TextOutWDelegate(void* dc, int xStart, int yStart, byte* pStr, int strLen);
 
     [UnmanagedFunctionPointer(CallingConvention.Winapi)]
-    public delegate int hCoInitialize(IntPtr Reserved);
+    public delegate int CoInitializeDelegate(IntPtr Reserved);
 }
