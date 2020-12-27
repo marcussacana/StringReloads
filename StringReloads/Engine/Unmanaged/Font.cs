@@ -21,16 +21,20 @@ namespace StringReloads.Engine.Unmanaged
                          from Font in Directory.GetFiles(RootDir, Ext)
                          select Font);
 
+            Log.Trace("Font Search Root: " + RootDir);
+
             foreach (var Font in Fonts)
             {
                 int Loaded = AddFontResourceExW(Font, FR_PRIVATE, null);
-                
+
                 if (Loaded > 0)
-                    Log.Information("{0} Fonts Loaded From {1}", Loaded.ToString(), Path.GetFileName(Font));
+                    Log.Debug($"{Loaded} Fonts Loaded From: {Path.GetFileName(Font)}");
+                else
+                    Log.Trace($"Failed to Load Font: {Path.GetFileName(Font)}");
             }
         }
 
-        [DllImport("gdi32.dll")]
+        [DllImport("gdi32.dll", CharSet = CharSet.Unicode)]
         static extern int AddFontResourceExW(string lpszFilename, uint fl, void* reserved);
 
         const uint FR_PRIVATE  = 0x10;

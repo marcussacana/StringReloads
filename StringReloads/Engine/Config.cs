@@ -73,7 +73,7 @@ namespace StringReloads.Engine
         public bool LogFile => ((bool?)(_LogFile ??= GetValue("LogFile").ToBoolean())).Value;
        
         bool? _LoadLocalFont = null;
-        public bool LoadLocalFont => ((bool?)(_LoadLocalFont ??= GetValue("LoadLocalFont").ToBoolean())).Value;
+        public bool LoadLocalFont => ((bool?)(_LoadLocalFont ??= GetValue("LoadLocalFonts").ToBoolean())).Value;
 
         Log.LogLevel? _LogLevel = null;
         public Log.LogLevel LogLevel => ((Log.LogLevel?)(_LogLevel ??= GetValue("LogLevel").ToLogLevel())).Value;
