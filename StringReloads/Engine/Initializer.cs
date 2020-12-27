@@ -1,5 +1,7 @@
-﻿using System;
+﻿using StringReloads.Engine.Unmanaged;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.IO;
 using System.Linq;
 
@@ -36,6 +38,9 @@ namespace StringReloads.Engine
             Log.Debug($"{Engine.CharRemap.Count} Remap(s) Loaded");
 
             PluginsInitializer(Engine);
+
+            if (Engine.Settings.LoadLocalFont)
+                FontUtility.LoadLocalFonts();
 
             ModifiersInitializer(Engine);
             HooksInitializer(Engine);
