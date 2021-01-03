@@ -75,6 +75,9 @@ namespace StringReloads.Hook
             if (Config.Default.WideCharToMultiByteUndoRemap)
                 lpWideCharStr = (WCString)Remaper.Default.Restore((WCString)lpWideCharStr);
 
+            if (Config.Default.WideCharToMultiByteRemapAlt)
+                lpWideCharStr = (WCString)RemaperAlt.Default.Restore((WCString)lpWideCharStr);
+
             if (WriteEncoding != null)
                 Config.Default.WriteEncoding = WriteEncoding;
 

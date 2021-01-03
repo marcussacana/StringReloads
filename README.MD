@@ -1,4 +1,4 @@
-# StringsReloads v7.2
+# StringsReloads v7.3
 [![Build Status](https://ci.appveyor.com/api/projects/status/github/marcussacana/StringReloads?branch=master&retina=true)](https://ci.appveyor.com/project/marcussacana/StringReloads)
 
 
@@ -8,6 +8,7 @@ This is a tool created to inject strings using low level code
 * Help use Non-ASCII Characters.
 * Help with a customizable Auto-WordWrap.
 * Help change the game font size (when possible)
+* Help fix non-monospaced char spacing (when possible)
 * Can use with just a small assembly knowledge
 
 

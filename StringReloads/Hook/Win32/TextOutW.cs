@@ -28,6 +28,9 @@ namespace StringReloads.Hook.Win32
             if (Config.Default.TextOutWUndoRemap)
                 InStr = Remaper.Default.Restore(InStr);
 
+            if (Config.Default.TextOutWRemapAlt)
+                InStr = RemaperAlt.Default.Apply(InStr, null);
+
             return Bypass(dc, xStart, yStart, InStr, InStr.Count());
         }
     }

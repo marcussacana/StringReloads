@@ -4,15 +4,15 @@ using StringReloads.Engine.Match;
 
 namespace StringReloads.StringModifier
 {
-    public class Remaper : IStringModifier
+    public class RemaperAlt : IStringModifier
     {
 
-        static Remaper _Default = null;
-        public static Remaper Default = _Default ??= new Remaper(EntryPoint.SRL);
+        static RemaperAlt _Default = null;
+        public static RemaperAlt Default = _Default ??= new RemaperAlt(EntryPoint.SRL);
         SRL Engine;
-        public Remaper(SRL Main) => Engine = Main;
+        public RemaperAlt(SRL Main) => Engine = Main;
 
-        public string Name => "Remaper";
+        public string Name => "RemaperAlt";
 
         public bool CanRestore => true;
 
@@ -21,8 +21,8 @@ namespace StringReloads.StringModifier
             string Result = string.Empty;
             foreach (var Char in String)
             {
-                if (Engine.CharRemap.ContainsKey(Char))
-                    Result += Engine.CharRemap[Char];
+                if (Engine.CharRemapAlt.ContainsKey(Char))
+                    Result += Engine.CharRemapAlt[Char];
                 else
                     Result += Char;
             }
@@ -35,8 +35,8 @@ namespace StringReloads.StringModifier
             string Result = string.Empty;
             foreach (var Char in String)
             {
-                if (Engine.CharRemap.ContainsValue(Char))
-                    Result += Engine.CharRemap.ReverseMatch(Char);
+                if (Engine.CharRemapAlt.ContainsValue(Char))
+                    Result += Engine.CharRemapAlt.ReverseMatch(Char);
                 else
                     Result += Char;
             }

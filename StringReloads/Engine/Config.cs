@@ -189,6 +189,66 @@ namespace StringReloads.Engine
 
         bool? _TextOutWUndoRemap = null;
         public bool TextOutWUndoRemap => ((bool?)(_TextOutWUndoRemap ??= GetValue("UndoRemap", "TextOutW").ToBoolean())).Value;
+        
+        bool? _GetTextExtentPoint32WUndoRemap = null;
+        public bool GetTextExtentPoint32WUndoRemap => ((bool?)(_GetTextExtentPoint32WUndoRemap ??= GetValue("UndoRemap", "GetTextExtentPoint32W").ToBoolean())).Value;
+
+        bool? _GetTextExtentPoint32AUndoRemap = null;
+        public bool GetTextExtentPoint32AUndoRemap => ((bool?)(_GetTextExtentPoint32AUndoRemap ??= GetValue("UndoRemap", "GetTextExtentPoint32A").ToBoolean())).Value;
+        
+        bool? _GetCharacterPlacementAUndoRemap = null;
+        public bool GetCharacterPlacementAUndoRemap => ((bool?)(_GetCharacterPlacementAUndoRemap ??= GetValue("UndoRemap", "GetCharacterPlacementA").ToBoolean())).Value;
+
+        bool? _GetCharacterPlacementWUndoRemap = null;
+        public bool GetCharacterPlacementWUndoRemap => ((bool?)(_GetCharacterPlacementWUndoRemap ??= GetValue("UndoRemap", "_GetCharacterPlacementW").ToBoolean())).Value;
+
+        bool? _MultiByteToWideCharRemapAlt = null;
+        public bool MultiByteToWideCharRemapAlt => ((bool?)(_MultiByteToWideCharRemapAlt ??= GetValue("RemapAlt", "MultiByteToWideChar").ToBoolean())).Value;
+
+        bool? _WideCharToMultiByteRemapAlt = null;
+        public bool WideCharToMultiByteRemapAlt => ((bool?)(_WideCharToMultiByteRemapAlt ??= GetValue("RemapAlt", "WideCharToMultiByte").ToBoolean())).Value;
+
+        bool? _TextOutARemapAlt = null;
+        public bool TextOutARemapAlt => ((bool?)(_TextOutARemapAlt ??= GetValue("RemapAlt", "TextOutA").ToBoolean())).Value;
+
+        bool? _TextOutWRemapAlt = null;
+        public bool TextOutWRemapAlt => ((bool?)(_TextOutWRemapAlt ??= GetValue("RemapAlt", "TextOutW").ToBoolean())).Value;
+
+        bool? _GetTextExtentPoint32WRemapAlt = null;
+        public bool GetTextExtentPoint32WRemapAlt => ((bool?)(_GetTextExtentPoint32WRemapAlt ??= GetValue("RemapAlt", "GetTextExtentPoint32W").ToBoolean())).Value;
+
+        bool? _GetTextExtentPoint32ARemapAlt = null;
+        public bool GetTextExtentPoint32ARemapAlt => ((bool?)(_GetTextExtentPoint32ARemapAlt ??= GetValue("RemapAlt", "GetTextExtentPoint32A").ToBoolean())).Value;
+
+        bool? _GetCharacterPlacementARemapAlt = null;
+        public bool GetCharacterPlacementARemapAlt => ((bool?)(_GetCharacterPlacementARemapAlt ??= GetValue("RemapAlt", "GetCharacterPlacementA").ToBoolean())).Value;
+
+        bool? _GetCharacterPlacementWRemapAlt = null;
+        public bool GetCharacterPlacementWRemapAlt => ((bool?)(_GetCharacterPlacementWRemapAlt ??= GetValue("RemapAlt", "GetCharacterPlacementW").ToBoolean())).Value;
+        
+        bool? _GetCharABCWidthsFloatWUndoRemap = null;
+        public bool GetCharABCWidthsFloatWUndoRemap => ((bool?)(_GetCharABCWidthsFloatWUndoRemap ??= GetValue("UndoRemap", "GetCharABCWidthsFloatW").ToBoolean())).Value;
+
+        bool? _GetCharABCWidthsFloatAUndoRemap = null;
+        public bool GetCharABCWidthsFloatAUndoRemap => ((bool?)(_GetCharABCWidthsFloatAUndoRemap ??= GetValue("UndoRemap", "GetCharABCWidthsFloatA").ToBoolean())).Value;
+
+        bool? _GetCharABCWidthsFloatWRemapAlt = null;
+        public bool GetCharABCWidthsFloatWRemapAlt => ((bool?)(_GetCharABCWidthsFloatWRemapAlt ??= GetValue("RemapAlt", "GetCharABCWidthsFloatW").ToBoolean())).Value;
+
+        bool? _GetCharABCWidthsFloatARemapAlt = null;
+        public bool GetCharABCWidthsFloatARemapAlt => ((bool?)(_GetCharABCWidthsFloatARemapAlt ??= GetValue("RemapAlt", "GetCharABCWidthsFloatA").ToBoolean())).Value;
+
+        bool? _GetGlyphOutlineWUndoRemap = null;
+        public bool GetGlyphOutlineWUndoRemap => ((bool?)(_GetGlyphOutlineWUndoRemap ??= GetValue("UndoRemap", "GetGlyphOutlineW").ToBoolean())).Value;
+
+        bool? _GetGlyphOutlineAUndoRemap = null;
+        public bool GetGlyphOutlineAUndoRemap => ((bool?)(_GetGlyphOutlineAUndoRemap ??= GetValue("UndoRemap", "GetGlyphOutlineA").ToBoolean())).Value;
+
+        bool? _GetGlyphOutlineWRemapAlt = null;
+        public bool GetGlyphOutlineWRemapAlt => ((bool?)(_GetGlyphOutlineWRemapAlt ??= GetValue("RemapAlt", "GetGlyphOutlineW").ToBoolean())).Value;
+
+        bool? _GetGlyphOutlineARemapAlt = null;
+        public bool GetGlyphOutlineARemapAlt => ((bool?)(_GetGlyphOutlineARemapAlt ??= GetValue("RemapAlt", "GetGlyphOutlineA").ToBoolean())).Value;
 
 
         Dictionary<string, string>[] _FontRemaps;

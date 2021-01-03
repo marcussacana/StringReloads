@@ -28,10 +28,12 @@ namespace StringReloads
             {
                 if ((ulong)Value <= ushort.MaxValue)
                 {
-                    return (void*)(ushort)SRL.ResolveRemap((char)(ushort)Value);
+                    var NewRemap = (ushort)SRL.ResolveRemap((char)(ushort)Value);
+                    Log.Trace($"Character Remaped from {(char)(ushort)Value} to {(char)NewRemap}");
+                    return (void*)NewRemap;
                 }
 
-                return (void*)SRL.ProcessString((CString)Value);
+                return SRL.ProcessString((CString)Value);
             }
             catch (Exception ex) {
                 SRL.HasMatchLocks = new List<object>();
@@ -55,10 +57,12 @@ namespace StringReloads
             {
                 if ((ulong)Value <= ushort.MaxValue)
                 {
-                    return (void*)(ushort)SRL.ResolveRemap((char)(ushort)Value);
+                    var NewRemap = (ushort)SRL.ResolveRemap((char)(ushort)Value);
+                    Log.Trace($"Character Remaped from {(char)(ushort)Value} to {(char)NewRemap}");
+                    return (void*)NewRemap;
                 }
 
-                return (void*)SRL.ProcessString((WCString)Value);
+                return SRL.ProcessString((WCString)Value);
             }
             catch (Exception ex) {
                 SRL.HasMatchLocks = new List<object>();

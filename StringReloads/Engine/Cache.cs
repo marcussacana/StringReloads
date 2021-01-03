@@ -9,7 +9,7 @@ namespace StringReloads.Engine
 {
     unsafe class Cache
     {
-        const uint Signature = 0x364C5253;//SRL6
+        const uint Signature = 0x374C5253;//SRL7
 
         Stream File;
 
@@ -72,7 +72,20 @@ namespace StringReloads.Engine
             }
         }
 
-        public void BuildDatabase(Database[] Databases, KeyValuePair<char, char>[] Remaps) {
+        public IEnumerable<KeyValuePair<char, char>> GetRemapsAlt()
+        {
+            File.Position = GetHeader().CharsAltOffset;
+            uint Entries = Reader.ReadUInt32();
+            for (uint i = 0; i < Entries; i++)
+            {
+                char A = Reader.ReadChar();
+                char B = Reader.ReadChar();
+
+                yield return new KeyValuePair<char, char>(A, B);
+            }
+        }
+
+        public void BuildDatabase(Database[] Databases, KeyValuePair<char, char>[] Remaps, KeyValuePair<char, char>[] RemapsAlt) {
             File.Position = 0;
             Header Header = new Header();
             Header* pHeader = &Header;
@@ -101,10 +114,20 @@ namespace StringReloads.Engine
             }
 
             Writer.Flush();
+
             pHeader->CharsOffset = (uint)Writer.BaseStream.Position;
 
             Writer.Write((uint)Remaps.Length);
             foreach (var Remap in Remaps) {
+                Writer.Write(Remap.Key);
+                Writer.Write(Remap.Value);
+            }
+
+            pHeader->CharsAltOffset = (uint)Writer.BaseStream.Position;
+
+            Writer.Write((uint)RemapsAlt.Length);
+            foreach (var Remap in RemapsAlt)
+            {
                 Writer.Write(Remap.Key);
                 Writer.Write(Remap.Value);
             }
@@ -120,6 +143,7 @@ namespace StringReloads.Engine
             public uint Signature;
             public uint DatabaseOffset;
             public uint CharsOffset;
+            public uint CharsAltOffset;
         }
     }
 

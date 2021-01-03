@@ -15,11 +15,11 @@ namespace StringReloads.Hook
         public override void Initialize()
         {
             if (Config.Default.ImportHook) {
-                HookDelegate = new MultiByteToWideCharDelegate(PersistentMultiByteToWideChar);
+                HookDelegate = PersistentMultiByteToWideChar;
                 Compile(true);
             }
             else { 
-                HookDelegate = new MultiByteToWideCharDelegate(hMultiByteToWideChar);
+                HookDelegate = hMultiByteToWideChar;
                 Compile();
             }
         }
@@ -79,6 +79,9 @@ namespace StringReloads.Hook
 
             if (Config.Default.MultiByteToWideCharUndoRemap)
                 lpMultiByteStr = (CString)Remaper.Default.Restore((CString)lpMultiByteStr);
+
+            if (Config.Default.MultiByteToWideCharRemapAlt)
+                lpMultiByteStr = (CString)RemaperAlt.Default.Apply((CString)lpMultiByteStr, null);
 
             if (ReadEncoding != null)
                 Config.Default.ReadEncoding = ReadEncoding;

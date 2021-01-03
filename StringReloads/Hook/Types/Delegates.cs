@@ -15,9 +15,25 @@ namespace StringReloads.Hook
     public unsafe delegate void* CreateFontIndirectWDelegate(ref LOGFONTW lplf);
 
     [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Ansi)]
+    public unsafe delegate uint GetCharacterPlacementADelegate(void* hdc, byte* lpString, int nCount, int nMexExtent, GCP_RESULTSA* lpResult, uint dwFlags);
+
+    [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode)]
+    public unsafe delegate uint GetCharacterPlacementWDelegate(void* hdc, byte* lpString, int nCount, int nMexExtent, GCP_RESULTSW* lpResult, uint dwFlags);
+
+    [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Ansi)]
     public unsafe delegate uint GetGlyphOutlineADelegate(void* hdc, uint uChar, uint uFormat, out GLYPHMETRICS lpgm, uint cbBuffer, byte* lpvBuffer, ref MAT2 lpmat2);
     [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode)]
     public unsafe delegate uint GetGlyphOutlineWDelegate(void* hdc, uint uChar, uint uFormat, out GLYPHMETRICS lpgm, uint cbBuffer, byte* lpvBuffer, ref MAT2 lpmat2);
+    
+    [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Ansi)]
+    public unsafe delegate bool GetCharABCWidthsFloatADelegate(void* hdc, uint iFirst, uint iLast, ABCFLOAT* lpABC);
+    [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode)]
+    public unsafe delegate bool GetCharABCWidthsFloatWDelegate(void* hdc, uint iFirst, uint iLast, ABCFLOAT* lpABC);
+
+    [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Ansi)]
+    public unsafe delegate bool GetTextExtentPoint32ADelegate(void* hdc, byte* lpString, int c, SIZE* psize);
+    [UnmanagedFunctionPointer(CallingConvention.Winapi, CharSet = CharSet.Unicode)]
+    public unsafe delegate bool GetTextExtentPoint32WDelegate(void* hdc, byte* lpString, int c, SIZE* psize);
 
     [UnmanagedFunctionPointer(CallingConvention.Winapi)]
     public unsafe delegate void* SysAllocStringDelegate(void* pStr);

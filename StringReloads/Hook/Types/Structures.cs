@@ -274,4 +274,53 @@ namespace StringReloads.Hook
     }
     #endregion
 
+    #region GETCHARABCWIDTHSFLOAT
+    [StructLayout(LayoutKind.Sequential)]
+    public struct ABCFLOAT
+    {
+        public float AbcfA;
+        public float AbcfB;
+        public float AbcfC;
+    };
+    #endregion
+
+    #region GETTEXTEXTENDPOINT
+    public struct SIZE
+    {
+        public uint cx;
+        public uint cy;
+    }
+    #endregion
+
+    #region GETCHARACTERPLACEMENT
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    public unsafe struct GCP_RESULTSW
+    {
+        public int lStructSize;
+        public char* lpOutString;
+        public uint* lpOrder;
+        public int* lpDx;
+        public int* lpCaretPos;
+        public byte* lpClass;
+        public char* lpGlyphs;
+        public uint nGlyphs;
+        public int nMaxFit;
+    }
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+    public unsafe struct GCP_RESULTSA
+    {
+        public int lStructSize;
+        public byte* lpOutString;
+        public uint* lpOrder;
+        public int* lpDx;
+        public int* lpCaretPos;
+        public byte* lpClass;
+        public char* lpGlyphs;
+        public uint nGlyphs;
+        public int nMaxFit;
+    }
+
+    #endregion
 }

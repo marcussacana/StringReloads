@@ -30,12 +30,14 @@ namespace StringReloads.Engine
                 var Cache = new Cache(Engine.Settings.CachePath);
                 Engine.Databases = Cache.GetDatabases().ToList();
                 Engine.CharRemap = Cache.GetRemaps().ToDictionary();
+                Engine.CharRemapAlt = Cache.GetRemapsAlt().ToDictionary();
             }
             else
                 BuildCache(Engine);
 
             Log.Debug($"{Engine.Databases.Count} Database(s) Loaded");
             Log.Debug($"{Engine.CharRemap.Count} Remap(s) Loaded");
+            Log.Debug($"{Engine.CharRemapAlt.Count} Alternative Remap(s) Loaded");
 
             PluginsInitializer(Engine);
 
@@ -256,7 +258,7 @@ namespace StringReloads.Engine
             if (!Directory.Exists(Engine.Settings.WorkingDirectory))
                 Directory.CreateDirectory(Engine.Settings.WorkingDirectory);
 
-            string[] SpecialLSTs = new string[] { "chars", "regex", "mtl" };
+            string[] SpecialLSTs = new string[] { "chars", "charsalt", "regex", "mtl" };
 
             foreach (string Lst in Directory.GetFiles(Engine.Settings.WorkingDirectory, "*.lst"))
             {
@@ -272,11 +274,20 @@ namespace StringReloads.Engine
                 Engine.Databases.Add(DB);
             }
 
-            string CharsFile = Path.Combine(Engine.Settings.WorkingDirectory, "Chars.lst");
+            Engine.CharRemap = LoadCharRemap(Path.Combine(Engine.Settings.WorkingDirectory, "Chars.lst"));
+            Engine.CharRemapAlt = LoadCharRemap(Path.Combine(Engine.Settings.WorkingDirectory, "CharsAlt.lst"));
 
-            if (File.Exists(CharsFile))
+
+            Cache Builder = new Cache(Engine.Settings.CachePath);
+
+            Builder.BuildDatabase(Engine.Databases.ToArray(), Engine.CharRemap.ToArray(), Engine.CharRemapAlt.ToArray());
+        }
+
+        private Dictionary<char, char> LoadCharRemap(string LstPath) {
+            Dictionary<char, char> Remap = new Dictionary<char, char>();
+            if (File.Exists(LstPath))
             {
-                foreach (string Line in File.ReadAllLines(CharsFile))
+                foreach (string Line in File.ReadAllLines(LstPath))
                 {
                     if (!Line.Contains('=') || string.IsNullOrWhiteSpace(Line))
                         continue;
@@ -308,12 +319,10 @@ namespace StringReloads.Engine
                         B = PartB.First();
 
                     Log.Debug($"Character Remap from {A} to {B}");
-                    Engine.CharRemap[A] = B;
+                    Remap[A] = B;
                 }
             }
-
-            Cache Builder = new Cache(Engine.Settings.CachePath);
-            Builder.BuildDatabase(Engine.Databases.ToArray(), Engine.CharRemap.ToArray());
+            return Remap;
         }
 
         private void EnableExceptionHandler(SRL Engine)

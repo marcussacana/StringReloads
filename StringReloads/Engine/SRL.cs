@@ -42,6 +42,7 @@ namespace StringReloads.Engine
         public IStringModifier[] ReloadModifiers => _ReloadModifiers ??= new IStringModifier[] {
             new MonoWordWrap(this),
             new Remaper(this),
+            new RemaperAlt(this),
             new Escape()
         };
 
@@ -51,8 +52,14 @@ namespace StringReloads.Engine
             new CreateFontW(),
             new CreateFontIndirectA(),
             new CreateFontIndirectW(),
+            new GetCharABCWidthsFloatA(),
+            new GetCharABCWidthsFloatW(),
+            new GetCharacterPlacementA(),
+            new GetCharacterPlacementW(),
             new GetGlyphOutlineA(),
             new GetGlyphOutlineW(),
+            new GetTextExtentPoint32A(),
+            new GetTextExtentPoint32W(),
             new SysAllocString(),
             new MultiByteToWideChar(),
             new WideCharToMultiByte(),
@@ -95,6 +102,7 @@ namespace StringReloads.Engine
         public Queue<string> RecentOutput = new Queue<string>();
 
         internal Dictionary<char, char> CharRemap = new Dictionary<char, char>();
+        internal Dictionary<char, char> CharRemapAlt = new Dictionary<char, char>();
 
         internal bool Initialized;
 

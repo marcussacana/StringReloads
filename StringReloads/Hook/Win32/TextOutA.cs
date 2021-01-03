@@ -24,12 +24,15 @@ namespace StringReloads.Hook.Win32
             CString OriStr = pStr;
             OriStr.FixedLength = (uint)strLen;
 
-            WCString Str = EntryPoint.ProcessW((WCString)(string)OriStr);
+            WCString InStr = EntryPoint.ProcessW((WCString)(string)OriStr);
 
             if (Config.Default.TextOutAUndoRemap)
-                Str = Remaper.Default.Restore(Str);
+                InStr = Remaper.Default.Restore(InStr);
 
-            return TextOutW(dc, xStart, yStart, Str, (int)Str.LongCount());
+            if (Config.Default.TextOutARemapAlt)
+                InStr = RemaperAlt.Default.Apply(InStr, null);
+
+            return TextOutW(dc, xStart, yStart, InStr, (int)InStr.LongCount());
         }
 
         [DllImport("gdi32.dll", CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Unicode)]
