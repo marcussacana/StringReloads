@@ -1,7 +1,11 @@
-﻿using StringReloads.Engine.Unmanaged;
+﻿using StringReloads.Engine.Interface;
+using StringReloads.Engine.Match;
+using StringReloads.Engine.Unmanaged;
+using StringReloads.StringModifier;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 
@@ -35,9 +39,20 @@ namespace StringReloads.Engine
             else
                 BuildCache(Engine);
 
+            if (Engine.Settings.Hashset) {
+                Log.Debug("Generating Hashset...");
+                foreach (var Database in Engine.Databases) {
+                    foreach (var Entry in Database) {
+                        Engine.Hashset.Add(Entry.OriginalLine);
+                        Engine.Hashset.Add(Minify.Default.Apply(Entry.OriginalLine, null));
+                    }
+                }
+            }
+
             Log.Debug($"{Engine.Databases.Count} Database(s) Loaded");
             Log.Debug($"{Engine.CharRemap.Count} Remap(s) Loaded");
             Log.Debug($"{Engine.CharRemapAlt.Count} Alternative Remap(s) Loaded");
+            Log.Debug($"{Engine.Hashset.Count} Hashes Ready");
 
             PluginsInitializer(Engine);
 
@@ -51,6 +66,13 @@ namespace StringReloads.Engine
             AutoInstall(Engine);
 
             EnableExceptionHandler(Engine);
+
+            if (Engine.Settings.FastMode)
+            {
+                Log.Debug("Fast Mode Enabled, Disabling Cool Features...");
+                IMatch Basic = (from x in Engine.Matchs where x is BasicMatch select x).First();
+                Engine._Matchs = new IMatch[] { Basic };
+            }
 
             Engine.Initialized = true;
             Log.Information("SRL Initialized");

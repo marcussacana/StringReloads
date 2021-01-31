@@ -38,6 +38,8 @@ namespace StringReloads.Engine
 
         public List<Database> Databases = new List<Database>();
 
+        public HashSet<string> Hashset = new HashSet<string>();
+
         internal IStringModifier[] _ReloadModifiers = null;
         public IStringModifier[] ReloadModifiers => _ReloadModifiers ??= new IStringModifier[] {
             new MonoWordWrap(this),
@@ -178,6 +180,7 @@ namespace StringReloads.Engine
 
             return Output;
         }
+
         public string ProcessString(string String)
         {
             if (Settings.CacheOutput && RecentOutput.Contains(String))

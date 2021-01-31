@@ -12,7 +12,7 @@ namespace StringReloads.AutoInstall
     {
         public string Name => "ExHIBIT";
 
-        lstrcpyA lstrcpyAHook;
+        ExHIBIT_lstrcpyA lstrcpyAHook;
 
         ExHIBIT_Say10 Say10Hook;
         ExHIBIT_PrintSub3 PrintSub3Hook;
@@ -28,7 +28,7 @@ namespace StringReloads.AutoInstall
             var Resident = (from x in Modules where x.ModuleName.ToLowerInvariant() == "resident.dll" select x.BaseAddress).Single();
 
             if (lstrcpyAHook == null)
-                lstrcpyAHook = new lstrcpyA(Resident);
+                lstrcpyAHook = new ExHIBIT_lstrcpyA(Resident);
 
             Say10Hook.Install();
             PrintSub3Hook.Install();

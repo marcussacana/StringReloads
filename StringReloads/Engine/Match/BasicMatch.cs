@@ -25,16 +25,22 @@ namespace StringReloads.Engine.Match
         {
             string Minified = String;
 
-            foreach (var Modifier in Engine.ReloadModifiers)
+            if (!Engine.Settings.FastMode)
             {
-                if (Modifier.CanRestore)
-                    Minified = Modifier.Restore(Minified);
+                foreach (var Modifier in Engine.ReloadModifiers)
+                {
+                    if (Modifier.CanRestore)
+                        Minified = Modifier.Restore(Minified);
+                }
             }
 
             Minified = Engine.Minify(String);
 
             if (Engine.CurrentDatabase.HasKey(Minified))
                 return true;
+
+            if (Engine.Settings.Hashset && !Engine.Hashset.Contains(String) && !Engine.Hashset.Contains(Minified))
+                return false;
 
             for (int i = 0; i < Engine.Databases.Count; i++)
             {
@@ -48,10 +54,13 @@ namespace StringReloads.Engine.Match
         {
             string Minified = String;
 
-            foreach (var Modifier in Engine.ReloadModifiers)
+            if (!Engine.Settings.FastMode)
             {
-                if (Modifier.CanRestore)
-                    Minified = Modifier.Restore(Minified);
+                foreach (var Modifier in Engine.ReloadModifiers)
+                {
+                    if (Modifier.CanRestore)
+                        Minified = Modifier.Restore(Minified);
+                }
             }
 
             Minified = Engine.Minify(String);
@@ -72,16 +81,22 @@ namespace StringReloads.Engine.Match
 
             string Minified = String;
 
-            foreach (var Modifier in Engine.ReloadModifiers)
+            if (!Engine.Settings.FastMode)
             {
-                if (Modifier.CanRestore)
-                    Minified = Modifier.Restore(Minified);
+                foreach (var Modifier in Engine.ReloadModifiers)
+                {
+                    if (Modifier.CanRestore)
+                        Minified = Modifier.Restore(Minified);
+                }
             }
 
             Minified = Engine.Minify(Minified);
 
             if (Engine.CurrentDatabase.HasKey(Minified))
                 return Engine.CurrentDatabase[Minified];
+
+            if (Engine.Settings.Hashset && !Engine.Hashset.Contains(String) && !Engine.Hashset.Contains(Minified))
+                return null;
 
             for (int i = 0; i < Engine.Databases.Count; i++)
             {

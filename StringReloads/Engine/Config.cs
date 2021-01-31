@@ -81,6 +81,12 @@ namespace StringReloads.Engine
         string _Workspace = null;
         public string Workspace => _Workspace ??= GetValue("Workspace");
 
+        bool? _Hashset = null;
+        public bool Hashset => _Hashset ??= GetValue("Hashset").ToBoolean();
+
+        bool? _FastMode = null;
+        public bool FastMode => _FastMode ??= GetValue("FastMode").ToBoolean();
+
 
         string _WorkingDirectory = null;
         public string WorkingDirectory {

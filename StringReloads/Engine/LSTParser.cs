@@ -126,8 +126,8 @@ namespace StringReloads.Engine
                 LineB = LineB.Substring(LineB.IndexOf("::", 2) + 2);
             }
 
-            OriginalLine = LineA.Replace(LSTParser.BreakLine, "\n");
-            TranslationLine = LineB.Replace(LSTParser.ReturnLine, "\r");
+            OriginalLine = LineA.Replace(LSTParser.BreakLine, "\n").Replace(LSTParser.ReturnLine, "\r");
+            TranslationLine = LineB.Replace(LSTParser.BreakLine, "\n").Replace(LSTParser.ReturnLine, "\r");
         }
 
         public LSTFlag[] Flags => OriginalFlags.Union(TranslationFlags).ToArray();
