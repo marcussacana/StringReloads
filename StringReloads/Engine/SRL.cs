@@ -60,6 +60,8 @@ namespace StringReloads.Engine
             new GetGlyphOutlineW(),
             new GetTextExtentPoint32A(),
             new GetTextExtentPoint32W(),
+            new lstrcpyA(),
+            new lstrcpyW(),
             new SysAllocString(),
             new MultiByteToWideChar(),
             new WideCharToMultiByte(),
@@ -81,6 +83,7 @@ namespace StringReloads.Engine
         internal IAutoInstall[] _Installers = null;
         internal IAutoInstall[] Installers => _Installers ??= new IAutoInstall[] {
             new AdvHD(),
+            new ExHIBIT(),
             new SoftPalMethodA(),
             new SoftPalMethodB(),
             new CMVS()

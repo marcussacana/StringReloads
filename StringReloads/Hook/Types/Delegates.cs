@@ -52,6 +52,16 @@ namespace StringReloads.Hook
     [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
     public unsafe delegate void* CMVS_GetTextDelegate(void* hScript, uint ID);
 
+    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+    public unsafe delegate void ExHIBIT_Say10Delegate(void* This, void* a1, void* a2, byte* Text, void* a4, void* a5, void* a6, void* a7, void* a8, void* a9, void* a10);
+
+    [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
+    public unsafe delegate void ExHIBIT_PrintSub3Delegate(void* This, void* Text, void* a2, void* a3);
+
+    [UnmanagedFunctionPointer(CallingConvention.Winapi)]
+    public unsafe delegate byte* lstrcpyDelegate(byte* lpString1, byte* lpString2);
+
+
     [UnmanagedFunctionPointer(CallingConvention.Winapi)]
     public unsafe delegate int MultiByteToWideCharDelegate(uint CodePage, uint dwFlags, byte* lpMultiByteStr, int cbMultiByte, char* lpWideCharStr, int cchWideChar);
     

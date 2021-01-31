@@ -77,7 +77,10 @@ namespace StringReloads.Hook.Base
         public byte[] RealBuffer;
         public byte[] HookBuffer;
 
-        public void Compile(bool ImportHook = false)
+        public bool Enabled { get; private set; } = false;
+        public bool Persistent;
+
+        public void Compile(bool ImportHook = false, IntPtr? TargetModule = null)
         {
             var hModule = GetLibrary(Library);
 
@@ -90,7 +93,7 @@ namespace StringReloads.Hook.Base
                 Function = GetProcAddress(hModule, Ordinal);
 
             if (ImportHook)
-                SetupImportHook();
+                SetupImportHook(TargetModule == null ? Config.Default.GameBaseAddress : TargetModule.Value.ToPointer());
             else
                 AssemblyHook();
 
@@ -224,15 +227,14 @@ namespace StringReloads.Hook.Base
 
 #endif
 
-        private void SetupImportHook()
+        private void SetupImportHook(void* BaseAddress)
         {
-            var Imports = ModuleInfo.GetModuleImports((byte*)Config.Default.GameBaseAddress);
+            var Imports = ModuleInfo.GetModuleImports((byte*)BaseAddress);
 
             var Import = (from x in Imports where x.Function == Export && x.Module.ToLower() == Library.ToLower() select x).Single();
 
             BypassFunction = Function;
             Function = Import.ImportAddress;
-
 
 #if x64
             HookBuffer = new byte[8];
@@ -243,21 +245,28 @@ namespace StringReloads.Hook.Base
             HookBuffer = new byte[4];
             BitConverter.GetBytes((uint)HookFunction).CopyTo(HookBuffer, 0);
             RealBuffer = new byte[4];
-            BitConverter.GetBytes((uint)BypassFunction).CopyTo(HookBuffer, 0);
+            BitConverter.GetBytes((uint)BypassFunction).CopyTo(RealBuffer, 0);
 #endif
 
             if (HookFunction == null)
                 Log.Critical($"\"{Name}\" Null Hook Function");
+            else
+                Log.Trace($"Import to Hook Address: 0x{(ulong)Function:X16}");
         }
 
         public void Install()
         {
+            Enabled = true;
             DeprotectMemory(Function, (uint)HookBuffer.LongLength);
             Marshal.Copy(HookBuffer, 0, new IntPtr(Function), HookBuffer.Length);
         }
 
         public void Uninstall()
         {
+            if (!Enabled || Persistent)
+                return;
+
+            Enabled = false;
             DeprotectMemory(Function, (uint)RealBuffer.LongLength);
             Marshal.Copy(RealBuffer, 0, new IntPtr(Function), RealBuffer.Length);
         }

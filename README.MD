@@ -1,4 +1,4 @@
-# StringsReloads v7.3
+# StringsReloads v7.4
 [![Build Status](https://ci.appveyor.com/api/projects/status/github/marcussacana/StringReloads?branch=master&retina=true)](https://ci.appveyor.com/project/marcussacana/StringReloads)
 
 
@@ -75,7 +75,7 @@ After some problems with games that reload string inside a loop I created the Ge
 	dd 0                ;Here is the @Nxt: + 0x21
 
 ```
-You don't give nothing to this method, just call and catch the EAX, the EAX is a pointer to the Process function, using this pointer will be more fast to call the function, Keep in mind, the pointer given by the GetDirectProcess
+This method don't have paramters, just call and catch the EAX, the EAX is a pointer to the Process function
 
 ---
 
@@ -86,6 +86,7 @@ The SRL have a feature to automatically install the SRL in the game engine witho
 - AdvHD
 - SoftPal
 - CMVS32 and CMVS64
+- ExHIBIT
 
 Some SoftPal games needs a manual setup with the help of the Auto-Installer, click below to see the example:
 [![SRL SoftPal Auto-Install Feature](http://img.youtube.com/vi/RAgZQBWqiJQ/0.jpg)](http://www.youtube.com/watch?v=RAgZQBWqiJQ "SRL SoftPal Auto-Install Feature")
