@@ -9,7 +9,6 @@ using StringReloads.Engine.Match;
 using StringReloads.Engine.String;
 using StringReloads.Engine.Unmanaged;
 using StringReloads.Hook;
-using StringReloads.Hook.Base;
 using StringReloads.Hook.Win32;
 using StringReloads.Mods;
 using StringReloads.StringModifier;
@@ -21,7 +20,7 @@ namespace StringReloads.Engine
         internal IPlugin[] _Plugins = null;
         public IPlugin[] Plugins => _Plugins ??=
             (from Asm in AppDomain.CurrentDomain.GetAssemblies()
-             from Typ in Asm.GetTypes()
+             from Typ in Helpers.TryGet(Asm.GetTypes) ?? new Type[0]
              where typeof(IPlugin).IsAssignableFrom(Typ) && !Typ.IsInterface
              select (IPlugin)Activator.CreateInstance(Typ)).OrderBy(x => x.Name).ToArray();
 
