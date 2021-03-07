@@ -53,6 +53,8 @@ namespace StringReloads.Engine
             new CreateFontW(),
             new CreateFontIndirectA(),
             new CreateFontIndirectW(),
+            new ExtTextOutA(),
+            new ExtTextOutW(),
             new GetCharABCWidthsFloatA(),
             new GetCharABCWidthsFloatW(),
             new GetCharacterPlacementA(),

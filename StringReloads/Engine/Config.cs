@@ -189,13 +189,19 @@ namespace StringReloads.Engine
 
         bool? _MultiByteToWideCharAutoEncoding = null;
         public bool MultiByteToWideCharAutoEncoding => ((bool?)(_MultiByteToWideCharAutoEncoding ??= GetValue("AutoEncoding", "MultiByteToWideChar").ToBoolean())).Value;
-        
+
         bool? _TextOutAUndoRemap = null;
         public bool TextOutAUndoRemap => ((bool?)(_TextOutAUndoRemap ??= GetValue("UndoRemap", "TextOutA").ToBoolean())).Value;
 
         bool? _TextOutWUndoRemap = null;
         public bool TextOutWUndoRemap => ((bool?)(_TextOutWUndoRemap ??= GetValue("UndoRemap", "TextOutW").ToBoolean())).Value;
-        
+
+        bool? _ExtTextOutAUndoRemap = null;
+        public bool ExtTextOutAUndoRemap => ((bool?)(_ExtTextOutAUndoRemap ??= GetValue("UndoRemap", "ExtTextOutA").ToBoolean())).Value;
+
+        bool? _ExtTextOutWUndoRemap = null;
+        public bool ExtTextOutWUndoRemap => ((bool?)(_ExtTextOutWUndoRemap ??= GetValue("UndoRemap", "ExtTextOutW").ToBoolean())).Value;
+
         bool? _GetTextExtentPoint32WUndoRemap = null;
         public bool GetTextExtentPoint32WUndoRemap => ((bool?)(_GetTextExtentPoint32WUndoRemap ??= GetValue("UndoRemap", "GetTextExtentPoint32W").ToBoolean())).Value;
 
@@ -219,6 +225,13 @@ namespace StringReloads.Engine
 
         bool? _TextOutWRemapAlt = null;
         public bool TextOutWRemapAlt => ((bool?)(_TextOutWRemapAlt ??= GetValue("RemapAlt", "TextOutW").ToBoolean())).Value;
+
+        bool? _ExtTextOutARemapAlt = null;
+        public bool ExtTextOutARemapAlt => ((bool?)(_ExtTextOutARemapAlt ??= GetValue("RemapAlt", "ExtTextOutA").ToBoolean())).Value;
+
+        bool? _ExtTextOutWRemapAlt = null;
+        public bool ExtTextOutWRemapAlt => ((bool?)(_ExtTextOutWRemapAlt ??= GetValue("RemapAlt", "ExtTextOutW").ToBoolean())).Value;
+
 
         bool? _GetTextExtentPoint32WRemapAlt = null;
         public bool GetTextExtentPoint32WRemapAlt => ((bool?)(_GetTextExtentPoint32WRemapAlt ??= GetValue("RemapAlt", "GetTextExtentPoint32W").ToBoolean())).Value;

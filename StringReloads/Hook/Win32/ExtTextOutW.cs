@@ -7,22 +7,22 @@ using System.Runtime.InteropServices;
 
 namespace StringReloads.Hook.Win32
 {
-    unsafe class TextOutA : Hook<TextOutADelegate>
+    unsafe class ExtTextOutW : Hook<ExtTextOutWDelegate>
     {
         public override string Library => "gdi32.dll";
 
-        public override string Export => "TextOutA";
+        public override string Export => "ExtTextOutW";
 
         public override void Initialize()
         {
-            HookDelegate = new TextOutADelegate(hTextOut);
+            HookDelegate = new ExtTextOutWDelegate(ExtTextOut);
             Compile();
         }
 
-        bool hTextOut(void* dc, int xStart, int yStart, byte* pStr, int strLen)
+        bool ExtTextOut(void* hdc, int x, int y, uint options, void* lprect, byte* lpString, uint c, int* lpDx)
         {
-            CString OriStr = pStr;
-            OriStr.FixedLength = (uint)strLen;
+            WCString OriStr = lpString;
+            OriStr.FixedLength = c;
 
             WCString InStr = EntryPoint.ProcessW((WCString)(string)OriStr);
 
@@ -32,10 +32,7 @@ namespace StringReloads.Hook.Win32
             if (Config.Default.TextOutARemapAlt)
                 InStr = RemaperAlt.Default.Apply(InStr, null);
 
-            return TextOutW(dc, xStart, yStart, InStr, (int)InStr.LongCount());
+            return Bypass(hdc, x, y , options, lprect, InStr, (uint)InStr.LongCount()/2, lpDx);
         }
-
-        [DllImport("gdi32.dll", CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Unicode)]
-        extern static bool TextOutW(void* dc, int xStart, int yStart, byte* pStr, int strLen);
     }
 }

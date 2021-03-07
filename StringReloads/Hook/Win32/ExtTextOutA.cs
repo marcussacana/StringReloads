@@ -7,35 +7,35 @@ using System.Runtime.InteropServices;
 
 namespace StringReloads.Hook.Win32
 {
-    unsafe class TextOutA : Hook<TextOutADelegate>
+    unsafe class ExtTextOutA : Hook<ExtTextOutADelegate>
     {
         public override string Library => "gdi32.dll";
 
-        public override string Export => "TextOutA";
+        public override string Export => "ExtTextOutA";
 
         public override void Initialize()
         {
-            HookDelegate = new TextOutADelegate(hTextOut);
+            HookDelegate = new ExtTextOutADelegate(ExtTextOut);
             Compile();
         }
 
-        bool hTextOut(void* dc, int xStart, int yStart, byte* pStr, int strLen)
+        bool ExtTextOut(void* hdc, int x, int y, uint options, void* lprect, byte* lpString, uint c, int* lpDx)
         {
-            CString OriStr = pStr;
-            OriStr.FixedLength = (uint)strLen;
+            CString OriStr = lpString;
+            OriStr.FixedLength = c;
 
             WCString InStr = EntryPoint.ProcessW((WCString)(string)OriStr);
 
-            if (Config.Default.TextOutAUndoRemap)
+            if (Config.Default.ExtTextOutAUndoRemap)
                 InStr = Remaper.Default.Restore(InStr);
 
-            if (Config.Default.TextOutARemapAlt)
+            if (Config.Default.ExtTextOutARemapAlt)
                 InStr = RemaperAlt.Default.Apply(InStr, null);
 
-            return TextOutW(dc, xStart, yStart, InStr, (int)InStr.LongCount());
+            return ExtTextOutW(hdc, x, y , options, lprect, InStr, (uint)InStr.LongCount()/2, lpDx);
         }
 
         [DllImport("gdi32.dll", CallingConvention = CallingConvention.Winapi, CharSet = CharSet.Unicode)]
-        extern static bool TextOutW(void* dc, int xStart, int yStart, byte* pStr, int strLen);
+        extern static bool ExtTextOutW(void* hdc, int x, int y, uint options, void* lprect, byte* lpString, uint c, int* lpDx);
     }
 }
