@@ -202,7 +202,11 @@ namespace StringReloads.Engine
             string Prefix = String.GetStartTrimmed();
             string Sufix = String.GetEndTrimmed();
 
-            Reloaded = Prefix + Reloaded + Sufix;
+            if (!Reloaded.StartsWith(Prefix))
+                Reloaded = Prefix + Reloaded;
+
+            if (!Reloaded.EndsWith(Sufix))
+                Reloaded += Sufix;
 
             foreach (var Modifier in ReloadModifiers)
                 Reloaded = Modifier.Apply(Reloaded, Matched?.OriginalLine);

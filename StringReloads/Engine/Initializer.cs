@@ -20,8 +20,13 @@ namespace StringReloads.Engine
 
             //Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);//.net core
 
+#if DEBUG
             if (Config.Default.Debug)
                 System.Diagnostics.Debugger.Launch();
+#else
+            if (Config.Default.Debug)
+                Log.Error("You can't Debug a Release Build of the SRL.");
+#endif
 
             Log.Information($"SRL - StringReloads v{Engine.Settings.SRLVersion}");
             Log.Information($"Created by Marcussacana");
