@@ -1,4 +1,5 @@
 ﻿using System;
+using StringReloads.Engine;
 using StringReloads.Engine.Interface;
 
 namespace StringReloads.StringModifier
@@ -29,7 +30,7 @@ namespace StringReloads.StringModifier
                         break;
                 }
             }
-            return Rst.Trim();
+            return Rst.Trim().Replace(Config.Default.BreakLine.ToLowerInvariant(), "");
         }
 
         public string Restore(string String)

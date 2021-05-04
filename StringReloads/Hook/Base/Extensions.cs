@@ -180,7 +180,9 @@ namespace StringReloads.Hook.Base
                             List.Add(Instruction.Create(Code.Mov_r64_imm64, Instruction.Op0Register, Instruction.IPRelativeMemoryAddress));
                             List.Add(Instruction.Create(Code.Mov_r64_rm64, Instruction.Op0Register, new MemoryOperand(Instruction.Op0Register)));
                             break;
-                        case Code.Lea_r64_m:
+                        case Code.Lea_r64_m:                            
+                            if (Instruction.MemoryBase != Register.RIP)
+                                goto default;
                             List.Add(Instruction.Create(Code.Mov_r64_imm64, Instruction.Op0Register, Instruction.IPRelativeMemoryAddress));
                             break;
                         default:
@@ -298,7 +300,7 @@ namespace StringReloads.Hook.Base
         {
             var Instructions = new InstructionList();
             Instructions.Add(Instruction.Create(Code.Pushq_imm32, unchecked((int)(Value & uint.MaxValue))));
-            Instructions.Add(Instruction.Create(Code.Mov_rm32_imm32, new MemoryOperand(Register.RSP, 4), (uint)(Value >> 8 * 4)));
+            Instructions.Add(Instruction.Create(Code.Mov_rm32_imm32, new MemoryOperand(Register.RSP, 4L), (uint)(Value >> 8 * 4)));
             return Instructions;
         }
 

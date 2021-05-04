@@ -131,7 +131,7 @@ namespace StringReloads.Engine.Match
                 string LSTPath = Path.Combine(Engine.Settings.WorkingDirectory, "Strings.lst");
                 if (File.Exists(LSTPath))
                 {
-                    using (var Reader = File.OpenText(LSTPath))
+                    using (var Reader = new StreamReader(File.Open(LSTPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite)))
                     {
                         while (Reader.Peek() != -1)
                         {
@@ -141,7 +141,7 @@ namespace StringReloads.Engine.Match
                         Reader.Close();
                     }
                 }
-                DefaultLST = File.AppendText(LSTPath);
+                DefaultLST = new StreamWriter(File.Open(LSTPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite));
             }
 
             String = String.Trim().Replace("\n", LSTParser.BreakLine).Replace("\r", LSTParser.ReturnLine);

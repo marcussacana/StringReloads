@@ -13,7 +13,7 @@
         }
 
         private void* hSysAllocString(void* pStr) {
-            pStr = EntryPoint.Process(pStr);
+            pStr = EntryPoint.ProcessW(pStr);
             return Bypass(pStr);
         }
     }
