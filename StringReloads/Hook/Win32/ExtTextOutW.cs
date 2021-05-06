@@ -26,10 +26,10 @@ namespace StringReloads.Hook.Win32
 
             WCString InStr = EntryPoint.ProcessW((WCString)(string)OriStr);
 
-            if (Config.Default.TextOutAUndoRemap)
+            if (Config.Default.ExtTextOutWUndoRemap)
                 InStr = Remaper.Default.Restore(InStr);
 
-            if (Config.Default.TextOutARemapAlt)
+            if (Config.Default.ExtTextOutWRemapAlt)
                 InStr = RemaperAlt.Default.Apply(InStr, null);
 
             return Bypass(hdc, x, y , options, lprect, InStr, (uint)InStr.LongCount()/2, lpDx);
