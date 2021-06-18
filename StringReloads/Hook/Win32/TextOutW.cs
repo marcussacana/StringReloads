@@ -2,12 +2,16 @@
 using StringReloads.Engine.String;
 using StringReloads.Hook.Base;
 using StringReloads.StringModifier;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace StringReloads.Hook.Win32
 {
     unsafe class TextOutW : Hook<TextOutWDelegate>
     {
+
         public override string Library => "gdi32.dll";
 
         public override string Export => "TextOutW";
