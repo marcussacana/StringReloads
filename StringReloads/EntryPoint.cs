@@ -91,7 +91,6 @@ namespace StringReloads
 
         public static void PipeServer(string PipeName)
         {
-            System.Diagnostics.Debugger.Launch();
             Pipe.Run(PipeName); 
         }
 
