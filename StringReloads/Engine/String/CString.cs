@@ -16,6 +16,7 @@ namespace StringReloads.Engine.String
 
         public static implicit operator CString(byte* Ptr) => new CString(Ptr);
         public static implicit operator CString(void* Ptr) => new CString((byte*)Ptr);
+        public static implicit operator CString(IntPtr Ptr) => new CString((byte*)Ptr.ToPointer());
 
         public static implicit operator void*(CString Str) => Str.Address;
         public static implicit operator byte*(CString Str) => (byte*)Str.Address;

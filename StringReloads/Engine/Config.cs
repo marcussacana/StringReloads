@@ -20,7 +20,7 @@ namespace StringReloads.Engine
 
 
         string _ConfigPath = null;
-        public string ConfigPath => _ConfigPath ??= Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SRL.ini");
+        public string ConfigPath => _ConfigPath ??= Path.Combine(EntryPoint.ApplicationDirectory, "SRL.ini");
 
         bool? _Debug = null;
         public bool Debug => ((bool?)(_Debug ??= GetValue("Debug").ToBoolean())).Value;
@@ -94,7 +94,7 @@ namespace StringReloads.Engine
                 if (_WorkingDirectory != null)
                     return _WorkingDirectory;
 
-                _WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                _WorkingDirectory = EntryPoint.ApplicationDirectory;
                 if (Workspace != string.Empty)
                     _WorkingDirectory = Path.Combine(_WorkingDirectory, Workspace);
 

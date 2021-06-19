@@ -1,4 +1,5 @@
-﻿using StringReloads.Engine;
+﻿using StringReloads;
+using StringReloads.Engine;
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -96,7 +97,7 @@ public static class Log
     {
         if (LogStream == null)
         {
-            LogStream = File.CreateText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "SRL.log"));
+            LogStream = File.CreateText(Path.Combine(EntryPoint.ApplicationDirectory, "SRL.log"));
         }
         LogStream.WriteLine(Line);
         LogStream.Flush();

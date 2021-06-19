@@ -2,11 +2,7 @@
 using StringReloads.Engine.String;
 using StringReloads.Hook.Base;
 using StringReloads.StringModifier;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace StringReloads.Hook.Win32
 {

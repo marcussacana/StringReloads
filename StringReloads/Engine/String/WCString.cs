@@ -13,6 +13,7 @@ namespace StringReloads.Engine.String
 
         public static implicit operator WCString(byte* Ptr) => new WCString(Ptr);
         public static implicit operator WCString(void* Ptr) => new WCString((byte*)Ptr);
+        public static implicit operator WCString(IntPtr Ptr) => new WCString((byte*)Ptr.ToPointer());
 
         public static implicit operator void*(WCString Str) => Str.Address;
         public static implicit operator byte*(WCString Str) => (byte*)Str.Address;

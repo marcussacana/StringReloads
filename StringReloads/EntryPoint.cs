@@ -14,6 +14,8 @@ namespace StringReloads
         public static string _CurrentDLL = null;
         public static string CurrentDll => _CurrentDLL ?? Assembly.GetExecutingAssembly().Location;
 
+        public static string ApplicationDirectory => System.IO.Path.GetDirectoryName(CurrentDll);
+
         internal static SRL SRL = new SRL();
         static ProcessDelegate ProcessInstance;
         static ProcessDelegate ProcessWInstance;
@@ -85,6 +87,12 @@ namespace StringReloads
         {
             ProcessWInstance = new ProcessDelegate(ProcessW);
             return Marshal.GetFunctionPointerForDelegate(ProcessWInstance).ToPointer();
+        }
+
+        public static void PipeServer(string PipeName)
+        {
+            System.Diagnostics.Debugger.Launch();
+            Pipe.Run(PipeName); 
         }
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
