@@ -1,0 +1,52 @@
+#Sample Overlay
+#To use in the begin of a SRL line needs have the tag EVENT + ID, example: "::OVERLAY-1::The Original Text"
+#When the ::OVERLAY-1:: is readed will trigger the event with the id 1, change to any number
+#The Event 0 is a static event called when the overlay is initialized
+
+:0
+Opacity: 0,85
+Dock At: Bottom
+Back Color: Reset
+Auto Font Size: false
+Event End
+
+:1
+Show Overlay
+Padding: Top: 15%|Bottom: -45%|Left: 0|Rigth: 0
+Opacity: 1,0
+Dock At: Center
+Back Color: Black
+Font Size: 14,6 
+Auto Font Size: false
+Show Text: Você não precisa fazer nada. Apenas deixe tudo para mim.
+Event End
+
+:2
+Show Text: E mesmo se você me disser qual é o seu verdadeiro desejo,\nvocê realmente acha que é o que você realmente quer?
+Event End
+
+:3
+Show Text: Eu prepararei tudo: felicidade, tristeza, provações, tristezas, dificuldades, diversão...
+Event End
+
+:4
+Show Text: Eu sei o que precisa ser feito.
+Event End
+
+:5
+Show Text: E ainda assim, lá você vai se forçar novamente.
+Event End
+
+:6
+Show Text: Você não preferiria simplesmente desistir?\nEu vou ter certeza de te pegar quando você cair.\nVocê prefere assim mesmo, não é?
+Event End
+
+:7
+Show Text: -Você é realmente tão desagradável
+Event End
+
+:8
+Clear Text
+Call: 0
+Hide Overlay
+Event End

@@ -224,6 +224,7 @@ namespace StringReloads.Engine
         }
 
         public event Types.FlagTrigger OnFlagTriggered;
+
         private void TriggerFlags(LSTFlag[] Flags) {
             var Cancel = new CancelEventArgs();
             foreach (var Flag in Flags) {
