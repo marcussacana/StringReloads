@@ -56,7 +56,7 @@ namespace StringReloads.AutoInstall
             }
 
             if (Hook == null)
-                Hook = new CMVS_GetText((void*)((ulong)Config.Default.GameBaseAddress + Offset.Value));
+                Hook = new CMVS_GetText((void*)((ulong)Config.GameBaseAddress + Offset.Value));
 
             Hook.Install();
         }
@@ -128,13 +128,13 @@ namespace StringReloads.AutoInstall
 
             Address++;//Skip int3
 
-            Offset = ((ulong)Address) - (ulong)Config.Default.GameBaseAddress;
+            Offset = ((ulong)Address) - (ulong)Config.GameBaseAddress;
             Log.Debug($"CMVS Injection Offset Found: 0x{Offset:X16}");
         }
 
         private bool Scan(out byte* Address, byte?[] Pattern)
         {
-            var Info = ModuleInfo.GetCodeInfo((byte*)Config.Default.GameBaseAddress);
+            var Info = ModuleInfo.GetCodeInfo((byte*)Config.GameBaseAddress);
 
             Address = null;
             long CodeAdd = (long)Info.CodeAddress;

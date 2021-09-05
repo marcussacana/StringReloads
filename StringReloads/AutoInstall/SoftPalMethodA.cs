@@ -85,7 +85,7 @@ namespace StringReloads.AutoInstall
         }
 
         void SetupStepA(void* Caller) {
-            Log.Trace($"PalFontDrawText called from 0x{(uint)Caller:X8}");
+            Log.Debug($"PalFontDrawText called from 0x{(uint)Caller:X8}");
             if (!SetupMode)
                 return;
             
@@ -95,12 +95,12 @@ namespace StringReloads.AutoInstall
 
             if (hFunc == null)
             {
-                Log.Trace("Failed to search the function address.");
+                Log.Debug("Failed to search the function address.");
                 SetupFailed();
             }
 
        
-            Log.Trace($"PalFontDrawText Referenced by 0x{(uint)hFunc:X8}");
+            Log.Debug($"PalFontDrawText Referenced by 0x{(uint)hFunc:X8}");
 
             SoftPalConfig = new Dictionary<string, string>();
             SoftPalConfig["HookOffset"]  = ((uint)hFunc - (uint)Config.GameBaseAddress).ToString();
@@ -137,12 +137,12 @@ namespace StringReloads.AutoInstall
             while (StackOffset < 50) {
                 var RStack = (Stack + StackOffset);
                 if (IsBadCodePtr((void*)*RStack)) {
-                    Log.Trace($"Bad Pointer: 0x{*RStack:X8}");
+                    Log.Debug($"Bad Pointer: 0x{*RStack:X8}");
                     StackOffset++;
                     continue;
                 }
 
-                Log.Trace($"Guessing Offset: 0x{(uint)RStack:X8} (+{StackOffset}) (0x{*RStack:X8})");
+                Log.Debug($"Guessing Offset: 0x{(uint)RStack:X8} (+{StackOffset}) (0x{*RStack:X8})");
                 CString Str = (byte*)*RStack;
                 if (Str.Count() > 0 && Str.Count() < 500)
                 {

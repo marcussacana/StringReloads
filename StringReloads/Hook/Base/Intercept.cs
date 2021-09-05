@@ -87,7 +87,7 @@ namespace StringReloads.Hook.Base
             DeprotectMemory(phBuffer, BufferSize);
             HookAddress = phBuffer;
 
-            Log.Trace($"Intercept 0x{(ulong)Address:X8} With 0x{(ulong)phBuffer:X8}");
+            Log.Debug($"Intercept 0x{(ulong)Address:X8} With 0x{(ulong)phBuffer:X8}");
 
             Compiler.Encode(IInstructions, (ulong)phBuffer);
 

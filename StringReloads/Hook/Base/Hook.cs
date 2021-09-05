@@ -93,14 +93,11 @@ namespace StringReloads.Hook.Base
                 Function = GetProcAddress(hModule, Ordinal);
 
             if (ImportHook)
-                SetupImportHook(TargetModule == null ? Config.Default.GameBaseAddress : TargetModule.Value.ToPointer());
+                SetupImportHook(TargetModule == null ? Config.GameBaseAddress : TargetModule.Value.ToPointer());
             else
                 AssemblyHook();
 
-            if (Config.Default.LogLevel == Log.LogLevel.Trace)
-                Log.Trace("Hook \"{0}->{1}\" {2}; Hook: 0x{3}; Bypass: 0x{4}", new string[] { Library, Export ?? Ordinal.ToString(), ImportHook ? "Ready" : "Compiled", ((ulong)HookFunction).ToString("X16"), ((ulong)BypassFunction).ToString("X16") });
-            else
-                Log.Debug("Hook \"{0}->{1}\" {2}", new string[] { Library, Export ?? Ordinal.ToString(), ImportHook ? "Ready" : "Compiled" });
+            Log.Debug("Hook \"{0}->{1}\" {2}; Hook: 0x{3}; Bypass: 0x{4}", new string[] { Library, Export ?? Ordinal.ToString(), ImportHook ? "Ready" : "Compiled", ((ulong)HookFunction).ToString("X16"), ((ulong)BypassFunction).ToString("X16") });
         }
 
         public void Compile(void* Function)
@@ -108,10 +105,7 @@ namespace StringReloads.Hook.Base
             this.Function = Function;
             AssemblyHook();
 
-            if (Config.Default.LogLevel == Log.LogLevel.Trace)
-                Log.Trace($"Anonymous Hook (0x{(ulong)Function:X16}) Compiled; Hook: 0x{(ulong)HookFunction:X16}; Bypass: 0x{(ulong)BypassFunction:X16}");
-            else
-                Log.Debug($"Anonymous Hook (0x{(ulong)Function:X16}) Compiled");
+            Log.Debug($"Anonymous Hook (0x{(ulong)Function:X16}) Compiled; Hook: 0x{(ulong)HookFunction:X16}; Bypass: 0x{(ulong)BypassFunction:X16}");
         }
 
 #if x64
@@ -251,7 +245,7 @@ namespace StringReloads.Hook.Base
             if (HookFunction == null)
                 Log.Critical($"\"{Name}\" Null Hook Function");
             else
-                Log.Trace($"Import to Hook Address: 0x{(ulong)Function:X16}");
+                Log.Debug($"Import to Hook Address: 0x{(ulong)Function:X16}");
         }
 
         public void Install()

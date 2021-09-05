@@ -42,7 +42,7 @@ namespace SamplePlugin
 
         public string Apply(string String, string Original)
         {
-            Log.Trace("Sample Modifier Plugin Called");
+            Log.Debug("Sample Modifier Plugin Called");
             return String.Replace("a", "@").Replace("i", "1").Replace("s", "$").Replace("e", "&");
         }
 

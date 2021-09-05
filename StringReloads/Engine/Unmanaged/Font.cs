@@ -21,7 +21,7 @@ namespace StringReloads.Engine.Unmanaged
                          from Font in Directory.GetFiles(RootDir, Ext)
                          select Font);
 
-            Log.Trace("Font Search Root: " + RootDir);
+            Log.Debug("Font Search Root: " + RootDir);
 
             foreach (var Font in Fonts)
             {
@@ -30,7 +30,7 @@ namespace StringReloads.Engine.Unmanaged
                 if (Loaded > 0)
                     Log.Debug($"{Loaded} Fonts Loaded From: {Path.GetFileName(Font)}");
                 else
-                    Log.Trace($"Failed to Load Font: {Path.GetFileName(Font)}");
+                    Log.Debug($"Failed to Load Font: {Path.GetFileName(Font)}");
             }
         }
 

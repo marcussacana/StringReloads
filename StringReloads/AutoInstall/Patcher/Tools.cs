@@ -86,7 +86,7 @@ namespace StringReloads.AutoInstall.Patcher
 
             if (UsedWrapper != null)
             {
-                Log.Trace($"Wrapper to \"{UsedWrapper}\" detected as supported and enabled");
+                Log.Debug($"Wrapper to \"{UsedWrapper}\" detected as supported and enabled");
             }
 
             Restart();
@@ -169,7 +169,7 @@ namespace StringReloads.AutoInstall.Patcher
 
             if (UsedWrapper != null)
             {
-                Log.Trace($"Wrapper to \"{UsedWrapper}\" detected as supported and enabled");
+                Log.Debug($"Wrapper to \"{UsedWrapper}\" detected as supported and enabled");
             }
 
             return true;

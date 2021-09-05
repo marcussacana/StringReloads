@@ -22,7 +22,7 @@ namespace StringReloads.Engine
 
         public int Count => DB.Count;
 
-        public LSTEntry Current { 
+        public LSTEntry Current {
             get {
                 if (CurrentIndex < 0)
                     CurrentIndex = 0;
@@ -99,6 +99,23 @@ namespace StringReloads.Engine
             return this;
         }
 
-        public LSTEntry this[string Key] => DB[Minify(Key)];
+        public LSTEntry this[string Key] {
+            get
+            {
+                try { 
+                    return DB[Minify(Key)]; 
+                } catch { 
+                    return new LSTEntry(Key, Key);
+                }
+            }
+            set
+            {
+                try
+                {
+                    DB[Minify(Key)] = value;
+                }
+                catch { }
+            }
+        }
     }
 }

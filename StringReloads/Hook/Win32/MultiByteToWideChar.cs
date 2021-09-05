@@ -1,6 +1,8 @@
 ﻿using StringReloads.Engine;
 using StringReloads.Engine.String;
 using StringReloads.StringModifier;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -8,15 +10,42 @@ namespace StringReloads.Hook
 {
     public unsafe class MultiByteToWideChar : Base.Hook<MultiByteToWideCharDelegate>
     {
+        List<Base.Hook> Parents = new List<Base.Hook>();
+        void* Target = null;
+        
+        public MultiByteToWideChar()
+        {
+            if (Target == null && Config.Default.ImportHookEx)
+            {
+                foreach (var Module in Config.GameModules)
+                    Parents.Add(new MultiByteToWideChar(Module.BaseAddress.ToPointer()));
+            }
+        }
+        private MultiByteToWideChar(void* Target) {
+            this.Target = Target;
+        }
         public override string Library => "Kernel32.dll";
 
         public override string Export => "MultiByteToWideChar";
 
+        public new void Install() {
+            base.Install();
+
+            foreach (var Parent in Parents)
+                Parent.Install();
+        }
+
+        public new void Uninstall() {
+            base.Uninstall();
+
+            foreach (var Parent in Parents)
+                Parent.Install();
+        }
         public override void Initialize()
         {
-            if (Config.Default.ImportHook) {
+            if (Config.Default.ImportHook || Config.Default.ImportHookEx) {
                 HookDelegate = PersistentMultiByteToWideChar;
-                Compile(true);
+                Compile(true, Target == null ? null : new IntPtr(Target));
             }
             else { 
                 HookDelegate = hMultiByteToWideChar;

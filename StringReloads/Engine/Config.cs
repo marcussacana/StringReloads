@@ -12,6 +12,25 @@ namespace StringReloads.Engine
     {
         public static Config Default => EntryPoint.SRL.Settings;
 
+        public static ProcessModule[] Modules => Process.GetCurrentProcess().Modules.Cast<ProcessModule>().ToArray();
+
+        /// <summary>
+        /// Return modules from the game directory (Ignoring the Main Module and SRL)
+        /// </summary>
+        public static ProcessModule[] GameModules => Modules
+            .Where(x => x.FileName.StartsWith(AppDomain.CurrentDomain.BaseDirectory, StringComparison.OrdinalIgnoreCase))
+            .Where(x => x.BaseAddress.ToPointer() != GameBaseAddress)
+            .Where(x => !x.FileName.Equals(EntryPoint.CurrentDll, StringComparison.OrdinalIgnoreCase)).ToArray();
+
+        
+        static void* _GameBaseAddress = null;
+        public static void* GameBaseAddress => _GameBaseAddress != null ? _GameBaseAddress : (_GameBaseAddress = Process.GetCurrentProcess().MainModule.BaseAddress.ToPointer());
+
+        public static string BaseDirectory => AppDomain.CurrentDomain.BaseDirectory;
+
+
+
+
         internal void* _MainWindow = null;
         public void* MainWindow => _MainWindow != null ? _MainWindow : (_MainWindow = Process.GetCurrentProcess().MainWindowHandle.ToPointer());
 
@@ -49,10 +68,15 @@ namespace StringReloads.Engine
 
         bool? _DumpRegex = null;
         public bool DumpRegex => ((bool?)(_DumpRegex ??= GetValue("DumpRegex").ToBoolean())).Value;
-
+        
 
         bool? _ImportHook = null;
         public bool ImportHook => ((bool?)(_ImportHook ??= GetValue("ImportHook").ToBoolean())).Value;
+
+
+        bool? _ImportHookEx = null;
+        public bool ImportHookEx => ((bool?)(_ImportHookEx ??= GetValue("ImportHookEx").ToBoolean())).Value;
+
 
         bool? _HeapAlloc = null;
         public bool HeapAlloc => ((bool?)(_HeapAlloc ??= GetValue("HeapAlloc").ToBoolean())).Value;
@@ -143,10 +167,6 @@ namespace StringReloads.Engine
                 _WEncoding = value;
             }
         }
-
-
-        void* _GameBaseAddress = null;
-        public void* GameBaseAddress => _GameBaseAddress != null ? _GameBaseAddress : (_GameBaseAddress = Process.GetCurrentProcess().MainModule.BaseAddress.ToPointer());
 
         string _GameExePath = null;
         public string GameExePath => _GameExePath ??= Process.GetCurrentProcess().MainModule.FileName;
