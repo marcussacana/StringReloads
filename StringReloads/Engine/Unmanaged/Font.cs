@@ -30,7 +30,7 @@ namespace StringReloads.Engine.Unmanaged
                 if (Loaded > 0)
                     Log.Debug($"{Loaded} Fonts Loaded From: {Path.GetFileName(Font)}");
                 else
-                    Log.Debug($"Failed to Load Font: {Path.GetFileName(Font)}");
+                    Log.Warning($"Failed to Load Font: {Path.GetFileName(Font)}");
             }
         }
 

@@ -241,7 +241,7 @@ namespace StringReloads.Engine.Match
                 Rst.Height = Height;
 
 
-            Log.Debug($"Remaped    -> Width: {Rst.Width:+00;-00}, Height: {Rst.Height:+00;-00}, Charset: 0x{Rst.Charset:X2}, Name: \"{Rst.To}\"");
+            Log.Trace($"Remaped    -> Width: {Rst.Width:+00;-00}, Height: {Rst.Height:+00;-00}, Charset: 0x{Rst.Charset:X2}, Name: \"{Rst.To}\"");
 
             return Rst;
         }

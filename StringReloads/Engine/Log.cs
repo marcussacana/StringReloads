@@ -24,7 +24,7 @@ public static class Log
 
         var Color = Console.ForegroundColor;
         Console.ForegroundColor = ConsoleColor.Green;
-        WriteLine(Line, LogLevel.Information, Format, null, 0, null);
+        WriteLine(Line, LogLevel.Information, Format, null, 0, null, ConsoleColor.Green);
         Console.ForegroundColor = Color;
     }
     public static void Warning(string Line, string[] Format = null, [CallerMemberName] string CallerMethod = null, [CallerLineNumber] int CallerLine = 0, [CallerFilePath] string CallerFile = null)
@@ -34,7 +34,7 @@ public static class Log
 
         var Color = Console.ForegroundColor;
         Console.ForegroundColor = ConsoleColor.Yellow;
-        WriteLine(Line, LogLevel.Warning, Format, CallerMethod, CallerLine, CallerFile);
+        WriteLine(Line, LogLevel.Warning, Format, CallerMethod, CallerLine, CallerFile, ConsoleColor.Yellow);
         Console.ForegroundColor = Color;
     }
 
@@ -45,7 +45,7 @@ public static class Log
 
         var Color = Console.ForegroundColor;
         Console.ForegroundColor = ConsoleColor.DarkRed;
-        WriteLine(Line, LogLevel.Error, Format, CallerMethod, CallerLine, CallerFile);
+        WriteLine(Line, LogLevel.Error, Format, CallerMethod, CallerLine, CallerFile, ConsoleColor.DarkRed);
         Console.ForegroundColor = Color;
     }
 
@@ -56,12 +56,12 @@ public static class Log
 
         var Color = Console.ForegroundColor;
         Console.ForegroundColor = ConsoleColor.Magenta;
-        WriteLine(Line, LogLevel.Critical, Format, CallerMethod, CallerLine, CallerFile);
+        WriteLine(Line, LogLevel.Critical, Format, CallerMethod, CallerLine, CallerFile, ConsoleColor.Magenta);
         Console.ForegroundColor = Color;
         Environment.Exit(1);
     }
 
-    static unsafe void WriteLine(string Line, LogLevel Level, string[] Format, string CallerMethod, int CallerLine, string CallerFile)
+    static unsafe void WriteLine(string Line, LogLevel Level, string[] Format, string CallerMethod, int CallerLine, string CallerFile, ConsoleColor? InitialForeColor = null)
     {
         if (!Config.Default.Log)
             return;
@@ -77,6 +77,9 @@ public static class Log
                 Console.OutputEncoding = Encoding.Unicode;
                 hConsole = GetConsoleWindow();
                 ShowWindow(hConsole, SW_SHOW);
+
+                if (InitialForeColor != null)
+                    Console.ForegroundColor = InitialForeColor.Value;
             }
         }
 
