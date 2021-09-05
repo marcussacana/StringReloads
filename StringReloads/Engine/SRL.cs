@@ -211,7 +211,7 @@ namespace StringReloads.Engine
             foreach (var Modifier in ReloadModifiers)
                 Reloaded = Modifier.Apply(Reloaded, Matched?.OriginalLine);
 
-            Log.Debug($"Reload from:\r\n{Matched?.OriginalLine}\r\nTo:\r\n{Reloaded}");
+            Log.Trace($"Reload from:\r\n{Matched?.OriginalLine}\r\nTo:\r\n{Reloaded}");
 
             if (Settings.CacheOutput)
             {
