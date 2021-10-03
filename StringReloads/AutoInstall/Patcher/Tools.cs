@@ -19,6 +19,9 @@ namespace StringReloads.AutoInstall.Patcher
         static string CurrentDllName => Path.GetFileName(EntryPoint.CurrentDll);
         internal static bool ApplyWrapperPatch(string Name = "SRL.dll")
         {
+            if (!Engine.Config.Default.WrapperPatch)
+                return true;
+
             if (CurrentDllName.ToLowerInvariant().StartsWith(Name.ToLowerInvariant()))
                 return true;
 

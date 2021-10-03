@@ -111,6 +111,9 @@ namespace StringReloads.Engine
         bool? _FastMode = null;
         public bool FastMode => _FastMode ??= GetValue("FastMode").ToBoolean();
 
+        bool? _WrapperPatch = null;
+        public bool WrapperPatch => _WrapperPatch ??= GetValue("WrapperPatch").ToBoolean();
+
 
         string _WorkingDirectory = null;
         public string WorkingDirectory {
