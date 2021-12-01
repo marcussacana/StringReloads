@@ -115,7 +115,6 @@ In the end of the SRL.ini you can found a default 'sample' font remap entry, the
 Expressions can have the parameters: `[Width]`, `[Height]`, `[Charset]`, `[Facename]`, you can check details of the expression usage [here](https://github.com/ncalc/ncalc/wiki)
 
 Also, in the `[StringReloads]` block, you can find the `LoadLocalFonts` parameter, with this parameter set to true, the SRL will make the game be able to load fonts from the game directory (or subdirectory) without need install the font in the host system.
-For more details see: 
 
 ### Dependencies:
 *	[DllExport](https://github.com/3F/DllExport) (Included)
