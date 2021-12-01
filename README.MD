@@ -83,7 +83,8 @@ This method don't have paramters, just call and catch the EAX, the EAX is a poin
 ---
 
 ### Auto-Install Feature:
-The SRL have a feature to automatically install the SRL in the game engine without you need know how to patch the game, just rename the SRLx32.dll to d3d9.dll; dinput8.dll or any other supported wrapper [See Here what is supported](https://github.com/marcussacana/StringReloads/tree/master/SRLWrapper/Wrapper), then in the SRL.ini set the AutoInstall to true.    
+The SRL have a feature to automatically install the SRL in the game engine without you need know how to patch the game.  
+First, dowload the SRL [HERE](https://github.com/marcussacana/StringReloads/releases/latest), extract to the game directory, then rename the SRLWrapper.dll to d3d9.dll; dinput8.dll or any other supported wrapper [See Here what is supported](https://github.com/marcussacana/StringReloads/tree/master/SRLWrapper/Wrapper), then in the SRL.ini set the AutoInstall to true.    
 
 #### Supported By:
 - AdvHD
@@ -93,6 +94,28 @@ The SRL have a feature to automatically install the SRL in the game engine witho
 
 Some SoftPal games needs a manual setup with the help of the Auto-Installer, click below to see the example:
 [![SRL SoftPal Auto-Install Feature](http://img.youtube.com/vi/RAgZQBWqiJQ/0.jpg)](http://www.youtube.com/watch?v=RAgZQBWqiJQ "SRL SoftPal Auto-Install Feature")
+
+---
+
+### Font Modifier
+A common feature that the people want from the String Reloads is the Font Modifier feature, this feature works with major part of games that don't have a pre-rendered font and is easy to setup it.  
+First, dowload the SRL [HERE](https://github.com/marcussacana/StringReloads/releases/latest), extract to the game directory, then rename the SRLWrapper.dll to d3d9.dll; dinput8.dll or any other supported wrapper [See Here what is supported](https://github.com/marcussacana/StringReloads/tree/master/SRLWrapper/Wrapper).  
+Now, you need to enable the CreateFont hook in the SRL.ini, we have 4 variants of the CreateFont, the CreateFontA, CreateFontW, CreateFontIndirectA and CreateFontIndirectW.  
+Usually a game use only one of those 4 options, the correct way to know what hook you must enable is find in the game executable if he have the string "CreateFontA", "CreateFontW", "CreateFontIndirectA" or "CreateFontIndirectW"... Or, if you're lazy or you're a bit crazy, you can just enable everything, but isn't recommended.  
+When you enable the CreateFont hook, the SRL will be able to modify some few things in the game font, like the font size (Not works with all engines) and the font itself.  
+In the end of the SRL.ini you can found a default 'sample' font remap entry, the `[Font.0]`, you can add more font reload parameters adding a new block with a incremented number in the block name, like `[Font.1]`, `[Font.2]`, `[Font.3]`...  
+- In the `From` parameter you can set the 'origin' font face name to be modified, where * means all fonts.
+- In the `FromWidth` or `FromHeight` you can match the font to be modified by specifying his original size. (By default commented)
+- In the `FromCharset` you can match the font to be modified by specifying the font charset. (By default commented)
+- In the `To` parameter you can set your 'target' font face name.
+- In the `Charset` parameter you can force the font charset to be used, where 0 = auto, commented = don't modify, 932 = SJIS, see more values [here](https://docs.microsoft.com/en-us/windows/win32/intl/code-page-identifiers)
+- In the `Width`, `Height` parameters, you can modify the font size, the numbers can be a absolute size or relative size, `+5` or `-1` are relative values that are calculed with  the original font size value. the `.` prefix in the value specify that value is a absolute value, then `.-1` will really became -1 regradless of the original font size.  
+
+- The `Width`, `Height` parameters can be even more dynamic if you want, it's possible to set the value as a expression to be evaulated during the runtime, for example, if you set the `Width` to `if([Width] < 0, [Width] * -1, [Width])`, this expression will check if the Width is negative, and make him positive, otherwise, does nothing.  
+Expressions can have the parameters: `[Width]`, `[Height]`, `[Charset]`, `[Facename]`, you can check details of the expression usage [here](https://github.com/ncalc/ncalc/wiki)
+
+Also, in the `[StringReloads]` block, you can find the `LoadLocalFonts` parameter, with this parameter set to true, the SRL will make the game be able to load fonts from the game directory (or subdirectory) without need install the font in the host system.
+For more details see: 
 
 ### Dependencies:
 *	[DllExport](https://github.com/3F/DllExport) (Included)
