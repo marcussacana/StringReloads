@@ -23,8 +23,8 @@ namespace StringReloads.Engine.String
 
         public static implicit operator string(CString Str)
         {
-            var Len = Str.Count();
-            return new string(Str.Address, 0, Len, Str.ReadEncoding);
+            var Len =  Str.FixedLength ?? Str.Count();
+            return new string(Str.Address, 0, (int)Len, Str.ReadEncoding);
         }
 
         public static implicit operator CString(string Content)

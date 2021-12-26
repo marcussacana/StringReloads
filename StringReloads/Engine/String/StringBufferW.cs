@@ -6,7 +6,7 @@ namespace StringReloads.Engine.String
 {
     public unsafe abstract class StringBufferW : IEnumerable<byte>
     {
-        public uint? FixedLength = null;
+        public long? FixedLength = null;
         public sbyte* Address => (sbyte*)Ptr;
         public IEnumerator<byte> GetEnumerator()
         {

@@ -20,8 +20,8 @@ namespace StringReloads.Engine.String
 
         public static implicit operator string(WCString Str)
         {
-            var Len = Str.Count();
-            return new string(Str.Address, 0, Len, Encoding.Unicode);
+            var Len = Str.FixedLength ?? Str.Count();
+            return new string(Str.Address, 0, (int)Len, Encoding.Unicode);
         }
 
         public static implicit operator WCString(string Content)
