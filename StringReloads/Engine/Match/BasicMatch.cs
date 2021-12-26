@@ -230,7 +230,7 @@ namespace StringReloads.Engine.Match
                         Value = (int)nHeight.Evalaute(EvalKeys, EvalVals);
 
                     if (Relative)
-                        Rst.Height = Width + Value;
+                        Rst.Height = Height + Value;
                     else
                         Rst.Height = Value;
                 }
