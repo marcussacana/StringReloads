@@ -44,7 +44,8 @@ namespace StringReloads.Engine
             new MonoWordWrap(this),
             new Remaper(this),
             new RemaperAlt(this),
-            new Escape()
+            new Escape(),
+            new TrimRestore(this),
         };
 
         internal Hook.Base.Hook[] _Hooks = null;
@@ -147,6 +148,7 @@ namespace StringReloads.Engine
 
             return Output;
         }
+
         internal byte* ProcessString(WCString pString) {
             if (!Initialized)
                 Initializer.Initialize(this);

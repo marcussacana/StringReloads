@@ -64,6 +64,9 @@ namespace StringReloads.StringModifier
                         case 'r':
                             SB.Append('\r');
                             break;
+                        case 's':
+                            SB.Append(' ');
+                            break;
                         default:
                             throw new Exception("\\" + c + " Isn't a valid string escape.");
                     }
