@@ -50,7 +50,7 @@ namespace StringReloads.Hook
         {
             if (Config.Default.ImportHook || Config.Default.ImportHookEx) {
                 HookDelegate = new WideCharToMultiByteDelegate(PersistentWideCharToMultiByte);
-                Compile(true, Target == null ? null : new IntPtr(Target));
+                Compile(true, Target == null ? (IntPtr)null : new IntPtr(Target));
             }
             else { 
                 HookDelegate = new WideCharToMultiByteDelegate(hWideCharToMultiByte);

@@ -45,7 +45,7 @@ namespace StringReloads.Hook
         {
             if (Config.Default.ImportHook || Config.Default.ImportHookEx) {
                 HookDelegate = PersistentMultiByteToWideChar;
-                Compile(true, Target == null ? null : new IntPtr(Target));
+                Compile(true, Target == null ? (IntPtr)null : new IntPtr(Target));
             }
             else { 
                 HookDelegate = hMultiByteToWideChar;

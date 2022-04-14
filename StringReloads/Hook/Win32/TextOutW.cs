@@ -27,6 +27,9 @@ namespace StringReloads.Hook.Win32
             WCString InStr = pStr;
             InStr.FixedLength = (uint)strLen;
 
+
+            Log.Trace($"TextOutW X: {xStart} Y: {yStart}: {InStr}");
+
             InStr = EntryPoint.ProcessW((WCString)(string)InStr);//Ensure Null-Terminated
 
             if (Config.Default.TextOutWUndoRemap)
