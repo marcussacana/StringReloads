@@ -24,7 +24,7 @@ namespace StringReloads.Hook.Win32
             CString OriStr = pStr;
             OriStr.FixedLength = strLen;
             
-            Log.Trace($"TextOutA X: {xStart} Y: {yStart}: {OriStr}");
+            Log.Trace($"TextOutA X: {xStart} Y: {yStart}: {(string)OriStr}");
 
             WCString InStr = EntryPoint.ProcessW((WCString)(string)OriStr);
 
