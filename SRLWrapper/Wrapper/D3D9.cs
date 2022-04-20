@@ -31,7 +31,7 @@ namespace SRLWrapper.Wrapper
             SetOptions = GetDelegate<NULL_1>(RealHandler, "D3DPERF_SetOptions", true);
             GetStatus = GetDelegate<RET_0>(RealHandler, "D3DPERF_GetStatus", true);
             DbgSetLevel = GetDelegate<RET_0>(RealHandler, "DebugSetLevel", true);
-            DbgSetMute = GetDelegate<RET_1>(RealHandler, "DebugSetMute", true);
+            DbgSetMute = GetDelegate<RET_0>(RealHandler, "DebugSetMute", true);
             PSampleTexture = GetDelegate<RET_0>(RealHandler, "PSGPSampleTexture", true);
             PError = GetDelegate<RET_0>(RealHandler, "PSGPError", true);
             ShaderValidator = GetDelegate<RET_0>(RealHandler, "Direct3DShaderValidatorCreate9", true);
@@ -90,9 +90,9 @@ namespace SRLWrapper.Wrapper
         }
 
         [DllExport(CallingConvention = CallingConvention.Winapi)]
-        public static IntPtr DebugSetMute(IntPtr Mute)
+        public static IntPtr DebugSetMute()
         {
-            return DbgSetMute(Mute);
+            return DbgSetMute();
         }
 
         [DllExport(CallingConvention = CallingConvention.Winapi)]
@@ -143,7 +143,7 @@ namespace SRLWrapper.Wrapper
         static NULL_1 SetOptions;
 
         static RET_0 DbgSetLevel;
-        static RET_1 DbgSetMute;
+        static RET_0 DbgSetMute;
 
         static RET_0 PSampleTexture;
         static RET_0 PError;
