@@ -21,28 +21,28 @@ namespace SRLWrapper.Wrapper
             if (RealHandler == null)
                 Environment.Exit(0x505);//ERROR_DELAY_LOAD_FAILED
 
-            dAcquireDDThreadLock = GetDelegate<RET_0>(RealHandler, "AcquireDDThreadLock", false);
-            dReleaseDDThreadLock = GetDelegate<RET_0>(RealHandler, "ReleaseDDThreadLock", false);
+            dAcquireDDThreadLock = GetDelegate<RET_0>(RealHandler, "AcquireDDThreadLock", true);
+            dReleaseDDThreadLock = GetDelegate<RET_0>(RealHandler, "ReleaseDDThreadLock", true);
             dDirectDrawCreate = GetDelegate<RET_3>(RealHandler, "DirectDrawCreate", false);
             dGetSurfaceFromDC = GetDelegate<RET_3>(RealHandler, "GetSurfaceFromDC", false);
             dDirectDrawCreateEx = GetDelegate<RET_4>(RealHandler, "DirectDrawCreateEx", false);
-            dRegisterSpecialCase = GetDelegate<RET_4>(RealHandler, "RegisterSpecialCase", false);
+            dRegisterSpecialCase = GetDelegate<RET_4>(RealHandler, "RegisterSpecialCase", true);
             dDDInternalUnlock = GetDelegate<RET_1>(RealHandler, "DDInternalUnlock", false);
             dDDInternalLock = GetDelegate<RET_2>(RealHandler, "DDInternalLock", false);
-            dGetDDSurfaceLocal = GetDelegate<RET_3>(RealHandler, "GetDDSurfaceLocal", false);
-            dCompleteCreateSysmemSurface = GetDelegate<RET_1>(RealHandler, "CompleteCreateSysmemSurface", false);
+            dGetDDSurfaceLocal = GetDelegate<RET_3>(RealHandler, "GetDDSurfaceLocal", true);
+            dCompleteCreateSysmemSurface = GetDelegate<RET_1>(RealHandler, "CompleteCreateSysmemSurface", true);
             dDirectDrawEnumerateExW = GetDelegate<RET_3>(RealHandler, "DirectDrawEnumerateExW", false);
-            dD3DParseUnknownCommand = GetDelegate<RET_2>(RealHandler, "D3DParseUnknownCommand", false);
+            dD3DParseUnknownCommand = GetDelegate<RET_2>(RealHandler, "D3DParseUnknownCommand", true);
             dDirectDrawEnumerateW = GetDelegate<RET_2>(RealHandler, "DirectDrawEnumerateW", false);
             dDirectDrawEnumerateExA = GetDelegate<RET_3>(RealHandler, "DirectDrawEnumerateExA", false);
             dDirectDrawEnumerateA = GetDelegate<RET_2>(RealHandler, "DirectDrawEnumerateA", false);
-            dDDGetAttachedSurfaceLcl = GetDelegate<RET_3>(RealHandler, "DDGetAttachedSurfaceLcl", false);
+            dDDGetAttachedSurfaceLcl = GetDelegate<RET_3>(RealHandler, "DDGetAttachedSurfaceLcl", true);
             dDSoundHelp = GetDelegate<RET_3>(RealHandler, "DSoundHelp", false);
             dDirectDrawCreateClipper = GetDelegate<RET_3>(RealHandler, "DirectDrawCreateClipper", false);
             dDllGetClassObject = GetDelegate<RET_3>(RealHandler, "DllGetClassObject", false);
             dDllCanUnloadNow = GetDelegate<RET_0>(RealHandler, "DllCanUnloadNow", false);
-            dGetOLEThunkData = GetDelegate<RET_1>(RealHandler, "GetOLEThunkData", false);
-            dSetAppCompatData = GetDelegate<RET_2>(RealHandler, "SetAppCompatData", false);
+            dGetOLEThunkData = GetDelegate<RET_1>(RealHandler, "GetOLEThunkData", true);
+            dSetAppCompatData = GetDelegate<RET_2>(RealHandler, "SetAppCompatData", true);
 
             InitializeSRL();
         }

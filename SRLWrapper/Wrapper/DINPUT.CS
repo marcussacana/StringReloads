@@ -17,7 +17,7 @@ namespace SRLWrapper.Wrapper
             if (RealHandler != null)
                 return;
 
-            RealHandler = LoadLibrary(CurrentDllName);
+            RealHandler = LoadLibrary("dinput.dll");
 
             if (RealHandler == null)
                 Environment.Exit(0x505);//ERROR_DELAY_LOAD_FAILED
