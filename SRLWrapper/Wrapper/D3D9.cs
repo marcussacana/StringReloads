@@ -20,7 +20,7 @@ namespace SRLWrapper.Wrapper
 
 
             Create = GetDelegate<RET_1>(RealHandler, "Direct3DCreate9", false);
-            CreateEx = GetDelegate<RET_2>(RealHandler, "Direct3DCreate9Ex", false);
+            CreateEx = GetDelegate<RET_2>(RealHandler, "Direct3DCreate9Ex", true);
 
 
             BeginEvent = GetDelegate<RET_2>(RealHandler, "D3DPERF_BeginEvent", true);
