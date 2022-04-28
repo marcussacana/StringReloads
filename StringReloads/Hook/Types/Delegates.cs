@@ -58,6 +58,12 @@ namespace StringReloads.Hook
     [UnmanagedFunctionPointer(CallingConvention.ThisCall)]
     public unsafe delegate void ExHIBIT_PrintSub3Delegate(void* This, void* Text, void* a2, void* a3);
 
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public unsafe delegate void* EntisGLS_eslHeapAllocateDelegate(void* a1, int HeapSize, void* a3);
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public unsafe delegate void EntisGLS_eslHeapFreeDelegate(void* a1, void* Heap, void* a3);
+
     [UnmanagedFunctionPointer(CallingConvention.Winapi)]
     public unsafe delegate byte* lstrcpyDelegate(byte* lpString1, byte* lpString2);
 
@@ -82,4 +88,8 @@ namespace StringReloads.Hook
 
     [UnmanagedFunctionPointer(CallingConvention.Winapi)]
     public delegate int CoInitializeDelegate(IntPtr Reserved);
+
+
+    [UnmanagedFunctionPointer(CallingConvention.Winapi)]
+    public unsafe delegate void* LoadResourceDelegate(void* hModule, void* hResourceInfo);
 }

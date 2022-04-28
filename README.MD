@@ -91,9 +91,14 @@ First, dowload the SRL [HERE](https://github.com/marcussacana/StringReloads/rele
 - SoftPal
 - CMVS32 and CMVS64
 - ExHIBIT
+- EntisGLS
 
 Some SoftPal games needs a manual setup with the help of the Auto-Installer, click below to see the example:
-[![SRL SoftPal Auto-Install Feature](http://img.youtube.com/vi/RAgZQBWqiJQ/0.jpg)](http://www.youtube.com/watch?v=RAgZQBWqiJQ "SRL SoftPal Auto-Install Feature")
+[![SRL SoftPal Auto-Install Feature](http://img.youtube.com/vi/RAgZQBWqiJQ/0.jpg)](http://www.youtube.com/watch?v=RAgZQBWqiJQ "SRL SoftPal Auto-Install Feature")  
+
+The EntisGLS AutoInstall only allow you modify the internal engine XML config, and with that, you will be able to set custom fonts and load extracted files.  
+Just add the `<file path="$(CURRENT)\Patch"/>` in the genareted `EntisGLSConfig.xml` file and the SRL will automatically force the game use your custom settings.
+Note: The priority are in the upper lines, add the line in the top of others `<file/>` or `<archive/>` blocks.
 
 ---
 
