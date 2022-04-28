@@ -79,7 +79,7 @@ namespace StringReloads.AutoInstall
                         eslHeapAllocateHook.Uninstall();
                         eslHeapFreeHook.Uninstall();
 
-                        LoadResourceHook.Install();
+                        //LoadResourceHook.Install();
 
                         ProcessXml(HeapData);
                     }
