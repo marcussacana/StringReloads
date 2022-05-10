@@ -12,6 +12,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SamplePlugin", "SamplePlugin\SamplePlugin.csproj", "{653A209C-13B5-4C77-8782-D6ADA9A1C57E}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SRLNative", "SRLNative\SRLNative.vcxproj", "{DC7EB29C-7A06-4706-9628-52D11AD37788}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4A5A7F71-90BF-42DF-82DC-C6008D02AD96} = {4A5A7F71-90BF-42DF-82DC-C6008D02AD96}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Overlay", "Overlay\Overlay.csproj", "{CD45A40D-D1FC-4236-AAFA-5708F312C68A}"
 EndProject

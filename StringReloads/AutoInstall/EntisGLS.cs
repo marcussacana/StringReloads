@@ -17,13 +17,20 @@ namespace StringReloads.AutoInstall
     {
         public string Name => "EntisGLS";
 
-        LoadResource LoadResourceHook = new LoadResource();
+        LoadResource LoadResourceHook;
 
-        EntisGLS_eslHeapAllocate eslHeapAllocateHook = new EntisGLS_eslHeapAllocate();
-        EntisGLS_eslHeapFree eslHeapFreeHook = new EntisGLS_eslHeapFree();
+        EntisGLS_eslHeapAllocate eslHeapAllocateHook;
+        EntisGLS_eslHeapFree eslHeapFreeHook;
 
         public void Install()
         {
+            if (LoadResourceHook == null)
+            {
+                LoadResourceHook = new LoadResource();
+                eslHeapAllocateHook = new EntisGLS_eslHeapAllocate();
+                eslHeapFreeHook = new EntisGLS_eslHeapFree();
+            }
+
             LoadResourceHook.OnCalled += LoadResourceCalled;
             LoadResourceHook.Install();
         }
