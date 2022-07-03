@@ -28,7 +28,7 @@ namespace SRLWrapper.Wrapper
             dVerQueryValueA = GetDelegate<RET_4>(RealHandler, "VerQueryValueA", false);
             dGetFileVersionInfoSizeA = GetDelegate<RET_2>(RealHandler, "GetFileVersionInfoSizeA", false);
             dGetFileVersionInfoA = GetDelegate<RET_4>(RealHandler, "GetFileVersionInfoA", false);
-            dGetFileVersionInfoByHandle = GetDelegate<RET_4>(RealHandler, "GetFileVersionInfoByHandle", false);
+            dGetFileVersionInfoByHandle = GetDelegate<RET_4>(RealHandler, "GetFileVersionInfoByHandle", true);
             dVerFindFileA = GetDelegate<RET_8>(RealHandler, "VerFindFileA", false);
             dVerInstallFileA = GetDelegate<RET_8>(RealHandler, "VerInstallFileA", false);
             dVerFindFileW = GetDelegate<RET_8>(RealHandler, "VerFindFileW", false);
