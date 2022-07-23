@@ -27,7 +27,13 @@ namespace StringReloads.AutoInstall
 
             var hDrawText = GetProcAddress(hModule, "DrawText");
             if (hDrawText == null)
-                return false;
+            {
+                hDrawText = GetProcAddress(hModule, "drawText");
+                if (hDrawText == null)
+                    return false;
+
+                SoftPal_DrawText.AltName = true;
+            }
 
             Tools.ApplyWrapperPatch();
             Hook = new SoftPal_DrawText();

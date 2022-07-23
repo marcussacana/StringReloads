@@ -61,12 +61,31 @@ namespace StringReloads.AutoInstall
 
             SoftPalConfig = Config.GetValues("SoftPal");
 
+            if (SoftPalConfig != null && SoftPalConfig.ContainsKey("forcemethodb"))
+            {
+                if (SoftPalConfig["forcemethodb"].ToBoolean())
+                    return false;
+            }
+
             if (SoftPalConfig == null || !SoftPalConfig.ContainsKey("enginesize") || SoftPalConfig["enginesize"].ToInt64() != new FileInfo(Config.GameExePath).Length)
             {
                 var Rst = ShowMessageBox("SRL is not configured to work with this game yet, do you want to configure it now?", "StringReloads Setup Wizard", MBButtons.YesNo, MBIcon.Question);
                 if (Rst == MBResult.No)
                     return false;
-                
+
+                if (GetProcAddress(hModule, "DrawText") != null || GetProcAddress(hModule, "drawText") != null)
+                {
+                    Rst = ShowMessageBox("This game may use a alternative text draw method, you want try it first?", "StringReloads Setup Wizard", MBButtons.YesNo, MBIcon.Question);
+                    if (Rst == MBResult.Yes)
+                    {
+                        Config.SetValue("SoftPal", "ForceMethodB", "true");
+                        Config.SaveSettings();
+
+                        ShowMessageBox("If this method not works, delete the ForceMethodB in the SRL.ini file to retry the Method A.", "StringReloads Setup Wizard", MBButtons.Ok, MBIcon.Information);
+                        return false;
+                    }
+                }
+
                 Tools.ApplyWrapperPatch();
                 SetupMode = true;
             }

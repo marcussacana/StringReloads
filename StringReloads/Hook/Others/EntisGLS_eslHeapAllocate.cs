@@ -13,8 +13,12 @@ namespace StringReloads.Hook.Others
 
         public override void Initialize()
         {
-            HookDelegate = eslHeapAllocate;
-            Compile();
+            try
+            {
+                HookDelegate = eslHeapAllocate;
+                Compile();
+            }
+            catch { }
         }
 
         public Action<IntPtr, int> OnHeapAllocated;
