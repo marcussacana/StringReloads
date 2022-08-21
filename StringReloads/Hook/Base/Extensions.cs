@@ -170,6 +170,19 @@ namespace StringReloads.Hook.Base
                     //Execute Jmp
                     List.Add(Instruction.Create(Code.Retnq));
                 }
+                else if (Instruction.IsCallNear || Instruction.IsCallNearIndirect)
+                {
+                    ulong MemAddress = Instruction.IPRelativeMemoryAddress;
+
+                    //push MemAddress
+                    List.AddRange(MemAddress.Assembly_Pushq_imm64());
+
+                    //pop RAX
+                    List.Add(Instruction.Create(Code.Pop_r64, Register.RAX));
+
+                    //Execute Jmp
+                    List.Add(Instruction.Create(Code.Call_rm64, Register.RAX));
+                }
                 else
                 {
                     switch (Instruction.Code)
