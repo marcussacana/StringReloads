@@ -20,17 +20,17 @@ namespace SRLWrapper.Wrapper
 
             dCreateDXGIFactory = GetDelegate<RET_2>(RealHandler, "CreateDXGIFactory", false);
             dCreateDXGIFactory1 = GetDelegate<RET_2>(RealHandler, "CreateDXGIFactory1", false);
-            dCompatValue = GetDelegate<RET_2>(RealHandler, "CompatValue", false);
-            dCompatString = GetDelegate<RET_4>(RealHandler, "CompatString", false);
+            dCompatValue = GetDelegate<RET_2>(RealHandler, "CompatValue", true);
+            dCompatString = GetDelegate<RET_4>(RealHandler, "CompatString", true);
             dApplyCompatResolutionQuirking = GetDelegate<RET_3>(RealHandler, "ApplyCompatResolutionQuirking", true);
             dCreateDXGIFactory2 = GetDelegate<RET_3>(RealHandler, "CreateDXGIFactory2", true);
-            dDXGID3D10RegisterLayers = GetDelegate<RET_2>(RealHandler, "DXGID3D10RegisterLayers", false);
+            dDXGID3D10RegisterLayers = GetDelegate<RET_2>(RealHandler, "DXGID3D10RegisterLayers", true);
             dPIXEndCapture = GetDelegate<RET_1>(RealHandler, "PIXEndCapture", true);
-            dDXGID3D10GetLayeredDeviceSize = GetDelegate<RET_2>(RealHandler, "DXGID3D10GetLayeredDeviceSize", false);
-            dDXGID3D10CreateLayeredDevice = GetDelegate<RET_5>(RealHandler, "DXGID3D10CreateLayeredDevice", false);
-            dDXGID3D10CreateDevice = GetDelegate<RET_6>(RealHandler, "DXGID3D10CreateDevice", false);
-            dDXGIReportAdapterConfiguration = GetDelegate<RET_1>(RealHandler, "DXGIReportAdapterConfiguration", false);
-            dSetAppCompatStringPointer = GetDelegate<RET_2>(RealHandler, "SetAppCompatStringPointer", false);
+            dDXGID3D10GetLayeredDeviceSize = GetDelegate<RET_2>(RealHandler, "DXGID3D10GetLayeredDeviceSize", true);
+            dDXGID3D10CreateLayeredDevice = GetDelegate<RET_5>(RealHandler, "DXGID3D10CreateLayeredDevice", true);
+            dDXGID3D10CreateDevice = GetDelegate<RET_6>(RealHandler, "DXGID3D10CreateDevice", true);
+            dDXGIReportAdapterConfiguration = GetDelegate<RET_1>(RealHandler, "DXGIReportAdapterConfiguration", true);
+            dSetAppCompatStringPointer = GetDelegate<RET_2>(RealHandler, "SetAppCompatStringPointer", true);
             dUpdateHMDEmulationStatus = GetDelegate<RET_2>(RealHandler, "UpdateHMDEmulationStatus", true);
             dDXGIGetDebugInterface1 = GetDelegate<RET_3>(RealHandler, "DXGIGetDebugInterface1", true);
 
