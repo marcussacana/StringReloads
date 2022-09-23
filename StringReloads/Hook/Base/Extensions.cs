@@ -142,7 +142,7 @@ namespace StringReloads.Hook.Base
                     if (!Instruction.IsANotJmp())
                         Instruction.NegateConditionCode();
 
-                    var Jmp = Instruction.Immediate64.AssemblyJmp();
+                    var Jmp = Instruction.MemoryDisplacement64.AssemblyJmp();
 
                     //Get Far Jmp Size + Short Conditional Jmp Size
                     var JmpSize = (uint)Jmp.GetAutoEncodedSize(64, IP);

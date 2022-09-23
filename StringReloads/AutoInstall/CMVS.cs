@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Iced.Intel;
 using StringReloads.Engine;
 using StringReloads.Engine.Interface;
 using StringReloads.Engine.Unmanaged;
+using StringReloads.Hook.Base;
 using StringReloads.Hook.Others;
 
 namespace StringReloads.AutoInstall
@@ -59,6 +61,17 @@ namespace StringReloads.AutoInstall
                 Hook = new CMVS_GetText((void*)((ulong)Config.GameBaseAddress + Offset.Value));
 
             Hook.Install();
+            
+            /*// Read all files from directory (Must extract all packages before)
+            foreach (var Match in EntryPoint.SRL.Matchs)
+            {
+                if (Match is not RegexMatch)
+                    continue;
+                
+                RegexMatch RMatch = Match as RegexMatch;
+                RMatch.AddRegex(@"([A-z\0-9\\\/]*)\.cpz", "$1");
+            }
+            */
         }
 
         private void EnsureMultiArch()
@@ -87,32 +100,46 @@ namespace StringReloads.AutoInstall
             Patcher.Tools.ApplyWrapperPatch(CurrentSRL);
         }
 
-        byte?[][] Patterns => new[] {
-            //x64
-            new byte?[] {
-                0x4C, null, null,             //mov ???, ???
-                0x25, 0x00, 0x00, 0x00, 0xC0, //and eax, 0xC0000000
-                0x74, null,                   //je ??
-                0x3D, 0x00, 0x00, 0x00, 0x40, //cmp eax, 0x40000000
-                0x74, null                    //je ??
-            },
-            //x32
-            new byte?[] {
-                0x25, 0x00, 0x00, 0x00, 0xC0, //and eax, 0xC0000000
-                0x3D, 0x00, 0x00, 0x00, 0x80, //cmp eax, 0x80000000
-                0x77, null,                   //ja ??
-                0x74, null                    //je ??
-            }
-        };
-
         void SearchOffset()
         {
-            byte* Address = null;
-            foreach (var Pattern in Patterns)
+            var Imports = ModuleInfo.GetModuleImports((byte*)Config.GameBaseAddress);
+            var ShellExec = Imports.Where(x => x.Function == "ShellExecuteA").Single();
+
+            var Bitness = Environment.Is64BitProcess ? 64 : 32;
+
+            ulong? Address = null;
+            byte?[] Pattern = new byte?[] { 0xFF, 0x15 };
+            foreach (var lAddress in Scan(Pattern))
             {
-                if (Scan(out Address, Pattern))
+                Decoder Dissassembler = Decoder.Create(Bitness, new MemoryCodeReader((byte*)lAddress));
+                Dissassembler.IP = (ulong)lAddress;
+                var Call = Dissassembler.PeekDecode();
+                var MemAddress = Call.IPRelativeMemoryAddress;
+                //if (Environment.Is64BitProcess)
+                //    MemAddress = Call.IPRelativeMemoryAddress + (ulong)lAddress + 6ul;
+
+                if (MemAddress == (ulong)ShellExec.ImportAddress)
+                {
+                    Log.Debug($"Call dword ptr ds: [&ShellExecuteA] - Found at 0x{lAddress:X16}");
+                    Pattern = new byte?[] { 0xE8 };
+                    foreach (var lgetTextAddress in Scan(Pattern, (ulong)lAddress, true))
+                    {
+                        Dissassembler = Decoder.Create(Bitness, new MemoryCodeReader((byte*)lgetTextAddress));
+                        Dissassembler.IP = (ulong)lgetTextAddress;
+                        Call = Dissassembler.PeekDecode();
+
+                        var Immediate = Environment.Is64BitProcess ? Call.MemoryDisplacement64 : Call.MemoryDisplacement32;
+
+                        if (Address != Immediate)
+                        {
+                            Address = Immediate;
+                            continue;
+                        } 
+                        else
+                            break;
+                    }
                     break;
-                Address = null;
+                }
             }
 
             if (Address == null)
@@ -121,40 +148,72 @@ namespace StringReloads.AutoInstall
                 return;
             }
 
-            uint[] Prefixes = new uint[] { 0x4CC28BCC, 0xEC8B55CC };
-
-            while (!Prefixes.Contains((*(uint*)Address)))
-                Address--;
-
-            Address++;//Skip int3
-
             Offset = ((ulong)Address) - (ulong)Config.GameBaseAddress;
             Log.Debug($"CMVS Injection Offset Found: 0x{Offset:X16}");
         }
 
-        private bool Scan(out byte* Address, byte?[] Pattern)
+        private IEnumerable<long> Scan(byte?[] Pattern, ulong? BeginAddress = null, bool Up = false)
+        {
+            ulong? Match = BeginAddress;
+            do
+            {
+                if (Match != null) {
+                    
+                    if (Up)
+                        Match--;
+                    else
+                        Match++;
+
+                }
+
+                Match =  Up ? ScanUp(Pattern, Match ?? ulong.MaxValue) : ScanDown(Pattern, Match ?? 0ul);
+
+                if (Match != null)
+                    yield return (long)Match;
+
+            } while (Match != null);
+        }
+
+        private unsafe ulong? ScanUp(byte?[] Pattern, ulong BeginAddress = ulong.MaxValue)
         {
             var Info = ModuleInfo.GetCodeInfo((byte*)Config.GameBaseAddress);
 
-            Address = null;
-            long CodeAdd = (long)Info.CodeAddress;
-            long CodeLen = Info.CodeSize - Pattern.Length;
-            for (int i = 0; i < CodeLen; i++)
+            if (BeginAddress == ulong.MaxValue)
+                BeginAddress = (ulong)Info.CodeAddress + Info.CodeSize;
+
+            ulong CodeAdd = (ulong)Info.CodeAddress;
+            for (ulong i = BeginAddress - CodeAdd; i >= 0; i--)
             {
-                byte* pBuffer = (byte*)(Info.CodeAddress) + i;
-                if (!CheckPattern(pBuffer, Pattern))
+                byte* pAddress = (byte*)(CodeAdd + i);
+                if (!CheckPattern(pAddress, Pattern))
                     continue;
-                Log.Debug($"CMVS Pattern Found At: 0x{(ulong)pBuffer:X16}");
-                for (long x = (long)pBuffer; x > CodeAdd; x--)
-                {
-                    byte* pFunc = (byte*)x;
-                    if (!CheckPattern(pFunc, Pattern))
-                        continue;
-                    Address = pFunc;
-                    return true;
-                }
+
+                return (ulong)pAddress;
             }
-            return false;
+
+            return null;
+        }
+
+        private unsafe ulong? ScanDown(byte?[] Pattern, ulong BeginAddress = 0)
+        {
+            var Info = ModuleInfo.GetCodeInfo((byte*)Config.GameBaseAddress);
+
+            ulong CodeAdd = (ulong)Info.CodeAddress;
+            ulong CodeLen = Info.CodeSize;
+
+            if (BeginAddress != 0)
+                BeginAddress = BeginAddress - CodeAdd;
+
+            for (ulong i = BeginAddress; i < CodeLen; i++)
+            {
+                byte* pAddress = (byte*)(CodeAdd + i);
+                if (!CheckPattern(pAddress, Pattern))
+                    continue;
+
+                return (ulong)pAddress;
+            }
+
+            return null;
         }
 
         private bool CheckPattern(byte* Buffer, byte?[] Pattern)

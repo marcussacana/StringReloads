@@ -113,6 +113,12 @@ namespace StringReloads.Hook.Base
         public uint JmpSize => (_JmpSize ?? (_JmpSize = (uint)ulong.MaxValue.AssemblyJmp().GetEncodedSize(64))).Value;
         private void AssemblyHook()
         {
+            if (Function == null)
+            {
+                Log.Error($"Can't Assembly the {Name??"Anonymous"} Hook, Null Function Pointer");
+                return;
+            }
+
             //Copy Minimal Instructions Amount
             var Reader = new MemoryCodeReader(this.Function, 100);
             var Decoder = Iced.Intel.Decoder.Create(64, Reader);

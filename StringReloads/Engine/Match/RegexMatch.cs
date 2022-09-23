@@ -20,7 +20,7 @@ namespace StringReloads.Engine.Match
 				using (var LST = new LSTParser(LSTPath))
 				{
 					foreach (var Entry in LST.GetEntries())
-						RDB[new Regex(Entry.OriginalLine)] = Entry.TranslationLine;					
+						AddRegex(Entry.OriginalLine, Entry.TranslationLine);
 				}
 			}
             DumpThread = new Thread(Dump);
@@ -28,7 +28,12 @@ namespace StringReloads.Engine.Match
             DumpThread.Start();
         }
 
-		~RegexMatch() {
+        public void AddRegex(string OriginalLine, string TranslationLine)
+		{
+			RDB[new Regex(OriginalLine)] = TranslationLine;
+		}
+
+        ~RegexMatch() {
 			DumpThread.Abort();
 			RegexLST?.Close();
 		}
