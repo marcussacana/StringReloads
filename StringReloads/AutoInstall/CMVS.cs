@@ -24,7 +24,7 @@ namespace StringReloads.AutoInstall
 
         public CMVS()
         {
-            var CFG = Config.Default.GetValues("CMVS");
+            var CFG = Config.Default.GetValues(Name);
             if (CFG == null)
                 return;
 
@@ -53,7 +53,7 @@ namespace StringReloads.AutoInstall
                 Dic["FileSize"] = new FileInfo(Config.Default.GameExePath).Length.ToString();
                 Dic["Offset"] = Offset.Value.ToString();
 
-                Config.Default.SetValues("CMVS", Dic);
+                Config.Default.SetValues(Name, Dic);
                 Config.Default.SaveSettings();
             }
 
