@@ -16,10 +16,14 @@ namespace StringReloads.Hook.Others
             Compile(Function);
         }
 
-        void* GetStrHook(void* hScript, uint StrID)
+        void* GetStrHook(void* hScript, int StrID)
         {
             void* Str = Bypass(hScript, StrID);
-            return EntryPoint.Process(Str);
+
+            if (StrID >= 0)
+                return EntryPoint.Process(Str);
+
+            return Str;
         }
     }
 }
