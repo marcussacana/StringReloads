@@ -185,73 +185,80 @@ namespace StringReloads.Engine
 
         private void PluginsInitializer(SRL Engine)
         {
-            _ = Engine.ReloadModifiers;
-            _ = Engine.Installers;
-            _ = Engine.Reloads;
-            _ = Engine.Matchs;
-            _ = Engine.Hooks;
-            _ = Engine.Mods;
-
-            string PluginDir = Path.Combine(Path.GetDirectoryName(EntryPoint.CurrentDll), "Plugins");
-            if (Directory.Exists(PluginDir))
+            try
             {
-                foreach (string PluginPath in Directory.EnumerateFiles(PluginDir, "*.dll", SearchOption.TopDirectoryOnly))
+                _ = Engine.ReloadModifiers;
+                _ = Engine.Installers;
+                _ = Engine.Reloads;
+                _ = Engine.Matchs;
+                _ = Engine.Hooks;
+                _ = Engine.Mods;
+
+                string PluginDir = Path.Combine(Path.GetDirectoryName(EntryPoint.CurrentDll), "Plugins");
+                if (Directory.Exists(PluginDir))
+                {
+                    foreach (string PluginPath in Directory.EnumerateFiles(PluginDir, "*.dll", SearchOption.TopDirectoryOnly))
+                    {
+                        try
+                        {
+                            AppDomain.CurrentDomain.Load(File.ReadAllBytes(PluginPath));
+                        }
+                        catch { }
+                    }
+                }
+
+                foreach (var Plugin in Engine.Plugins)
                 {
                     try
                     {
-                        AppDomain.CurrentDomain.Load(File.ReadAllBytes(PluginPath));
+                        Plugin.Initialize(Engine);
+                        Log.Debug($"Plugin \"{Plugin.Name}\" Initialized.");
+
+                        try
+                        {
+                            AppendArray(ref Engine._ReloadModifiers, Plugin.GetModifiers(), true);
+                        }
+                        catch { }
+                        try
+                        {
+                            AppendArray(ref Engine._Installers, Plugin.GetAutoInstallers(), true);
+                        }
+                        catch { }
+                        try
+                        {
+                            AppendArray(ref Engine._Matchs, Plugin.GetMatchs(), true);
+                        }
+                        catch { }
+                        try
+                        {
+                            AppendArray(ref Engine._Hooks, Plugin.GetHooks(), true);
+                        }
+                        catch { }
+                        try
+                        {
+                            AppendArray(ref Engine._Mods, Plugin.GetMods(), true);
+                        }
+                        catch { }
+                        try
+                        {
+                            AppendArray(ref Engine._Reloads, Plugin.GetReloaders(), true);
+                        }
+                        catch { }
+                        try
+                        {
+                            AppendArray(ref Engine.Encodings, Plugin.GetEncodings(), true);
+                        }
+                        catch { }
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        Log.Error($"Failed to Load the Plugin \"{Plugin.Name}\".\n{ex}");
+                    }
                 }
             }
-
-            foreach (var Plugin in Engine.Plugins)
+            catch (Exception ex)
             {
-                try
-                {
-                    Plugin.Initialize(Engine);
-                    Log.Debug($"Plugin \"{Plugin.Name}\" Initialized.");
-
-                    try
-                    {
-                        AppendArray(ref Engine._ReloadModifiers, Plugin.GetModifiers(), true);
-                    }
-                    catch { }
-                    try
-                    {
-                        AppendArray(ref Engine._Installers, Plugin.GetAutoInstallers(), true);
-                    }
-                    catch { }
-                    try
-                    {
-                        AppendArray(ref Engine._Matchs, Plugin.GetMatchs(), true);
-                    }
-                    catch { }
-                    try
-                    {
-                        AppendArray(ref Engine._Hooks, Plugin.GetHooks(), true);
-                    }
-                    catch { }
-                    try
-                    {
-                        AppendArray(ref Engine._Mods, Plugin.GetMods(), true);
-                    }
-                    catch { }
-                    try
-                    {
-                        AppendArray(ref Engine._Reloads, Plugin.GetReloaders(), true);
-                    }
-                    catch { }
-                    try
-                    {
-                        AppendArray(ref Engine.Encodings, Plugin.GetEncodings(), true);
-                    }
-                    catch { }
-                }
-                catch (Exception ex)
-                {
-                    Log.Error($"Failed to Load the Plugin \"{Plugin.Name}\".\n{ex}");
-                }
+                Log.Error("Plugin Engine Error: " + ex.ToString());
             }
         }
 
