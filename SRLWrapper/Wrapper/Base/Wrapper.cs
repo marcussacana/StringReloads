@@ -21,7 +21,7 @@ namespace SRLWrapper.Wrapper.Base
 
         static bool WOW64 => !Environment.Is64BitProcess && Environment.Is64BitOperatingSystem;
 
-        internal static void* LoadLibrary(string lpFileName)
+        internal static void* LoadLibrary(string lpFileName, bool Required = true)
         {
             string DllPath = lpFileName;
             if (lpFileName.Length < 2 || lpFileName[1] != ':')
@@ -50,7 +50,7 @@ namespace SRLWrapper.Wrapper.Base
 
             void* Handler = RealHandler = LoadLibraryW(DllPath);
 
-            if (Handler == null)
+            if (Handler == null && Required)
             {
                 MessageBoxW(null, "Library: " + DllPath, "SRL WRAPPER ERROR", 0x10);
                 Environment.Exit(0x505);//ERROR_DELAY_LOAD_FAILED

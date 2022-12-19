@@ -15,7 +15,7 @@ namespace SRLWrapper
             if (RealHandler != null)
                 return;
 
-            RealHandler = LoadLibrary(CurrentDllName);
+            RealHandler = LoadLibrary(CurrentDllName, false);
 
             if (RealHandler != null) {
                 Link   = GetDelegate<RET_1>(RealHandler, "V2Link", false);
