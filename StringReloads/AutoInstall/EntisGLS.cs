@@ -106,7 +106,7 @@ namespace StringReloads.AutoInstall
             }
             else
             {
-                Log.Debug("EntisGLS Engine Config Not Found: Modding...");
+                Log.Debug("EntisGLS Engine Config Found: Modding...");
                 var DefaultRead = File.ReadAllText(XMLPath);
 
                 Encoding Encoding = Encoding.GetEncoding(932);
