@@ -25,7 +25,7 @@ namespace StringReloads.Hook.Win32
         bool TextOut(void* dc, int xStart, int yStart, byte* pStr, int strLen)
         {
             WCString InStr = pStr;
-            InStr.FixedLength = (uint)strLen;
+            InStr.FixedLength = (uint)strLen*2;
 
 
             Log.Trace($"TextOutW X: {xStart} Y: {yStart}: {(string)InStr}");

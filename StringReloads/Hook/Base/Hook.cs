@@ -87,6 +87,9 @@ namespace StringReloads.Hook.Base
             if (hModule == null)
                 throw new DllNotFoundException(Library);
 
+            if (TargetModule == IntPtr.Zero)
+                TargetModule = null;
+
             if (Export != null)
                 Function = GetProcAddress(hModule, Export);
             else
