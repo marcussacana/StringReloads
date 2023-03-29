@@ -193,10 +193,18 @@ namespace StringReloads.AutoInstall
 
         private void FinishSetup() {
             SoftPalConfig["StackOffset"] = LastOffset.ToString();
+
             if (Config.BreakLine != "<br>") {
                 var Rst = ShowMessageBox("Looks like you aren't using the tag <br> as breakline rigth now, You want use it?", "StringReloader Setup Wizard", MBButtons.YesNo, MBIcon.Question);
                 if (Rst == MBResult.Yes)
                     Config.SetValue("BreakLine", "<br>");
+            }
+
+            if (!Config.Overwrite)
+            {
+                var Rst = ShowMessageBox("It looks like you are not in memory overwrite mode, which is probably needed for this game, do you want to enable memory overwrite mode?", "StringReloader Setup Wizard", MBButtons.YesNo, MBIcon.Question);
+                if (Rst == MBResult.Yes)
+                    Config.SetValue("Overwrite", "true");
             }
 
             Config.SetValues("SoftPal", SoftPalConfig);

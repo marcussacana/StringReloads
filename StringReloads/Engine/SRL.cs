@@ -142,7 +142,7 @@ namespace StringReloads.Engine
             }
 
             if (Settings.Overwrite && Output != null && ((string)Output) != null)
-                return (CString)Alloc.Overwrite(Output.ToArray(), pString);
+                return (CString)Alloc.Overwrite(Output.ToArray(), pString, pString.Count());
 
             if (Settings.HeapAlloc && Output != null && ((string)Output) != null)
                 return (CString)Alloc.CreateHeap(Output.ToArray());
@@ -177,7 +177,7 @@ namespace StringReloads.Engine
             }
 
             if (Settings.Overwrite && Output != null && ((string)Output) != null)
-                return (WCString)Alloc.Overwrite(Output.ToArray(), pString);
+                return (WCString)Alloc.Overwrite(Output.ToArray(), pString, pString.Count());
 
             if (Settings.HeapAlloc && Output != null && ((string)Output) != null)
                 return (WCString)Alloc.CreateHeap(Output.ToArray());

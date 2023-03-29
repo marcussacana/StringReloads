@@ -13,7 +13,11 @@ namespace StringReloads.Engine.Unmanaged
             return hAlloc;
         }
 
-        public static void* Overwrite(byte[] Data, void* Address) {
+        public static void* Overwrite(byte[] Data, void* Address, int OriginalSize) {
+            if (Data.Length < OriginalSize)
+            {
+                Array.Resize(ref Data, OriginalSize);
+            }
             Marshal.Copy(Data, 0, new IntPtr(Address), Data.Length);
             return Address;
         }
