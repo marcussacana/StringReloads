@@ -82,7 +82,10 @@ namespace StringReloads.Engine
         public bool HeapAlloc => ((bool?)(_HeapAlloc ??= GetValue("HeapAlloc").ToBoolean())).Value;
        
         bool? _Overwrite = null;
-        public bool Overwrite => ((bool?)(_Overwrite ??= GetValue("Overwrite").ToBoolean())).Value;
+        public bool Overwrite => ((bool?)(_Overwrite ??= GetValue("Overwrite").ToBoolean())).Value && !SafeOverwrite;
+
+        bool? _SafeOverwrite = null;
+        public bool SafeOverwrite => ((bool?)(_SafeOverwrite ??= GetValue("SafeOverwrite").ToBoolean())).Value;
 
         bool? _ReloadRegexCaptures = null;
         public bool ReloadRegexCaptures => ((bool?)(_ReloadRegexCaptures ??= GetValue("ReloadRegexCaptures").ToBoolean())).Value;

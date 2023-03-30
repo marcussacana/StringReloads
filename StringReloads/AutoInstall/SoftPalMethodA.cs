@@ -10,6 +10,7 @@ using StringReloads.Hook.Base;
 using StringReloads.Engine.String;
 using StringReloads.AutoInstall.Patcher;
 using StringReloads.Engine.Interface;
+using Iced.Intel;
 
 namespace StringReloads.AutoInstall
 {
@@ -18,7 +19,8 @@ namespace StringReloads.AutoInstall
 
         bool SetupMode = false;
         CallerTracer Tracer;
-        Interceptor Intercepter;
+        Intercept Intercepter;
+        SoftPal_PalSpriteCreateText FontDrawTextHook;
 
         Config Config => Config.Default;
         Dictionary<string, string> SoftPalConfig;
@@ -39,9 +41,13 @@ namespace StringReloads.AutoInstall
             }
 
             StackOffset = SoftPalConfig["stackoffset"].ToUInt32();
+            FromEBP = SoftPalConfig["fromebp"].ToBoolean();
             void* hFunc = (void*)((int)Config.GameBaseAddress + SoftPalConfig["hookoffset"].ToInt32());
-            Intercepter = new Interceptor(hFunc, new InterceptDelegate(DrawTextHook));
+            Intercepter = new ManagedInterceptor(hFunc, new ManagedInterceptDelegate(DrawTextHook));
             Intercepter.Install();
+
+            FontDrawTextHook = new SoftPal_PalSpriteCreateText();
+            FontDrawTextHook.Install();
         }
 
         public bool IsCompatible()
@@ -96,10 +102,15 @@ namespace StringReloads.AutoInstall
         public void Uninstall()
         {
             Intercepter.Uninstall();
+            FontDrawTextHook.Uninstall();
         }
 
-        void DrawTextHook(void* Stack) {
-            uint* Address = ((uint*)Stack) + StackOffset;
+        void DrawTextHook(ref ulong ESP, ref ulong EAX, ref ulong ECX, ref ulong EDX, ref ulong EBX, ref ulong EBP, ref ulong ESI, ref ulong EDI)
+        {
+            uint* BasePtr = (FromEBP ? ((uint*)EBP) : ((uint*)ESP));
+
+            uint* Address = BasePtr + StackOffset;
+
             *Address = (uint)EntryPoint.Process((void*)*Address);
         }
 
@@ -121,6 +132,48 @@ namespace StringReloads.AutoInstall
        
             Log.Debug($"PalFontDrawText Referenced by 0x{(uint)hFunc:X8}");
 
+
+            var MemReader = new MemoryCodeReader(hFunc);
+            var Diassembler = Decoder.Create(32, MemReader);
+            for (int i = 0, x = 0; i < 30; i++)
+            {
+                var CurrentOffset = Diassembler.IP;
+                var Instruction = Diassembler.Decode();
+                switch (x)
+                {
+                    case 0:
+                        if (Instruction.IsCallNear && Instruction.IPRelativeMemoryAddress == Diassembler.IP) 
+                            x++;
+                        break;
+                    case 1:
+                        if (Instruction.Code == Code.Pop_r32)
+                            x++;
+                        else
+                            x = 0;
+                        break;
+                    case 2:
+                        if (Instruction.Code == Code.Add_EAX_imm32)
+                            x++;
+                        else
+                            x = 0;
+                        break;
+                    case 3:
+                        if (Instruction.IsJmpNearIndirect)
+                           x++;
+                        else
+                            x = 0;
+                        break;
+                    case 4:
+                        if (Instruction.Code == Code.Nopd)
+                            break;
+
+                        Log.Debug("SoftPAL Wordwrap Patched Engine Detected");
+                        hFunc = (byte*)hFunc + CurrentOffset;
+                        x++;
+                        break;
+                }
+            }
+
             SoftPalConfig = new Dictionary<string, string>();
             SoftPalConfig["HookOffset"]  = ((uint)hFunc - (uint)Config.GameBaseAddress).ToString();
             SoftPalConfig["EngineSize"]  = new FileInfo(Config.GameExePath).Length.ToString();
@@ -128,15 +181,17 @@ namespace StringReloads.AutoInstall
             Tracer.Uninstall();
 
 
-            Intercepter = new Interceptor(hFunc, new InterceptDelegate(SetupStepB));
+            Intercepter = new ManagedInterceptor(hFunc, new ManagedInterceptDelegate(SetupStepB));
             Intercepter.Install();
             ShowMessageBox($"Very well, looks like SRL can perform Auto-Install in this game!\nSRL now needs to gather more intricate information from the game.\nPlease press OK and continue to the next in-game dialogue.", "StringReloads Setup Wizard", MBButtons.Ok, MBIcon.Information);
         }
 
+        bool FromEBP;
         int LastOffset = 0;
         bool WaitingConfirmation = false;
         bool FirstTry = true;
-        void SetupStepB(void* ESP) {
+        void SetupStepB(ref ulong ESP, ref ulong EAX, ref ulong ECX, ref ulong EDX, ref ulong EBX, ref ulong EBP, ref ulong ESI, ref ulong EDI)
+        {
             if (FirstTry)
                 ShowMessageBox("SRL will now need your help to confirm if the dialogue has been found.\nThe program will display the game dialogue; when the correct dialogue is shown, press YES. If nothing is shown or if you see corrupted text, press NO.\nTake note that if you don't set the proper game encoding inside SRL.ini, the correct dialogue will most likely never be shown.\nPress OK if you have read and understood the above.", "StringReloads Setup Wizard", MBButtons.Ok, MBIcon.Information);
 
@@ -152,36 +207,33 @@ namespace StringReloads.AutoInstall
             }
 
             uint* Stack = (uint*)ESP;
+            uint* BaseStack = (uint*)EBP;
             int StackOffset = LastOffset;
-            while (StackOffset < 50) {
+            while (StackOffset < 80)
+            {
                 var RStack = (Stack + StackOffset);
-                if (IsBadCodePtr((void*)*RStack)) {
-                    Log.Debug($"Bad Pointer: 0x{*RStack:X8}");
-                    StackOffset++;
-                    continue;
+                var BStack = (BaseStack + StackOffset);
+
+                if (GuessOffset(RStack, StackOffset))
+                {
+                    FromEBP = false;
+                    break;
                 }
 
-                Log.Debug($"Guessing Offset: 0x{(uint)RStack:X8} (+{StackOffset}) (0x{*RStack:X8})");
-                CString Str = (byte*)*RStack;
-                if (Str.Count() > 0 && Str.Count() < 500)
+                if (GuessOffset(BStack, StackOffset))
                 {
-                    var Reply = ShowMessageBox(Str, "Is this the dialogue?", MBButtons.YesNo, MBIcon.Question);
-                    if (Reply == MBResult.Yes)
-                    {
-                        Str = "Looks Like everything is working,<br>Continue to the next game dialogue!";
-                        *RStack = (uint)(void*)Str;
-                        WaitingConfirmation = true;
-                        break;
-                    }
+                    FromEBP = true;
+                    break;
                 }
 
                 StackOffset++;
                 continue;
             }
 
+
             LastOffset = StackOffset;
 
-            if (StackOffset == 50)
+            if (StackOffset == 60)
                 SetupFailed();
 
 
@@ -191,8 +243,34 @@ namespace StringReloads.AutoInstall
             }
         }
 
+        private bool GuessOffset(uint* Address, int Offset)
+        {
+            if (IsBadCodePtr((void*)*Address))
+            {
+                return false;
+            }
+
+            Log.Debug($"Guessing Offset: 0x{(uint)Address:X8} (+{StackOffset}) (0x{*Address:X8})");
+            CString Str = (byte*)*Address;
+            if (Str.Count() > 0 && Str.Count() < 500)
+            {
+                var Reply = ShowMessageBox(Str, "Is this the dialogue?", MBButtons.YesNo, MBIcon.Question);
+                if (Reply == MBResult.Yes)
+                {
+                    Str = "Looks Like everything is working,<br>Continue to the next game dialogue!";
+                    *Address = (uint)(void*)Str;
+                    WaitingConfirmation = true;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private void FinishSetup() {
             SoftPalConfig["StackOffset"] = LastOffset.ToString();
+
+            SoftPalConfig["FromEBP"] = FromEBP ? "true" : "false";
 
             if (Config.BreakLine != "<br>") {
                 var Rst = ShowMessageBox("Looks like you aren't using the tag <br> as breakline rigth now, You want use it?", "StringReloader Setup Wizard", MBButtons.YesNo, MBIcon.Question);
@@ -200,11 +278,11 @@ namespace StringReloads.AutoInstall
                     Config.SetValue("BreakLine", "<br>");
             }
 
-            if (!Config.Overwrite)
+            if (!Config.SafeOverwrite)
             {
-                var Rst = ShowMessageBox("It looks like you are not in memory overwrite mode, which is probably needed for this game, do you want to enable memory overwrite mode?", "StringReloader Setup Wizard", MBButtons.YesNo, MBIcon.Question);
+                var Rst = ShowMessageBox("It looks like you are not in safe memory overwrite mode, which is probably needed for this game, do you want to enable safe memory overwrite mode?", "StringReloader Setup Wizard", MBButtons.YesNo, MBIcon.Question);
                 if (Rst == MBResult.Yes)
-                    Config.SetValue("Overwrite", "true");
+                    Config.SetValue("SafeOverwrite", "true");
             }
 
             Config.SetValues("SoftPal", SoftPalConfig);

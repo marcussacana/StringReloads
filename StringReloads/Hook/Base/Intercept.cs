@@ -2,8 +2,6 @@ using System;
 using Iced.Intel;
 using System.Runtime.InteropServices;
 using static StringReloads.Hook.Base.Extensions;
-using StringReloads.Engine;
-using System.Runtime.Remoting.Contexts;
 
 namespace StringReloads.Hook.Base
 {
@@ -31,7 +29,9 @@ namespace StringReloads.Hook.Base
 
         }
 
-        public virtual InterceptDelegate HookFunction { get => InterceptManager; }
+        private InterceptDelegate _HookDelegate;
+
+        public virtual InterceptDelegate HookFunction { get => _HookDelegate ??= new InterceptDelegate(InterceptManager); }
         public virtual ManagedInterceptDelegate ManagedHookFunction { get => null; }
 
         void* Address;
@@ -120,7 +120,7 @@ namespace StringReloads.Hook.Base
         void InterceptManager(void* ESP)
         {
             uint* Stack = (uint*)ESP;
-
+            
             ulong EDI = Stack[0];
             ulong ESI = Stack[1];
             ulong EBP = Stack[2];
@@ -129,7 +129,7 @@ namespace StringReloads.Hook.Base
             ulong ECX = Stack[6];
             ulong EAX = Stack[7];
 
-            var OriESP = (void**)Stack[3];
+            ulong OriESP = Stack[3];
 
             ManagedHookFunction(ref OriESP, ref EAX, ref ECX, ref EDX, ref EBX, ref EBP, ref ESI, ref EDI);
 
@@ -149,6 +149,6 @@ namespace StringReloads.Hook.Base
     [UnmanagedFunctionPointer(CallingConvention.StdCall)]
     public unsafe delegate void InterceptDelegate(void* ESP);
 
-    public unsafe delegate void ManagedInterceptDelegate(ref void** ESP, ref ulong EAX, ref ulong ECX, ref ulong EDX, ref ulong EBX, ref ulong EBP, ref ulong ESI, ref ulong EDI);
+    public unsafe delegate void ManagedInterceptDelegate(ref ulong ESP, ref ulong EAX, ref ulong ECX, ref ulong EDX, ref ulong EBX, ref ulong EBP, ref ulong ESI, ref ulong EDI);
 
 }

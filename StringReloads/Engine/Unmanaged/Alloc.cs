@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Antlr.Runtime.Tree;
+using StringReloads.Engine.String;
+using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace StringReloads.Engine.Unmanaged
@@ -13,13 +16,87 @@ namespace StringReloads.Engine.Unmanaged
             return hAlloc;
         }
 
-        public static void* Overwrite(byte[] Data, void* Address, int OriginalSize) {
+        public static CString Overwrite(CString String, CString OriString)
+        {
+            var Data = String.ToArray();
+
+            Array.Resize(ref Data, Data.Length + 1);//Null Termination
+
+            var OriginalSize = OriString.Count();
+
+            return OveriteInternal(Data, OriString, OriginalSize);
+        }
+
+        public static WCString Overwrite(WCString String, WCString OriString)
+        {
+            var Data = String.ToArray();
+
+            Array.Resize(ref Data, Data.Length + 2);//Null Termination
+
+            var OriginalSize = OriString.Count();
+
+            return OveriteInternal(Data, OriString, OriginalSize);
+        }
+
+        private static void* OveriteInternal(byte[] Data, void* OriString, int OriginalSize)
+        {
             if (Data.Length < OriginalSize)
             {
                 Array.Resize(ref Data, OriginalSize);
             }
-            Marshal.Copy(Data, 0, new IntPtr(Address), Data.Length);
-            return Address;
+
+            Marshal.Copy(Data, 0, new IntPtr(OriString), Data.Length);
+            return OriString;
+        }
+
+        public static CString SafeOverwrite(CString String, CString OriString)
+        {
+            var Data = String.ToArray();
+            
+            Array.Resize(ref Data, Data.Length + 1);//Null Termination
+
+            var OriginalSize = OriString.Count();
+
+            return SafeOveriteInternal(Data, String, OriString, OriginalSize);
+        }
+
+        public static WCString SafeOverwrite(WCString String, WCString OriString)
+        {
+            var Data = String.ToArray();
+
+            Array.Resize(ref Data, Data.Length + 2);//Null Termination
+
+            var OriginalSize = OriString.Count();
+
+            return SafeOveriteInternal(Data, String, OriString, OriginalSize);
+        }
+
+        private static void* SafeOveriteInternal(byte[] Data, void* String, void* OriString, int OriginalSize)
+        {
+            if (Data.Length < OriginalSize)
+            {
+                Array.Resize(ref Data, OriginalSize);
+            }
+
+            if (Data.Length > OriginalSize)
+            {
+                byte* pOriEnd = (byte*)OriString + OriginalSize;
+
+                int EmptyBufferSize = 0;
+                while (*pOriEnd == 0)
+                {
+                    EmptyBufferSize++;
+                    pOriEnd++;
+                }
+
+                if (EmptyBufferSize + OriginalSize < Data.Length)
+                {
+                    return String;
+                }
+            }
+
+            Marshal.Copy(Data, 0, new IntPtr(OriString), Data.Length);
+            return OriString;
         }
 
         [DllImport("kernel32.dll", SetLastError = true)]
