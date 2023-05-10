@@ -131,7 +131,7 @@ namespace StringReloads.Engine
 
             var Rst = ProcessString((string)String);
             if (Rst == null)
-                return String;
+                return pString;
             var Output = (CString)Rst;
 
             foreach (var Rld in Reloads)
@@ -169,7 +169,7 @@ namespace StringReloads.Engine
 
             var Rst = ProcessString((string)String);
             if (Rst == null)
-                return String;
+                return pString;
             var Output = (WCString)Rst;
 
             foreach (var Rld in Reloads)
