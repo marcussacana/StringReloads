@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace StringReloads.Engine.Unmanaged
 {
-    unsafe static class Alloc
+    public unsafe static class Alloc
     {
         const uint HEAP_ZERO_MEMORY = 0x00000008;
         public static void* CreateHeap(byte[] Data) {

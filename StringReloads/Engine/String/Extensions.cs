@@ -229,7 +229,8 @@ namespace StringReloads
                 if ((UseDB ?? Config.Default.Filter.UseDB) && EntryPoint.SRL.HasMatch(String))
                     return true;
 
-                string Str = String.Trim();
+
+                 string Str = String.Trim();
                 Str = Str.Replace(Config.Default.BreakLine, "\n");
 
                 foreach (string Ignore in IgnoreList)
@@ -246,6 +247,8 @@ namespace StringReloads
 
                 if (UseAcceptableRange && CharacterRanges.TotalMissmatch(Str, Config.Default.Filter.AcceptableRange) > 0)
                     return false;
+
+                string[] ScriptPatterns = new string[] { "!=", "<=", ">=", "==", "+=", "-=", "->", "//", ");", "*-", "null", "&&", "||" };
 
                 string[] Words = Str.Split(' ');
 
@@ -307,7 +310,7 @@ namespace StringReloads
                 }
                 try
                 {
-                    char Last = (LineQuotes == null ? Str.Last() : Str.TrimEnd(LineQuotes.Value.End).Last());
+                    char Last = (LineQuotes == null ? Str.Last() : Str.TrimEnd(LineQuotes?.End ?? ' ').Last());
                     if (IsJap && PontuationJapList.Contains(Last))
                         Points -= 3;
 
@@ -318,7 +321,7 @@ namespace StringReloads
                 catch { }
                 try
                 {
-                    char First = (LineQuotes == null ? Str.First() : Str.TrimEnd(LineQuotes.Value.Start).First());
+                    char First = (LineQuotes == null ? Str.First() : Str.TrimEnd(LineQuotes?.Start ?? ' ').First());
                     if (IsJap && PontuationJapList.Contains(First))
                         Points -= 3;
 
@@ -330,20 +333,38 @@ namespace StringReloads
 
                 if (!IsJap)
                 {
+                    int NumberOnly = 0;
+                    int LetterOnly = 0;
                     foreach (string Word in Words)
                     {
                         int WNumbers = Word.Where(c => char.IsNumber(c)).Count();
                         int WLetters = Word.Where(c => char.IsLetter(c)).Count();
+                        int WNumSpecials = Word.Where(c => c == ',' || c == '.').Count();
+
+                        WLetters -= WNumSpecials;
+
                         if (WLetters > 0 && WNumbers > 0)
                         {
                             Points += 2;
                         }
+
+                        if (WLetters <= 0 && WNumbers > 0)
+                            NumberOnly++;
+                        if (WNumbers <= 0 && WLetters > 0)
+                            LetterOnly++;
+
                         if (Word.Trim(PontuationList).Where(c => PontuationList.Contains(c)).Count() != 0)
                         {
                             Points += 2;
                         }
                     }
+
+                    if (NumberOnly > LetterOnly)
+                        Points += NumberOnly > LetterOnly * 2 ? 2 : 1;
                 }
+
+                if (string.IsNullOrWhiteSpace(Str.Trim().Trim(Str.First())))
+                    Points = 3;//Discard pontuation checks
 
                 if (!BeginQuote && !char.IsLetter(Str.First()))
                     Points += 2;
@@ -369,23 +390,50 @@ namespace StringReloads
                 if (Spaces > WordCount * 2)
                     Points++;
 
-                if (Uppers > Spaces + 1 && !IsCaps)
-                    Points++;
-
                 if (IsJap && Spaces == 0)
                     Points--;
 
                 if (!IsJap && Spaces == 0)
                     Points += 2;
 
-                if (WordCount <= 2 && Numbers != 0 && !Config.Default.Filter.AllowNumbers)
+                if (WordCount <= 2 && Numbers != 0)
                     Points += (int)(Str.PercentOf(Numbers) / 10);
 
                 if (Str.Length <= 3 && !IsJap)
                     Points++;
 
-                if (Numbers >= (IsJap ? Kanjis + JapChars : Latim))
+                if (Numbers >= Str.Length)
                     Points += 3;
+
+                foreach (var Pattern in ScriptPatterns)
+                {
+                    if (Str.ToLowerInvariant().Replace(" ", "").Contains(Pattern))
+                        Points += 2;
+                }
+
+                //Detect dots followed of a non space character
+                if (!IsJap && Str.Trim().TrimEnd('.').Contains("."))
+                {
+                    var Count = Str.Trim().TrimEnd('.').Split('.').Skip(1).Count(x => !string.IsNullOrEmpty(x) && !char.IsWhiteSpace(x.FirstOrDefault()));
+                    if (Count > 0)
+                        Points++;
+                }
+
+                if (!IsJap && WordCount == 1 && char.IsUpper(Str.First()) && !char.IsPunctuation(Str.TrimEnd().Last()))
+                    Points++;
+
+                if (!IsJap && WordCount == 1 && !char.IsUpper(Str.First()))
+                    Points++;
+
+                if (Words.Where(x => x.Skip(1).Where(y => char.IsUpper(y)).Count() > 1
+                                  && x.Where(y => char.IsLower(y)).Count() > 1).Any())
+                    Points++;
+
+                if (!IsJap && char.IsUpper(Str.TrimStart().First()) && char.IsPunctuation(Str.TrimEnd().Last()))
+                    Points--;
+
+                if (!char.IsPunctuation(Str.TrimEnd().Last()))
+                    Points++;
 
                 if (IsJap && Kanjis / 2 > JapChars)
                     Points--;
@@ -410,6 +458,7 @@ namespace StringReloads
 
                 if (Str.Trim().Trim(Str.Trim().First()) == string.Empty)
                     Points += 2;
+
 
                 if (IsJap != Config.Default.Filter.FromAsian)
                     return false;
