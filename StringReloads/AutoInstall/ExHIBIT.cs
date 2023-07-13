@@ -15,11 +15,31 @@ namespace StringReloads.AutoInstall
         ExHIBIT_lstrcpyA lstrcpyAHook;
 
         ExHIBIT_Say10 Say10Hook;
+        ExHIBIT_Say11 Say12Hook;
         ExHIBIT_PrintSub3 PrintSub3Hook;
+        ExHIBIT_Question QuestionHook;
         public void Install()
         {
-            if (Say10Hook == null)
-                Say10Hook = new ExHIBIT_Say10();
+            if (Say10Hook == null && Say12Hook == null)
+            {
+                try
+                {
+                    Say10Hook = new ExHIBIT_Say10();
+                }
+                catch 
+                { 
+                    Say12Hook = new ExHIBIT_Say11();
+                }
+            }
+
+            if (QuestionHook == null)
+            {
+                try
+                {
+                    QuestionHook = new ExHIBIT_Question();
+                }
+                catch { }
+            }
 
             if (PrintSub3Hook == null)
                 PrintSub3Hook = new ExHIBIT_PrintSub3();
@@ -30,9 +50,14 @@ namespace StringReloads.AutoInstall
             if (lstrcpyAHook == null)
                 lstrcpyAHook = new ExHIBIT_lstrcpyA(Resident);
 
-            Say10Hook.Install();
+            Say10Hook?.Install();
+            Say12Hook?.Install();
             PrintSub3Hook.Install();
-            lstrcpyAHook.Install();
+
+            if (QuestionHook == null)
+                lstrcpyAHook.Install();
+            else
+                QuestionHook.Install();
         }
 
         public bool IsCompatible()
@@ -51,7 +76,9 @@ namespace StringReloads.AutoInstall
 
         public void Uninstall()
         {
-            Say10Hook.Uninstall();
+            Say10Hook?.Uninstall();
+            Say12Hook?.Uninstall();
+            QuestionHook?.Uninstall();
             PrintSub3Hook.Uninstall();
             lstrcpyAHook.Uninstall();
         }

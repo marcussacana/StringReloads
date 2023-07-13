@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Text;
+using Antlr.Runtime.Tree;
 using StringReloads.Engine.String;
 using StringReloads.Hook.Base;
 
@@ -32,15 +33,15 @@ namespace StringReloads.Hook.Others
 
             string Str = (CString)lpString2;
 
-            if (Minify(Str).Length == 0)
+            if (MinifiedCount(Str) == 0)
                 return Bypass(lpString1, lpString2);
 
             lpString2 = EntryPoint.SRL.ProcessString((CString)lpString2);
             return Bypass(lpString1, lpString2);
         }
 
-        private string Minify(string Input) {
-            StringBuilder Builder = new StringBuilder();
+        private int MinifiedCount(string Input) {
+            int Result = 0;
             foreach (var Char in Input) {
                 if (Char >= '0' && Char <= '9')
                     continue;
@@ -48,9 +49,9 @@ namespace StringReloads.Hook.Others
                     continue;
                 if (Char == ';' || char.IsWhiteSpace(Char))
                     continue;
-                Builder.Append(Char);
+                Result++;
             }
-            return Builder.ToString().Replace("NULL", "").Trim();
+            return Result;
         }
     }
 }

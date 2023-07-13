@@ -7,7 +7,9 @@ namespace StringReloads.Hook.Others
     {
         public override string Library => "resident.dll";
 
-        public override string Export => "?say@RetouchAdvCharacter@@QAEXHPBD0_NHHHHPAVRetouchPrintParam@@K@Z";
+        public const string ExportName ="?say@RetouchAdvCharacter@@QAEXHPBD0_NHHHHPAVRetouchPrintParam@@K@Z";
+
+        public override string Export => ExportName;
 
         public override void Initialize()
         {

@@ -95,6 +95,9 @@ namespace StringReloads.Hook.Base
             else
                 Function = GetProcAddress(hModule, Ordinal);
 
+            if (Function == null)
+                throw new Exception("Target Export Not Found");
+
             if (ImportHook)
                 SetupImportHook(TargetModule == null ? Config.GameBaseAddress : TargetModule.Value.ToPointer());
             else
