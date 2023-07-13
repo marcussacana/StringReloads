@@ -80,9 +80,11 @@ namespace StringReloads.Engine.Match
         {
 
             string Minified = String;
+            string UnmodifiedMinified = null;
 
             if (!Engine.Settings.FastMode)
             {
+                UnmodifiedMinified = Engine.Minify(String);
                 foreach (var Modifier in Engine.ReloadModifiers)
                 {
                     if (Modifier.CanRestore)
@@ -95,7 +97,10 @@ namespace StringReloads.Engine.Match
             if (Engine.CurrentDatabase.HasKey(Minified))
                 return Engine.CurrentDatabase[Minified];
 
-            if (Engine.Settings.Hashset && !Engine.Hashset.Contains(String) && !Engine.Hashset.Contains(Minified))
+            if (UnmodifiedMinified != null && Engine.CurrentDatabase.HasKey(UnmodifiedMinified))
+                return Engine.CurrentDatabase[UnmodifiedMinified];
+
+            if (Engine.Settings.Hashset && !Engine.Hashset.Contains(String) && !Engine.Hashset.Contains(Minified) && !Engine.Hashset.Contains(UnmodifiedMinified))
                 return null;
 
             for (int i = 0; i < Engine.Databases.Count; i++)
@@ -105,6 +110,13 @@ namespace StringReloads.Engine.Match
                     Engine.CurrentDatabaseIndex = i;
                     Log.Trace($"Database Changed to {Engine.Databases[i].Name} (ID: {i})");
                     return Engine.Databases[i][Minified];
+                }
+
+                if (UnmodifiedMinified != null && Engine.Databases[i].HasKey(UnmodifiedMinified))
+                {
+                    Engine.CurrentDatabaseIndex = i;
+                    Log.Trace($"Database Changed to {Engine.Databases[i].Name} (ID: {i})");
+                    return Engine.Databases[i][UnmodifiedMinified];
                 }
             }
 
@@ -121,17 +133,12 @@ namespace StringReloads.Engine.Match
             if (Engine.Settings.Filter.DumpFilter && !String.IsDialogue(UseAcceptableRange: Engine.Settings.Filter.DumpAcceptableRange))
                 return;
 
-            if (DumpCache.Contains(Minified))
-                return;
-
-            DumpCache.Add(Minified);
-
             if (DefaultLST == null)
             {
                 string LSTPath = Path.Combine(Engine.Settings.WorkingDirectory, "Strings.lst");
                 if (File.Exists(LSTPath))
                 {
-                    using (var Reader = new StreamReader(File.Open(LSTPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite)))
+                    using (var Reader = new StreamReader(File.Open(LSTPath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite)))
                     {
                         while (Reader.Peek() != -1)
                         {
@@ -141,8 +148,17 @@ namespace StringReloads.Engine.Match
                         Reader.Close();
                     }
                 }
-                DefaultLST = new StreamWriter(File.Open(LSTPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite));
+
+                var FStream = File.Open(LSTPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
+                FStream.Seek(0, SeekOrigin.End);
+
+                DefaultLST = new StreamWriter(FStream);
             }
+
+            if (DumpCache.Contains(Minified))
+                return;
+
+            DumpCache.Add(Minified);
 
             String = String.Trim().Replace("\n", LSTParser.BreakLine).Replace("\r", LSTParser.ReturnLine);
 

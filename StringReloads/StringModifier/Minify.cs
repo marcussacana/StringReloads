@@ -6,8 +6,12 @@ namespace StringReloads.StringModifier
 {
     class Minify : IStringModifier
     {
+        public Minify() {
+            Config.Default.Modifiers.TryGetValue("acceptablerangeminify", out AcceptableRange);
+        }
         public static Minify Default = new Minify();
 
+        bool AcceptableRange;
         public string Name => "Minify";
 
         public bool CanRestore => false;
@@ -25,6 +29,22 @@ namespace StringReloads.StringModifier
                     default:
                         if (char.IsWhiteSpace(Char))
                             break;
+
+                        if (AcceptableRange)
+                        {
+                            bool Valid = false;
+                            foreach (var Range in Config.Default.Filter.AcceptableRange)
+                            {
+                                if (Char >= Range.Begin && Char <= Range.End)
+                                {
+                                    Valid = true;
+                                    break;
+                                }
+                            }
+
+                            if (!Valid)
+                                break;
+                        }
 
                         Rst += char.ToLowerInvariant(Char);
                         break;
