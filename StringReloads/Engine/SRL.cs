@@ -41,6 +41,7 @@ namespace StringReloads.Engine
 
         internal IStringModifier[] _ReloadModifiers = null;
         public IStringModifier[] ReloadModifiers => _ReloadModifiers ??= new IStringModifier[] {
+            new AntiIlegalChar(this),
             new MonoWordWrap(this),
             new Remaper(this),
             new RemaperAlt(this),
