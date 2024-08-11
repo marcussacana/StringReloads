@@ -12,6 +12,7 @@ namespace StringReloads.Hook.Base
 
         uint Length = 0;
 
+        public MemoryCodeReader(long Address) : this((byte*)Address) { }
         public MemoryCodeReader(void* Address) : this((byte*)Address) { }
         public MemoryCodeReader(byte* Address) : this(Address, 0) { }
         public MemoryCodeReader(void* Address, uint Length) : this((byte*)Address, Length) { }

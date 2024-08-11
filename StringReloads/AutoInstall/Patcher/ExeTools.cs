@@ -8,7 +8,7 @@ using static StringReloads.Engine.User;
 
 namespace StringReloads.AutoInstall.Patcher
 {
-    static class Tools
+    static class ExeTools
     {
         static readonly string[] SupportedWrappers = new string[] {
             "version.dll", "d3d9.dll", "d3d10.dll", "d3d11.dll",

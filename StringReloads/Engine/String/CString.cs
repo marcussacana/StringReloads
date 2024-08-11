@@ -15,6 +15,8 @@ namespace StringReloads.Engine.String
         public Encoding WriteEncoding = Config.Default.WriteEncoding;
 
         public static implicit operator CString(byte* Ptr) => new CString(Ptr);
+        public static implicit operator CString(long Ptr) => new CString((byte*)Ptr);
+        public static implicit operator CString(ulong Ptr) => new CString((byte*)Ptr);
         public static implicit operator CString(void* Ptr) => new CString((byte*)Ptr);
         public static implicit operator CString(IntPtr Ptr) => new CString((byte*)Ptr.ToPointer());
 

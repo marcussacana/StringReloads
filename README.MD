@@ -92,6 +92,7 @@ First, dowload the SRL [HERE](https://github.com/marcussacana/StringReloads/rele
 - CMVS32 and CMVS64
 - ExHIBIT
 - EntisGLS
+- Favorite (FVP)
 
 Some SoftPal games needs a manual setup with the help of the Auto-Installer, click below to see the example:
 [![SRL SoftPal Auto-Install Feature](http://img.youtube.com/vi/RAgZQBWqiJQ/0.jpg)](http://www.youtube.com/watch?v=RAgZQBWqiJQ "SRL SoftPal Auto-Install Feature")  

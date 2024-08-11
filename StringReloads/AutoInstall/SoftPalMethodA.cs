@@ -92,7 +92,7 @@ namespace StringReloads.AutoInstall
                     }
                 }
 
-                Tools.ApplyWrapperPatch();
+                ExeTools.ApplyWrapperPatch();
                 SetupMode = true;
             }
 
@@ -289,11 +289,11 @@ namespace StringReloads.AutoInstall
             Config.SaveSettings();
 
             ShowMessageBox($"Perfect! SRL is now ready to use! Enjoy!", "StringReloads", MBButtons.Ok, MBIcon.Information);
-            Tools.Restart();
+            ExeTools.Restart();
         }
         private void SetupFailed() {
             ShowMessageBox("Hmm, looks like SRL can't perform Auto-Install in this game at the moment. Please report an issue in the GitHub repository.", "StringReloads Setup Wizard", MBButtons.Ok, MBIcon.Error);
-            Tools.Restart();
+            ExeTools.Restart();
         }
     }
 }

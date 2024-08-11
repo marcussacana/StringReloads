@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using Iced.Intel;
 using StringReloads.Engine;
 using StringReloads.Engine.Interface;
 using StringReloads.Engine.Unmanaged;
 using StringReloads.Hook.Base;
 using StringReloads.Hook.Others;
+using StringReloads.Tools;
 
 namespace StringReloads.AutoInstall
 {
@@ -95,51 +97,35 @@ namespace StringReloads.AutoInstall
             if (!AltSRLAvailable)
                 Log.Warning($"Failed to Find the {AltSRL}.");
             else
-                Patcher.Tools.ThirdPartyApplyPatch(AltExe, AltSRL);
+                Patcher.ExeTools.ThirdPartyApplyPatch(AltExe, AltSRL);
 
-            Patcher.Tools.ApplyWrapperPatch(CurrentSRL);
+            Patcher.ExeTools.ApplyWrapperPatch(CurrentSRL);
         }
 
         void SearchOffset()
         {
-            var Imports = ModuleInfo.GetModuleImports((byte*)Config.GameBaseAddress);
-            var ShellExec = Imports.Where(x => x.Function == "ShellExecuteA").Single();
-
-            var Bitness = Environment.Is64BitProcess ? 64 : 32;
-
             ulong? Address = null;
-            byte?[] Pattern = new byte?[] { 0xFF, 0x15 };
-            foreach (var lAddress in Scan(Pattern))
+            var Bitness = Environment.Is64BitProcess ? 64 : 32;
+            foreach (var lAddress in Scanner.SearchExportCall("ShellExecuteA"))
             {
-                Decoder Dissassembler = Decoder.Create(Bitness, new MemoryCodeReader((byte*)lAddress));
-                Dissassembler.IP = (ulong)lAddress;
-                var Call = Dissassembler.PeekDecode();
-                var MemAddress = Call.IPRelativeMemoryAddress;
-                //if (Environment.Is64BitProcess)
-                //    MemAddress = Call.IPRelativeMemoryAddress + (ulong)lAddress + 6ul;
-
-                if (MemAddress == (ulong)ShellExec.ImportAddress)
+                var Pattern = new byte?[] { 0xE8 };
+                foreach (var lgetTextAddress in Scanner.Scan(Pattern, (ulong)lAddress, true))
                 {
-                    Log.Debug($"Call dword ptr ds: [&ShellExecuteA] - Found at 0x{lAddress:X16}");
-                    Pattern = new byte?[] { 0xE8 };
-                    foreach (var lgetTextAddress in Scan(Pattern, (ulong)lAddress, true))
+                    var Dissassembler = Decoder.Create(Bitness, new MemoryCodeReader((byte*)lgetTextAddress));
+                    Dissassembler.IP = (ulong)lgetTextAddress;
+                    var Call = Dissassembler.PeekDecode();
+
+                    var Immediate = Environment.Is64BitProcess ? Call.MemoryDisplacement64 : Call.MemoryDisplacement32;
+
+                    if (Address != Immediate)
                     {
-                        Dissassembler = Decoder.Create(Bitness, new MemoryCodeReader((byte*)lgetTextAddress));
-                        Dissassembler.IP = (ulong)lgetTextAddress;
-                        Call = Dissassembler.PeekDecode();
-
-                        var Immediate = Environment.Is64BitProcess ? Call.MemoryDisplacement64 : Call.MemoryDisplacement32;
-
-                        if (Address != Immediate)
-                        {
-                            Address = Immediate;
-                            continue;
-                        } 
-                        else
-                            break;
+                        Address = Immediate;
+                        continue;
                     }
-                    break;
+                    else
+                        break;
                 }
+                break;
             }
 
             if (Address == null)
@@ -152,82 +138,6 @@ namespace StringReloads.AutoInstall
             Log.Debug($"CMVS Injection Offset Found: 0x{Offset:X16}");
         }
 
-        private IEnumerable<long> Scan(byte?[] Pattern, ulong? BeginAddress = null, bool Up = false)
-        {
-            ulong? Match = BeginAddress;
-            do
-            {
-                if (Match != null) {
-                    
-                    if (Up)
-                        Match--;
-                    else
-                        Match++;
-
-                }
-
-                Match =  Up ? ScanUp(Pattern, Match ?? ulong.MaxValue) : ScanDown(Pattern, Match ?? 0ul);
-
-                if (Match != null)
-                    yield return (long)Match;
-
-            } while (Match != null);
-        }
-
-        private unsafe ulong? ScanUp(byte?[] Pattern, ulong BeginAddress = ulong.MaxValue)
-        {
-            var Info = ModuleInfo.GetCodeInfo((byte*)Config.GameBaseAddress);
-
-            if (BeginAddress == ulong.MaxValue)
-                BeginAddress = (ulong)Info.CodeAddress + Info.CodeSize;
-
-            ulong CodeAdd = (ulong)Info.CodeAddress;
-            for (ulong i = BeginAddress - CodeAdd; i >= 0; i--)
-            {
-                byte* pAddress = (byte*)(CodeAdd + i);
-                if (!CheckPattern(pAddress, Pattern))
-                    continue;
-
-                return (ulong)pAddress;
-            }
-
-            return null;
-        }
-
-        private unsafe ulong? ScanDown(byte?[] Pattern, ulong BeginAddress = 0)
-        {
-            var Info = ModuleInfo.GetCodeInfo((byte*)Config.GameBaseAddress);
-
-            ulong CodeAdd = (ulong)Info.CodeAddress;
-            ulong CodeLen = Info.CodeSize;
-
-            if (BeginAddress != 0)
-                BeginAddress = BeginAddress - CodeAdd;
-
-            for (ulong i = BeginAddress; i < CodeLen; i++)
-            {
-                byte* pAddress = (byte*)(CodeAdd + i);
-                if (!CheckPattern(pAddress, Pattern))
-                    continue;
-
-                return (ulong)pAddress;
-            }
-
-            return null;
-        }
-
-        private bool CheckPattern(byte* Buffer, byte?[] Pattern)
-        {
-            for (int i = 0; i < Pattern.Length; i++)
-            {
-                if (Pattern[i] == null)
-                    continue;
-                byte bPattern = Pattern[i].Value;
-                if (bPattern != Buffer[i])
-                    return false;
-            }
-            return true;
-        }
 
         public bool IsCompatible() => Config.Default.GameExePath.GetFilenameNoExt().ToLowerInvariant().StartsWith("cmvs");
 

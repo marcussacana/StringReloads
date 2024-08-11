@@ -35,7 +35,7 @@ namespace StringReloads.AutoInstall
                 SoftPal_DrawText.AltName = true;
             }
 
-            Tools.ApplyWrapperPatch();
+            ExeTools.ApplyWrapperPatch();
             Hook = new SoftPal_DrawText();
             return true;
         }

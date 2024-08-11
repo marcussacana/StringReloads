@@ -23,6 +23,7 @@ namespace StringReloads.Engine.Unmanaged
             };
         }
 
+        public unsafe static ImportEntry[] GetMainModuleImports() => GetModuleImports((byte*)Config.GameBaseAddress);
         public unsafe static ImportEntry[] GetModuleImports(byte* Module)
         {
             if (Module == null)
@@ -149,6 +150,7 @@ namespace StringReloads.Engine.Unmanaged
         /// The Address of the Imported Function
         /// </summary>
         public void* FunctionAddress;
+
     }
 
 }

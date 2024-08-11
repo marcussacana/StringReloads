@@ -92,7 +92,8 @@ namespace StringReloads.Engine
             new SoftPalMethodA(),
             new SoftPalMethodB(),
             new CMVS(),
-            new EntisGLS()
+            new EntisGLS(),
+            new Favorite()
         };
 
         internal IEncoding[] Encodings = new IEncoding[0];

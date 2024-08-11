@@ -12,6 +12,8 @@ namespace StringReloads.Engine.String
         private WCString(byte* Ptr) : base(Ptr) { }
 
         public static implicit operator WCString(byte* Ptr) => new WCString(Ptr);
+        public static implicit operator WCString(long Ptr) => new WCString((byte*)Ptr);
+        public static implicit operator WCString(ulong Ptr) => new WCString((byte*)Ptr);
         public static implicit operator WCString(void* Ptr) => new WCString((byte*)Ptr);
         public static implicit operator WCString(IntPtr Ptr) => new WCString((byte*)Ptr.ToPointer());
 
