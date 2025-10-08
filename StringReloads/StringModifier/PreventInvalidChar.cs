@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 
 namespace StringReloads.StringModifier
 {
-    internal class AntiIlegalChar : IStringModifier
+    internal class PreventInvalidChar : IStringModifier
     {
-        public AntiIlegalChar(SRL Engine) 
+        public PreventInvalidChar(SRL Engine) 
         {
             Illegals = Engine.CharRemap.Values.ToArray();
         } 
-        public string Name => "AntiIlegalChar";
+        public string Name => "PreventInvalidChar";
 
         public bool CanRestore => false;
 
