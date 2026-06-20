@@ -91,6 +91,7 @@ namespace StringReloads.Engine
             new ExHIBIT(),
             new SoftPalMethodA(),
             new SoftPalMethodB(),
+            new SoftPalMethodC(),
             new CMVS(),
             new EntisGLS(),
             new Favorite()

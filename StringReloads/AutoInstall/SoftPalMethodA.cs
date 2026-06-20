@@ -73,6 +73,9 @@ namespace StringReloads.AutoInstall
                     return false;
             }
 
+            if (Config.GetValue("ForceMethodC", "SoftPal") == "true")
+                return false;
+
             if (SoftPalConfig == null || !SoftPalConfig.ContainsKey("enginesize") || SoftPalConfig["enginesize"].ToInt64() != new FileInfo(Config.GameExePath).Length)
             {
                 var Rst = ShowMessageBox("SRL is not configured to work with this game yet, do you want to configure it now?", "StringReloads Setup Wizard", MBButtons.YesNo, MBIcon.Question);
@@ -209,7 +212,10 @@ namespace StringReloads.AutoInstall
             uint* Stack = (uint*)ESP;
             uint* BaseStack = (uint*)EBP;
             int StackOffset = LastOffset;
-            while (StackOffset < 80)
+
+            const int StackLimit = 80;
+
+            while (StackOffset < StackLimit)
             {
                 var RStack = (Stack + StackOffset);
                 var BStack = (BaseStack + StackOffset);
@@ -233,7 +239,7 @@ namespace StringReloads.AutoInstall
 
             LastOffset = StackOffset;
 
-            if (StackOffset == 60)
+            if (StackOffset >= StackLimit)
                 SetupFailed();
 
 
@@ -292,7 +298,11 @@ namespace StringReloads.AutoInstall
             ExeTools.Restart();
         }
         private void SetupFailed() {
-            ShowMessageBox("Hmm, looks like SRL can't perform Auto-Install in this game at the moment. Please report an issue in the GitHub repository.", "StringReloads Setup Wizard", MBButtons.Ok, MBIcon.Error);
+            ShowMessageBox("Hmm, this method seems to be not working, the game will now restart to test a different method.", "StringReloads Setup Wizard", MBButtons.Ok, MBIcon.Error);
+            
+            Config.SetValue("SoftPal", "ForceMethodC", "true");
+            Config.SaveSettings();
+
             ExeTools.Restart();
         }
     }
