@@ -3,20 +3,51 @@ name: Build & Auto Release
 on:
   push:
     branches: [ master, main ]
-    tags:
-      - 'v*'
-  pull_request:
-    branches: [ master, main ]
   workflow_dispatch:
 
 jobs:
   build:
-    name: Build & Publish Release
+    name: Build & Publish Auto-Release
     runs-on: windows-2022
+    permissions:
+      contents: write
+      pull-requests: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Auto-Increment Version (v7.8.x)
+        shell: powershell
+        run: |
+          git fetch --tags --force
+          $tags = git tag -l "v7.8.*" | ForEach-Object { [int]($_ -replace "^v7\.8\.", "") } | Sort-Object -Descending
+
+          if ($tags.Count -gt 0) {
+              $nextPatch = $tags[0] + 1
+          } else {
+              $nextPatch = 0
+          }
+
+          $version = "7.8.$nextPatch"
+          $tag = "v$version"
+          $asmVersion = "$version.0"
+
+          Write-Host "New Auto-Increment Version: $version ($tag)"
+
+          echo "NEW_VERSION=$version" >> $env:GITHUB_ENV
+          echo "NEW_TAG=$tag" >> $env:GITHUB_ENV
+          echo "ASM_VERSION=$asmVersion" >> $env:GITHUB_ENV
+
+          if (Test-Path "StringReloads/StringReloads.csproj") {
+              (Get-Content "StringReloads/StringReloads.csproj") -replace '<AssemblyVersion>.*?</AssemblyVersion>', "<AssemblyVersion>$asmVersion</AssemblyVersion>" -replace '<FileVersion>.*?</FileVersion>', "<FileVersion>$asmVersion</FileVersion>" | Set-Content "StringReloads/StringReloads.csproj"
+          }
+
+          if (Test-Path "SRLWrapper/SRLWrapper.csproj") {
+              (Get-Content "SRLWrapper/SRLWrapper.csproj") -replace '<AssemblyVersion>.*?</AssemblyVersion>', "<AssemblyVersion>$asmVersion</AssemblyVersion>" -replace '<FileVersion>.*?</FileVersion>', "<FileVersion>$asmVersion</FileVersion>" | Set-Content "SRLWrapper/SRLWrapper.csproj"
+          }
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
@@ -49,15 +80,17 @@ jobs:
       - name: Upload Build Artifacts (Actions)
         uses: actions/upload-artifact@v4
         with:
-          name: StringReloads-Builds
+          name: StringReloads-${{ env.NEW_TAG }}
           path: |
             StringReloads-x86.zip
             StringReloads-x64.zip
 
-      - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Create GitHub Release (${{ env.NEW_TAG }})
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main')
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ env.NEW_TAG }}
+          name: StringReloads ${{ env.NEW_TAG }}
           files: |
             StringReloads-x86.zip
             StringReloads-x64.zip
