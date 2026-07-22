@@ -71,8 +71,34 @@ jobs:
           New-Item -ItemType Directory -Force -Path "./publish/x86"
           New-Item -ItemType Directory -Force -Path "./publish/x64"
 
-          if (Test-Path "./Release") { Get-ChildItem "./Release" | Copy-Item -Destination "./publish/x86" -Recurse -Force }
-          if (Test-Path "./x64/Release") { Get-ChildItem "./x64/Release" | Copy-Item -Destination "./publish/x64" -Recurse -Force }
+          $x86Paths = @(
+            "./Release",
+            "./SRLWrapper/bin/x86/Release/net45/win-x86",
+            "./SRLWrapper/bin/Release/net45",
+            "./SRLDebugger/bin/x86/Release/net45/win-x86",
+            "./Overlay/bin/Release",
+            "./SamplePlugin/bin/Release"
+          )
+
+          foreach ($path in $x86Paths) {
+            if (Test-Path $path) {
+              Get-ChildItem -Path $path -File | Copy-Item -Destination "./publish/x86" -Force
+            }
+          }
+
+          $x64Paths = @(
+            "./x64/Release",
+            "./SRLWrapper/bin/x64/Release/net45/win-x64",
+            "./SRLDebugger/bin/x64/Release/net45/win-x64",
+            "./Overlay/bin/Release",
+            "./SamplePlugin/bin/Release"
+          )
+
+          foreach ($path in $x64Paths) {
+            if (Test-Path $path) {
+              Get-ChildItem -Path $path -File | Copy-Item -Destination "./publish/x64" -Force
+            }
+          }
 
           Compress-Archive -Path "./publish/x86/*" -DestinationPath "StringReloads-x86.zip" -Force
           Compress-Archive -Path "./publish/x64/*" -DestinationPath "StringReloads-x64.zip" -Force
