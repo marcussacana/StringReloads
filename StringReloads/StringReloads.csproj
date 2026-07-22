@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net45</TargetFramework>
     <Platforms>x64;x86</Platforms>
@@ -57,6 +57,7 @@
     <PackageReference Include="CoreCLR-NCalc" Version="2.2.92" />
     <PackageReference Include="Iced" Version="1.17.0" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>
     <None Update="SRL.ini">

@@ -24,14 +24,15 @@ jobs:
       - name: Setup NuGet
         uses: nuget/setup-nuget@v2
 
-      - name: Restore NuGet packages
-        run: nuget restore StringReloads.sln
+      - name: Restore & Build Release x86
+        run: |
+          msbuild StringReloads.sln /t:Restore /p:Configuration=Release /p:Platform="x86"
+          msbuild StringReloads.sln /p:Configuration=Release /p:Platform="x86"
 
-      - name: Build Release x86
-        run: msbuild StringReloads.sln /p:Configuration=Release /p:Platform="x86"
-
-      - name: Build Release x64
-        run: msbuild StringReloads.sln /p:Configuration=Release /p:Platform="x64"
+      - name: Restore & Build Release x64
+        run: |
+          msbuild StringReloads.sln /t:Restore /p:Configuration=Release /p:Platform="x64"
+          msbuild StringReloads.sln /p:Configuration=Release /p:Platform="x64"
 
       - name: Create Release Zip Artifacts
         shell: powershell
