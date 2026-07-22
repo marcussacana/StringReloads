@@ -24,6 +24,8 @@ namespace StringReloads.StringModifier
                     this.Size = Size;
                 else
                     this.Size = null;
+
+                Log.Trace("Changed wordwrap size to: " + Flag.Value);
             };
         }
 

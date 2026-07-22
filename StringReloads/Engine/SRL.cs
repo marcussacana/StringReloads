@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -89,6 +89,7 @@ namespace StringReloads.Engine
         internal IAutoInstall[] Installers => _Installers ??= new IAutoInstall[] {
             new AdvHD(),
             new ExHIBIT(),
+            new SoftPalMethodD(),//Must be first
             new SoftPalMethodA(),
             new SoftPalMethodB(),
             new SoftPalMethodC(),

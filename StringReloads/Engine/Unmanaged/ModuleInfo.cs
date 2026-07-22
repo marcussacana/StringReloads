@@ -1,4 +1,4 @@
-﻿using StringReloads.Engine.String;
+using StringReloads.Engine.String;
 using System;
 using System.Collections.Generic;
 
@@ -21,6 +21,48 @@ namespace StringReloads.Engine.Unmanaged
                 EntryPoint = hModule + EntryPoint,
                 CodeSize = SizeOfCode
             };
+        }
+
+        public unsafe static ModuleMemoryInfo GetModuleMemoryInfo(byte* hModule)
+        {
+            ulong PEStart = *(uint*)(hModule + 0x3C) + (ulong)hModule;
+            ulong OptionalHeader = PEStart + 0x18;
+            uint SizeOfImage = *(uint*)(OptionalHeader + 0x38);
+
+            return new ModuleMemoryInfo()
+            {
+                BaseAddress = hModule,
+                ImageSize = SizeOfImage
+            };
+        }
+
+        public unsafe static SectionInfo[] GetModuleSections(byte* hModule)
+        {
+            ulong PEStart = *(uint*)(hModule + 0x3C) + (ulong)hModule;
+            ushort numSections = *(ushort*)(PEStart + 0x06);
+            ushort sizeOfOptHeader = *(ushort*)(PEStart + 0x14);
+            ulong sectionHeader = PEStart + 0x18 + sizeOfOptHeader;
+
+            var sections = new List<SectionInfo>();
+            for (int i = 0; i < numSections; i++)
+            {
+                ulong sec = sectionHeader + (ulong)(i * 40);
+                byte* pName = (byte*)sec;
+                int nameLen = 0;
+                while (nameLen < 8 && pName[nameLen] != 0) nameLen++;
+                string name = new string((sbyte*)pName, 0, nameLen);
+
+                uint virtualSize = *(uint*)(sec + 0x08);
+                uint virtualAddress = *(uint*)(sec + 0x0C);
+
+                sections.Add(new SectionInfo()
+                {
+                    Name = name,
+                    Address = hModule + virtualAddress,
+                    Size = virtualSize
+                });
+            }
+            return sections.ToArray();
         }
 
         public unsafe static ImportEntry[] GetMainModuleImports() => GetModuleImports((byte*)Config.GameBaseAddress);
@@ -151,6 +193,27 @@ namespace StringReloads.Engine.Unmanaged
         /// </summary>
         public void* FunctionAddress;
 
+    }
+
+    public unsafe struct ModuleMemoryInfo
+    {
+        public void* BaseAddress;
+        public uint ImageSize;
+
+        public ulong BaseAddressValue => (ulong)BaseAddress;
+        public void* EndAddress => (void*)((ulong)BaseAddress + ImageSize);
+        public bool AddressIsContained(void* Address) => Address >= BaseAddress && Address <= EndAddress;
+    }
+
+    public unsafe struct SectionInfo
+    {
+        public string Name;
+        public void* Address;
+        public uint Size;
+
+        public ulong AddressValue => (ulong)Address;
+        public void* EndAddress => (void*)((ulong)Address + Size);
+        public bool AddressIsContained(void* Addr) => Addr >= Address && Addr <= EndAddress;
     }
 
 }

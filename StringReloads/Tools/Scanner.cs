@@ -1,4 +1,4 @@
-﻿using StringReloads.Engine.Unmanaged;
+using StringReloads.Engine.Unmanaged;
 using StringReloads.Engine;
 using System;
 using System.Collections.Generic;
@@ -33,6 +33,62 @@ namespace StringReloads.Tools
             }
         }
         private unsafe static ulong GetAddress(ImportEntry Entry) => (ulong)Entry.ImportAddress;
+
+        internal static IEnumerable<long> ScanMemory(byte?[] Pattern, ulong baseAddress, uint size)
+        {
+            ulong start = baseAddress;
+            ulong maxOffset = size >= (uint)Pattern.Length ? size - (uint)Pattern.Length : 0;
+
+            for (ulong i = 0; i <= maxOffset; i++)
+            {
+                bool isMatch = false;
+                unsafe
+                {
+                    byte* pAddress = (byte*)(start + i);
+                    isMatch = CheckPattern(pAddress, Pattern);
+                }
+
+                if (isMatch)
+                    yield return (long)(start + i);
+            }
+        }
+
+        internal static IEnumerable<long> ScanModule(byte?[] Pattern, ulong hModule = 0)
+        {
+            if (hModule == 0)
+            {
+                unsafe
+                {
+                    hModule = (ulong)Config.GameBaseAddress;
+                }
+            }
+
+            SectionInfo[] sections = null;
+            unsafe
+            {
+                sections = ModuleInfo.GetModuleSections((byte*)hModule);
+            }
+
+            if (sections != null && sections.Length > 0)
+            {
+                foreach (var sec in sections)
+                {
+                    if (sec.Size == 0 || sec.AddressValue == 0) continue;
+                    foreach (var addr in ScanMemory(Pattern, sec.AddressValue, sec.Size))
+                        yield return addr;
+                }
+            }
+            else
+            {
+                ModuleMemoryInfo info;
+                unsafe
+                {
+                    info = ModuleInfo.GetModuleMemoryInfo((byte*)hModule);
+                }
+                foreach (var addr in ScanMemory(Pattern, info.BaseAddressValue, info.ImageSize))
+                    yield return addr;
+            }
+        }
 
         internal static IEnumerable<long> Scan(byte?[] Pattern, ulong? BeginAddress = null, bool Up = false)
         {

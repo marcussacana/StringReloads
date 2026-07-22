@@ -1,4 +1,4 @@
-﻿using static StringReloads.Hook.Base.Extensions;
+using static StringReloads.Hook.Base.Extensions;
 using static StringReloads.Engine.User;
 using System;
 using System.Collections.Generic;
@@ -66,6 +66,9 @@ namespace StringReloads.AutoInstall
                 return false;
 
             SoftPalConfig = Config.GetValues("SoftPal");
+
+            if (SoftPalConfig != null && (SoftPalConfig.ContainsKey("hookoffset_d") || SoftPalConfig.ContainsKey("forcemethodd")))
+                return false;
 
             if (SoftPalConfig != null && SoftPalConfig.ContainsKey("forcemethodb"))
             {

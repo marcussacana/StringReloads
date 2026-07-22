@@ -1,4 +1,4 @@
-﻿using Iced.Intel;
+using Iced.Intel;
 using StringReloads.AutoInstall.Patcher;
 using StringReloads.Engine;
 using StringReloads.Engine.Interface;
@@ -106,6 +106,9 @@ namespace StringReloads.AutoInstall
                 return false;
 
             SoftPalConfig = Config.GetValues("SoftPal");
+
+            if (SoftPalConfig != null && (SoftPalConfig.ContainsKey("hookoffset_d") || SoftPalConfig.ContainsKey("forcemethodd")))
+                return false;
 
             if (SoftPalConfig != null && SoftPalConfig.ContainsKey("forcemethodb"))
             {

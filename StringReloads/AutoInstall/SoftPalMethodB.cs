@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.IO;
+using StringReloads.Engine;
 using StringReloads.Hook;
 using StringReloads.Engine.Interface;
 using StringReloads.AutoInstall.Patcher;
@@ -16,6 +17,10 @@ namespace StringReloads.AutoInstall
 
         public bool IsCompatible()
         {
+            var SoftPalConfig = Config.Default.GetValues("SoftPal");
+            if (SoftPalConfig != null && (SoftPalConfig.ContainsKey("hookoffset_d") || SoftPalConfig.ContainsKey("forcemethodd")))
+                return false;
+
             var DLLPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "dll", "pal.dll");
 
             if (!File.Exists(DLLPath))
