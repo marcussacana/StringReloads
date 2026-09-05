@@ -9,17 +9,40 @@ namespace StringReloads.Engine.Unmanaged
         public unsafe static CodeInfo GetCodeInfo(byte* hModule)
         {
             ulong PEStart = *(uint*)(hModule + 0x3C) + (ulong)hModule;
+            byte* pNtHeader = (byte*)PEStart;
             ulong OptionalHeader = PEStart + 0x18;
 
             uint SizeOfCode = *(uint*)(OptionalHeader + 0x04);
             uint EntryPoint = *(uint*)(OptionalHeader + 0x10);
             uint BaseOfCode = *(uint*)(OptionalHeader + 0x14);
 
+            ushort numSections = *(ushort*)(pNtHeader + 0x06);
+            ushort sizeOfOptHeader = *(ushort*)(pNtHeader + 0x14);
+            byte* sectionHeader = (byte*)OptionalHeader + sizeOfOptHeader;
+
+            uint maxCodeExtent = BaseOfCode + SizeOfCode;
+            for (int i = 0; i < numSections; i++)
+            {
+                byte* sec = sectionHeader + (i * 40);
+                uint virtualSize = *(uint*)(sec + 0x08);
+                uint virtualAddress = *(uint*)(sec + 0x0C);
+                uint characteristics = *(uint*)(sec + 0x24);
+
+                if ((characteristics & 0x20000020) != 0) // IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN_CNT_CODE
+                {
+                    uint extent = virtualAddress + virtualSize;
+                    if (extent > maxCodeExtent)
+                        maxCodeExtent = extent;
+                }
+            }
+
+            uint totalCodeSize = maxCodeExtent > BaseOfCode ? maxCodeExtent - BaseOfCode : SizeOfCode;
+
             return new CodeInfo()
             {
                 CodeAddress = hModule + BaseOfCode,
                 EntryPoint = hModule + EntryPoint,
-                CodeSize = SizeOfCode
+                CodeSize = totalCodeSize
             };
         }
 
@@ -162,7 +185,7 @@ namespace StringReloads.Engine.Unmanaged
         public void* EntryPoint;
 
         public void* EndCodeAddress => (void*)((ulong)CodeAddress + CodeSize);
-        public bool AddressIsContained(void* Address) => Address >= CodeAddress && Address <= EndCodeAddress;
+        public bool AddressIsContained(void* Address) => (ulong)Address >= (ulong)CodeAddress && (ulong)Address <= (ulong)EndCodeAddress;
     }
 
     public unsafe struct ImportEntry

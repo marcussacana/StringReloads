@@ -8,33 +8,282 @@ using Iced.Intel;
 
 namespace StringReloads.Tools
 {
-    internal unsafe class Scanner
+    public unsafe class Scanner
     {
-        public static IEnumerable<long> SearchExportCall(string Function)
+        public static IEnumerable<long> SearchExportCall(string Function) => SearchExportCall(Function, null);
+
+        public static IEnumerable<long> SearchExportCall(string Function, string Module)
         {
             var Imports = ModuleInfo.GetMainModuleImports();
-            var Func = Imports.Where(x => x.Function == Function).Single();
+            var matches = Imports.Where(x => string.Equals(x.Function, Function, StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrEmpty(Module))
+                matches = matches.Where(x => string.Equals(x.Module, Module, StringComparison.OrdinalIgnoreCase) ||
+                                             (x.Module != null && x.Module.IndexOf(Module, StringComparison.OrdinalIgnoreCase) >= 0));
 
-            var Bitness = Environment.Is64BitProcess ? 64 : 32;
-
-            byte?[] Pattern = new byte?[] { 0xFF, 0x15 };
-            foreach (var lAddress in Scan(Pattern))
+            var func = matches.FirstOrDefault();
+            ulong iatAddr = 0;
+            ulong funcAddr = 0;
+            unsafe
             {
-                Decoder Dissassembler = Decoder.Create(Bitness, new MemoryCodeReader(lAddress));
-                Dissassembler.IP = (ulong)lAddress;
-                var Call = Dissassembler.PeekDecode();
-                var MemAddress = Call.IPRelativeMemoryAddress;
+                iatAddr = (ulong)func.ImportAddress;
+                funcAddr = (ulong)func.FunctionAddress;
+            }
 
-                if (MemAddress == GetAddress(Func))
+            if (iatAddr == 0)
+                yield break;
+
+            foreach (var call in SearchImportCalls(iatAddr, funcAddr))
+            {
+                Log.Debug($"Call dword ptr ds: [&{Function}] - Found at 0x{call:X16}");
+                yield return call;
+            }
+        }
+
+        public static IEnumerable<long> SearchExportCallers(string Function) => SearchExportCallers(Function, null);
+
+        public static IEnumerable<long> SearchExportCallers(string Function, string Module)
+        {
+            var Imports = ModuleInfo.GetMainModuleImports();
+            var matches = Imports.Where(x => string.Equals(x.Function, Function, StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrEmpty(Module))
+                matches = matches.Where(x => string.Equals(x.Module, Module, StringComparison.OrdinalIgnoreCase) ||
+                                             (x.Module != null && x.Module.IndexOf(Module, StringComparison.OrdinalIgnoreCase) >= 0));
+
+            var func = matches.FirstOrDefault();
+            ulong iatAddr = 0;
+            ulong funcAddr = 0;
+            unsafe
+            {
+                iatAddr = (ulong)func.ImportAddress;
+                funcAddr = (ulong)func.FunctionAddress;
+            }
+
+            if (iatAddr == 0)
+                yield break;
+
+            foreach (var caller in SearchCallers(iatAddr, funcAddr))
+            {
+                yield return caller;
+            }
+        }
+
+        public unsafe static IEnumerable<long> SearchImportCalls(void* iatAddress, void* exportAddress = null)
+        {
+            return SearchImportCalls((ulong)iatAddress, (ulong)exportAddress);
+        }
+
+        public static IEnumerable<long> SearchImportCalls(ulong iatAddress, ulong exportAddress = 0)
+        {
+            var bitness = Environment.Is64BitProcess ? 64 : 32;
+            bool is64 = bitness == 64;
+
+            CodeInfo info;
+            ulong codeStart;
+            uint codeLen;
+            unsafe
+            {
+                info = ModuleInfo.GetCodeInfo((byte*)Config.GameBaseAddress);
+                codeStart = (ulong)info.CodeAddress;
+                codeLen = info.CodeSize;
+            }
+
+            if (codeLen < 10)
+                yield break;
+
+            for (uint i = 0; i + 6 <= codeLen; i++)
+            {
+                ulong currentAddr = codeStart + i;
+                byte b0, b1;
+                unsafe
                 {
-                    Log.Debug($"Call dword ptr ds: [&{Function}] - Found at 0x{lAddress:X16}");
-                    yield return lAddress;
+                    byte* p = (byte*)currentAddr;
+                    b0 = p[0];
+                    b1 = p[1];
+                }
+
+                // Direct call to IAT: FF 15
+                if (iatAddress != 0 && b0 == 0xFF && b1 == 0x15)
+                {
+                    ulong target;
+                    unsafe
+                    {
+                        byte* p = (byte*)currentAddr;
+                        target = is64
+                            ? (ulong)p + 6 + (ulong)(long)*(int*)(p + 2)
+                            : *(uint*)(p + 2);
+                    }
+
+                    if (target == iatAddress)
+                        yield return (long)currentAddr;
+                }
+
+                // Call to export or thunk: E8
+                if (b0 == 0xE8)
+                {
+                    ulong target;
+                    unsafe
+                    {
+                        byte* p = (byte*)currentAddr;
+                        target = (ulong)p + 5 + (ulong)(long)*(int*)(p + 1);
+                    }
+
+                    bool match = false;
+                    if (exportAddress != 0 && target == exportAddress)
+                    {
+                        match = true;
+                    }
+                    else if (iatAddress != 0)
+                    {
+                        bool isContained = false;
+                        unsafe
+                        {
+                            isContained = info.AddressIsContained((void*)target);
+                        }
+
+                        if (isContained)
+                        {
+                            unsafe
+                            {
+                                byte* pTarget = (byte*)target;
+                                if (pTarget[0] == 0xFF && pTarget[1] == 0x25)
+                                {
+                                    ulong thunkTarget = is64
+                                        ? (ulong)pTarget + 6 + (ulong)(long)*(int*)(pTarget + 2)
+                                        : *(uint*)(pTarget + 2);
+
+                                    if (thunkTarget == iatAddress)
+                                        match = true;
+                                }
+                            }
+                        }
+                    }
+
+                    if (match)
+                        yield return (long)currentAddr;
                 }
             }
         }
-        private unsafe static ulong GetAddress(ImportEntry Entry) => (ulong)Entry.ImportAddress;
 
-        internal static IEnumerable<long> ScanMemory(byte?[] Pattern, ulong baseAddress, uint size)
+        public unsafe static IEnumerable<long> SearchCallers(void* iatAddress, void* exportAddress = null)
+        {
+            return SearchCallers((ulong)iatAddress, (ulong)exportAddress);
+        }
+
+        public static IEnumerable<long> SearchCallers(ulong iatAddress, ulong exportAddress = 0)
+        {
+            var bitness = Environment.Is64BitProcess ? 64 : 32;
+            bool is64 = bitness == 64;
+
+            CodeInfo info;
+            ulong codeStart;
+            uint codeLen;
+            unsafe
+            {
+                info = ModuleInfo.GetCodeInfo((byte*)Config.GameBaseAddress);
+                codeStart = (ulong)info.CodeAddress;
+                codeLen = info.CodeSize;
+            }
+
+            if (codeLen < 10)
+                yield break;
+
+            for (uint i = 0; i + 6 <= codeLen; i++)
+            {
+                ulong currentAddr = codeStart + i;
+                byte b0, b1;
+                unsafe
+                {
+                    byte* p = (byte*)currentAddr;
+                    b0 = p[0];
+                    b1 = p[1];
+                }
+
+                // Direct call to IAT: FF 15
+                if (iatAddress != 0 && b0 == 0xFF && b1 == 0x15)
+                {
+                    ulong target;
+                    unsafe
+                    {
+                        byte* p = (byte*)currentAddr;
+                        target = is64
+                            ? (ulong)p + 6 + (ulong)(long)*(int*)(p + 2)
+                            : *(uint*)(p + 2);
+                    }
+
+                    if (target == iatAddress)
+                        yield return (long)(currentAddr + 6);
+                }
+
+                // Call to export or thunk: E8
+                if (b0 == 0xE8)
+                {
+                    ulong target;
+                    unsafe
+                    {
+                        byte* p = (byte*)currentAddr;
+                        target = (ulong)p + 5 + (ulong)(long)*(int*)(p + 1);
+                    }
+
+                    bool match = false;
+                    if (exportAddress != 0 && target == exportAddress)
+                    {
+                        match = true;
+                    }
+                    else if (iatAddress != 0)
+                    {
+                        bool isContained = false;
+                        unsafe
+                        {
+                            isContained = info.AddressIsContained((void*)target);
+                        }
+
+                        if (isContained)
+                        {
+                            unsafe
+                            {
+                                byte* pTarget = (byte*)target;
+                                if (pTarget[0] == 0xFF && pTarget[1] == 0x25)
+                                {
+                                    ulong thunkTarget = is64
+                                        ? (ulong)pTarget + 6 + (ulong)(long)*(int*)(pTarget + 2)
+                                        : *(uint*)(pTarget + 2);
+
+                                    if (thunkTarget == iatAddress)
+                                        match = true;
+                                }
+                            }
+                        }
+                    }
+
+                    if (match)
+                        yield return (long)(currentAddr + 5);
+                }
+
+                // In 64-bit: mov reg, [iatAddress] followed by call reg
+                if (is64 && iatAddress != 0 && i + 9 <= codeLen)
+                {
+                    bool indirectMatch = false;
+                    unsafe
+                    {
+                        byte* p = (byte*)currentAddr;
+                        if (p[0] == 0x48 && p[1] == 0x8B && (p[2] & 0xC7) == 0x05)
+                        {
+                            ulong target = (ulong)p + 7 + (ulong)(long)*(int*)(p + 3);
+                            if (target == iatAddress)
+                            {
+                                if (p[7] == 0xFF && (p[8] & 0xF8) == 0xD0)
+                                    indirectMatch = true;
+                            }
+                        }
+                    }
+
+                    if (indirectMatch)
+                        yield return (long)(currentAddr + 9);
+                }
+            }
+        }
+
+        public static IEnumerable<long> ScanMemory(byte?[] Pattern, ulong baseAddress, uint size)
         {
             ulong start = baseAddress;
             ulong maxOffset = size >= (uint)Pattern.Length ? size - (uint)Pattern.Length : 0;
@@ -53,7 +302,7 @@ namespace StringReloads.Tools
             }
         }
 
-        internal static IEnumerable<long> ScanModule(byte?[] Pattern, ulong hModule = 0)
+        public static IEnumerable<long> ScanModule(byte?[] Pattern, ulong hModule = 0)
         {
             if (hModule == 0)
             {
@@ -90,7 +339,7 @@ namespace StringReloads.Tools
             }
         }
 
-        internal static IEnumerable<long> Scan(byte?[] Pattern, ulong? BeginAddress = null, bool Up = false)
+        public static IEnumerable<long> Scan(byte?[] Pattern, ulong? BeginAddress = null, bool Up = false)
         {
             ulong? Match = BeginAddress;
             do
